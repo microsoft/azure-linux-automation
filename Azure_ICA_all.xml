@@ -3,10 +3,8 @@
 <config>
   <global>
     <platform>Azure</platform>
-
-    <emailList>v-kusa@microsoft.com</emailList>
-
-    <emailSender>v-kusa@microsoft.com</emailSender>
+    <emailList>recipient_emails_separated_by_comma</emailList>
+    <emailSender>sender_email</emailSender>
     <emailSubject>Automated test run on Azure</emailSubject>
     <smtpServer>smtphost.redmond.corp.microsoft.com</smtpServer>
     <params>
@@ -30,25 +28,23 @@
       <FabricVersion></FabricVersion>
       <Location></Location>
     </ClusterEnv>
-
-    <!-- <ExistingAvailableDiskUrl>http://linuxautostoreeastus2.blob.core.windows.net/data/ICA-TEST-VHD-DO-NOT-DELETE.vhd</ExistingAvailableDiskUrl> -->
   </global>
 
   <Azure>
 
     <General>
-      <SubscriptionID>51627e5a-c9df-453c-9038-991020af2830</SubscriptionID>
-      <SubscriptionName>Windows Azure Internal Consumption</SubscriptionName>
-      <CertificateThumbprint>C093FA5CD3AAE057CB7C4E04532B2E16E07C26CA</CertificateThumbprint>
+      <SubscriptionID>Your_Azure_Subscription_ID</SubscriptionID>
+      <SubscriptionName>Your_Azure_Subscription_Name</SubscriptionName>
+      <CertificateThumbprint>Certificate_Associated_with_your_Azure_Subscription</CertificateThumbprint>
       <ManagementEndpoint>https://management.core.windows.net</ManagementEndpoint>
-      <StorageAccount>sivahydsa</StorageAccount>
-      <!-- <Location>West US</Location> -->
-      <AffinityGroup>affinityuswest</AffinityGroup>
+      <StorageAccount>Preferred_Stoarage_Account</StorageAccount>
+      <!-- <Location>Preferred_Location</Location> -->
+      <AffinityGroup>Your_Affinity_Group</AffinityGroup>
     </General>
 
     <CSUpload>
       <!-- Note : Please fill the subscription Id , Thumbprint and Service management link accordingly.Following details are for Production Cluster-->
-      <Subscription>"SubscriptionID=51627e5a-c9df-453c-9038-991020af2830;CertificateThumbprint=c093fa5cd3aae057cb7c4e04532b2e16e07c26ca;ServiceManagementEndpoint=https://management.core.windows.net"</Subscription>
+      <Subscription>"SubscriptionID=Your_Azure_Subscription_ID;CertificateThumbprint=Certificate_Associated_with_your_Azure_Subscription;ServiceManagementEndpoint=https://management.core.windows.net"</Subscription>
       <!-- <DestinationURL>http://linuxautostoreeastus2.blob.core.windows.net/vhds</DestinationURL>  -->
       <VHDName>OracleLinux6-U4-x86_64-drop2.vhd</VHDName>
       <VHDpath>F:\VHDs</VHDpath>
@@ -108,14 +104,14 @@
         </VMsizes>
 
         <UserName>test</UserName>
-        <Password>"Redhat.Redhat.777"</Password>
+        <Password>"Your_Preferred_Password"</Password>
         <sshKey>myPrivateKey.ppk</sshKey>
         <WaagentVersion>$CommitBranch:master$|$LastCommitDate:2013-02-20 15:51:16 -0800$|$LastCommitHash:797c97b556e1672c6efa7febf28d0575d54999dd$</WaagentVersion>
         <DTAP>
-          <IP>131.107.220.167</IP>
+          <IP>Certificate_Associated_with_your_Azure_Subscription</IP>
           <SshPort></SshPort>
           <user>test</user>
-          <password>Redhat.Redhat.777</password>
+          <password>"Password_of_LinuxMachine"</password>
           <tcpPort>750</tcpPort>
           <udpPort>990</udpPort>
         </DTAP>
@@ -143,10 +139,10 @@
           <Password>redhat</Password>
         </nfsServer>
         <ExternalPingServer>
-          <IP>137.135.10.230</IP>
-          <Url>externalpingserverdonotdelete.cloudapp.net</Url>
+          <IP>PublicPingServerIP(LinuxMachine)</IP>
+          <Url>URL_of_Ping_Server</Url>
           <Username>test</Username>
-          <Password>"Delt@!>Delt@@!LOA"</Password>
+          <Password>"Password_of_LinuxMachine"</Password>
           <SSH>22</SSH>
           <UDPport>750</UDPport>
         </ExternalPingServer>
