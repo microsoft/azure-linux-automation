@@ -48,12 +48,16 @@ def set_variables_OS_dependent():
 		service_command		= "service "  #space character after service is mandatory here.
 
 	# Identify the Distro to Set OS Dependent Variables
-	if ((current_distro == "Oracle") or (current_distro == "CentOS")):
+	if ((current_distro == "Oracle") or (current_distro == "centos")):
 		pexpect_pkg_name	= "pexpect"
 		service_httpd_name	= "httpd"
 		service_mysqld_name = "mysqld"
 		mysql_pkg_name		= "mysql-server"
 		frontend_packages_list = ["mysql.x86_64","php", "php-mysql", "httpd" , "wget","sendmail"]
+		if(distro_version == "7" or "7.0"):
+			service_mysqld_name	= "mariadb"
+			mysql_pkg_name		= "mariadb-server"
+			frontend_packages_list = ["mariadb","mariadb.x86_64","php.x86_64", "php-mysql", "httpd","vim","wget","sendmail"]
 	elif (current_distro == "ubuntu"):
 		pexpect_pkg_name	= "python-pexpect"
 		service_httpd_name	= "apache2"
@@ -125,8 +129,8 @@ def DetectDistro():
 			elif (re.match(r'.*openSUSE.*',line,re.M|re.I)):
 				distribution = 'openSUSE'
 				break
-			elif (re.match(r'.*CentOS.*',line,re.M|re.I)):
-				distribution = 'CentOS'
+			elif (re.match(r'.*centos.*',line,re.M|re.I)):
+				distribution = 'centos'
 				break
 			elif (re.match(r'.*Oracle.*',line,re.M|re.I)):
 				distribution = 'Oracle'
@@ -176,7 +180,7 @@ def uninstall_package(package):
 	RunLog.info( "\nUninstall package: "+package)
 	if ((current_distro == "ubuntu") or (current_distro == "Debian")):
 		return aptget_package_uninstall(package)
-	elif ((current_distro == "Red Hat") or (current_distro == "Oracle") or (current_distro == 'CentOS') or (current_distro == 'rhel') ):
+	elif ((current_distro == "Red Hat") or (current_distro == "Oracle") or (current_distro == 'centos') or (current_distro == 'rhel') ):
 		return yum_package_uninstall(package)
 	elif ((current_distro == "SUSE Linux") or (current_distro == "sles") or (current_distro == "opensuse")):
 		return zypper_package_uninstall(package)
@@ -289,7 +293,7 @@ def install_package(package):
 	RunLog.info("Installing Packages based on Distro's")
 	if ((current_distro == "ubuntu") or (current_distro == "Debian")):
 		return aptget_package_install(package)
-	elif ((current_distro == "Red Hat") or(current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'CentOS')):
+	elif ((current_distro == "Red Hat") or (current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos')):
 		return yum_package_install(package)
 	elif (current_distro == "SUSE Linux") or (current_distro == "opensuse") or (current_distro == "sles"):
 		return zypper_package_install(package)
@@ -610,7 +614,7 @@ def UpdateRepos():
 	#Repo update for current_distro
 	if ((current_distro == "ubuntu") or (current_distro == "Debian")):
 		Run("echo '"+vm_password+"' | sudo -S apt-get update")
-	elif ((current_distro == "RedHat") or (current_distro == "Oracle") or (current_distro == 'CentOS')):
+	elif ((current_distro == "RedHat") or (current_distro == "Oracle") or (current_distro == 'centos')):
 		Run("echo '"+vm_password+"' | sudo -S yum -y update")
 	elif (current_distro == "opensuse") or (current_distro == "SUSE Linux") or (current_distro == "sles"):
 		Run("echo '"+vm_password+"' | sudo -S zypper --non-interactive --gpg-auto-import-keys update")
@@ -649,9 +653,9 @@ def setup_wordpress_singleVM():
 	RunLog.info( "Restarting services for WordPress")
 
 	if ((current_distro == "sles") or (current_distro == "SUSE Linux")):
-		Run ("echo '"+vm_password+"' | sudo -S chomd -R 777 /srv/www/htdocs/*")
+		Run ("echo '"+vm_password+"' | sudo -S chmod -R 777 /srv/www/htdocs/*")
 	else:
-		Run ("echo '"+vm_password+"' | sudo -S chomd -R 777 /var/www/html/*")
+		Run ("echo '"+vm_password+"' | sudo -S chmod -R 777 /var/www/html/*")
 
 	if ((current_distro == "sles") or (current_distro == "SUSE Linux")):
 		output=Run("cat /etc/sysconfig/apache2 | grep 'APACHE_MODULES=.*php5' ")		
@@ -734,9 +738,9 @@ def setup_wordpress_E2ELoadBalance_frontend():
 	RunLog.info("Restarting services for WordPress")
 
 	if ((current_distro == "sles") or (current_distro == "SUSE Linux")):
-		Run ("echo '"+vm_password+"' | sudo -S chomd -R 777 /srv/www/htdocs/*")
+		Run ("echo '"+vm_password+"' | sudo -S chmod -R 777 /srv/www/htdocs/*")
 	else:
-		Run ("echo '"+vm_password+"' | sudo -S chomd -R 777 /var/www/html/*")
+		Run ("echo '"+vm_password+"' | sudo -S chmod -R 777 /var/www/html/*")
 
 	if ((current_distro == "sles") or (current_distro == "SUSE Linux")):
 		output=Run("cat /etc/sysconfig/apache2 | grep 'APACHE_MODULES=.*php5' ")
