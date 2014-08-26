@@ -1,5 +1,4 @@
-﻿<#-------------Create Deployment Start------------------#>
-Import-Module .\TestLibs\RDFELibs.psm1 -Force
+﻿Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $Subtests= $currentTestData.SubtestValues
 $SubtestValues = $Subtests.Split(",")
 $testResult = ""
@@ -39,6 +38,7 @@ if ($isDeployed)
 		{   
 			try
 			{
+                $testResult = $null
 				$server.cmd = "./start-server.py -i1 -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log -f"
 				LogMsg "Test Started for Parallel Connections $Value in $mode mode.."
 				if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
@@ -52,6 +52,7 @@ if ($isDeployed)
 				$server.logDir = $LogDir + "\$Value\$mode"
 				$client.logDir = $LogDir + "\$Value\$mode"
 				$testResult=IperfClientServerUDPTestParallel $server $client
+                LogMsg "$($currentTestData.testName) : $Value : $testResult"
 			}
 			catch
 			{

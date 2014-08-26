@@ -1,5 +1,4 @@
-﻿<#-------------Create Deployment Start------------------#>
-Import-Module .\TestLibs\RDFELibs.psm1 -Force
+﻿Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $Subtests= $currentTestData.SubtestValues
 $SubtestValues = $Subtests.Split(",")
 $testResult = ""
@@ -35,15 +34,14 @@ if ($isDeployed)
 	{
 		try
 		{
+            $testResult = $null
 			$client.cmd = "./start-client.py -c $dtapServerIp -p $dtapServerUdpport -t10 -u yes -l $Value"
-
 			LogMsg "Test Started for UDP Datagram size $Value"
 			mkdir $LogDir\$Value -ErrorAction SilentlyContinue | out-null
 			$server.logDir = $LogDir + "\$Value"
 			$client.logDir = $LogDir + "\$Value"
-			$testResult=IperfClientServerUDPDatagramTest $server $client
-
-			LogMsg "Test Status for UDP Datagram size $Value - $testResult"
+			$testResult = IperfClientServerUDPDatagramTest $server $client
+			LogMsg "$($currentTestData.testName) : $Value : $testResult"
 		}
 		catch
 		{

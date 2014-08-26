@@ -1,5 +1,4 @@
-﻿<#-------------Create Deployment Start------------------#>
-Import-Module .\TestLibs\RDFELibs.psm1 -Force
+﻿Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""
 $resultArr = @()
@@ -34,14 +33,13 @@ if ($isDeployed)
 	{
 		try
 		{
+            $testResult = $null
 			mkdir $LogDir\$mode -ErrorAction SilentlyContinue | out-null
-
 			$server.cmd ="./start-server.py -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log -f"
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 			{
 				$client.cmd ="./start-client.py -c $hs1VIP -p $hs1vm1udpport -t10 -u yes -l1420"
 			}
-
 			if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 			{
 				$client.cmd ="./start-client.py -c $hs1ServiceUrl -p $hs1vm1udpport -t10 -u yes -l1420"
@@ -65,7 +63,8 @@ if ($isDeployed)
 			if($isServerStarted -eq $true)
 			{
 				LogMsg "iperf Server started successfully. Listening TCP port $($client.tcpPort) ..."
-#>>>On confirmation, of server starting, let's start iperf client...
+                
+                #>>>On confirmation, of server starting, let's start iperf client...
 				StartIperfClient $client
                 $suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo ClientStopped1 >> iperf-client.txt" -runAsSudo
 				$isClientStarted = IsIperfClientStarted $client -beginningText ClientStarted1 -endText ClientStopped1
@@ -73,7 +72,7 @@ if ($isDeployed)
 				if($isClientStarted -eq $true)
 				{
 					$serverState = IsIperfServerRunning $server
-                   
+                 
 					if($serverState -eq $true)
 					{
 						LogMsg "Stopping Server.."
@@ -83,7 +82,7 @@ if ($isDeployed)
 						$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "./stop-client.py" -runAsSudo
 						
 
-#Step 2. Do not start iperf server and start the client..
+                        #Step 2. Do not start iperf server and start the client..
 						LogMsg "Starting the client without starting the server.."
 						$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo ClientStarted2 >> iperf-client.txt" -runAsSudo
 
@@ -102,7 +101,8 @@ if ($isDeployed)
 							if($isServerStarted -eq $true)
 							{
 								LogMsg "iperf Server started successfully. Listening TCP port $($client.tcpPort) ..."
-#>>>On confirmation, of server starting, let's start iperf client...
+                                
+                                #On confirmation, of server starting, let's start iperf client...
 								$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo ClientStarted3 >> iperf-client.txt" -runAsSudo
 								StartIperfClient $client
                                 $suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo ClientStopped3 >> iperf-client.txt" -runAsSudo
@@ -118,9 +118,7 @@ if ($isDeployed)
 										LogMsg "Server was successfully connected to client.."
 										$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo TestCompleted >> iperf-client.txt" -runAsSudo
 										$suppressedOut = RunLinuxCmd -username $server.user -password $server.password -ip $server.ip -port $server.sshPort -command "echo TestCompleted >> iperf-server.txt" -runAsSudo
-
 										$testResult = "PASS"
-#GetStringMatchObject -logFile "$($client.Logdir)\iperf-client"
 									}
 									else
 									{
@@ -165,7 +163,7 @@ if ($isDeployed)
 				LogMsg "Unable to start iperf-server. Aborting test."
 				$testResult = "Aborted"
 			}
-
+            LogMsg "$($currentTestData.testName) : $mode : $testResult"
 		}
 		catch
 		{

@@ -10,7 +10,7 @@ if ($isDeployed)
 	$hs1Name = $isDeployed
 	$testServiceData = Get-AzureService -ServiceName $hs1Name
 
-#Get VMs deployed in the service..
+    #Get VMs deployed in the service..
 	$testVMsinService = $testServiceData | Get-AzureVM
 
 	$hs1vm1 = $testVMsinService
@@ -37,6 +37,7 @@ if ($isDeployed)
 		{
 			try
 			{
+                $testResult = $null
                 RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
                 RemoteCopy -uploadTo $dtapServerIp -port $dtapServerSshport -files $currentTestData.files -username $user -password $password -upload
                 $suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *.py && rm -rf *.txt *.log" -runAsSudo
@@ -55,7 +56,7 @@ if ($isDeployed)
 				$server.logDir = $LogDir + "\$Value\$mode"
 				$client.logDir = $LogDir + "\$Value\$mode"
 				$testResult = IperfClientServerUDPDatagramTest $server $client
-				LogMsg "Test Status for MSS Size $Value - $testResult"
+				LogMsg "$($currentTestData.testName) : $Value : $mode : $testResult"
 			}
 			catch
 			{

@@ -1,17 +1,14 @@
-﻿<#-------------Create Deployment Start------------------#>
-Import-Module .\TestLibs\RDFELibs.psm1 -Force
-
+﻿Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""
 $resultArr = @()
-
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
 	$hs1Name = $isDeployed
 	$testServiceData = Get-AzureService -ServiceName $hs1Name
 
-#Get VMs deployed in the service..
+    #Get VMs deployed in the service..
 	$testVMsinService = $testServiceData | Get-AzureVM
 
 	$hs1vm1 = $testVMsinService[0]
@@ -40,7 +37,7 @@ if ($isDeployed)
 	$dtapServerTcpport = "750"
 	$dtapServerUdpport = "990"
 	$dtapServerSshport = "22"
-#$dtapServerIp="131.107.220.167"
+
 	$wait=30
 
 	$cmd1="./start-server.py -p $hs1vm1tcpport && mv Runtime.log start-server.py.log -f"
@@ -56,9 +53,9 @@ if ($isDeployed)
 	foreach ($mode in $currentTestData.TestMode.Split(",")) 
 	{
 		mkdir $LogDir\$mode -ErrorAction SilentlyContinue | out-null
-
 		try
 		{
+            $testResult = $null
 			LogMsg "Starting test for $Value parallel connections in $mode mode.."
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 			{#.........................................................................Client command will decided according to TestMode....
@@ -142,22 +139,6 @@ if ($isDeployed)
 								$testResult = "PASS"
 								LogMsg "Connection Counts are distributed evenly in both Servers"
 								LogMsg "Diff between server1 and server2 is $diff"
-#$server1Dt= GetTotalDataTransfer -logFile $server1Log -beg "Test Started" -end "TestComplete"
-#LogMsg "Server1 Total Data Transfer is $server1Dt"
-#$server2Dt= GetTotalDataTransfer -logFile $server2Log -beg "Test Started" -end "TestComplete"
-#LogMsg "Server2 Total Data Transfer is $server2Dt"
-#$clientDt= GetTotalDataTransfer -logFile $clientLog -beg "Test Started" -end "TestComplete"
-
-#LogMsg "Client Total Data Transfer is $clientDt"
-#$totalServerDt = ([int]($server1Dt.Split("K")[0]) + [int]($server2Dt.Split("K")[0]))
-#LogMsg "All Servers Total Data Transfer is $totalServerDt"
-#If (([int]($clientDt.Split("K")[0])) -eq [int]($totalServerDt)) {
-#    $testResult = "PASS"
-#    LogMsg "Total DataTransfer is equal on both Server and Client"
-#} else {
-#    $testResult = "FAIL"
-#    LogMsg "Total DataTransfer is NOT equal on both Server and Client"
-#}
 							} 
 							else
 							{
@@ -181,7 +162,7 @@ if ($isDeployed)
 				else 
 				{
 					LogErr "Failured detected in client connection."
-					RemoteCopy -download -downloadFrom $server1.ip -files "/home/test/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
+					RemoteCopy -download -downloadFrom $server1.ip -files "/home/$user/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
 					LogMsg "Test Finished..!"
 					$testResult = "FAIL"
 				}
@@ -189,8 +170,8 @@ if ($isDeployed)
 			else	
 			{
 				LogErr "Unable to start iperf-server. Aborting test."
-				RemoteCopy -download -downloadFrom $server1.ip -files "/home/test/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
-				RemoteCopy -download -downloadFrom $server2.ip -files "/home/test/iperf-server.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
+				RemoteCopy -download -downloadFrom $server1.ip -files "/home/$user/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
+				RemoteCopy -download -downloadFrom $server2.ip -files "/home/$user/iperf-server.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
 				$testResult = "Aborted"
 			}
 

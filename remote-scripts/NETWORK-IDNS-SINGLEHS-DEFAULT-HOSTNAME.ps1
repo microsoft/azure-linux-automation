@@ -1,5 +1,4 @@
-﻿<#-------------Create Deployment Start------------------#>
-Import-Module .\TestLibs\RDFELibs.psm1 -Force
+﻿Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $Subtests= $currentTestData.SubtestValues
 $SubtestValues = $Subtests.Split(",")
 $result = ""
@@ -54,7 +53,7 @@ if($isDeployed)
 			$testResult = "FAIL"
 		}
     	LogMsg "NSLOOKUP RESULT : $nslookupResult. DIG RESULT : $digResult"
-		Write-Host "Hum angrejo ke jamane ke jailer hai.. HAHA"
+        LogMsg "$($currentTestData.testName) : $mode : $testResult"
 	}
 	catch
 	{

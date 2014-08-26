@@ -1,5 +1,4 @@
-﻿<#-------------Create Deployment Start------------------#>
-Import-Module .\TestLibs\RDFELibs.psm1 -Force
+﻿Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""
 $resultArr = @()
@@ -40,8 +39,10 @@ if($isDeployed)
 		LogMsg "Test Started for Parallel Connections $Value"
 		mkdir $LogDir\$Value -ErrorAction SilentlyContinue | out-null
 		foreach ($mode in $currentTestData.TestMode.Split(","))
-        {    #.1............ Added foreach for modes...
-			try{
+        {
+            $testResult = $null
+			try
+            {
                 RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -username $user -password $password -files $currentTestData.files -upload
                 RemoteCopy -uploadTo $dtapServerIp -port $dtapServerSshport -files $currentTestData.files -username $user -password $password -upload
                 $suppressedOut = RunLinuxCmd -ip $hs1VIP -username $user -password $password -port $hs1vm1sshport -command "chmod +x * && rm -rf *.txt *.log" -runAsSudo
@@ -59,6 +60,7 @@ if($isDeployed)
 				$server.logDir = $LogDir + "\$Value" + "\$mode"
 				$client.logDir = $LogDir + "\$Value" + "\$mode"
 				$testResult = IperfClientServerTestParallel $server $client
+                LogMsg "$($currentTestData.testName) : $Value : $testResult"
 			}
 			catch
             {

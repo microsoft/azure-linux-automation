@@ -1,19 +1,15 @@
-﻿<#-------------Create Deployment Start------------------#>
-Import-Module .\TestLibs\RDFELibs.psm1 -Force
+﻿Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $Subtests= $currentTestData.SubtestValues
 $SubtestValues = $Subtests.Split(",")
 $testResult = ""
 $result = ""
 $resultArr = @()
-
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
-#$isDeployed = "ICA-PublicEndpoint-Ubuntu1404beta2-4-2-5-5-18"
 if($isDeployed)
 {
 	$hs1Name = $isDeployed
 	$testServiceData = Get-AzureService -ServiceName $hs1Name
-
-#Get VMs deployed in the service..
+    #Get VMs deployed in the service..
 	$testVMsinService = $testServiceData | Get-AzureVM
 
 	$hs1vm1 = $testVMsinService
@@ -30,12 +26,12 @@ if($isDeployed)
 	$dtapServerUdpport = "990"
 	$hs1vm1sshport = GetPort -Endpoints $hs1vm1Endpoints -usage ssh	
 	$dtapServerSshport = "22"
-#$dtapServerIp="131.107.220.167"
+
 	$cmd1="./start-server.py -p $dtapServerUDPport -u yes && mv Runtime.log start-server.py.log -f"
 	$cmd2="./start-client.py -c $dtapServerIp -p $dtapServerUDPport -t20 -P1 -u yes"
 
-	$a = CreateIperfNode -nodeIp $dtapServerIp -nodeSshPort $dtapServerSshport -nodeTcpPort $dtapServerTcpport -nodeIperfCmd $cmd1 -user $user -password $password -files $currentTestData.files -logDir $LogDir
-	$b = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -nodeTcpPort $hs1vm1tcpport -nodeIperfCmd $cmd2 -user $user -password $password -files $currentTestData.files -logDir $LogDir
+	$server = CreateIperfNode -nodeIp $dtapServerIp -nodeSshPort $dtapServerSshport -nodeTcpPort $dtapServerTcpport -nodeIperfCmd $cmd1 -user $user -password $password -files $currentTestData.files -logDir $LogDir
+	$client = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -nodeTcpPort $hs1vm1tcpport -nodeIperfCmd $cmd2 -user $user -password $password -files $currentTestData.files -logDir $LogDir
 
 	$resultArr = @()
 	$result = "", ""
@@ -43,19 +39,15 @@ if($isDeployed)
 	{
 		try
 		{
-
+            $testResult = $null
 			LogMsg "Test Started for Parallel Connections $Value"
-			$b.cmd = "./start-client.py -c $dtapServerIp -p $dtapServerUDPport -t20 -P$Value -u yes"
+			$client.cmd = "./start-client.py -c $dtapServerIp -p $dtapServerUDPport -t20 -P$Value -u yes"
 			mkdir $LogDir\$Value -ErrorAction SilentlyContinue | out-null
-			$b.logDir = $LogDir + "\$Value"
-			$a.logDir = $LogDir + "\$Value"
-			$server = $a
-			$client = $b
-
-			$suppressedOut = RunLinuxCmd -username $a.user -password $a.password -ip $a.ip -port $a.sshport -command "rm -rf iperf-server.txt" -runAsSudo
-
+			$server.logDir = $LogDir + "\$Value"
+			$client.logDir = $LogDir + "\$Value"
+			$suppressedOut = RunLinuxCmd -username $server.user -password $server.password -ip $server.ip -port $server.sshport -command "rm -rf iperf-server.txt" -runAsSudo
 			$testResult=IperfClientServerUDPTestParallel $server $client
-			LogMsg "Test Status for Parallel Connections $Value - $testResult"
+			LogMsg "$($currentTestData.testName) : $Value : $testResult"
 		}
 
 		catch

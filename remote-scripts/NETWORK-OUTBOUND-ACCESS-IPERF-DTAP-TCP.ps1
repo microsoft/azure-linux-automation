@@ -9,8 +9,8 @@ if ($isDeployed)
 	{
 		$hs1Name = $isDeployed
 		$testServiceData = Get-AzureService -ServiceName $hs1Name
-
-#Get VMs deployed in the service..
+        
+        #Get VMs deployed in the service..
 		$testVMsinService = $testServiceData | Get-AzureVM
 
 		$hs1vm1 = $testVMsinService
@@ -21,15 +21,13 @@ if ($isDeployed)
 		$hs1ServiceUrl = $hs1ServiceUrl.Replace("http://","")
 		$hs1ServiceUrl = $hs1ServiceUrl.Replace("/","")
 
-#$hs1vm2 = $testVMsinService[1]
-#$hs1vm2Endpoints = $hs1vm2 | Get-AzureEndpoint
 		$hs1vm1tcpport = GetPort -Endpoints $hs1vm1Endpoints -usage tcp
 		$dtapServerTcpport = "750"
 		$hs1vm1udpport = GetPort -Endpoints $hs1vm1Endpoints -usage udp
 		$dtapServerUdpport = "990"
 		$hs1vm1sshport = GetPort -Endpoints $hs1vm1Endpoints -usage ssh	
 		$dtapServerSshport = "22"
-#$dtapServerIp="131.107.220.167"
+        #$dtapServerIp is defined in AzureAutomationManager and is a global variable.
         
 	    RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
 	    RemoteCopy -uploadTo $dtapServerIp -port $dtapServerSshport -files $currentTestData.files -username $user -password $password -upload
@@ -40,18 +38,19 @@ if ($isDeployed)
 		$cmd2="./start-client.py -c $dtapServerIp -p $dtapServerTcpport -t10"
 		$server = CreateIperfNode -nodeIp $dtapServerIp -nodeSshPort $dtapServerSshport -nodeTcpPort $dtapServerTcpport -nodeIperfCmd $cmd1 -user $user -password $password -files $currentTestData.files -logDir $LogDir
 		$client = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -nodeTcpPort $hs1vm1tcpport -nodeIperfCmd $cmd2 -user $user -password $password -files $currentTestData.files -logDir $LogDir
-
 		$testresult=IperfClientServerTest -server $server -client $client
-
+        LogMsg "$($currentTestData.testName) : $testResult"
 	}
-	catch{
+	catch
+    {
 		$ErrorMessage =  $_.Exception.Message
 		LogMsg "EXCEPTION : $ErrorMessage"
 	}
 
-	Finally{
-
-		if (!$testResult){
+	Finally
+    {
+		if (!$testResult)
+        {
 			$testResult = "Aborted"
 		}
 		$resultArr += $testResult

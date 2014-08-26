@@ -4,16 +4,13 @@ $SubtestValues = $Subtests.Split(",")
 $result = ""
 $testResult = ""
 $resultArr = @()
-
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if($isDeployed)
 {
-
-
 	$hs1Name = $isDeployed
 	$testServiceData = Get-AzureService -ServiceName $hs1Name
 
-#Get VMs deployed in the service..
+    #Get VMs deployed in the service..
 	$testVMsinService = $testServiceData | Get-AzureVM
 
 	$hs1vm1 = $testVMsinService[0]
@@ -41,8 +38,6 @@ if($isDeployed)
 	$dtapServerTcpport = "750"
 	$dtapServerUdpport = "990"
 	$dtapServerSshport = "22"
-#$dtapServerIp="131.107.220.167"
-
 	$cmd1="./start-server.py -p $hs1vm1tcpport && mv Runtime.log start-server.py.log -f"
 	$cmd2="./start-server.py -p $hs1vm2tcpport && mv Runtime.log start-server.py.log -f"
 	$cmd3=""
@@ -51,8 +46,6 @@ if($isDeployed)
 	$server2 = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm2sshport -nodeTcpPort $hs1vm2tcpport -nodeIperfCmd $cmd2 -user $user -password $password -files $currentTestData.files -logDir $LogDir -nodeDip $hs1vm2.IpAddress
 	$client = CreateIperfNode -nodeIp $dtapServerIp -nodeSshPort $dtapServerSshport -nodeTcpPort $dtapServerTcpport -nodeIperfCmd $cmd3 -user $user -password $password -files $currentTestData.files -logDir $LogDir
 	$resultArr = @()
-
-
 	foreach ($Value in $SubtestValues) 
 	{
 		mkdir $LogDir\$Value -ErrorAction SilentlyContinue | out-null
@@ -61,7 +54,7 @@ if($isDeployed)
 			mkdir $LogDir\$Value\$mode -ErrorAction SilentlyContinue | out-null
 			try
 			{
-				$testResult = ""
+				$testResult = $null
 				LogMsg "Starting test for $Value parallel connections in $mode mode.."
 				if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 				{#.........................................................................Client command will decided according to TestMode....
@@ -88,9 +81,7 @@ if($isDeployed)
 					$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshPort -command "chmod +x *" -runAsSudo
 					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "chmod +x *" -runAsSudo
 				}
-
 				UploadFiles
-
 				$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshport -command "rm -rf *.txt *.log" -runAsSudo
 				$suppressedOut = RunLinuxCmd -username $server2.user -password $server2.password -ip $server2.ip -port $server2.sshPort -command "rm -rf *.txt *.log" -runAsSudo
 				$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshport -command "echo Test Started > iperf-server.txt" -runAsSudo
@@ -113,7 +104,6 @@ if($isDeployed)
 				$suppressedOut = RunLinuxCmd -username $server2.user -password $server2.password -ip $server2.ip -port $server2.sshPort -command "./start-server-without-stopping.py -p $hs1vm2ProbePort -log iperf-probe.txt" -runAsSudo
 
 				WaitFor -seconds 15
-
 
 				$isServerStarted = IsIperfServerStarted $server1
 				$isServerStarted = IsIperfServerStarted $server2
@@ -141,7 +131,9 @@ if($isDeployed)
 						{
 							LogMsg "Test Finished..!"
 							$testResult = "PASS"
-						} else {
+						} 
+                        else
+                        {
 							LogMsg "Test Finished..!"
 							$testResult = "FAIL"
 						}
@@ -160,7 +152,6 @@ if($isDeployed)
 							If (($isServerConnected1) -and ($isServerConnected2))
 							{
 								$testResult = "PASS"
-
 								$connectStr1="$($server1.DIP)\sport\s\d*\sconnected with $($client.ip)\sport\s\d"
 								$connectStr2="$($server2.DIP)\sport\s\d*\sconnected with $($client.ip)\sport\s\d"
 
@@ -180,125 +171,114 @@ if($isDeployed)
 										$testResult = "PASS"
 										LogMsg "Connection Counts are distributed evenly in both Servers"
 										LogMsg "Diff between server1 and server2 is $diff"
-#$server1Dt= GetTotalDataTransfer -logFile $server1Log -beg "Test Started" -end "TestComplete"
-#$server2Dt= GetTotalDataTransfer -logFile $server2Log -beg "Test Started" -end "TestComplete"
-#$clientDt= GetTotalDataTransfer -logFile $clientLog -beg "Test Started" -end "TestComplete"
-#LogMsg "Server1 Total Data Transfer is $server1Dt"
-#LogMsg "Server2 Total Data Transfer is $server2Dt"
-#LogMsg "Client Total Data Transfer is $clientDt"
-#$totalServerDt = ([int]($server1Dt.Split("K")[0]) + [int]($server2Dt.Split("K")[0]))
-#LogMsg "All Servers Total Data Transfer is $totalServerDt"
-#If (([int]($clientDt.Split("K")[0])) -eq [int]($totalServerDt)) {
-#    $testResult = "PASS"
-#    LogMsg "Total DataTransfer is equal on both Server and Client"
-#    #Analyse CustomProbe on Other CP Port
-	if ($testResult -eq "PASS")
-	{
-		RemoteCopy -download -downloadFrom $server1.ip -files "/home/test/iperf-probe.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
-		RemoteCopy -download -downloadFrom $server2.ip -files "/home/test/iperf-probe.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
-		$server1CpLog= $server1.LogDir + "\iperf-probe.txt"
-		$server2CpLog= $server2.LogDir + "\iperf-probe.txt"
-		If (( IsCustomProbeMsgsPresent -logFile $server1CpLog) -and (IsCustomProbeMsgsPresent -logFile $server2CpLog))
-		{
-			$server1CpConnCount= GetCustomProbeMsgsCount -logFile $server1CpLog
-			$server2CpConnCount= GetCustomProbeMsgsCount -logFile $server2CpLog
-			LogMsg "$server1CpConnCount Custom Probe Messages observed on Server1 on CPPort"
-			LogMsg "$server2CpConnCount Custom Probe Messages observed on Server2 on CPPort"
-			$lap=($ClientStopped - $BothServersStarted)
-			$cpFrequency=$lap/$server1CpConnCount
-			LogMsg "$server1CpConnCount Custom Probe Messages in $lap seconds observed on Server1.Frequency=$cpFrequency"
-			$cpFrequency=$lap/$server2CpConnCount
-			LogMsg "$server2CpConnCount Custom Probe Messages in $lap seconds observed on Server2.Frequency=$cpFrequency"
-			$testResult = "PASS"
-		}
-		else 
-		{
-			if (!( IsCustomProbeMsgsPresent -logFile $server1Log) ) 
-			{
-				LogErr "NO Custom Probe Messages observed on Server1 on CP Port"
-				$testResult = "FAIL"
-			}
-			if (!(IsCustomProbeMsgsPresent -logFile $server2Log))
-			{
-				LogErr "NO Custom Probe Messages observed on Server2  on CP Port"
-				$testResult = "FAIL"
-			} 
-		}
+	                                    if ($testResult -eq "PASS")
+	                                    {
+		                                    RemoteCopy -download -downloadFrom $server1.ip -files "/home/$user/iperf-probe.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
+		                                    RemoteCopy -download -downloadFrom $server2.ip -files "/home/$user/iperf-probe.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
+		                                    $server1CpLog= $server1.LogDir + "\iperf-probe.txt"
+		                                    $server2CpLog= $server2.LogDir + "\iperf-probe.txt"
+		                                    If (( IsCustomProbeMsgsPresent -logFile $server1CpLog) -and (IsCustomProbeMsgsPresent -logFile $server2CpLog))
+		                                    {
+			                                    $server1CpConnCount= GetCustomProbeMsgsCount -logFile $server1CpLog
+			                                    $server2CpConnCount= GetCustomProbeMsgsCount -logFile $server2CpLog
+			                                    LogMsg "$server1CpConnCount Custom Probe Messages observed on Server1 on CPPort"
+			                                    LogMsg "$server2CpConnCount Custom Probe Messages observed on Server2 on CPPort"
+			                                    $lap=($ClientStopped - $BothServersStarted)
+			                                    $cpFrequency=$lap/$server1CpConnCount
+			                                    LogMsg "$server1CpConnCount Custom Probe Messages in $lap seconds observed on Server1.Frequency=$cpFrequency"
+			                                    $cpFrequency=$lap/$server2CpConnCount
+			                                    LogMsg "$server2CpConnCount Custom Probe Messages in $lap seconds observed on Server2.Frequency=$cpFrequency"
+			                                    $testResult = "PASS"
+		                                    }
+		                                    else 
+		                                    {
+			                                    if (!( IsCustomProbeMsgsPresent -logFile $server1Log) ) 
+			                                    {
+				                                    LogErr "NO Custom Probe Messages observed on Server1 on CP Port"
+				                                    $testResult = "FAIL"
+			                                    }
+			                                    if (!(IsCustomProbeMsgsPresent -logFile $server2Log))
+			                                    {
+				                                    LogErr "NO Custom Probe Messages observed on Server2  on CP Port"
+				                                    $testResult = "FAIL"
+			                                    } 
+		                                    }
 #CP Port Analysis Finished
-	} else {
-		$testResult = "FAIL"
-		LogErr "Total DataTransfer is NOT equal on both Server and Client"
-	}
-
-
-} else {
-	$testResult = "FAIL"
-	LogErr "Connection Counts are not distributed correctly"
-	LogErr "Diff between server1 and server2 is $diff"
-}
-} else {
-	if ((IsCustomProbeMsgsPresent -logFile $server1Log -beg "Test Started" -end "TestComplete") ) {
-		$server1CpConnCount= GetCustomProbeMsgsCount -logFile $server1Log -beg "Test Started" -end "TestComplete"
-		LogErr "$server1CpConnCount Custom Probe Messages observed on Server1"
-		$testResult = "FAIL"
-	}
-	if ((IsCustomProbeMsgsPresent -logFile $server2Log -beg "Test Started" -end "TestComplete")) {
-		$server2CpConnCount= GetCustomProbeMsgsCount -logFile $server2Log -beg "Test Started" -end "TestComplete"
-		LogErr "$server2CpConnCount Custom Probe Messages observed on Server2"
-		$testResult = "FAIL"
-	} 
-}
-
-
-}
-else
-{
-	$testResult = "FAIL"
-	LogErr "Server is not Connected to Client"
-}
-} 
-else
-{
-	$testResult = "FAIL"
-	LogErr "Client is not Connected to Client"
-}
+	                                    } 
+                                        else
+                                        {
+		                                    $testResult = "FAIL"
+		                                    LogErr "Total DataTransfer is NOT equal on both Server and Client"
+	                                    }
+                                    }
+                                    else
+                                    {
+	                                    $testResult = "FAIL"
+	                                    LogErr "Connection Counts are not distributed correctly"
+	                                    LogErr "Diff between server1 and server2 is $diff"
+                                    }
+                                }
+                                else 
+                                {
+	                                if ((IsCustomProbeMsgsPresent -logFile $server1Log -beg "Test Started" -end "TestComplete") ) {
+		                                $server1CpConnCount= GetCustomProbeMsgsCount -logFile $server1Log -beg "Test Started" -end "TestComplete"
+		                                LogErr "$server1CpConnCount Custom Probe Messages observed on Server1"
+		                                $testResult = "FAIL"
+	                                }
+	                                if ((IsCustomProbeMsgsPresent -logFile $server2Log -beg "Test Started" -end "TestComplete")) {
+		                                $server2CpConnCount= GetCustomProbeMsgsCount -logFile $server2Log -beg "Test Started" -end "TestComplete"
+		                                LogErr "$server2CpConnCount Custom Probe Messages observed on Server2"
+		                                $testResult = "FAIL"
+	                                } 
+                                }
+                            }
+                            else
+                            {
+	                            $testResult = "FAIL"
+	                            LogErr "Server is not Connected to Client"
+                            }
+                        } 
+                        else
+                        {
+	                        $testResult = "FAIL"
+	                        LogErr "Client is not Connected to Client"
+                        }
 #endregion
-} 
-else 
-{
-	LogErr "Failured detected in client connection."
-	RemoteCopy -download -downloadFrom $server1.ip -files "/home/test/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
-	LogMsg "Test Finished..!"
-	$testResult = "FAIL"
-}
-}
-else
-{
-	LogMsg "Unable to start iperf-server. Aborting test."
-	RemoteCopy -download -downloadFrom $server1.ip -files "/home/test/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
-	RemoteCopy -download -downloadFrom $server2.ip -files "/home/test/iperf-server.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
-	$testResult = "Aborted"
-}
-LogMsg "Test Finished for Parallel Connections $Value, result is $testResult"
-}
-catch
-{
-	$ErrorMessage =  $_.Exception.Message
-	LogErr "EXCEPTION : $ErrorMessage"   
-}
-Finally
-{
-	$metaData = "$Value : $mode" 
-	if (!$testResult)
-	{
-		$testResult = "Aborted"
-	}
-	$resultArr += $testResult
-	$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
-}   
-
-}
-}
+                    } 
+                    else 
+                    {
+	                    LogErr "Failured detected in client connection."
+	                    RemoteCopy -download -downloadFrom $server1.ip -files "/home/$user/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
+	                    LogMsg "Test Finished..!"
+	                    $testResult = "FAIL"
+                    }
+                }
+                else
+                {
+	                LogMsg "Unable to start iperf-server. Aborting test."
+	                RemoteCopy -download -downloadFrom $server1.ip -files "/home/$user/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
+	                RemoteCopy -download -downloadFrom $server2.ip -files "/home/$user/iperf-server.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
+	                $testResult = "Aborted"
+                }
+                LogMsg "$($currentTestData.testName) : $mode : $testResult"
+            }
+            catch
+            {
+	            $ErrorMessage =  $_.Exception.Message
+	            LogErr "EXCEPTION : $ErrorMessage"   
+            }
+            Finally
+            {
+	            $metaData = "$Value : $mode" 
+	            if (!$testResult)
+	            {
+		            $testResult = "Aborted"
+	            }
+	            $resultArr += $testResult
+	            $resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
+            }   
+        }
+    }
 }
 else
 {
