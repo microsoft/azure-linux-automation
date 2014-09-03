@@ -1,5 +1,4 @@
-﻿<#-------------Create Deployment Start------------------#>
-Import-Module .\TestLibs\RDFELibs.psm1 -Force
+﻿Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""
 $resultArr = @()
@@ -10,7 +9,6 @@ if($isDeployed)
 	$hsNames = $hsNames.Split("^")
 	$hs1Name = $hsNames[0]
 	$hs2Name = $hsNames[1]
-
 	$testService1Data = Get-AzureService -ServiceName $hs1Name
 	$testService2Data =  Get-AzureService -ServiceName $hs2Name
     #Get VMs deployed in the service..
@@ -46,8 +44,8 @@ if($isDeployed)
 		$suppressedOut = RunLinuxCmd -username $vm1.user -password $vm1.password -ip $vm1.Ip -port $vm1.SshPort -command "chmod +x *" -runAsSudo
         if(!$vm1.fqdn -and !$vm2.fqdn)
         {
-            RetryOperation -operation  {$vm1.fqdn =  RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "hostname --fqdn"} -maxRetryCount 15 -retryInterval 3
-            RetryOperation -operation  {$vm2.fqdn =  RunLinuxCmd -username $user -password $password -ip $hs2VIP -port $hs2vm1sshport -command "hostname --fqdn"} -maxRetryCount 15 -retryInterval 3
+            $vm1.fqdn =  RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "hostname --fqdn"
+            $vm2.fqdn =  RunLinuxCmd -username $user -password $password -ip $hs2VIP -port $hs2vm1sshport -command "hostname --fqdn"
         }
 
 		$vm1.hostname = $vm1.fqdn
@@ -79,6 +77,7 @@ if($isDeployed)
             LogMsg "Test Result : FAIL"
 
 		}
+        LogMsg "$($currentTestData.testName) : $testResult"
 	}
 	catch
 	{

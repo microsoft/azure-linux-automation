@@ -1,17 +1,14 @@
-﻿<#-------------Create Deployment Start------------------#>
-Import-Module .\TestLibs\RDFELibs.psm1 -Force
-
+﻿Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""
 $resultArr = @()
-
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
 	$hs1Name = $isDeployed
 	$testServiceData = Get-AzureService -ServiceName $hs1Name
 
-#Get VMs deployed in the service..
+    #Get VMs deployed in the service..
 	$testVMsinService = $testServiceData | Get-AzureVM
 
 	$hs1vm1 = $testVMsinService[0]
@@ -34,9 +31,7 @@ if ($isDeployed)
 	$dtapServerTcpport = "750"
 	$dtapServerUdpport = "990"
 	$dtapServerSshport = "22"
-#$dtapServerIp="131.107.220.167"
 	$wait=45
-
 	$Value = 6
 	$cmd1="./start-server.py -p $hs1vm1tcpport && mv Runtime.log start-server.py.log -f"
 	$cmd2="./start-server.py -p $hs1vm2tcpport && mv Runtime.log start-server.py.log -f"
@@ -52,9 +47,8 @@ if ($isDeployed)
 	{
 		try
 		{
-			$testResult = ""
+			$testResult = $null
 			LogMsg "Test Started in $mode mode.."
-
 			mkdir $LogDir\$mode -ErrorAction SilentlyContinue | out-null
 			mkdir $LogDir\$mode\Server1 -ErrorAction SilentlyContinue | out-null
 			mkdir $LogDir\$mode\Server2 -ErrorAction SilentlyContinue | out-null
@@ -70,7 +64,6 @@ if ($isDeployed)
 			$server2.logDir = $LogDir + "\$mode" + "\Server2"
 			$client.logDir = $LogDir + "\$mode"
 			$client.cmd = $cmd3
-
 
 			RemoteCopy -uploadTo $server1.ip -port $server1.sshPort -files $server1.files -username $server1.user -password $server1.password -upload
 			RemoteCopy -uploadTo $server2.Ip -port $server2.sshPort -files $server2.files -username $server2.user -password $server2.password -upload
@@ -172,9 +165,9 @@ if ($isDeployed)
 					$suppressedOut = RunLinuxCmd -username $server2.user -password $server2.password -ip $server2.ip -port $server2.sshPort -command "echo TestComplete >> iperf-probe.txt" -runAsSudo
 					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo AllTestComplete >> iperf-client.txt" -runAsSudo
 # Copy All Logs
-					RemoteCopy -download -downloadFrom $server1.ip -files "/home/test/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
-					RemoteCopy -download -downloadFrom $server2.ip -files "/home/test/iperf-server.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
-					RemoteCopy -download -downloadFrom $client.ip -files "/home/test/start-client.py.log, /home/test/iperf-client.txt" -downloadTo $client.LogDir -port $client.sshPort -username $client.user -password $client.password
+					RemoteCopy -download -downloadFrom $server1.ip -files "/home/$user/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
+					RemoteCopy -download -downloadFrom $server2.ip -files "/home/$user/iperf-server.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
+					RemoteCopy -download -downloadFrom $client.ip -files "/home/$user/start-client.py.log, /home/$user/iperf-client.txt" -downloadTo $client.LogDir -port $client.sshPort -username $client.user -password $client.password
 
 #endregion
 
@@ -315,8 +308,8 @@ if ($isDeployed)
 																		$testResult = "PASS"
 																		LogMsg "Total DataTransfer is equal on both Server and Client"
 #Analyse CustomProbe on Other CP Port
-																		RemoteCopy -download -downloadFrom $server1.ip -files "/home/test/iperf-probe.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
-																		RemoteCopy -download -downloadFrom $server2.ip -files "/home/test/iperf-probe.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
+																		RemoteCopy -download -downloadFrom $server1.ip -files "/home/$user/iperf-probe.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
+																		RemoteCopy -download -downloadFrom $server2.ip -files "/home/$user/iperf-probe.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
 																		$server1CpLog= $server1.LogDir + "\iperf-probe.txt"
 																		$server2CpLog= $server2.LogDir + "\iperf-probe.txt"
 #Analyse CustomProbe on Other CP Port between "test started" and "server 1 stopped 1"
@@ -376,8 +369,6 @@ if ($isDeployed)
 																		$testResult = "FAIL"
 																		LogErr "Total DataTransfer is NOT equal on both Server and Client"
 																	}
-
-
 																}
 																else 
 																{
@@ -401,7 +392,6 @@ if ($isDeployed)
 																	$testResult = "FAIL"
 																} 
 															}
-
 #Test Analysis Finished
 														}
 														else
@@ -454,7 +444,7 @@ if ($isDeployed)
 				else
 				{
 					LogErr "Failured detected in client connection."
-					RemoteCopy -download -downloadFrom $server1.ip -files "/home/test/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
+					RemoteCopy -download -downloadFrom $server1.ip -files "/home/$user/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
 					LogMsg "Test Finished..!"
 					$testResult = "FAIL"
 				}
@@ -462,12 +452,11 @@ if ($isDeployed)
 			else	
 			{
 				LogErr "Unable to start iperf-server. Aborting test."
-				RemoteCopy -download -downloadFrom $server1.ip -files "/home/test/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
-				RemoteCopy -download -downloadFrom $server2.ip -files "/home/test/iperf-server.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
+				RemoteCopy -download -downloadFrom $server1.ip -files "/home/$user/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
+				RemoteCopy -download -downloadFrom $server2.ip -files "/home/$user/iperf-server.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
 				$testResult = "Aborted"
 			}
-			LogMsg "Test Finished for Parallel Connections $mode, result is $testResult"
-
+			LogMsg "$($currentTestData.testName) : $mode : $testResult"
 		}
 		catch
 		{

@@ -1,5 +1,4 @@
-﻿<#-------------Create Deployment Start------------------#>
-Import-Module .\TestLibs\RDFELibs.psm1 -Force
+﻿Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $Subtests= $currentTestData.SubtestValues
 $SubtestValues = $Subtests.Split(",") 
 $result = ""
@@ -35,7 +34,7 @@ if($isDeployed)
 	{ 
 		try
 		{
-
+            $testResult = $null
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 			{
 				$pingFrom.cmd = "./ping.py -x $hs1vm2IP -c 10"
@@ -50,8 +49,7 @@ if($isDeployed)
 			mkdir $LogDir\$mode -ErrorAction SilentlyContinue | out-null
 			$pingFrom.logDir = $LogDir + "\$mode"
 			$testResult = DoPingTest -pingFrom $pingFrom
-
-			LogMsg "Test Status for $mode mode - $testResult"
+			LogMsg "$($currentTestData.testName) : $mode : $testResult"
 		}
 		catch
 		{

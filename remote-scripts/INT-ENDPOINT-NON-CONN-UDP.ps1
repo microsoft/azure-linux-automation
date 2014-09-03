@@ -1,12 +1,8 @@
 ﻿Import-Module .\TestLibs\RDFELibs.psm1 -Force
-Import-Module .\TestLibs\parser.psm1 -Force
 $result = ""
 $testResult = ""
 $resultArr = @()
-
-#Create Deployment
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
-
 if($isDeployed)
 {
     #Collect deployment information
@@ -49,26 +45,27 @@ if($isDeployed)
     LogMsg "$hs2VIP set as iperf client."
 
     #Start test
-    foreach ($mode in $currentTestData.TestMode.Split(",")){ 
+    foreach ($mode in $currentTestData.TestMode.Split(","))
+    { 
 	    try
         {
-         if(($mode -eq "IP") -or ($mode -eq "VIP")){
-	        $client.cmd ="./start-client.py -c $hs1vm1IP -p $testPort  -t10 -u yes"
+            $testResult = $null
+            if(($mode -eq "IP") -or ($mode -eq "VIP"))
+            {
+	            $client.cmd ="./start-client.py -c $hs1vm1IP -p $testPort  -t10 -u yes"
 	        }
-
-            if(($mode -eq "URL") -or ($mode -eq "Hostname")){
-	        $client.cmd ="./start-client.py -c $hs1vm1Hostname -p $testPort  -t10 -u yes"
+            if(($mode -eq "URL") -or ($mode -eq "Hostname"))
+            {
+	            $client.cmd ="./start-client.py -c $hs1vm1Hostname -p $testPort  -t10 -u yes"
 	        }
-        LogMsg "Starting the test in $mode mode.."
-        $server.cmd="./start-server.py -p $testPort -u yes  && mv Runtime.log start-server.py.log"
-	    #$cmd2="./start-client.py -c $($hs1vm1.IpAddress)  -p $hs1vm1tcpport -t10"
-	    mkdir $LogDir\$mode -ErrorAction SilentlyContinue | out-null
-        $server.LogDir = "$LogDir\$mode"
-        $client.LogDir = "$LogDir\$mode"
-        
-        $testResult = IperfClientServerUDPNonConnectivity -server $server -client $client
-    
-        #VerifyNonConnectivityOnClient -logFile $ClientLog -beg "Test Started" -end "TestComplete"
+            LogMsg "Starting the test in $mode mode.."
+            $server.cmd="./start-server.py -p $testPort -u yes  && mv Runtime.log start-server.py.log"
+	        #$cmd2="./start-client.py -c $($hs1vm1.IpAddress)  -p $hs1vm1tcpport -t10"
+	        mkdir $LogDir\$mode -ErrorAction SilentlyContinue | out-null
+            $server.LogDir = "$LogDir\$mode"
+            $client.LogDir = "$LogDir\$mode"
+            $testResult = IperfClientServerUDPNonConnectivity -server $server -client $client
+            LogMsg "$($currentTestData.testName) : $mode : $testResult"
         }
         catch
         {

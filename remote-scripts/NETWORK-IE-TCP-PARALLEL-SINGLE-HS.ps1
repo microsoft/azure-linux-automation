@@ -1,5 +1,4 @@
-﻿<#-------------Create Deployment Start------------------#>
-Import-Module .\TestLibs\RDFELibs.psm1 -Force
+﻿Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $Subtests= $currentTestData.SubtestValues
 $SubtestValues = $Subtests.Split(",") 
 $result = ""
@@ -46,6 +45,7 @@ if($isDeployed)
 		{ 
 			try
 			{
+                $testResult = $null
                 RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
 			    RemoteCopy -uploadTo $hs1VIP -port $hs1vm2sshport -files $currentTestData.files -username $user -password $password -upload
 			    $suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *" -runAsSudo
@@ -66,7 +66,7 @@ if($isDeployed)
 				$client.logDir = $LogDir + "\$Value\$mode"
 
 				$testResult=IperfClientServerTestParallel $server $client
-				LogMsg "Test Status for Parallel Connections $Value - $testResult"
+                LogMsg "$($currentTestData.testName) : $Value : $mode : $testResult"
 			}
 			catch
 			{
@@ -83,11 +83,8 @@ if($isDeployed)
 				$resultArr += $testResult
 				$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
 			}   
-
 		}
-
 	}
-
 }
 
 else

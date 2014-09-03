@@ -1,18 +1,16 @@
-﻿<#-------------Create Deployment Start------------------#>
-Import-Module .\TestLibs\RDFELibs.psm1 -Force
+﻿Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $Subtests= $currentTestData.SubtestValues
 $SubtestValues = $Subtests.Split(",")
 $result = ""
 $testResult = ""
 $resultArr = @()
-
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
 	$hs1Name = $isDeployed
 	$testServiceData = Get-AzureService -ServiceName $hs1Name
 
-#Get VMs deployed in the service..
+    #Get VMs deployed in the service..
 	$testVMsinService = $testServiceData | Get-AzureVM
 
 	$hs1vm1 = $testVMsinService[0]
@@ -41,8 +39,6 @@ if ($isDeployed)
 	$dtapServerTcpport = "750"
 	$dtapServerUdpport = "990"
 	$dtapServerSshport = "22"
-#$dtapServerIp="131.107.220.167"
-
 	$cmd1="./start-server.py -p $hs1vm1tcpport && mv Runtime.log start-server.py.log -f"
 	$cmd2="./start-server.py -p $hs1vm2tcpport && mv Runtime.log start-server.py.log -f"
 
@@ -54,17 +50,15 @@ if ($isDeployed)
 	foreach ($Value in $SubtestValues)
 	{
 		mkdir $LogDir\$Value -ErrorAction SilentlyContinue | out-null
-
 		foreach ($mode in $currentTestData.TestMode.Split(",")) 
 		{
 			mkdir $LogDir\$Value\$mode -ErrorAction SilentlyContinue | out-null
-
 			try
 			{
-				$testResult = ""
+				$testResult = $null
 				LogMsg "Starting test for $Value parallel connections in $mode mode.."
 				if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
-				{#.........................................................................Client command will decided according to TestMode....
+				{
 					$cmd3="./start-client.py -c $hs1VIP -p $hs1vm1tcpport -t20 -P$Value" 
 				}
 				if(($mode -eq "URL") -or ($mode -eq "Hostname"))
@@ -98,7 +92,8 @@ if ($isDeployed)
 				$isServer1Started = IsIperfServerStarted $server1
 				$isServer2Started = IsIperfServerStarted $server2
 				sleep(30)
-				if(($isServer1Started -eq $true) -and ($isServer2Started -eq $true)) {
+				if(($isServer1Started -eq $true) -and ($isServer2Started -eq $true)) 
+                {
 					LogMsg "Iperf Server1 and Server2 started successfully. Listening TCP port $($client.tcpPort) ..."
 #>>>On confirmation, of server starting, let's start iperf client...
 					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshport -command "echo Test Started > iperf-client.txt" -runAsSudo
@@ -107,13 +102,17 @@ if ($isDeployed)
 					$ClientStopped = GetStopWatchElapasedTime $stopWatch "ss"
 					$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshport -command "echo TestComplete >> iperf-server.txt" -runAsSudo
 					$suppressedOut = RunLinuxCmd -username $server2.user -password $server2.password -ip $server2.ip -port $server2.sshPort -command "echo TestComplete >> iperf-server.txt" -runAsSudo
-					if($isClientStarted -eq $true) {
+					if($isClientStarted -eq $true) 
+                    {
 						$server1State = IsIperfServerRunning $server1
 						$server2State = IsIperfServerRunning $server2
-						if(($server1State -eq $true) -and ($server2State -eq $true)) {
+						if(($server1State -eq $true) -and ($server2State -eq $true)) 
+                        {
 							LogMsg "Test Finished..!"
 							$testResult = "PASS"
-						} else {
+						}
+                        else
+                        {
 							LogErr "Test Finished..!"
 							$testResult = "FAIL"
 						}
@@ -122,14 +121,15 @@ if ($isDeployed)
 						$clientConnCount = GetParallelConnectionCount -logFile $clientLog -beg "Test Started" -end "TestComplete"
 						$server1CpConnCount = 0
 						$server2CpConnCount = 0
-						If ($isClientConnected)
+						if ($isClientConnected)
 						{
 							$testResult = "PASS"
 							$server1Log= $server1.LogDir + "\iperf-server.txt"
 							$server2Log= $server2.LogDir + "\iperf-server.txt"
 							$isServerConnected1 = AnalyseIperfServerConnectivity $server1Log "Test Started" "TestComplete"
 							$isServerConnected2 = AnalyseIperfServerConnectivity $server2Log "Test Started" "TestComplete"
-							If (($isServerConnected1) -and ($isServerConnected2)) {
+							if (($isServerConnected1) -and ($isServerConnected2))
+                            {
 								$testResult = "PASS"
 
 								$connectStr1="$($server1.DIP)\sport\s\d*\sconnected with $($client.ip)\sport\s\d"
@@ -139,7 +139,8 @@ if ($isDeployed)
 								$server2ConnCount = GetStringMatchCount -logFile $server2Log -beg "Test Started" -end "TestComplete" -str $connectStr2
 #Verify Custom Probe Messages on both server
 
-								If (( IsCustomProbeMsgsPresent -logFile $server1Log -beg "Test Started" -end "TestComplete") -and (IsCustomProbeMsgsPresent -logFile $server2Log -beg "Test Started" -end "TestComplete")) {
+								if (( IsCustomProbeMsgsPresent -logFile $server1Log -beg "Test Started" -end "TestComplete") -and (IsCustomProbeMsgsPresent -logFile $server2Log -beg "Test Started" -end "TestComplete"))
+                                {
 									$server1CpConnCount= GetCustomProbeMsgsCount -logFile $server1Log -beg "Test Started" -end "TestComplete"
 									$server2CpConnCount= GetCustomProbeMsgsCount -logFile $server2Log -beg "Test Started" -end "TestComplete"
 									LogMsg "$server1CpConnCount Custom Probe Messages observed on Server1"
@@ -154,63 +155,61 @@ if ($isDeployed)
 									LogMsg "Server1 Parallel Connection Count is $server1ConnCount"
 									LogMsg "Server2 Parallel Connection Count is $server2ConnCount"
 									$diff = [Math]::Abs($server1ConnCount - $server2ConnCount)
-									If ((($diff/$Value)*100) -lt 20) {
+									If ((($diff/$Value)*100) -lt 20)
+                                    {
 										$testResult = "PASS"
 										LogMsg "Connection Counts are distributed evenly in both Servers"
 										LogMsg "Diff between server1 and server2 is $diff"
-#$server1Dt= GetTotalDataTransfer -logFile $server1Log -beg "Test Started" -end "TestComplete"
-#LogMsg "Server1 Total Data Transfer is $server1Dt"
-#$server2Dt= GetTotalDataTransfer -logFile $server2Log -beg "Test Started" -end "TestComplete"
-#LogMsg "Server2 Total Data Transfer is $server2Dt"
-#$clientDt= GetTotalDataTransfer -logFile $clientLog -beg "Test Started" -end "TestComplete"
-
-#LogMsg "Client Total Data Transfer is $clientDt"
-#$totalServerDt = ([int]($server1Dt.Split("K")[0]) + [int]($server2Dt.Split("K")[0]))
-#$LogMsg "All Servers Total Data Transfer is $totalServerDt"
-#If (([int]($clientDt.Split("K")[0])) -eq [int]($totalServerDt)) {
-#    $testResult = "PASS"
-#    LogMsg "Total DataTransfer is equal on both Server and Client"
-#} else {
-#    $testResult = "FAIL"
-#    LogMsg "Total DataTransfer is NOT equal on both Server and Client"
-#}
-									} else {
+									}
+                                    else
+                                    {
 										$testResult = "FAIL"
 										LogErr "Connection Counts are not distributed correctly"
 										LogErr "Diff between server1 and server2 is $diff"
 									}
-								} else {
-									if (!( IsCustomProbeMsgsPresent -logFile $server1Log -beg "Test Started" -end "TestComplete") ) {
+								} 
+                                else
+                                {
+									if (!( IsCustomProbeMsgsPresent -logFile $server1Log -beg "Test Started" -end "TestComplete") )
+                                    {
 										LogErr "NO Custom Probe Messages observed on Server1"
 										$testResult = "FAIL"
 									}
-									if (!(IsCustomProbeMsgsPresent -logFile $server2Log -beg "Test Started" -end "TestComplete")) {
+									if (!(IsCustomProbeMsgsPresent -logFile $server2Log -beg "Test Started" -end "TestComplete"))
+                                    {
 										LogErr "NO Custom Probe Messages observed on Server2"
 										$testResult = "FAIL"
 									} 
 								}							
 							}	
-							else {
+							else 
+                            {
 								$testResult = "FAIL"
 								LogErr "Server is not Connected to Client"
 							}
-						} else {
+						} 
+                        else
+                        {
 							$testResult = "FAIL"
 							LogErr "Client is not Connected to Client"
 						}	
-					} else {
+					}
+                    else
+                    {
 						LogErr "Failured detected in client connection."
-						RemoteCopy -download -downloadFrom $server1.ip -files "/home/test/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
+						RemoteCopy -download -downloadFrom $server1.ip -files "/home/$user/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
 						LogMsg "Test Finished..!"
 						$testResult = "FAIL"
 					}
-				} else	{
+				}
+                else
+                {
 					LogErr "Unable to start iperf-server. Aborting test."
-					RemoteCopy -download -downloadFrom $server1.ip -files "/home/test/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
-					RemoteCopy -download -downloadFrom $server2.ip -files "/home/test/iperf-server.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
+					RemoteCopy -download -downloadFrom $server1.ip -files "/home/$user/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
+					RemoteCopy -download -downloadFrom $server2.ip -files "/home/$user/iperf-server.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
 					$testResult = "Aborted"
 				}
-				LogMsg "Test Finished for Parallel Connections $Value, result is $testResult"
+				LogMsg "$($currentTestData.testName) : $Value : $mode : $testResult"
 			}
 			catch
 			{
@@ -227,7 +226,6 @@ if ($isDeployed)
 				$resultArr += $testResult
 				$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
 			}   
-
 		}
 	}
 }

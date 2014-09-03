@@ -51,6 +51,7 @@ if ($isDeployed)
 		{      
 			try
 			{
+                $testResult = $null
 				LogMsg "Starting test with $value parallel connections in $mode mode.."
 
 				if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
@@ -70,7 +71,7 @@ if ($isDeployed)
 				$client.logDir = $LogDir + "\$Value\$mode"
                 
 				$testResult=IperfClientServerUDPTestParallel $server $client
-                LogMsg "Test Result for Parallel Connecitons : $Value Mode : $mode : $testResult"
+                LogMsg "$($currentTestData.testName) : $Value : $mode : $testResult"
 			}
 			catch
 			{

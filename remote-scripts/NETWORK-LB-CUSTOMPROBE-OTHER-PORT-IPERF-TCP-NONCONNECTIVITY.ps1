@@ -1,16 +1,14 @@
-﻿<#-------------Create Deployment Start------------------#>
-Import-Module .\TestLibs\RDFELibs.psm1 -Force
+﻿Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""
 $resultArr = @()
-
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
 	$hs1Name = $isDeployed
 	$testServiceData = Get-AzureService -ServiceName $hs1Name
 
-#Get VMs deployed in the service..
+    #Get VMs deployed in the service..
 	$testVMsinService = $testServiceData | Get-AzureVM
 
 	$hs1vm1 = $testVMsinService[0]
@@ -34,7 +32,6 @@ if ($isDeployed)
 	$dtapServerTcpport = "750"
 	$dtapServerUdpport = "990"
 	$dtapServerSshport = "22"
-#$dtapServerIp="131.107.220.167"
 	$pSize = 6
 	$cmd1="./start-server.py -p $testPort && mv Runtime.log start-server.py.log -f"
 	$cmd2="./start-server.py -p $testPort && mv Runtime.log start-server.py.log -f"
@@ -49,8 +46,7 @@ if ($isDeployed)
 		mkdir $LogDir\$mode -ErrorAction SilentlyContinue | out-null
 		try
 		{
-			$testResult = ""
-
+			$testResult = $null
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 			{
 				$client.cmd = "./start-client.py -c $hs1VIP -p $testPort -t10 -P$pSize"
@@ -83,8 +79,9 @@ if ($isDeployed)
 
 			$isServerStarted = IsIperfServerStarted $server1
 			$isServerStarted = IsIperfServerStarted $server2
-			sleep(30)
-			if(($isServerStarted -eq $true) -and ($isServerStarted -eq $true)) {
+			WaitFor -seconds 30
+			if(($isServerStarted -eq $true) -and ($isServerStarted -eq $true))
+            {
 				LogMsg "Iperf Server1 and Server2 started successfully. Listening TCP port $($client.tcpPort) ..."
 #>>>On confirmation, of server starting, let's start iperf client...
 				$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshport -command "echo Test Started > iperf-client.txt" -runAsSudo
@@ -92,47 +89,63 @@ if ($isDeployed)
 				$isClientStarted = IsIperfClientStarted $client
 				$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshport -command "echo TestComplete >> iperf-server.txt" -runAsSudo
 				$suppressedOut = RunLinuxCmd -username $server2.user -password $server2.password -ip $server2.ip -port $server2.sshPort -command "echo TestComplete >> iperf-server.txt" -runAsSudo
-				if($isClientStarted -eq $false) {
+				if($isClientStarted -eq $false)
+                {
 					$server1State = IsIperfServerRunning $server1
 					$server2State = IsIperfServerRunning $server2
-					if(($server1State -eq $false) -and ($server2State -eq $false)) {
+					if(($server1State -eq $false) -and ($server2State -eq $false))
+                    {
 						LogMsg "Test Finished..!"
 						$testResult = "PASS"
-					} else {
-						if ( $server1State -eq $true) {
+					} 
+                    else
+                    {
+						if ( $server1State -eq $true)
+                        {
 							LogErr "Connections observed on server1. Test Finished..!"
 							$testResult = "FAIL"
 						}
-						if ( $server2State -eq $true) {
+						if ( $server2State -eq $true)
+                        {
 							LogErr "Connections observed on server2. Test Finished..!"
 							$testResult = "FAIL"
 						}
 					}
-
-				} else {
+				} 
+                else 
+                {
 					$testResult = "FAIL"
 #LogMsg "Failured detected in client connection."
 					LogErr "Ohh, client connected.. Verifying that it connected to server.."
 					$server1State = IsIperfServerRunning $server1
 					$server2State = IsIperfServerRunning $server2
-					if(($server1State -eq $false)) {
+					if(($server1State -eq $false))
+                    {
 						LogMsg "Not Connected to server1. Please check the logs.. where the client was connected."
-					} else {
+					}
+                    else
+                    {
 						LogMsg "Connections observed on server1. Test Finished..!"
 					}
-					if(($server2State -eq $false)) {
+					if(($server2State -eq $false))
+                    {
 						LogMsg "Not Connected to server2. Please check the logs.. where the client was connected."
-					} else {
+					}
+                    else
+                    {
 						LogMsg "Connections observed on server2. Test Finished..!"
 					}
 					LogMsg "Test Finished..!"
 				}
-			} else	{
+			} 
+            else
+            {
 				LogErr "Unable to start iperf-server. Aborting test."
-				RemoteCopy -download -downloadFrom $server1.ip -files "/home/test/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
-				RemoteCopy -download -downloadFrom $server2.ip -files "/home/test/iperf-server.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
+				RemoteCopy -download -downloadFrom $server1.ip -files "/home/$user/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
+				RemoteCopy -download -downloadFrom $server2.ip -files "/home/$user/iperf-server.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
 				$testResult = "Aborted"
 			}
+            LogMsg "$($currentTestData.testName) : $mode : $testResult"
 		}
 		catch
 		{
