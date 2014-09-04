@@ -1,5 +1,4 @@
-﻿<#-------------Create Deployment Start------------------#>
-Import-Module .\TestLibs\RDFELibs.psm1 -Force
+﻿Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $testResult = ""
 $result = ""
 $resultArr = @()
@@ -26,7 +25,7 @@ if ($isDeployed)
 	$dtapServerUdpport = "990"
 	$hs1vm1sshport = GetPort -Endpoints $hs1vm1Endpoints -usage ssh	
 	$dtapServerSshport = "22"
-    #$dtapServerIp="131.107.220.167"
+    #$dtapServerIp = $xmlConfig.config.Azure.Deployment.Data.DTAP.IP
 	$server = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -nodeUdpPort $dtapServerUdpport -nodeIperfCmd $cmd1 -user $user -password $password -files $currentTestData.files -logDir $LogDir
 	$client = CreateIperfNode -nodeIp $dtapServerIp  -nodeSshPort $dtapServerSshport -nodeudpPort $hs1vm1udpport -nodeIperfCmd $cmd2 -user $user -password $password -files $currentTestData.files -logDir $LogDir
 
@@ -34,6 +33,7 @@ if ($isDeployed)
 	{
 		try
 		{
+            $testResult = $null
 			LogMsg "Test Started in $mode mode.."
 			mkdir $LogDir\$mode -ErrorAction SilentlyContinue | out-null
 
@@ -51,6 +51,7 @@ if ($isDeployed)
 			$server.logDir = "$LogDir\$mode"
 			$client.logDir = "$LogDir\$mode"
 			$testResult =IperfClientServerUDPTest -server $server -client $client
+            LogMsg "$($currentTestData.testName) : $mode : $testResult"
 		}
 		catch
 		{

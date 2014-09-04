@@ -1,5 +1,4 @@
-﻿<#-------------Create Deployment Start------------------#>
-Import-Module .\TestLibs\RDFELibs.psm1 -Force
+﻿Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $Subtests= $currentTestData.SubtestValues
 $SubtestValues = $Subtests.Split(",")
 $resultSummary = ""
@@ -37,6 +36,7 @@ if ($isDeployed)
 		{   
 			try
 			{
+                $testResult = $null
 				$cmd1="./start-server.py -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log -f"
 				if ($mode -eq "VIP")
 				{
@@ -58,6 +58,7 @@ if ($isDeployed)
 				$server = $a
 				$client = $b
 				$testResult = IperfClientServerUDPDatagramTest -server $server -client $client
+                LogMsg "$($currentTestData.testName) : $Value : $mode : $testResult"
 			}
 			catch
 			{

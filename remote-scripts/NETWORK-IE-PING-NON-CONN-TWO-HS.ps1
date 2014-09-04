@@ -1,5 +1,4 @@
-﻿<#-------------Create Deployment Start------------------#>
-Import-Module .\TestLibs\RDFELibs.psm1 -Force
+﻿Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $Subtests= $currentTestData.SubtestValues
 $SubtestValues = $Subtests.Split(",") 
 $result = ""
@@ -52,11 +51,11 @@ if($isDeployed)
 	{ 
 		try
 		{
+            $testResult = $null
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 			{
 				$pingFrom.cmd = "./ping.py -x $hs2VIP -c 10"
 			}
-
 			if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 			{
 				$pingFrom.cmd = "./ping.py -x $hs2ServiceUrl -c 10"
@@ -74,7 +73,7 @@ if($isDeployed)
 			{
 				$testResult = "PASS"
 			}
-			LogMsg "Test Status for $mode mode - $testResult"
+            LogMsg "$($currentTestData.testName) : $mode : $testResult"
 		}
 		catch
 		{

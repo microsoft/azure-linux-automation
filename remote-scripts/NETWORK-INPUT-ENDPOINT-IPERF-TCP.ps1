@@ -1,5 +1,4 @@
-﻿<#-------------Create Deployment Start------------------#>
-Import-Module .\TestLibs\RDFELibs.psm1 -Force
+﻿Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""
 $resultArr = @()
@@ -34,8 +33,8 @@ if ($isDeployed)
 	{
 		try
 		{
+            $testResult = $null
 			mkdir $LogDir\$mode -ErrorAction SilentlyContinue | out-null
-
 			$server.cmd ="./start-server.py -i1 -p $hs1vm1tcpport && mv Runtime.log start-server.py.log -f"
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 			{
@@ -49,6 +48,7 @@ if ($isDeployed)
 			$server.logDir = "$LogDir\$mode"
 			$client.logDir = "$LogDir\$mode"
 			$testResult =IperfClientServerTest -server $server -client $client
+            LogMsg "$($currentTestData.testName) : $mode : $testResult"
 		}
 		catch
 		{

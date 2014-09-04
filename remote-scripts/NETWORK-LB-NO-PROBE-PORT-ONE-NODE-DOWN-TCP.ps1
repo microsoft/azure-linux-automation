@@ -7,7 +7,7 @@ if ($isDeployed)
 {
 	$hs1Name = $isDeployed
 	$testServiceData = Get-AzureService -ServiceName $hs1Name
-#Get VMs deployed in the service..
+    #Get VMs deployed in the service..
 	$testVMsinService = $testServiceData | Get-AzureVM
 
 	$hs1vm1 = $testVMsinService[0]
@@ -28,7 +28,7 @@ if ($isDeployed)
 	$dtapServerTcpport = "750"
 	$dtapServerUdpport = "990"
 	$dtapServerSshport = "22"
-#$dtapServerIp="131.107.220.167"
+
 	$wait=45
 	$cmd1="./start-server.py -p $hs1vm1tcpport && mv Runtime.log start-server.py.log -f"
 	$cmd2="./start-server.py -p $hs1vm2tcpport && mv Runtime.log start-server.py.log -f"
@@ -43,8 +43,8 @@ if ($isDeployed)
 	{
 		try
 		{
+            $testResult = $null
 			LogMsg "Test Started in $mode mode.."
-
 			mkdir $LogDir\$mode -ErrorAction SilentlyContinue | out-null
 			mkdir $LogDir\$mode\Server1 -ErrorAction SilentlyContinue | out-null
 			mkdir $LogDir\$mode\Server2 -ErrorAction SilentlyContinue | out-null
@@ -142,9 +142,9 @@ if ($isDeployed)
 					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo AllTestComplete >> iperf-client.txt" -runAsSudo
 					$lapTestCompleted=GetStopWatchElapasedTime $stopWatch "ss"
 # Copy All Logs
-					RemoteCopy -download -downloadFrom $server1.ip -files "/home/test/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
-					RemoteCopy -download -downloadFrom $server2.ip -files "/home/test/iperf-server.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
-					RemoteCopy -download -downloadFrom $client.ip -files "/home/test/start-client.py.log, /home/test/iperf-client.txt" -downloadTo $client.LogDir -port $client.sshPort -username $client.user -password $client.password
+					RemoteCopy -download -downloadFrom $server1.ip -files "/home/$user/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
+					RemoteCopy -download -downloadFrom $server2.ip -files "/home/$user/iperf-server.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
+					RemoteCopy -download -downloadFrom $client.ip -files "/home/$user/start-client.py.log, /home/$user/iperf-client.txt" -downloadTo $client.LogDir -port $client.sshPort -username $client.user -password $client.password
 					Function temp()
 					{
 
@@ -303,7 +303,7 @@ if ($isDeployed)
 				else
 				{
 					LogErr "Failured detected in client connection."
-					RemoteCopy -download -downloadFrom $server1.ip -files "/home/test/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
+					RemoteCopy -download -downloadFrom $server1.ip -files "/home/$user/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
 					LogMsg "Test Finished..!"
 					$testResult = "FAIL"
 				}
@@ -311,10 +311,11 @@ if ($isDeployed)
 			else	
 			{
 				LogErr "Unable to start iperf-server. Aborting test."
-				RemoteCopy -download -downloadFrom $server1.ip -files "/home/test/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
-				RemoteCopy -download -downloadFrom $server2.ip -files "/home/test/iperf-server.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
+				RemoteCopy -download -downloadFrom $server1.ip -files "/home/$user/iperf-server.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
+				RemoteCopy -download -downloadFrom $server2.ip -files "/home/$user/iperf-server.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
 				$testResult = "Aborted"
 			}
+        LogMsg "$($currentTestData.testName) : $mode : $testResult"
 		}
 		catch
 		{

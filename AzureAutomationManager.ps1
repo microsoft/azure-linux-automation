@@ -9,7 +9,7 @@
 #              - Invokes azure test suite
 ## Author : v-ampaw@microsoft.com
 ###############################################################################################
-param ([string] $xmlConfigFile, [switch] $eMail, [string] $logFilename="azure_ica.log", [switch] $runtests, [switch]$onCloud, [switch] $vhdprep, [switch]$upload, [switch] $help, [string] $Distro, [string] $cycleName, [string] $TestPriority, [string]$osImage)
+param ([string] $xmlConfigFile, [switch] $eMail, [string] $logFilename="azure_ica.log", [switch] $runtests, [switch]$onCloud, [switch] $vhdprep, [switch]$upload, [switch] $help, [string] $Distro, [string] $cycleName, [string] $TestPriority, [string]$osImage, [switch]$EconomyMode, [switch]$keepReproInact)
 
 #Import-Module .\TestLibs\RDFELibs.psm1 -Force
 Import-Module .\TestLibs\AzureWinUtils.psm1 -Force
@@ -17,15 +17,21 @@ Import-Module .\TestLibs\AzureWinUtils.psm1 -Force
 $xmlConfig = [xml](Get-Content $xmlConfigFile)
 $user = $xmlConfig.config.Azure.Deployment.Data.UserName
 $password = $xmlConfig.config.Azure.Deployment.Data.Password
+$sshKey = $xmlConfig.config.Azure.Deployment.Data.sshKey
+$sshPublickey = $xmlConfig.config.Azure.Deployment.Data.sshPublicKey
+$dtapServerIp = $xmlConfig.config.Azure.Deployment.Data.DTAP.IP
+
 Set-Variable -Name user -Value $user -Scope Global
 Set-Variable -Name password -Value $password -Scope Global
-$dtapServerIp = $xmlConfig.config.Azure.Deployment.Data.DTAP.IP
+Set-Variable -Name sshKey -Value $sshKey -Scope Global
+Set-Variable -Name sshPublicKey -Value $sshPublicKey -Scope Global
+Set-Variable -Name dtapServerIp -Value $dtapServerIp -Scope Global
 
 try
 {
     # Main Body of the script
     # Work flow starts here
-    #Creating TestResults directory
+    # Creating TestResults directory
     $testResults = "TestResults"
     if (! (test-path $testResults))
     {
@@ -75,6 +81,21 @@ try
     Set-Variable -Name Distro -Value $Distro -Scope Global
     Set-Variable -Name onCloud -Value $onCloud -Scope Global
     Set-Variable -Name xmlConfig -Value $xmlConfig -Scope Global
+    Set-Variable -Name vnetIsAllConfigured -Value $false -Scope Global
+    if($EconomyMode)
+    {
+        Set-Variable -Name EconomyMode -Value $true -Scope Global
+        if($keepReproInact)
+        {
+            Set-Variable -Name keepReproInact -Value $true -Scope Global
+        }
+    }
+    else
+    {
+        Set-Variable -Name EconomyMode -Value $false -Scope Global
+        Set-Variable -Name keepReproInact -Value $false -Scope Global
+    }
+
     
     $AzureSetup = $xmlConfig.config.Azure.General
     LogMsg  ("Info : AzureAutomationManager.ps1 - LIS on Azure Automation")

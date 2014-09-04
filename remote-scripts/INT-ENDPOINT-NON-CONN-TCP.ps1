@@ -4,10 +4,7 @@ Import-Module .\TestLibs\parser.psm1 -Force
 $result = ""
 $testResult = ""
 $resultArr = @()
-
-#Create Deployement
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
-
 if($isDeployed)
 { 
     $hsNames = $isDeployed
@@ -47,17 +44,20 @@ if($isDeployed)
 
     $testPort = $hs1vm1tcpport + 10
 
-    foreach ($mode in $currentTestData.TestMode.Split(",")){    #.1............ 
-        try{
+    foreach ($mode in $currentTestData.TestMode.Split(","))
+    {
+        try
+        {
             LogMsg "Starting the test in $mode.."
 	        $cmd1="./start-server.py -p $testPort   && mv Runtime.log start-server.py.log"
 	    
-            if(($mode -eq "IP") -or ($mode -eq "VIP")){
-	        $cmd2="./start-client.py -c $hs1vm1IP -p $testPort  -t10"
+            if(($mode -eq "IP") -or ($mode -eq "VIP"))
+            {
+	            $cmd2="./start-client.py -c $hs1vm1IP -p $testPort  -t10"
 	        }
-
-            if(($mode -eq "URL") -or ($mode -eq "Hostname")){
-	        $cmd2="./start-client.py -c $hs1vm1Hostname -p $testPort  -t10"
+            if(($mode -eq "URL") -or ($mode -eq "Hostname"))
+            {
+    	        $cmd2="./start-client.py -c $hs1vm1Hostname -p $testPort  -t10"
 	        }
 
             $server = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -nodeIperfCmd $cmd1 -user $user -password $password -files $currentTestData.files -logDir $LogDir -nodetcpPort $testPort
@@ -67,22 +67,23 @@ if($isDeployed)
             $server.logDir = $LogDir + "\$mode"
 	        $client.logDir = $LogDir + "\$mode"
             $testResult = IperfClientServerTCPNonConnectivity -server $server -client $client
-            #VerifyNonConnectivityOnClient -logFile $ClientLog -beg "Test Started" -end "TestComplete" 
+            LogMsg "$($currentTestData.testName) : $mode : $testResult"
+        }
+        catch
+        {
+            $ErrorMessage =  $_.Exception.Message
+            LogMsg "EXCEPTION : $ErrorMessage"   
+        }
+        Finally
+        {
+            $metaData = $mode 
+            if (!$testResult)
+            {
+                $testResult = "Aborted"
             }
-            catch{
-                $ErrorMessage =  $_.Exception.Message
-                LogMsg "EXCEPTION : $ErrorMessage"   
-            }
-            Finally{
-                $metaData = $mode 
-                if (!$testResult)
-                    {
-                    $testResult = "Aborted"
-                    }
-                $resultArr += $testResult
-                $resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
-    
-           }
+            $resultArr += $testResult
+            $resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
+        }
     }
 }
 else

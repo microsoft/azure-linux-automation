@@ -8,8 +8,7 @@ if($isDeployed)
 {
 	$hs1Name = $isDeployed
 	$testServiceData = Get-AzureService -ServiceName $hs1Name
-
-#Get VMs deployed in the service..
+    #Get VMs deployed in the service..
 	$testVMsinService = $testServiceData | Get-AzureVM
 
 	$hs1vm1 = $testVMsinService[0]
@@ -37,8 +36,6 @@ if($isDeployed)
 	$dtapServerTcpport = "750"
 	$dtapServerUdpport = "990"
 	$dtapServerSshport = "22"
-#$dtapServerIp="131.107.220.167"
-
 	$cmd1="./start-server.py -p $hs1vm1tcpport && mv Runtime.log start-server.py.log -f"
 	$cmd2="./start-server.py -p $hs1vm2tcpport && mv Runtime.log start-server.py.log -f"
 	$cmd3=""
@@ -54,7 +51,7 @@ if($isDeployed)
 		mkdir $LogDir\$mode -ErrorAction SilentlyContinue | out-null
 		try
 		{
-			$testResult = ""
+			$testResult = $null
 			LogMsg "Starting test in $mode mode.."
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 			{#.........................................................................Client command will decided according to TestMode....
@@ -167,18 +164,6 @@ if($isDeployed)
 									    $testResult = "PASS"
                                         LogMsg "Server Verification : level4 : Connection Counts are distributed evenly in both Servers."
 									    LogMsg "Diff between server1 and server2 is $diff"
-                                        #$server1Dt= GetTotalDataTransfer -logFile $server1Log -beg "Test Started" -end "TestComplete"
-                                        #$server2Dt= GetTotalDataTransfer -logFile $server2Log -beg "Test Started" -end "TestComplete"
-                                        #$clientDt= GetTotalDataTransfer -logFile $clientLog -beg "Test Started" -end "TestComplete"
-                                        #LogMsg "Server1 Total Data Transfer is $server1Dt"
-                                        #LogMsg "Server2 Total Data Transfer is $server2Dt"
-                                        #LogMsg "Client Total Data Transfer is $clientDt"
-                                        #$totalServerDt = ([int]($server1Dt.Split("K")[0]) + [int]($server2Dt.Split("K")[0]))
-                                        #LogMsg "All Servers Total Data Transfer is $totalServerDt"
-                                        #If (([int]($clientDt.Split("K")[0])) -eq [int]($totalServerDt)) {
-                                        #    $testResult = "PASS"
-                                        #    LogMsg "Total DataTransfer is equal on both Server and Client"
-                                        #    #Analyse CustomProbe on Other CP Port
 		                                RemoteCopy -download -downloadFrom $server1.ip -files "/home/$user/iperf-probe.txt" -downloadTo $server1.LogDir -port $server1.sshPort -username $server1.user -password $server1.password
 		                                RemoteCopy -download -downloadFrom $server2.ip -files "/home/$user/iperf-probe.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
 		                                $server1CpLog= $server1.LogDir + "\iperf-probe.txt"
@@ -236,8 +221,6 @@ if($isDeployed)
 	                                }
                                     
                                 }
-
-
                             }
                             else
                             {
@@ -253,7 +236,6 @@ if($isDeployed)
 					} 
                     else 
                     {
-						
                         if(!$server1State)
                         {
                         LogErr "Server1 not connected to client."
@@ -290,26 +272,24 @@ if($isDeployed)
 	            RemoteCopy -download -downloadFrom $server2.ip -files "/home/$user/iperf-server.txt" -downloadTo $server2.LogDir -port $server2.sshPort -username $server2.user -password $server2.password
 	            $testResult = "Aborted"
             }
-            LogMsg "Test Finished for Parallel Connections $Value, result is $testResult"
-}
-catch
-{
-	$ErrorMessage =  $_.Exception.Message
-	LogErr "EXCEPTION : $ErrorMessage"   
-}
-Finally
-{
-	$metaData = "$mode" 
-	if (!$testResult)
-	{
-		$testResult = "Aborted"
-	}
-	$resultArr += $testResult
-	$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
-}   
-
-}
-
+            LogMsg "$($currentTestData.testName) : $mode : $testResult"
+        }
+        catch
+        {
+	        $ErrorMessage =  $_.Exception.Message
+	        LogErr "EXCEPTION : $ErrorMessage"   
+        }
+        Finally
+        {
+	        $metaData = "$mode" 
+	        if (!$testResult)
+	        {
+		        $testResult = "Aborted"
+	        }
+	        $resultArr += $testResult
+	        $resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
+        }   
+    }
 }
 else
 {
