@@ -36,7 +36,7 @@ Function GetCurrentTestData($xmlConfig, $testName)
 {
 	foreach ($test in $xmlConfig.config.testsDefinition.test)
 	{
-	if ($test.testName -eq $testName)
+		if ($test.testName -eq $testName)
 		{
 		LogMsg "Loading the test data for $($test.testName)"
 		return $test
@@ -51,33 +51,32 @@ Function RefineTestResult2 ($testResult)
 	$tempResult = @()
 	foreach ($cmp in $testResult)
 	{
-						
 		if(($cmp -eq "PASS") -or ($cmp -eq "FAIL") -or ($cmp -eq "ABORTED"))
 		{
-		$tempResult += $testResult[$i]
-		$tempResult += $testResult[$i+1]
-		$testResult = $tempResult
-		break
+			$tempResult += $testResult[$i]
+			$tempResult += $testResult[$i+1]
+			$testResult = $tempResult
+			break
 		}
 		$i++;
 	}
-return $testResult
+	return $testResult
 }
 
 Function RefineTestResult1 ($tempResult)
 {
-    foreach ($new in $tempResult)
-    {
-        $lastObject = $new
-    }
-    $tempResultSplitted = $lastObject.Split(" ")
-    if($tempResultSplitted.Length > 1 )
-    {
-        Write-Host "Test Result =  $lastObject" -ForegroundColor Gray
-    }
-    $lastWord = ($tempResultSplitted.Length - 1)
+	foreach ($new in $tempResult)
+	{
+		$lastObject = $new
+	}
+	$tempResultSplitted = $lastObject.Split(" ")
+	if($tempResultSplitted.Length > 1 )
+	{
+		Write-Host "Test Result =  $lastObject" -ForegroundColor Gray
+	}
+	$lastWord = ($tempResultSplitted.Length - 1)
 
-    return $tempResultSplitted[$lastWord]
+	return $tempResultSplitted[$lastWord]
 }
 
 Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
@@ -92,14 +91,14 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 
 	$xmlElementsToAdd = @("currentTest", "stateTimeStamp", "state", "emailSummary", "htmlSummary", "jobID", "testCaseResults")
 	foreach($element in $xmlElementsToAdd)
+	{
+		if (! $testCycle.${element})
 		{
-			if (! $testCycle.${element})
-			{
-				$newElement = $xmlConfig.CreateElement($element)
-				$newElement.set_InnerText("")
-				$results = $testCycle.AppendChild($newElement)
-			}
+			$newElement = $xmlConfig.CreateElement($element)
+			$newElement.set_InnerText("")
+			$results = $testCycle.AppendChild($newElement)
 		}
+	}
 
 
 	$testSuiteLogFile=$logFile
@@ -108,10 +107,10 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 	
 	# Start JUnit XML report logger.
 	$reportFolder = "$pwd/report"
-    if(!(Test-Path $reportFolder))
-    {
-        New-Item -ItemType "Directory" $reportFolder
-    }
+	if(!(Test-Path $reportFolder))
+	{
+		New-Item -ItemType "Directory" $reportFolder
+	}
 	StartLogReport("$reportFolder/report_$($testCycle.cycleName).xml")
 	$testsuite = StartLogTestSuite "CloudTesting"
 	
@@ -143,34 +142,34 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 				$global:logFile  = $testCaseLogFile 
 				if ((!$currentTestData.SubtestValues -and !$currentTestData.TestMode))
 				{
-                    #Tests With No subtests and no SubValues will be executed here..
-                    try
-                    {
-					    $testResult = ""
-					    $LogDir = "$testDir\$($currentTestData.testName)"
-					    Set-Variable -Name LogDir -Value $LogDir -Scope Global
-					    LogMsg "~~~~~~~~~~~~~~~TEST STARTED : $($currentTestData.testName)~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-					    $testScriptPs1 = $currentTestData.testScriptPs1
-					    $startTime = [Datetime]::Now.ToUniversalTime()
-					    $command = ".\remote-scripts\" + $testScriptPs1
-					    LogMsg "Starting test $($currentTestData.testName)"
-					    $testResult = Invoke-Expression $command
-                        $testResult = RefineTestResult1 -tempResult $testResult
-					    $endTime = [Datetime]::Now.ToUniversalTime()
-					    $vmRam= GetTestVMHardwareDetails -xmlConfigFile $xmlConfig -setupType $testSetup  -RAM
-					    $vmVcpu = GetTestVMHardwareDetails -xmlConfigFile $xmlConfig -setupType $testSetup  -VCPU 
-					    $testRunDuration = GetStopWatchElapasedTime $stopWatch "mm"
-					    $testCycle.emailSummary += "$($currentTestData.testName) Execution Time: $testRunDuration minutes<br />"
-					    $testCycle.emailSummary += "	$($currentTestData.testName) : $testResult <br />"
-					    $testCycle.htmlSummary += "<tr><td>$($currentTestData.testName) - Execution Time  : </td><td> $testRunDuration min</td></tr>"
-					    $testResultRow = ""
-                    }
-	                catch
-	                {
-                        $testResult = "Aborted"
-		                $ErrorMessage =  $_.Exception.Message
-		                LogMsg "EXCEPTION : $ErrorMessage"   
-	                }
+					#Tests With No subtests and no SubValues will be executed here..
+					try
+					{
+						$testResult = ""
+						$LogDir = "$testDir\$($currentTestData.testName)"
+						Set-Variable -Name LogDir -Value $LogDir -Scope Global
+						LogMsg "~~~~~~~~~~~~~~~TEST STARTED : $($currentTestData.testName)~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+						$testScriptPs1 = $currentTestData.testScriptPs1
+						$startTime = [Datetime]::Now.ToUniversalTime()
+						$command = ".\remote-scripts\" + $testScriptPs1
+						LogMsg "Starting test $($currentTestData.testName)"
+						$testResult = Invoke-Expression $command
+						$testResult = RefineTestResult1 -tempResult $testResult
+						$endTime = [Datetime]::Now.ToUniversalTime()
+						$vmRam= GetTestVMHardwareDetails -xmlConfigFile $xmlConfig -setupType $testSetup  -RAM
+						$vmVcpu = GetTestVMHardwareDetails -xmlConfigFile $xmlConfig -setupType $testSetup  -VCPU 
+						$testRunDuration = GetStopWatchElapasedTime $stopWatch "mm"
+						$testCycle.emailSummary += "$($currentTestData.testName) Execution Time: $testRunDuration minutes<br />"
+						$testCycle.emailSummary += "	$($currentTestData.testName) : $testResult <br />"
+						$testCycle.htmlSummary += "<tr><td>$($currentTestData.testName) - Execution Time  : </td><td> $testRunDuration min</td></tr>"
+						$testResultRow = ""
+					}
+					catch
+					{
+						$testResult = "Aborted"
+						$ErrorMessage =  $_.Exception.Message
+						LogMsg "EXCEPTION : $ErrorMessage"   
+					}
 					if($testResult -imatch "PASS")
 					{
 						$testSuiteResultDetails.totalPassTc = $testSuiteResultDetails.totalPassTc +1
@@ -192,35 +191,35 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 					$testCycle.htmlSummary += "<tr><td>	$($currentTestData.testName) </td><td> $testResultRow </td></tr>"
 		  			LogMsg "~~~~~~~~~~~~~~~TEST END : $($currentTestData.testName)~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 				}
-				else	
+				else
 				{
-                    try
-                    {
-                        $testResult = @()
-					    $LogDir = "$testDir\$($currentTestData.testName)"
-					    Set-Variable -Name LogDir -Value $LogDir -Scope Global
-					    LogMsg "~~~~~~~~~~~~~~~TEST STARTED : $($currentTestData.testName)~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-					    $testScriptPs1 = $currentTestData.testScriptPs1
-					    $command = ".\remote-scripts\" + $testScriptPs1
-					    LogMsg "$command"
-					    LogMsg "Starting multiple tests : $($currentTestData.testName)"
-					    $startTime = [Datetime]::Now.ToUniversalTime()
-					    $testResult = Invoke-Expression $command
-					    $testResult = RefineTestResult2 -testResult $testResult
-					    $testRunDuration = GetStopWatchElapasedTime $stopWatch "mm"
-					    $testRunDuration = $testRunDuration.ToString()
-					    $testCycle.emailSummary += "$($currentTestData.testName) Execution Time: $testRunDuration minutes<br />"
-					    $testCycle.emailSummary += "	$($currentTestData.testName) : $($testResult[0])  <br />"
-					    $testCycle.emailSummary += "$($testResult[1])"
-					    LogMsg "~~~~~~~~~~~~~~~TEST END : $($currentTestData.testName)~~~~~~~~~~"
-                    }
-				    catch
-	                {
-                        $testResult[0] = "ABORTED"
-		                $ErrorMessage =  $_.Exception.Message
-		                LogMsg "EXCEPTION : $ErrorMessage"   
-	                }
-                    if($testResult[0] -imatch "PASS")
+					try
+					{
+						$testResult = @()
+						$LogDir = "$testDir\$($currentTestData.testName)"
+						Set-Variable -Name LogDir -Value $LogDir -Scope Global
+						LogMsg "~~~~~~~~~~~~~~~TEST STARTED : $($currentTestData.testName)~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+						$testScriptPs1 = $currentTestData.testScriptPs1
+						$command = ".\remote-scripts\" + $testScriptPs1
+						LogMsg "$command"
+						LogMsg "Starting multiple tests : $($currentTestData.testName)"
+						$startTime = [Datetime]::Now.ToUniversalTime()
+						$testResult = Invoke-Expression $command
+						$testResult = RefineTestResult2 -testResult $testResult
+						$testRunDuration = GetStopWatchElapasedTime $stopWatch "mm"
+						$testRunDuration = $testRunDuration.ToString()
+						$testCycle.emailSummary += "$($currentTestData.testName) Execution Time: $testRunDuration minutes<br />"
+						$testCycle.emailSummary += "	$($currentTestData.testName) : $($testResult[0])  <br />"
+						$testCycle.emailSummary += "$($testResult[1])"
+						LogMsg "~~~~~~~~~~~~~~~TEST END : $($currentTestData.testName)~~~~~~~~~~"
+					}
+					catch
+					{
+						$testResult[0] = "ABORTED"
+						$ErrorMessage =  $_.Exception.Message
+						LogMsg "EXCEPTION : $ErrorMessage"   
+					}
+					if($testResult[0] -imatch "PASS")
 					{
 						$testSuiteResultDetails.totalPassTc = $testSuiteResultDetails.totalPassTc +1
 						FnishLogTestCase $testcase
