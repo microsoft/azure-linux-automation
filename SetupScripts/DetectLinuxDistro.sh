@@ -6,6 +6,7 @@
 #  SUSE LINUX ENTERPRISE SERVER [VERSION INDEPENDANT]
 #  OPENSUSE [VERSION INDEPENDANT]
 #  REDHAT
+#  ORACLELINUX
 DetectDistro()
 {
 while echo $1 | grep ^- > /dev/null; do
