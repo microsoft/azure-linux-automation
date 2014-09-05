@@ -20,6 +20,9 @@ done
                 if [[ "$tmp" == *CentOS* ]]; then
                     echo "CENTOS"
                     exitVal=0
+                elif [[ "$tmp" == *Red* ]]; then
+                    echo "REDHAT"
+                    exitVal=0
                 else
                     tmp=`cat /etc/system-release`
                     if [[ "$tmp" == *Oracle* ]]; then
