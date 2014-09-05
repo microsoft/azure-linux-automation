@@ -71,7 +71,7 @@ Function DetectLinuxDistro($VIP, $SSHport, $testVMUser, $testVMPassword)
 
 	$tempout = RemoteCopy  -upload -uploadTo $VIP -port $SSHport -files ".\SetupScripts\DetectLinuxDistro.sh,.\SetupScripts\packageInstall.sh" -username $testVMUser -password $testVMPassword 2>&1 | Out-Null
 	$tempout = RunLinuxCmd -username $testVMUser -password $testVMPassword -ip $VIP -port $SSHport -command "chmod +x *.sh" -runAsSudo 2>&1 | Out-Null
-	$DistroName = RunLinuxCmd -username $testVMUser -password $testVMPassword -ip $VIP -port $SSHport -command "./DetectLinuxDistro.sh" -runAsSudo
+	$DistroName = RunLinuxCmd -username $testVMUser -password $testVMPassword -ip $VIP -port $SSHport -command "/home/$user/DetectLinuxDistro.sh" -runAsSudo
 	if(($DistroName -imatch "Unknown") -or (!$DistroName))
 	{
         LogErr "Linux distro detected : $DistroName"
@@ -856,7 +856,10 @@ Function GetAndCheckKernelLogs($DeployedServices, $status)
 			$VMSSHPort = GetPort -Endpoints $VMEndpoints -usage "SSH"
             if($status -imatch "Initial")
             {
-                $out = RemoteCopy -uploadTo $VMEndpoints[0].Vip -port $VMSSHPort  -files .\remote-scripts\temp.txt -username $user -password $password -upload
+                $randomFileName = [System.IO.Path]::GetRandomFileName()
+                Set-Content -Value "A Random file." -Path "$Logdir\$randomFileName"
+                $out = RemoteCopy -uploadTo $VMEndpoints[0].Vip -port $VMSSHPort  -files "$Logdir\$randomFileName" -username $user -password $password -upload
+                Remove-Item -Path "$Logdir\$randomFileName" -Force
                 $out = RunLinuxCmd -ip $VMEndpoints[0].Vip -port $VMSSHPort -username $user -password $password -command "dmesg" -runAsSudo 2>&1 > $InitailBootLog
                 LogMsg "$($VM.Name): $status Kernel logs collected ..SUCCESSFULLY"
                 $retValue = $true
@@ -912,7 +915,7 @@ Function GetAndCheckKernelLogs($DeployedServices, $status)
 
 Function DeployVMs ($xmlConfig, $setupType, $Distro)
 {
-   if( (!$EconomyMode) -or ( $EconomyMode -and ($xmlConfig.config.Azure.Deployment.$setupType.isDeployed -eq "NOT_DEPLOYED_YET")))
+   if( (!$EconomyMode) -or ( $EconomyMode -and ($xmlConfig.config.Azure.Deployment.$setupType.isDeployed -eq "NO")))
    {
        try
        {
@@ -925,7 +928,6 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro)
             $role = 1
             $setupTypeData = $xml.config.Azure.Deployment.$setupType
             $isAllDeployed = CreateAllDeployments -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro
-
             $isAllVerified = "False"
             $isAllConnected = "False"
             if($isAllDeployed[0] -eq "True")
@@ -981,7 +983,7 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro)
     else
     {
         $retValue = $xmlConfig.config.Azure.Deployment.$setupType.isDeployed
-        $KernelLogOutput= GetAndCheckKernelLogs -DeployedServices $deployedServices -status "Initial"
+        $KernelLogOutput= GetAndCheckKernelLogs -DeployedServices $retValue -status "Initial"
     }
 	return $retValue
 }
@@ -1672,7 +1674,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, [switch]$keepUserD
                             }
                         if($keepReproInact)
                         {
-                            $xmlConfig.config.Azure.Deployment.$setupType.isDeployed = "NOT_DEPLOYED_YET"
+                            $xmlConfig.config.Azure.Deployment.$setupType.isDeployed = "NO"
                         }
 					}
 				}
@@ -1684,7 +1686,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, [switch]$keepUserD
 						GetVMLogs -DeployedServices $hs
                         if($keepReproInact)
                         {
-                            $xmlConfig.config.Azure.Deployment.$setupType.isDeployed = "NOT_DEPLOYED_YET"
+                            $xmlConfig.config.Azure.Deployment.$setupType.isDeployed = "NO"
                         }
 					}
 					LogMsg "Skipping cleanup, as service is marked as DO NOT DISTURB.."
