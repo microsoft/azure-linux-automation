@@ -5,6 +5,8 @@
 #  CENTOS [VERSION INDEPENDANT]
 #  SUSE LINUX ENTERPRISE SERVER [VERSION INDEPENDANT]
 #  OPENSUSE [VERSION INDEPENDANT]
+#  REDHAT
+#  ORACLELINUX
 DetectDistro()
 {
 while echo $1 | grep ^- > /dev/null; do
@@ -19,6 +21,9 @@ done
                 tmp=`cat /etc/redhat-release`
                 if [[ "$tmp" == *CentOS* ]]; then
                     echo "CENTOS"
+                    exitVal=0
+                elif [[ "$tmp" == *Red* ]]; then
+                    echo "REDHAT"
                     exitVal=0
                 else
                     tmp=`cat /etc/system-release`
