@@ -71,7 +71,7 @@ Function DetectLinuxDistro($VIP, $SSHport, $testVMUser, $testVMPassword)
 
 	$tempout = RemoteCopy  -upload -uploadTo $VIP -port $SSHport -files ".\SetupScripts\DetectLinuxDistro.sh,.\SetupScripts\packageInstall.sh" -username $testVMUser -password $testVMPassword 2>&1 | Out-Null
 	$tempout = RunLinuxCmd -username $testVMUser -password $testVMPassword -ip $VIP -port $SSHport -command "chmod +x *.sh" -runAsSudo 2>&1 | Out-Null
-	$DistroName = RunLinuxCmd -username $testVMUser -password $testVMPassword -ip $VIP -port $SSHport -command "./DetectLinuxDistro.sh" -runAsSudo
+	$DistroName = RunLinuxCmd -username $testVMUser -password $testVMPassword -ip $VIP -port $SSHport -command "/home/$user/DetectLinuxDistro.sh" -runAsSudo
 	if(($DistroName -imatch "Unknown") -or (!$DistroName))
 	{
         LogErr "Linux distro detected : $DistroName"
@@ -280,10 +280,10 @@ Function DeleteService ($serviceName)
 			WaitFor -seconds 5
 			LogMsg "Deleting $serviceName..."
 			$retValue = "False"
-			$retryCount = 0
+			$retryCount = 1
 			while (($retValue -eq "False") -and ($retryCount -lt 10))
 			{
-                $out = Remove-AzureService -ServiceName $serviceName -DeleteAll -Force -ErrorAction SilentlyContinue -Verbose
+                $out = Remove-AzureService -ServiceName $serviceName -DeleteAll -Force  -Verbose
 				$RemoveServiceExitCode =  $?
 				if(($out -imatch "Complete") -or $RemoveServiceExitCode)
 				{
@@ -299,8 +299,9 @@ Function DeleteService ($serviceName)
 				}
 				else
 				{
+                    $retryCount = $retryCount + 1
 					LogWarn "Error in deletion. Retry Attempt $retryCount "
-					$retryCount = $retryCount + 1
+					
 				}
 			}
 		}
@@ -332,12 +333,12 @@ Function CreateService($serviceName, $location, $AffinityGroup)
 
 	    if($location) {
 			LogMsg "Using location : $location"
-		    $out = RunAzureCmd -AzureCmdlet "New-AzureService -ServiceName $serviceName -Location $location -ErrorAction SilentlyContinue"
+		    $out = RunAzureCmd -AzureCmdlet "New-AzureService -ServiceName $serviceName -Location $location "
 	    }
 	    else {
 		    if($AffinityGroup) {
 			LogMsg "Using Affinity Group : $AffinityGroup" 
-		    $out = RunAzureCmd -AzureCmdlet "New-AzureService -ServiceName $serviceName -AffinityGroup $AffinityGroup -ErrorAction SilentlyContinue"
+		    $out = RunAzureCmd -AzureCmdlet "New-AzureService -ServiceName $serviceName -AffinityGroup $AffinityGroup "
 		    }
 	    }
 
@@ -375,7 +376,7 @@ Function AddCertificate($serviceName)
         $FailCounter++
         $currentDirectory = (pwd).Path
 	    LogMsg "Adding Certificate to hosted service.."
-	    $out = RunAzureCmd -AzureCmdlet "Add-AzureCertificate -CertToDeploy `"$currentDirectory\ssh\myCert.cer`" -ServiceName $serviceName -ErrorAction SilentlyContinue"
+	    $out = RunAzureCmd -AzureCmdlet "Add-AzureCertificate -CertToDeploy `"$currentDirectory\ssh\myCert.cer`" -ServiceName $serviceName "
 	    $retValue = $?
         }
         catch
@@ -518,58 +519,60 @@ Function CreateDeployment ($DeploymentCommand, $NewServiceName , $vmCount)
 
 Function CheckVMsInService($serviceName)
 {
-#$DeployedVMs = Get-AzureService -ServiceName $serviceName -ErrorAction SilentlyContinue | Get-AzureVM -ErrorAction SilentlyContinue
+    try
+    {
+	    $DeployedVMs = RetryOperation -operation { Get-AzureVM -ServiceName $serviceName } -retryInterval 1 -maxRetryCount 10 -NoLogsPlease
+	    $allVMsReady = "False"
+	    $isTimedOut = "False"
+	    $VMCheckStarted = Get-Date
+	    While (($allVMsReady -eq "False") -and ($isTimedOut -eq "False"))
+	    {
+		    $i = 0
+            $VMStatus = @()
+    #$DeployedVMs = Get-AzureService -ServiceName $serviceName  | Get-AzureVM 
+		    $DeployedVMs = RetryOperation -operation { Get-AzureVM -ServiceName $serviceName } -retryInterval 1 -maxRetryCount 10 -NoLogsPlease
+		    $Recheck = 0
+            $VMStatuString = ""
+		    foreach ( $VM in $DeployedVMs )
+		    {
+                $VMStatuString += "$($VM.Name) : $($VM.InstanceStatus) "
+			    if ( $VM.InstanceStatus -ne "ReadyRole" )
+			    {
+				    $VMStatus = $VM.InstanceStatus
+    #Write-Host $VMStatus
+				    $Recheck = $Recheck + 1
+			    }
+			    else
+			    {
+    #Write-Host $VMStatus
+			    }
+		    }
 
-	$DeployedVMs = Get-AzureVM -ServiceName $serviceName -ErrorAction SilentlyContinue 
-	
-	$allVMsReady = "False"
-	$isTimedOut = "False"
-	$VMCheckStarted = Get-Date
-	While (($allVMsReady -eq "False") -and ($isTimedOut -eq "False"))
-	{
-		$i = 0
-        $VMStatus = @()
-#$DeployedVMs = Get-AzureService -ServiceName $serviceName -ErrorAction SilentlyContinue | Get-AzureVM -ErrorAction SilentlyContinue
-		$DeployedVMs = Get-AzureVM -ServiceName $serviceName -ErrorAction SilentlyContinue 
-		$Recheck = 0
-        $VMStatuString = ""
-		foreach ( $VM in $DeployedVMs )
-		{
-            $VMStatuString += "$($VM.Name) : $($VM.InstanceStatus) "
-			if ( $VM.InstanceStatus -ne "ReadyRole" )
-			{
-				$VMStatus = $VM.InstanceStatus
-#Write-Host $VMStatus
-				$Recheck = $Recheck + 1
-			}
-			else
-			{
-#Write-Host $VMStatus
-			}
-		}
-
-		$VMcheckTimeNow = Get-Date
-		$VMtime= $VMcheckTimeNow - $VMCheckStarted
-
-
-
-		if ($VMtime.TotalSeconds -gt 1800 )
-		{
-			$isTimedOut = "True"
-		}   
-		if ($Recheck -eq 0 )
-		{
-			$allVMsReady = "True"
-		}
-		$remainigSeconds = 1800 - $VMtime.TotalSeconds
-		Write-Progress -Id 500 -Activity "Checking Deployed VM in Service : $serviceName. Seconds Remaining : $remainigSeconds" -Status "$VMStatuString"
-#Write-Host "." -NoNewline
-#Write-Host $VMStatus -NoNewline
-		sleep 1
-	}   
-	Write-Progress -Id 500 -Activity "Checking Deployed VM in Service : $serviceName. Seconds Remaining : $remainigSeconds" -Status "$VMStatuString" -Completed
+		    $VMcheckTimeNow = Get-Date
+		    $VMtime= $VMcheckTimeNow - $VMCheckStarted
+		    if ($VMtime.TotalSeconds -gt 1800 )
+		    {
+			    $isTimedOut = "True"
+		    }   
+		    if ($Recheck -eq 0 )
+		    {
+			    $allVMsReady = "True"
+		    }
+		    $remainigSeconds = 1800 - $VMtime.TotalSeconds
+		    Write-Progress -Id 500 -Activity "Checking Deployed VM in Service : $serviceName. Seconds Remaining : $remainigSeconds" -Status "$VMStatuString"
+            Write-Host "." -NoNewline
+            #Write-Host $VMStatus -NoNewline
+		    sleep 1
+	    }   
+	    Write-Progress -Id 500 -Activity "Checking Deployed VM in Service : $serviceName. Seconds Remaining : $remainigSeconds" -Status "$VMStatuString" -Completed
+    }
+    catch
+    {
+        $ErrorMessage =  $_.Exception.Message
+		LogMsg "EXCEPTION in CheckVMsInService() : $ErrorMessage"
+        $allVMsReady = "False"
+    }
 	return $allVMsReady
-
 }
 
 Function CreateAllDeployments($setupType, $xmlConfig, $Distro){
@@ -856,15 +859,22 @@ Function GetAndCheckKernelLogs($DeployedServices, $status)
 			$VMSSHPort = GetPort -Endpoints $VMEndpoints -usage "SSH"
             if($status -imatch "Initial")
             {
-                $out = RemoteCopy -uploadTo $VMEndpoints[0].Vip -port $VMSSHPort  -files .\remote-scripts\temp.txt -username $user -password $password -upload
-                $out = RunLinuxCmd -ip $VMEndpoints[0].Vip -port $VMSSHPort -username $user -password $password -command "dmesg" -runAsSudo 2>&1 > $InitailBootLog
+                $randomFileName = [System.IO.Path]::GetRandomFileName()
+                Set-Content -Value "A Random file." -Path "$Logdir\$randomFileName"
+                $out = RemoteCopy -uploadTo $VMEndpoints[0].Vip -port $VMSSHPort  -files "$Logdir\$randomFileName" -username $user -password $password -upload
+                Remove-Item -Path "$Logdir\$randomFileName" -Force
+                $out = RunLinuxCmd -ip $VMEndpoints[0].Vip -port $VMSSHPort -username $user -password $password -command "dmesg > /home/$user/InitialBootLogs.txt" -runAsSudo
+                $out = RemoteCopy -download -downloadFrom $VMEndpoints[0].Vip -port $VMSSHPort -files "/home/$user/InitialBootLogs.txt" -downloadTo $BootLogDir -username $user -password $password
                 LogMsg "$($VM.Name): $status Kernel logs collected ..SUCCESSFULLY"
                 $retValue = $true
             }
             elseif($status -imatch "Final")
             {
-                $out = RunLinuxCmd -ip $VMEndpoints[0].Vip -port $VMSSHPort -username $user -password $password -command "dmesg" -runAsSudo 2>&1 > $FinalBootLog
+                $out = RunLinuxCmd -ip $VMEndpoints[0].Vip -port $VMSSHPort -username $user -password $password -command "dmesg > /home/$user/FinalBootLogs.txt" -runAsSudo
+                $out = RemoteCopy -download -downloadFrom $VMEndpoints[0].Vip -port $VMSSHPort -files "/home/$user/FinalBootLogs.txt" -downloadTo $BootLogDir -username $user -password $password
                 $KernelDiff = Compare-Object -ReferenceObject (Get-Content $FinalBootLog) -DifferenceObject (Get-Content $InitailBootLog)
+                #Removing final dmesg file from logs to reduce the size of logs. We can alwayas see complete Final Logs as : Initial Kernel Logs + Difference in Kernel Logs
+                Remove-Item -Path $FinalBootLog -Force | Out-Null
                 if($KernelDiff -eq $null)
                 {
                     LogMsg "** Initial and Final Kernel Logs has same content **"  
@@ -912,7 +922,7 @@ Function GetAndCheckKernelLogs($DeployedServices, $status)
 
 Function DeployVMs ($xmlConfig, $setupType, $Distro)
 {
-   if( (!$EconomyMode) -or ( $EconomyMode -and ($xmlConfig.config.Azure.Deployment.$setupType.isDeployed -eq "NOT_DEPLOYED_YET")))
+   if( (!$EconomyMode) -or ( $EconomyMode -and ($xmlConfig.config.Azure.Deployment.$setupType.isDeployed -eq "NO")))
    {
        try
        {
@@ -925,7 +935,6 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro)
             $role = 1
             $setupTypeData = $xml.config.Azure.Deployment.$setupType
             $isAllDeployed = CreateAllDeployments -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro
-
             $isAllVerified = "False"
             $isAllConnected = "False"
             if($isAllDeployed[0] -eq "True")
@@ -981,7 +990,7 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro)
     else
     {
         $retValue = $xmlConfig.config.Azure.Deployment.$setupType.isDeployed
-        $KernelLogOutput= GetAndCheckKernelLogs -DeployedServices $deployedServices -status "Initial"
+        $KernelLogOutput= GetAndCheckKernelLogs -DeployedServices $retValue -status "Initial"
     }
 	return $retValue
 }
@@ -1610,19 +1619,9 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, [switch]$keepUserD
 {
 	try
 	{
-        #Collecting kernel logs after execution of test case --- added by v-sirebb
-        $KernelLogOutput=GetAndCheckKernelLogs -DeployedServices $deployedServices -status "Final"
-        foreach ($test in $xmlConfig.config.testsDefinition.test)
-	    {
-	    if ($test.testName -eq $testName)
-		    {
-		    LogMsg "Loading the test data for $($test.testName)"
-		    $setupType = $($test.setupType)
-		    break
-		    }
-	    }
 		if($DeployedServices)
 		{
+            $KernelLogOutput=GetAndCheckKernelLogs -DeployedServices $deployedServices -status "Final" #Collecting kernel logs after execution of test case : v-sirebb
 			$isClened = @()
 			$hsNames = $DeployedServices
 			$hsNames = $hsNames.Split("^")
@@ -1672,7 +1671,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, [switch]$keepUserD
                             }
                         if($keepReproInact)
                         {
-                            $xmlConfig.config.Azure.Deployment.$setupType.isDeployed = "NOT_DEPLOYED_YET"
+                            $xmlConfig.config.Azure.Deployment.$setupType.isDeployed = "NO"
                         }
 					}
 				}
@@ -1684,7 +1683,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, [switch]$keepUserD
 						GetVMLogs -DeployedServices $hs
                         if($keepReproInact)
                         {
-                            $xmlConfig.config.Azure.Deployment.$setupType.isDeployed = "NOT_DEPLOYED_YET"
+                            $xmlConfig.config.Azure.Deployment.$setupType.isDeployed = "NO"
                         }
 					}
 					LogMsg "Skipping cleanup, as service is marked as DO NOT DISTURB.."
@@ -5186,13 +5185,13 @@ Specifies the maximum retry count. The default value is 18.
 .PARAMETER retryInterval
 Specifies the retry interval. The default value is 10 seconds.
 #>
-Function RetryOperation($operation, $description, $expectResult=$null, $maxRetryCount=18, $retryInterval=10)
+Function RetryOperation($operation, $description, $expectResult=$null, $maxRetryCount=18, $retryInterval=10, [switch]$NoLogsPlease)
 {
     $retryCount = 1
     
     do
     {
-        LogMsg "Attempt : $retryCount/$maxRetryCount : $description"
+        LogMsg "Attempt : $retryCount/$maxRetryCount : $description" -NoLogsPlease $NoLogsPlease
         $ret = $null
         $oldErrorActionValue = $ErrorActionPreference
         $ErrorActionPreference = "Stop"
