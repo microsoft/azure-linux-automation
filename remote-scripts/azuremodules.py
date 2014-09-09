@@ -1,8 +1,18 @@
 #!/usr/bin/python
+
+
+
+
 #####################################################################################################################################
+
+
+
 # THIS FILE CONTAINS ALL THE FUNCTIONS USED IN PYTHON TEST FILES... HANDLE WITH CARE...
 # FOR ANY QUERY - V-SHISAV@MICROSOFT.COM
+
 # DO NOT DELETE ANY STATEMENT FROM THE FUNCTION EVEN IF IT IS COMMENTED!!! BECAUSE I'M TRACKING, WHAT I'M DOING...
+
+
 #####################################################################################################################################
 
 import subprocess
@@ -13,10 +23,6 @@ import commands
 import time
 import os.path
 import array
-#added v-sirebb
-import linecache
-import sys
-import re
 
 #THIS LOG WILL COLLECT ALL THE LOGS THAT ARE RUN WHILE THE TEST IS GOING ON...
 RunLog = logging.getLogger("RuntimeLog : ")
@@ -326,27 +332,7 @@ def RemoveICAVMsFromREVfile():
     RemoveStringMatchLinesFromFile(lisvnetlab_rev_filepath,matchString)
 
 
-def RetryOperation(operation, description, expectResult=None, maxRetryCount=18, retryInterval=10):
-    retryCount = 1
 
-    while True:
-        RunLog.info("Attempt : %s : %s", retryCount, description)
-        ret = None
-
-        try:
-            ret = Run(operation)
-            if (expectResult and (ret.strip() == expectResult)) or (expectResult == None):
-                return ret
-        except:
-            RunLog.info("Retrying Operation")
-
-        if retryCount >= maxRetryCount:
-            break
-        retryCount += 1
-        time.sleep(retryInterval)
-    if(expectResult != None):
-        return ret
-    return None
 
 def AppendTextToFile(filepath,textString):
     #THIS FUNCTION DONES NOT CREATES ANY FILE. THE FILE MUST PRESENT AT THE SPECIFIED LOCATION.

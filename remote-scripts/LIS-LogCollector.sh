@@ -18,10 +18,8 @@ Log() {
 intro() {
 ##Create the Directory in Which Logs would be stored
 currtime=$(date +"%b%d%Y-%H-%M-%S");
-#hostnm=$(hostname)
-hostnm=""
-#dirname="LIS-Logs-"${hostnm};
-dirname="LIS-Logs"
+hostnm=$(hostname)
+dirname="LIS-Logs-"${hostnm};
 mkdir $dirname;
 }
 
