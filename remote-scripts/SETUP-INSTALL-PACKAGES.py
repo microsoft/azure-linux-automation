@@ -137,7 +137,7 @@ def zypper_package_install(package):
     RunLog.info("Installing Package: " + package+" from rpmlink")
     if package in rpm_links:
         if download_url(rpm_links.get(package), "/tmp/"):
-            if install_rpm("/tmp/"+re.split("/",rpm_links.get(package))[-1]):
+            if install_rpm("/tmp/"+re.split("/",rpm_links.get(package))[-1],package):
                 return True
 
     #Consider package installation failed if non of the above matches.
@@ -331,7 +331,7 @@ def exec_multi_cmds_local_sudo(cmd_list):
 	f = open('/tmp/temp_script.sh','w')
 	f.write("export PATH=$PATH:/sbin:/usr/sbin"+'\n') 
 	for line in cmd_list:
-		f.write(line+'\n') 
+		f.write(line+'\n')
 	f.close()
 	Run ("chmod +x /tmp/temp_script.sh")
 	Run ("echo '"+sudo_password+"' | sudo -S /tmp/temp_script.sh 2>&1 > /tmp/exec_multi_cmds_local_sudo.log")
@@ -352,7 +352,7 @@ def deprovision():
 
 	output = exec_multi_cmds_local_sudo(deprovision_commands)
 	outputlist = re.split("\n", output)
-
+	
 	for line in outputlist:
 		if (re.match(r'WARNING!.*account and entire home directory will be deleted', line, re.M|re.I)):
 			#RunLog.info ("'waagent -deprovision+user' command succesful\n")
@@ -386,19 +386,30 @@ def RunTest():
     output = Run("cat "+packages_list_xml)
     outputlist = re.split("\n", output)
     packages_list = []
-    for line in outputlist:
-        if "</packages>" in line:
-            matchObj = re.match( r'<packages>(.*)</packages>', line, re.M|re.I)
-            packages_list = str.split( matchObj.group(1))
-            
-        elif "</rpm_link>" in line:
-            matchObj = re.match( r'<rpm_link = "(.*)">(.*)</rpm_link>', line, re.M|re.I)
-            rpm_links[matchObj.group(1)] = matchObj.group(2)
-			
-        elif "</tar_link>" in line:
-            matchObj = re.match( r'<tar_link = "(.*)">(.*)</tar_link>', line, re.M|re.I)
-            tar_link[matchObj.group(1)] = matchObj.group(2)
+    	
+    try:
+        import xml.etree.cElementTree as ET
+    except ImportError:
+        import xml.etree.ElementTree as ET
 
+    # Parse the packages.xml file into memory
+    packages_xml_file = ET.parse(packages_list_xml)
+    xml_root = packages_xml_file.getroot()
+	
+    parse_success = False
+	
+    for branch in xml_root:
+        for node in branch:
+            if node.tag == "packages":
+                packages_list = node.text.split(" ")
+            elif node.tag == "waLinuxAgent_link":
+                # print "waLinuxAgent_link: ", node.text
+                pass
+            elif node.tag == "rpm_link":
+                rpm_links[node.attrib["name"]] = node.text
+            elif node.tag == "tar_link":
+                tar_link[node.attrib["name"]] = node.text
+		
     #Dtecting the linux distribution
     distro = DetectLinuxDistro()
     if (distro[0]):
@@ -411,6 +422,10 @@ def RunTest():
                 
     success = ConfigFilesUpdate()
     success = deprovision()
+    
+    # Disable 'requiretty' in sudoers
+    Run("sed -r 's/^.*Defaults\s*requiretty.*$/#Defaults requiretty/g' /etc/sudoers -i")
+    
     if success == True:
         ResultLog.info('PASS')
     else:

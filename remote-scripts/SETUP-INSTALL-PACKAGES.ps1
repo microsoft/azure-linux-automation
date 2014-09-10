@@ -48,7 +48,23 @@ if ($isDeployed)
         $NewImageName = $isDeployed + '-prepared'
         $tmp = Save-AzureVMImage -ServiceName $isDeployed -Name $hs1vm1Hostname -NewImageName $NewImageName -NewImageLabel $NewImageName
         LogMsg "Successfully captured VM image : $NewImageName"
-
+        
+        # Capture the prepared image names
+        $PreparedImageInfoLogPath = "$pwd\PreparedImageInfoLog.xml"
+        if((Test-Path $PreparedImageInfoLogPath) -eq $False)
+        {
+            $PreparedImageInfoLog = New-Object -TypeName xml
+            $root = $PreparedImageInfoLog.CreateElement("PreparedImages")
+            $content = "<PreparedImageName></PreparedImageName>"
+            $root.set_InnerXML($content)
+            $PreparedImageInfoLog.AppendChild($root)
+            $PreparedImageInfoLog.Save($PreparedImageInfoLogPath)
+        }
+        [xml]$xml = Get-Content $PreparedImageInfoLogPath
+        $xml.PreparedImages.PreparedImageName = $NewImageName
+        $xml.Save($PreparedImageInfoLogPath)
+        
+        
         if ($testStatus -eq "TestCompleted")
         {
             LogMsg "Test Completed"
@@ -69,7 +85,11 @@ if ($isDeployed)
         }
         $resultArr += $testResult
 #$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
-    }   
+    
+        # Remove the Cloud Service
+        LogMsg "Executing: Remove-AzureService -ServiceName $isDeployed -Force"
+        Remove-AzureService -ServiceName $isDeployed -Force
+    }
 }
 
 else
