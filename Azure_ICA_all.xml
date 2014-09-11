@@ -3007,7 +3007,8 @@
 				<Name>E2E-TIME-SYNC-KERNBENCH</Name>
 			</test>
 		</Cycle>
-		<cycleName>DEBUG</cycleName>
+		<Cycle>
+			<cycleName>DEBUG</cycleName>
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
 			<test>
 				<Name>BVT-VERIFY-SSHD-CONFIG</Name>
