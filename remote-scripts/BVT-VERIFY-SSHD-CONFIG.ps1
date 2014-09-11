@@ -1,13 +1,11 @@
-﻿<#-------------Create Deployment Start------------------#>
+<#-------------Create Deployment Start------------------#>
 Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""
 $resultArr = @()
-
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
-
 	try
 	{
 		$testServiceData = Get-AzureService -ServiceName $isDeployed
@@ -22,21 +20,36 @@ if ($isDeployed)
 		$hs1ServiceUrl = $hs1vm1.DNSName
 		$hs1ServiceUrl = $hs1ServiceUrl.Replace("http://","")
 		$hs1ServiceUrl = $hs1ServiceUrl.Replace("/","")
-		$hs1vm1Hostname =  $hs1vm1.Name
+
 
 		RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
 		RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *" -runAsSudo
 
 
 		LogMsg "Executing : $($currentTestData.testScript)"
-		RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "./$($currentTestData.testScript)" -runAsSudo
+		$output=RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "python $($currentTestData.testScript)" -runAsSudo
 		RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "mv Runtime.log $($currentTestData.testScript).log" -runAsSudo
 		RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/state.txt, /home/$user/Summary.log, /home/$user/$($currentTestData.testScript).log" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
 		$testResult = Get-Content $LogDir\Summary.log
 		$testStatus = Get-Content $LogDir\state.txt
 		LogMsg "Test result : $testResult"
-
-		if ($testStatus -eq "TestCompleted")
+        if ($output -imatch "CLIENT_ALIVE_INTERVAL_SUCCESS")
+		{
+			LogMsg "SSHD-CONFIG INFO :Client_Alive_Interval time is 180 Second"
+		}
+        else
+        {
+            if($output -imatch "CLIENT_ALIVE_INTERVAL_FAIL")
+            {
+                LogMsg "SSHD-CONFIG INFO :There is no Client_Alive_Interval time is 180 Second"
+            }
+            if($output -imatch "CLIENT_ALIVE_INTERVAL_COMMENTED")
+            {
+                LogMsg "SSHD-CONFIG INFO :There is a commented line in CLIENT_INTERVAL_COMMENTED "
+            }
+        }
+        
+        if ($testStatus -eq "TestCompleted")
 		{
 			LogMsg "Test Completed"
 		}

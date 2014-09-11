@@ -261,4 +261,3 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
  }
 
 RunTestsOnCycle -cycleName $cycleName -xmlConfig $xmlConfig -Distro $Distro
-

@@ -3,8 +3,8 @@ Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""
 $resultArr = @()
-
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
+#$isDeployed = "ICA-BVTDeployment-UbuntuCAPT-6-25-5-8-21"
 if ($isDeployed)
 {
 
@@ -23,23 +23,34 @@ if ($isDeployed)
 		$hs1ServiceUrl = $hs1ServiceUrl.Replace("http://","")
 		$hs1ServiceUrl = $hs1ServiceUrl.Replace("/","")
 		$hs1vm1Hostname =  $hs1vm1.Name
-
-		RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
-		RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *" -runAsSudo
-
-
-		LogMsg "Executing : $($currentTestData.testScript)"
-		RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "./$($currentTestData.testScript)" -runAsSudo
-		RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "mv Runtime.log $($currentTestData.testScript).log" -runAsSudo
-		RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/state.txt, /home/$user/Summary.log, /home/$user/$($currentTestData.testScript).log" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
-		$testResult = Get-Content $LogDir\Summary.log
-		$testStatus = Get-Content $LogDir\state.txt
-		LogMsg "Test result : $testResult"
-
-		if ($testStatus -eq "TestCompleted")
-		{
-			LogMsg "Test Completed"
-		}
+        LogMsg "Uploading $testFile to $uploadTo, port $port using PrivateKey authentication"
+        $successCount = 0
+        for ($i = 0; $i -lt 16; $i++)
+        {
+            try
+            {
+                LogMsg "Privatekey Authentication Verification loop : $i : STARTED"
+                Set-Content -Value "PrivateKey Test" -Path "$logDir\test-file-$i.txt" | Out-Null
+                RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -username $user -password $password -files "$logDir\test-file-$i.txt" -upload -usePrivateKey
+                Remove-Item -Path "$logDir\test-file-$i.txt" | Out-Null
+                RemoteCopy -downloadFrom $hs1VIP -port $hs1vm1sshport -username $user -password $password -downloadTo $logDir -files "/home/$user/test-file-$i.txt" -download -usePrivateKey
+                LogMsg "Privatekey Authentication Verification loop : $i : SuCCESS"
+                $successCount += 1
+            }
+            catch
+            {
+                $testResult = "FAIL"
+                LogMsg "Privatekey Authentication Verification loop : $i : FAILED"
+            }
+        }
+        if ($successCount -eq $i)
+        {
+            $testResult = "PASS"
+        }
+        else
+        {
+            $testResult = "FAIL"
+        }
 	}
 
 	catch
@@ -61,7 +72,7 @@ if ($isDeployed)
 
 else
 {
-	$testResult = "Aborted"
+	$testResult = "FAIL"
 	$resultArr += $testResult
 }
 
