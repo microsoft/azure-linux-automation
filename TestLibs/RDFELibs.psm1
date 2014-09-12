@@ -301,7 +301,6 @@ Function DeleteService ($serviceName)
 				{
                     $retryCount = $retryCount + 1
 					LogWarn "Error in deletion. Retry Attempt $retryCount "
-					
 				}
 			}
 		}
@@ -333,12 +332,12 @@ Function CreateService($serviceName, $location, $AffinityGroup)
 
 	    if($location) {
 			LogMsg "Using location : $location"
-		    $out = RunAzureCmd -AzureCmdlet "New-AzureService -ServiceName $serviceName -Location $location "
+		    $out = RunAzureCmd -AzureCmdlet "New-AzureService -ServiceName $serviceName -Location $location"
 	    }
 	    else {
 		    if($AffinityGroup) {
 			LogMsg "Using Affinity Group : $AffinityGroup" 
-		    $out = RunAzureCmd -AzureCmdlet "New-AzureService -ServiceName $serviceName -AffinityGroup $AffinityGroup "
+		    $out = RunAzureCmd -AzureCmdlet "New-AzureService -ServiceName $serviceName -AffinityGroup $AffinityGroup"
 		    }
 	    }
 
@@ -376,7 +375,7 @@ Function AddCertificate($serviceName)
         $FailCounter++
         $currentDirectory = (pwd).Path
 	    LogMsg "Adding Certificate to hosted service.."
-	    $out = RunAzureCmd -AzureCmdlet "Add-AzureCertificate -CertToDeploy `"$currentDirectory\ssh\myCert.cer`" -ServiceName $serviceName "
+	    $out = RunAzureCmd -AzureCmdlet "Add-AzureCertificate -CertToDeploy `"$currentDirectory\ssh\myCert.cer`" -ServiceName $serviceName"
 	    $retValue = $?
         }
         catch
@@ -1360,13 +1359,13 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 				{
                     if($usePrivateKey)
                     {
-					    LogMsg "Uploading $testFile to $uploadTo, port $port using PrivateKey authentication"
+					    LogMsg "Uploading $testFile to $username : $uploadTo, port $port using PrivateKey authentication"
 					    echo y | .\tools\pscp -i .\ssh\$sshKey -q -P $port $testFile $username@${uploadTo}:
                         $returnCode = $LASTEXITCODE
 					}
                     else
                     {
-					    LogMsg "Uploading $testFile to $uploadTo, port $port using Password authentication"
+					    LogMsg "Uploading $testFile to $username : $uploadTo, port $port using Password authentication"
 					    echo y | .\tools\pscp -pw $password -q -P $port $testFile $username@${uploadTo}:
                         $returnCode = $LASTEXITCODE
                     }
@@ -1412,13 +1411,13 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 				{
                     if($usePrivateKey)
                     {
-					    LogMsg "Downloading $testFile from $downloadFrom,port $port to $downloadTo using PrivateKey authentication"
+					    LogMsg "Downloading $testFile from $username : $downloadFrom,port $port to $downloadTo using PrivateKey authentication"
 					    echo y | .\tools\pscp -i .\ssh\$sshKey -q -P $port $username@${downloadFrom}:$testFile $downloadTo
                         $returnCode = $LASTEXITCODE
                     }
                     else
                     {
-					    LogMsg "Downloading $testFile from $downloadFrom,port $port to $downloadTo using Password authentication"
+					    LogMsg "Downloading $testFile from $username : $downloadFrom,port $port to $downloadTo using Password authentication"
 					    echo y | .\tools\pscp -pw $password -q -P $port $username@${downloadFrom}:$testFile $downloadTo
                         $returnCode = $LASTEXITCODE
                     }
@@ -4461,6 +4460,62 @@ Function GetTotalPhysicalDisks($FdiskOutput)
 	}
 	return $diskCount
 }
+
+Function GetNewPhysicalDiskNames($FdiskOutputBeforeAddingDisk, $FdiskOutputAfterAddingDisk)
+{
+    $availableDisksBeforeAddingDisk = ""
+    $availableDisksAfterAddingDisk = ""
+	$physicalDiskNames = ("sda","sdb","sdc","sdd","sde","sdf","sdg","sdh","sdi","sdj","sdk","sdl","sdm","sdn",
+			"sdo","sdp","sdq","sdr","sds","sdt","sdu","sdv","sdw","sdx","sdy","sdz")
+	foreach ($physicalDiskName in $physicalDiskNames)
+	{
+		if ($FdiskOutputBeforeAddingDisk -imatch "Disk /dev/$physicalDiskName")
+		{
+			if ( $availableDisksBeforeAddingDisk -eq "" )
+            {
+                $availableDisksBeforeAddingDisk = "/dev/$physicalDiskName"
+            }
+            else
+            {
+                $availableDisksBeforeAddingDisk = $availableDisksBeforeAddingDisk + "^" + "/dev/$physicalDiskName"
+            }
+		}
+	}
+	foreach ($physicalDiskName in $physicalDiskNames)
+	{
+		if ($FdiskOutputAfterAddingDisk -imatch "Disk /dev/$physicalDiskName")
+		{
+			if ( $availableDisksAfterAddingDisk -eq "" )
+            {
+                $availableDisksAfterAddingDisk = "/dev/$physicalDiskName"
+            }
+            else
+            {
+                $availableDisksAfterAddingDisk = $availableDisksAfterAddingDisk + "^" + "/dev/$physicalDiskName"
+            }
+		}
+	}
+    $newDisks = ""
+    foreach ($afterDisk in $availableDisksAfterAddingDisk.Split("^"))
+    {
+        if($availableDisksBeforeAddingDisk -imatch $afterDisk)
+        {
+
+        }
+        else
+        {
+            if($newDisks -eq "")
+            {
+                $newDisks = $afterDisk
+            }
+            else
+            {
+                $newDisks = $newDisks + "^" + $afterDisk
+            }
+        }
+    }
+	return $newDisks
+}
 Function CreateHotAddRemoveDataDiskNode
 {
 	param(
@@ -4492,10 +4547,77 @@ Function CreateHotAddRemoveDataDiskNode
 	return $objNode
 }
 
-
+Function PerformIOTestOnDisk($testVMObject, [string]$attachedDisk, [string]$diskFileSystem)
+{
+    $retValue = "Aborted"
+   	$testVMSSHport = $testVMObject.sshPort
+	$testVMVIP = $testVMObject.ip
+	$testVMUsername = $testVMObject.user 
+	$testVMPassword = $testVMObject.password
+	$isVMAlive = Test-TCP -testIP $testVMVIP -testport $testVMSSHport
+    if ($isVMAlive -eq "True")
+    {
+        $retValue = "FAIL"
+        $suppressedOut = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "rm -rf *.txt *.log" -runAsSudo
+        LogMsg "Performing I/O operations on $attachedDisk.."
+        $ioOutout = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "python /home/$testVMUsername/DoIOTest.py -d $attachedDisk -f $diskFileSystem" -runAsSudo
+        if ( $ioOutout -imatch ( "$attachedDisk" + "_AVAILABLE" ))
+        {
+            if ( $ioOutout -imatch ( "$attachedDisk" + "_PARTITION_CREATED_SUCCESSFULLY" ))
+            {
+                if ( $ioOutout -imatch ( "$attachedDisk" + "_PARTITION_FORMATTED_SUCCESSFULLY" ))
+                {
+                    if ( $ioOutout -imatch ( "$attachedDisk" + "_FILE_CREATED_SUCCESSFULLY" ))
+                    {
+                        if ( $ioOutout -imatch "FINAL_TEST_RESULT_PASS")
+                        {
+                            LogMsg "All I/O operations completed successfully on $attachedDisk"
+                            $retValue = "PASS"
+                        }
+                        else
+                        {
+                            LogErr "All tests done but unable to confirm final result. Please check logs for more information."
+                            $retValue = "FAIL"
+                        }
+                    }
+                    else
+                    {
+                        LogErr "Failed to create file on $attachedDisk`1"
+                        $retValue = "FAIL"
+                    }
+                }
+                else
+                {
+                    LogErr "Failed to Formant partition on $attachedDisk with file system $diskFileSystem."
+                    $retValue = "FAIL"
+                }
+            }
+            else
+            {
+                LogErr "Failed to Create partition on $attachedDisk"
+                $retValue = "FAIL"
+            }
+        }
+        else
+        {
+            LogErr "$attachedDisk is not available in VM."
+            $retValue = "FAIL"
+        }
+        $suppressedOut = RemoteCopy -downloadFrom $testVMVIP -port $testVMSSHport -files "/home/$testVMUsername/Runtime.log" -downloadTo $testVMObject.logDir -username $testVMUsername -password $testVMPassword -download
+        Rename-Item -Path "$($testVMObject.logdir)\Runtime.log" -NewName ( $attachedDisk.Replace("/dev/","dev-") + "-IO-Test-Logs.txt")
+        LogMsg "I/O logs saved as $($attachedDisk.Replace("/dev/","dev-"))-IO-Test-Logs.txt"
+    }
+    else
+    {
+		LogErr "VM is not Alive."
+		LogErr "Aborting Test."
+		$retValue = "Aborted"
+    }
+    return $retValue
+}
 Function DoHotAddNewDataDiskTest ($testVMObject, [int]$diskSizeInGB )
 {
-
+    
 	$testVMSSHport = $testVMObject.sshPort
 	$testVMVIP = $testVMObject.ip
 	$testVMServiceName = $testVMObject.ServiceName
@@ -4510,17 +4632,17 @@ Function DoHotAddNewDataDiskTest ($testVMObject, [int]$diskSizeInGB )
 		Add-Content  -Value "--------------------ADD DISK TO LUN $testLun : START----------------------" -Path $HotAddLogFile -Encoding UTF8
 #GetCurrentDiskInfo
 
-		$out = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo
+		$fdiskOutputBeforeAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo
 		Add-Content  -Value "Before Adding New Disk : " -Path $HotAddLogFile -Encoding UTF8
-		Add-Content  -Value $out -Path $HotAddLogFile -Encoding UTF8
-		$disksBeforeAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $out
+		Add-Content  -Value $fdiskOutputBeforeAddingDisk -Path $HotAddLogFile -Encoding UTF8
+		$disksBeforeAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $fdiskOutputBeforeAddingDisk
+        
 
 #Add datadisk to VM
 		$supressedOut = RetryOperation -operation { Get-AzureVM -ServiceName $testVMServiceName | Add-AzureDataDisk -CreateNew -DiskSizeInGB $diskSizeInGB -DiskLabel "TestDisk-$testLun" -LUN $testLun | Update-AzureVM  } -maxRetryCount 5 -retryInterval 5 -description "Attaching $diskSizeInGB GB disk to LUN : $testLun."
 		if ( ( $supressedOut.OperationDescription -eq "Update-AzureVM"  ) -and ( $supressedOut.OperationStatus -eq "Succeeded" ))
         {
 		    LogMsg "Disk Attached Successfully.."
-
 		    WaitFor -seconds 10
 		    LogMsg "Checking VM status.."
 		    $isVMAlive = Test-TCP -testIP $testVMVIP -testport $testVMSSHport
@@ -4529,30 +4651,37 @@ Function DoHotAddNewDataDiskTest ($testVMObject, [int]$diskSizeInGB )
 			    LogMsg "VM Status : RUNNING."
 			    $retryCount = 1
 			    $MaxRetryCount = 20
-			    $retValue = "FAIL"
-			    While (($retryCount -le $MaxRetryCount) -and ($retValue -eq "FAIL"))
+			    $newDiskAdded = "FAIL"
+			    While (($retryCount -le $MaxRetryCount) -and ($newDiskAdded -eq "FAIL"))
 			    {
-                    $out = ""
 				    LogMsg "Attempt : $retryCount : Checking for new disk."
-				    $out = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo -ignoreLinuxExitCode
-				    $disksafterAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $out
+				    $fdiskOutputAfterAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo -ignoreLinuxExitCode
+				    $disksafterAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $fdiskOutputAfterAddingDisk
 				    if ( ($disksBeforeAddingNewDisk + 1) -eq $disksafterAddingNewDisk )
 				    {
+                        $newDiskAdded = "PASS"
 					    LogMsg "New Disk detected."
-					    $retValue = "PASS"
-
+                        $newDisknames = GetNewPhysicalDiskNames -FdiskOutputBeforeAddingDisk $fdiskOutputBeforeAddingDisk -FdiskOutputAfterAddingDisk $fdiskOutputAfterAddingDisk
+                        $ioResult =  PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisknames -diskFileSystem "ext4"
+                        if ($ioResult -eq "PASS")
+                        {
+                            $retValue = "PASS"
+                        }
+                        else
+                        {
+                            $retValue = "FAIL"
+                        }
 				    }
 				    else
 				    {
 					    Write-Host "New disk not detected."
 					    WaitFor -seconds 10
-					    $retValue = "FAIL"
+					    $newDiskAdded = "FAIL"
 					    $retryCount += 1
 				    }
-
 			    }
 			    Add-Content  -Value "After Adding New Disk : " -Path $HotAddLogFile -Encoding UTF8
-			    Add-Content  -Value $out -Path $HotAddLogFile -Encoding UTF8
+			    Add-Content  -Value $fdiskOutputAfterAddingDisk -Path $HotAddLogFile -Encoding UTF8
 		    }
 	        else
 	        {
@@ -4674,10 +4803,10 @@ Function DoHotAddNewDataDiskTestParallel ($testVMObject, $TotalLuns)
 		Add-Content  -Value "--------------------ADD $TotalLuns DISKS : START----------------------" -Path $HotAddLogFile -Encoding UTF8
 #GetCurrentDiskInfo
 
-		$out = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo
+		$FdiskOutputBeforeAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo
 		Add-Content  -Value "Before Adding Disks : " -Path $HotAddLogFile -Encoding UTF8
-		Add-Content  -Value $out -Path $HotAddLogFile -Encoding UTF8
-		$disksBeforeAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $out
+		Add-Content  -Value $FdiskOutputBeforeAddingDisk -Path $HotAddLogFile -Encoding UTF8
+		$disksBeforeAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $FdiskOutputBeforeAddingDisk
 
 #Add datadisk to VM
 		$lunCounter = 0
@@ -4702,31 +4831,56 @@ Function DoHotAddNewDataDiskTestParallel ($testVMObject, $TotalLuns)
 			    LogMsg "VM Status : RUNNING."
 			    $retryCount = 1
 			    $MaxRetryCount = 20
-			    $retValue = "FAIL"
-			    While (($retryCount -le $MaxRetryCount) -and ($retValue -eq "FAIL"))
+			    $isAllDiskDetected = "FAIL"
+			    While (($retryCount -le $MaxRetryCount) -and ($isAllDiskDetected -eq "FAIL"))
 			    {
                     $out = ""
 				    LogMsg "Attempt : $retryCount : Checking for new disk."
-				    $out = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo -ignoreLinuxExitCode
-				    $disksafterAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $out
+				    $FdiskOutputAfterAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo -ignoreLinuxExitCode
+				    $disksafterAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $FdiskOutputAfterAddingDisk
 				    if ( ($disksBeforeAddingNewDisk + $TotalLuns) -eq $disksafterAddingNewDisk )
 				    {
 					    LogMsg "All $TotalLuns New Disks detected."
-					    $retValue = "PASS"
-
+                        $newDisks = GetNewPhysicalDiskNames -FdiskOutputBeforeAddingDisk $FdiskOutputBeforeAddingDisk -FdiskOutputAfterAddingDisk $FdiskOutputAfterAddingDisk
+                        $isAllDiskDetected = "PASS"
+                        $successCount = 0
+                        $errorCount = 0
+                        foreach ( $newDisk in $newDisks.split("^"))
+                        {
+                            $ioResult = $null
+                            $ioResult = PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisk -diskFileSystem "ext4"
+                            if ($ioResult -eq "PASS")
+                            {
+                                $successCount += 1
+                            }
+                            else
+                            {
+                                LogErr "IO Operations failed for $newDisk"
+                                $errorCount += 1
+                            }
+                        }
+                        if ($successCount -eq $TotalLuns)
+                        {
+                            $retValue = "PASS"
+                        }
+                        else
+                        {
+                            $retValue = "FAIL"
+                            LogErr "I/O operations on $errorCount disks."
+                        }
 				    }
 				    else
 				    {
 					    $NotDetectedDisks = ( ($disksBeforeAddingNewDisk + $TotalLuns) - $disksafterAddingNewDisk )
 					    LogErr "Total undetected disks : $NotDetectedDisks"
 					    WaitFor -seconds 10
-					    $retValue = "FAIL"
+					    $isAllDiskDetected = "FAIL"
 					    $retryCount += 1
 				    }
 
 			    }
 			    Add-Content  -Value "After Adding New Disk : " -Path $HotAddLogFile -Encoding UTF8
-			    Add-Content  -Value $out -Path $HotAddLogFile -Encoding UTF8
+			    Add-Content  -Value $FdiskOutputAfterAddingDisk -Path $HotAddLogFile -Encoding UTF8
 		    }
 		    else
 		    {
@@ -4864,10 +5018,10 @@ Function DoHotAddExistingDataDiskTest($testVMObject)
 	{
 		Add-Content  -Value "--------------------ADD EXISTING DISK TO LUN $testLun : START----------------------" -Path $HotAddLogFile -Encoding UTF8
 #GetCurrentDiskInfo
-		$out =  RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo
+		$fdiskOutputBeforeAddingDisk =  RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo
 		Add-Content  -Value "Before Adding Existing Disk : " -Path $HotAddLogFile -Encoding UTF8
-		Add-Content  -Value $out -Path $HotAddLogFile -Encoding UTF8
-		$disksBeforeAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $out
+		Add-Content  -Value $fdiskOutputBeforeAddingDisk -Path $HotAddLogFile -Encoding UTF8
+		$disksBeforeAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $fdiskOutputBeforeAddingDisk
 #Add datadisk to VM
 		$addExistingDisk = RetryOperation -operation { Get-AzureVM -ServiceName $testVMServiceName | Add-AzureDataDisk  -ImportFrom -MediaLocation $testExistingDisk -DiskLabel "TestDisk-$testLun" -LUN $testLun | Update-AzureVM  } -maxRetryCount 15 -retryInterval 10 -Description "Attaching $testExistingDisk disk to LUN : $testLun."
 		if ( ( $addExistingDisk.OperationDescription -eq "Update-AzureVM"  ) -and ( $addExistingDisk.OperationStatus -eq "Succeeded" ))
@@ -4881,29 +5035,39 @@ Function DoHotAddExistingDataDiskTest($testVMObject)
 			    LogMsg "VM Status : RUNNING."
 			    $retryCount = 1
 			    $MaxRetryCount = 20
-			    $retValue = "FAIL"
-			    While (($retryCount -le $MaxRetryCount) -and ($retValue -eq "FAIL"))
+			    $newDiskAdded = "FAIL"
+			    While (($retryCount -le $MaxRetryCount) -and ($newDiskAdded -eq "FAIL"))
 			    {
-                    $out = ""
+                    $fdiskOutputAfterAddingDisk = ""
 				    LogMsg "Attempt : $retryCount : Checking for new disk."
-				    $out = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo -ignoreLinuxExitCode
-				    $disksafterAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $out
+				    $fdiskOutputAfterAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo -ignoreLinuxExitCode
+				    $disksafterAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $fdiskOutputAfterAddingDisk
 				    if ( ($disksBeforeAddingNewDisk + 1) -eq $disksafterAddingNewDisk )
 				    {
 					    LogMsg "Existing Disk detected."
-					    $retValue = "PASS"
+					    $newDiskAdded = "PASS"
+                        $newDisknames = GetNewPhysicalDiskNames -FdiskOutputBeforeAddingDisk $fdiskOutputBeforeAddingDisk -FdiskOutputAfterAddingDisk $fdiskOutputAfterAddingDisk
+                        $ioResult =  PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisknames -diskFileSystem "ext4"
+                        if ($ioResult -eq "PASS")
+                        {
+                            $retValue = "PASS"
+                        }
+                        else
+                        {
+                            $retValue = "FAIL"
+                        }
 				    }
 				    else
 				    {
 					    LogErr "Existing disk not detected."
 					    WaitFor -seconds 10
-					    $retValue = "FAIL"
+					    $newDiskAdded = "FAIL"
 					    $retryCount += 1
 				    }
 
 			    }
 			    Add-Content  -Value "After Adding Existing Disk : " -Path $HotAddLogFile -Encoding UTF8
-			    Add-Content  -Value $out -Path $HotAddLogFile -Encoding UTF8
+			    Add-Content  -Value $fdiskOutputAfterAddingDisk -Path $HotAddLogFile -Encoding UTF8
 		    }
 		    else
 		    {
@@ -4948,10 +5112,10 @@ Function DoHotAddExistingDataDiskTestParallel ($testVMObject, $TotalLuns)
 		Add-Content  -Value "--------------------ADD EXISTING $TotalLuns DISKS : START----------------------" -Path $HotAddLogFile -Encoding UTF8
 #GetCurrentDiskInfo
 
-		$out = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo
+		$FdiskOutputBeforeAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo
 		Add-Content  -Value "Before Adding Disks : " -Path $HotAddLogFile -Encoding UTF8
-		Add-Content  -Value $out -Path $HotAddLogFile -Encoding UTF8
-		$disksBeforeAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $out
+		Add-Content  -Value $FdiskOutputBeforeAddingDisk -Path $HotAddLogFile -Encoding UTF8
+		$disksBeforeAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $FdiskOutputBeforeAddingDisk
 
 #Add datadisk to VM
 		$lunCounter = 0
@@ -4974,31 +5138,57 @@ Function DoHotAddExistingDataDiskTestParallel ($testVMObject, $TotalLuns)
 			    LogMsg "VM Status : RUNNING."
 			    $retryCount = 1
 			    $MaxRetryCount = 20
-			    $retValue = "FAIL"
-			    While (($retryCount -le $MaxRetryCount) -and ($retValue -eq "FAIL"))
+			    $isAllDiskDetected = "FAIL"
+			    While (($retryCount -le $MaxRetryCount) -and ($isAllDiskDetected -eq "FAIL"))
 			    {
-                    $out = ""
+                    $FdiskOutputAfterAddingDisk = ""
 				    LogMsg "Attempt : $retryCount : Checking for existing disk."
-				    $out = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo -ignoreLinuxExitCode
-				    $disksafterAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $out
+				    $FdiskOutputAfterAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo -ignoreLinuxExitCode
+				    $disksafterAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $FdiskOutputAfterAddingDisk
 				    if ( ($disksBeforeAddingNewDisk + $TotalLuns) -eq $disksafterAddingNewDisk )
 				    {
 					    LogMsg "All $TotalLuns existing Disks detected."
-					    $retValue = "PASS"
-
+					    $isAllDiskDetected = "PASS"
+                        $newDisks = GetNewPhysicalDiskNames -FdiskOutputBeforeAddingDisk $FdiskOutputBeforeAddingDisk -FdiskOutputAfterAddingDisk $FdiskOutputAfterAddingDisk
+                        $isAllDiskDetected = "PASS"
+                        $successCount = 0
+                        $errorCount = 0
+                        foreach ( $newDisk in $newDisks.split("^"))
+                        {
+                            $ioResult = $null
+                            $ioResult = PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisk -diskFileSystem "ext4"
+                            if ($ioResult -eq "PASS")
+                            {
+                                $successCount += 1
+                            }
+                            else
+                            {
+                                LogErr "IO Operations failed for $newDisk"
+                                $errorCount += 1
+                            }
+                        }
+                        if ($successCount -eq $TotalLuns)
+                        {
+                            $retValue = "PASS"
+                        }
+                        else
+                        {
+                            $retValue = "FAIL"
+                            LogErr "I/O operations on $errorCount disks."
+                        }
 				    }
 				    else
 				    {
 					    $NotDetectedDisks = ( ($disksBeforeAddingNewDisk + $TotalLuns) - $disksafterAddingNewDisk )
 					    LogErr "Total undetected disks : $NotDetectedDisks"
 					    WaitFor -seconds 10
-					    $retValue = "FAIL"
+					    $isAllDiskDetected = "FAIL"
 					    $retryCount += 1
 				    }
 
 			    }
 			    Add-Content  -Value "After Adding New Disk : " -Path $HotAddLogFile -Encoding UTF8
-			    Add-Content  -Value $out -Path $HotAddLogFile -Encoding UTF8
+			    Add-Content  -Value $FdiskOutputAfterAddingDisk -Path $HotAddLogFile -Encoding UTF8
 		    }
 		    else
 		    {
@@ -5034,7 +5224,7 @@ Function CleanUpExistingDiskReferences($ExistingDiskMediaLinks)
     {
         $RetryCount3 += 1
         LogMsg "ATTEMPT : $RetryCount3 : Checking if Existing Disks are attached to any VM or not.."
-        while(($RetryCount2 -le 10) -and ($falseDetections -gt 0))
+        while(($RetryCount2 -le 20) -and ($falseDetections -gt 0))
         {
             $disksToBreakRefrences = @()
             $UnableToDetachDisks =  @()
