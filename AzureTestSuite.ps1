@@ -163,6 +163,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 						$testCycle.emailSummary += "	$($currentTestData.testName) : $testResult <br />"
 						$testCycle.htmlSummary += "<tr><td>$($currentTestData.testName) - Execution Time  : </td><td> $testRunDuration min</td></tr>"
 						$testResultRow = ""
+						LogMsg "~~~~~~~~~~~~~~~TEST END : $($currentTestData.testName)~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 					}
 					catch
 					{
@@ -174,22 +175,23 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 					{
 						$testSuiteResultDetails.totalPassTc = $testSuiteResultDetails.totalPassTc +1
 						$testResultRow = "<span style='color:green;font-weight:bolder'>PASS</span>"
-						FnishLogTestCase $testcase
+						FinishLogTestCase $testcase
 					}
 					elseif($testResult -imatch "FAIL")
 					{
 						$testSuiteResultDetails.totalFailTc = $testSuiteResultDetails.totalFailTc +1
 						$testResultRow = "<span style='color:red;font-weight:bolder'>FAIL</span>"
-						FnishLogTestCase $testcase "FAIL" "$($test.Name) fail"
+						$caseLog = Get-Content -Raw $testCaseLogFile
+						FinishLogTestCase $testcase "FAIL" "$($test.Name) failed." $caseLog
 					}
 					elseif($testResult -imatch "ABORTED")
 					{
 						$testSuiteResultDetails.totalAbortedTc = $testSuiteResultDetails.totalAbortedTc +1
 						$testResultRow = "<span style='background-color:yellow;font-weight:bolder'>ABORT</span>"
-						FnishLogTestCase $testcase "ERROR" "$($test.Name) abort"
+						$caseLog = Get-Content -Raw $testCaseLogFile
+						FinishLogTestCase $testcase "ERROR" "$($test.Name) is aborted." $caseLog
 					}
 					$testCycle.htmlSummary += "<tr><td>	$($currentTestData.testName) </td><td> $testResultRow </td></tr>"
-		  			LogMsg "~~~~~~~~~~~~~~~TEST END : $($currentTestData.testName)~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 				}
 				else
 				{
@@ -222,17 +224,19 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 					if($testResult[0] -imatch "PASS")
 					{
 						$testSuiteResultDetails.totalPassTc = $testSuiteResultDetails.totalPassTc +1
-						FnishLogTestCase $testcase
+						FinishLogTestCase $testcase
 					}
 					elseif($testResult[0] -imatch "FAIL")
 					{
 						$testSuiteResultDetails.totalFailTc = $testSuiteResultDetails.totalFailTc +1
-						FnishLogTestCase $testcase "FAIL" "$($test.Name) fail"
+						$caseLog = Get-Content -Raw $testCaseLogFile
+						FinishLogTestCase $testcase "FAIL" "$($test.Name) failed." $caseLog
 					}
 					elseif($testResult[0] -imatch "ABORTED")
 					{
 						$testSuiteResultDetails.totalAbortedTc = $testSuiteResultDetails.totalAbortedTc +1
-						FnishLogTestCase $testcase "ERROR" "$($test.Name) abort"
+						$caseLog = Get-Content -Raw $testCaseLogFile
+						FinishLogTestCase $testcase "ERROR" "$($test.Name) is aborted." $caseLog
 					}
 				} 
 				
