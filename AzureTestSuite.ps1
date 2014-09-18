@@ -181,14 +181,14 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 						$testSuiteResultDetails.totalFailTc = $testSuiteResultDetails.totalFailTc +1
 						$testResultRow = "<span style='color:red;font-weight:bolder'>FAIL</span>"
 						$caseLog = Get-Content $testCaseLogFile
-						FinishLogTestCase $testcase "FAIL" $caseLog
+						FinishLogTestCase $testcase "FAIL" "$testcase failed." $caseLog
 					}
 					elseif($testResult -imatch "ABORTED")
 					{
 						$testSuiteResultDetails.totalAbortedTc = $testSuiteResultDetails.totalAbortedTc +1
 						$testResultRow = "<span style='background-color:yellow;font-weight:bolder'>ABORT</span>"
 						$caseLog = Get-Content $testCaseLogFile
-						FinishLogTestCase $testcase "ERROR" $caseLog
+						FinishLogTestCase $testcase "ERROR" "$testcase is aborted." $caseLog
 					}
 					$testCycle.htmlSummary += "<tr><td>	$($currentTestData.testName) </td><td> $testResultRow </td></tr>"
 		  			LogMsg "~~~~~~~~~~~~~~~TEST END : $($currentTestData.testName)~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -230,13 +230,13 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 					{
 						$testSuiteResultDetails.totalFailTc = $testSuiteResultDetails.totalFailTc +1
 						$caseLog = Get-Content $testCaseLogFile
-						FinishLogTestCase $testcase "FAIL" $caseLog
+						FinishLogTestCase $testcase "FAIL" "$testcase failed." $caseLog
 					}
 					elseif($testResult[0] -imatch "ABORTED")
 					{
 						$testSuiteResultDetails.totalAbortedTc = $testSuiteResultDetails.totalAbortedTc +1
 						$caseLog = Get-Content $testCaseLogFile
-						FinishLogTestCase $testcase "ERROR" $caseLog
+						FinishLogTestCase $testcase "ERROR" "$testcase is aborted." $caseLog
 					}
 				} 
 				
