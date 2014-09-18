@@ -180,14 +180,14 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 					{
 						$testSuiteResultDetails.totalFailTc = $testSuiteResultDetails.totalFailTc +1
 						$testResultRow = "<span style='color:red;font-weight:bolder'>FAIL</span>"
-						$caseLog = (Get-Content -Raw $testCaseLogFile).Replace("`r`n", "<br/>").Replace("`n", "<br/>")
+						$caseLog = (Get-Content -Raw $testCaseLogFile).Replace("`r`n", "&lt;br/&gt;").Replace("`n", "&lt;br/&gt;")
 						FinishLogTestCase $testcase "FAIL" "$($test.Name) failed." $caseLog
 					}
 					elseif($testResult -imatch "ABORTED")
 					{
 						$testSuiteResultDetails.totalAbortedTc = $testSuiteResultDetails.totalAbortedTc +1
 						$testResultRow = "<span style='background-color:yellow;font-weight:bolder'>ABORT</span>"
-						$caseLog = (Get-Content -Raw $testCaseLogFile).Replace("`r`n", "<br/>").Replace("`n", "<br/>")
+						$caseLog = (Get-Content -Raw $testCaseLogFile).Replace("`r`n", "&lt;br/&gt;").Replace("`n", "&lt;br/&gt;")
 						FinishLogTestCase $testcase "ERROR" "$($test.Name) is aborted." $caseLog
 					}
 					$testCycle.htmlSummary += "<tr><td>	$($currentTestData.testName) </td><td> $testResultRow </td></tr>"
@@ -229,13 +229,13 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 					elseif($testResult[0] -imatch "FAIL")
 					{
 						$testSuiteResultDetails.totalFailTc = $testSuiteResultDetails.totalFailTc +1
-						$caseLog = (Get-Content -Raw $testCaseLogFile).Replace("`r`n", "<br/>").Replace("`n", "<br/>")
+						$caseLog = (Get-Content -Raw $testCaseLogFile).Replace("`r`n", "&lt;br/&gt;").Replace("`n", "&lt;br/&gt;")
 						FinishLogTestCase $testcase "FAIL" "$($test.Name) failed." $caseLog
 					}
 					elseif($testResult[0] -imatch "ABORTED")
 					{
 						$testSuiteResultDetails.totalAbortedTc = $testSuiteResultDetails.totalAbortedTc +1
-						$caseLog = (Get-Content -Raw $testCaseLogFile).Replace("`r`n", "<br/>").Replace("`n", "<br/>")
+						$caseLog = (Get-Content -Raw $testCaseLogFile).Replace("`r`n", "&lt;br/&gt;").Replace("`n", "&lt;br/&gt;")
 						FinishLogTestCase $testcase "ERROR" "$($test.Name) is aborted." $caseLog
 					}
 				} 
