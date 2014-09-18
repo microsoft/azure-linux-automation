@@ -9,23 +9,23 @@ Example:
 	$testsuite = StartLogTestSuite "CloudTesting"
 
 	$testcase = StartLogTestCase $testsuite "BVT" "CloudTesting.BVT"
-	FnishLogTestCase $testcase
+	FinishLogTestCase $testcase
 
 	$testcase = StartLogTestCase $testsuite "NETWORK" "CloudTesting.NETWORK"
-	FnishLogTestCase $testcase "FAIL" "NETWORK fail"
+	FinishLogTestCase $testcase "FAIL" "NETWORK fail"
 
 	$testcase = StartLogTestCase $testsuite "VNET" "CloudTesting.VNET"
-	FnishLogTestCase $testcase "ERROR" "VNET error"
+	FinishLogTestCase $testcase "ERROR" "VNET error"
 
 	FinishLogTestSuite($testsuite)
 
 	$testsuite = StartLogTestSuite "FCTesting"
 
 	$testcase = StartLogTestCase $testsuite "BVT" "FCTesting.BVT"
-	FnishLogTestCase $testcase
+	FinishLogTestCase $testcase
 
 	$testcase = StartLogTestCase $testsuite "NEGATIVE" "FCTesting.NEGATIVE"
-	FnishLogTestCase $testcase "FAIL" "NEGATIVE fail"
+	FinishLogTestCase $testcase "FAIL" "NEGATIVE fail"
 
 	FinishLogTestSuite($testsuite)
 
@@ -150,7 +150,7 @@ Function StartLogTestCase([object]$testsuite, [string]$caseName, [string]$classN
 	return $testcase
 }
 
-Function FnishLogTestCase([object]$testcase, [string]$result="PASS", [string]$message="")
+Function FinishLogTestCase([object]$testcase, [string]$result="PASS", [string]$message="")
 {
 	if(!$global:isGenerateJunitReport)
 	{
