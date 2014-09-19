@@ -36,16 +36,16 @@ report.xml:
 	  <testsuite name="CloudTesting" timestamp="2014-07-11T06:37:24" tests="3" failures="1" errors="1" time="0.04">
 		<testcase name="BVT" classname="CloudTesting.BVT" time="0" />
 		<testcase name="NETWORK" classname="CloudTesting.NETWORK" time="0">
-		  <failure message="NETWORK fail">Stack trace: XXX</failure>
+		  <failure message="NETWORK fail"><![CDATA[Stack trace: XXX]]></failure>
 		</testcase>
 		<testcase name="VNET" classname="CloudTesting.VNET" time="0">
-		  <error message="VNET error">Stack trace: XXX</error>
+		  <error message="VNET error"><![CDATA[Stack trace: XXX]]></error>
 		</testcase>
 	  </testsuite>
 	  <testsuite name="FCTesting" timestamp="2014-07-11T06:37:24" tests="2" failures="1" errors="0" time="0.03">
 		<testcase name="BVT" classname="FCTesting.BVT" time="0" />
 		<testcase name="NEGATIVE" classname="FCTesting.NEGATIVE" time="0">
-		  <failure message="NEGATIVE fail">Stack trace: XXX</failure>
+		  <failure message="NEGATIVE fail"><![CDATA[Stack trace: XXX]]></failure>
 		</testcase>
 	  </testsuite>
 	</testsuites>
@@ -163,7 +163,7 @@ Function FinishLogTestCase([object]$testcase, [string]$result="PASS", [string]$m
 	if ($result -eq "FAIL")
 	{
 		$newChildElement = $global:junitReport.CreateElement("failure")
-		$newChildElement.InnerText = $detail
+		$newChildElement.InnerText = "<![CDATA[$detail]]>"
 		$newChildElement.SetAttribute("message", $message)
 		$testcase.testcaseNode.AppendChild($newChildElement)
 		
@@ -173,7 +173,7 @@ Function FinishLogTestCase([object]$testcase, [string]$result="PASS", [string]$m
 	if ($result -eq "ERROR")
 	{
 		$newChildElement = $global:junitReport.CreateElement("error")
-		$newChildElement.InnerText = $message
+		$newChildElement.InnerText = "<![CDATA[$detail]]>"
 		$newChildElement.SetAttribute("message", $message)
 		$testcase.testcaseNode.AppendChild($newChildElement)
 		
