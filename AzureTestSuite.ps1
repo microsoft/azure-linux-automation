@@ -163,6 +163,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 						$testCycle.emailSummary += "	$($currentTestData.testName) : $testResult <br />"
 						$testCycle.htmlSummary += "<tr><td>$($currentTestData.testName) - Execution Time  : </td><td> $testRunDuration min</td></tr>"
 						$testResultRow = ""
+						LogMsg "~~~~~~~~~~~~~~~TEST END : $($currentTestData.testName)~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 					}
 					catch
 					{
@@ -191,7 +192,6 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 						FinishLogTestCase $testcase "ERROR" "$($test.Name) is aborted." $caseLog
 					}
 					$testCycle.htmlSummary += "<tr><td>	$($currentTestData.testName) </td><td> $testResultRow </td></tr>"
-		  			LogMsg "~~~~~~~~~~~~~~~TEST END : $($currentTestData.testName)~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 				}
 				else
 				{
