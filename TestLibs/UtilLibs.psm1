@@ -163,7 +163,7 @@ Function FinishLogTestCase([object]$testcase, [string]$result="PASS", [string]$m
 	if ($result -eq "FAIL")
 	{
 		$newChildElement = $global:junitReport.CreateElement("failure")
-		$newChildElement.InnerText = "<![CDATA[$detail]]>"
+		$newChildElement.InnerText = $detail
 		$newChildElement.SetAttribute("message", $message)
 		$testcase.testcaseNode.AppendChild($newChildElement)
 		
@@ -173,7 +173,7 @@ Function FinishLogTestCase([object]$testcase, [string]$result="PASS", [string]$m
 	if ($result -eq "ERROR")
 	{
 		$newChildElement = $global:junitReport.CreateElement("error")
-		$newChildElement.InnerText = "<![CDATA[$detail]]>"
+		$newChildElement.InnerText = $detail
 		$newChildElement.SetAttribute("message", $message)
 		$testcase.testcaseNode.AppendChild($newChildElement)
 		
