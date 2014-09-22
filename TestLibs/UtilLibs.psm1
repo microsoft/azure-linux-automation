@@ -9,23 +9,23 @@ Example:
 	$testsuite = StartLogTestSuite "CloudTesting"
 
 	$testcase = StartLogTestCase $testsuite "BVT" "CloudTesting.BVT"
-	FnishLogTestCase $testcase
+	FinishLogTestCase $testcase
 
 	$testcase = StartLogTestCase $testsuite "NETWORK" "CloudTesting.NETWORK"
-	FnishLogTestCase $testcase "FAIL" "NETWORK fail"
+	FinishLogTestCase $testcase "FAIL" "NETWORK fail" "Stack trace: XXX"
 
 	$testcase = StartLogTestCase $testsuite "VNET" "CloudTesting.VNET"
-	FnishLogTestCase $testcase "ERROR" "VNET error"
+	FinishLogTestCase $testcase "ERROR" "VNET error" "Stack trace: XXX"
 
 	FinishLogTestSuite($testsuite)
 
 	$testsuite = StartLogTestSuite "FCTesting"
 
 	$testcase = StartLogTestCase $testsuite "BVT" "FCTesting.BVT"
-	FnishLogTestCase $testcase
+	FinishLogTestCase $testcase
 
 	$testcase = StartLogTestCase $testsuite "NEGATIVE" "FCTesting.NEGATIVE"
-	FnishLogTestCase $testcase "FAIL" "NEGATIVE fail"
+	FinishLogTestCase $testcase "FAIL" "NEGATIVE fail" "Stack trace: XXX"
 
 	FinishLogTestSuite($testsuite)
 
@@ -36,16 +36,16 @@ report.xml:
 	  <testsuite name="CloudTesting" timestamp="2014-07-11T06:37:24" tests="3" failures="1" errors="1" time="0.04">
 		<testcase name="BVT" classname="CloudTesting.BVT" time="0" />
 		<testcase name="NETWORK" classname="CloudTesting.NETWORK" time="0">
-		  <failure message="NETWORK fail">NETWORK fail</failure>
+		  <failure message="NETWORK fail">Stack trace: XXX</failure>
 		</testcase>
 		<testcase name="VNET" classname="CloudTesting.VNET" time="0">
-		  <error message="VNET error">VNET error</error>
+		  <error message="VNET error">Stack trace: XXX</error>
 		</testcase>
 	  </testsuite>
 	  <testsuite name="FCTesting" timestamp="2014-07-11T06:37:24" tests="2" failures="1" errors="0" time="0.03">
 		<testcase name="BVT" classname="FCTesting.BVT" time="0" />
 		<testcase name="NEGATIVE" classname="FCTesting.NEGATIVE" time="0">
-		  <failure message="NEGATIVE fail">NEGATIVE fail</failure>
+		  <failure message="NEGATIVE fail">Stack trace: XXX</failure>
 		</testcase>
 	  </testsuite>
 	</testsuites>
@@ -150,7 +150,7 @@ Function StartLogTestCase([object]$testsuite, [string]$caseName, [string]$classN
 	return $testcase
 }
 
-Function FnishLogTestCase([object]$testcase, [string]$result="PASS", [string]$message="")
+Function FinishLogTestCase([object]$testcase, [string]$result="PASS", [string]$message="", [string]$detail="")
 {
 	if(!$global:isGenerateJunitReport)
 	{
@@ -163,7 +163,7 @@ Function FnishLogTestCase([object]$testcase, [string]$result="PASS", [string]$me
 	if ($result -eq "FAIL")
 	{
 		$newChildElement = $global:junitReport.CreateElement("failure")
-		$newChildElement.InnerText = $message
+		$newChildElement.InnerText = $detail
 		$newChildElement.SetAttribute("message", $message)
 		$testcase.testcaseNode.AppendChild($newChildElement)
 		
@@ -173,7 +173,7 @@ Function FnishLogTestCase([object]$testcase, [string]$result="PASS", [string]$me
 	if ($result -eq "ERROR")
 	{
 		$newChildElement = $global:junitReport.CreateElement("error")
-		$newChildElement.InnerText = $message
+		$newChildElement.InnerText = $detail
 		$newChildElement.SetAttribute("message", $message)
 		$testcase.testcaseNode.AppendChild($newChildElement)
 		
