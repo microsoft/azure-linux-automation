@@ -4,6 +4,13 @@ $result = ""
 $testResult = ""
 $resultArr = @()
 $passwd = $password.Replace('"','')
+$wsurl = ""
+$dturl = ""
+$dburl = ""
+$dsurl = ""
+$siegetime= $currentTestData.SiegeTime
+$siegenumofusers=$currentTestData.SiegeNumberofUsers
+$siegeResult=""
 
 Function CreateIbmTar($ip,$port)
 {
@@ -91,7 +98,7 @@ if ($isDeployed)
 				#Preparation of daytrader install xml file
 				"#all the IPs should be Internal ips `n<back_endVM_ip>$beip</back_endVM_ip>`n<front_endVM_ips>$fe1ip $fe2ip $fe3ip</front_endVM_ips>`n<username>$user</username>`n<password>$passwd</password>" > 'Daytrader_install.XML'
 				$out = RemoteCopy -uploadTo $hs1VIP -port $hs1bvmsshport -files "Daytrader_install.XML" -username $user -password $password -upload 2>&1 | Out-Null
-				Remove-Item Daytrader_install.XML
+				Remove-Item Daytrader_install.XML | Out-Null
 							
 				$out = RemoteCopy -uploadTo $hs1VIP -port $hs1bvmsshport -files $currentTestData.files -username $user -password $password -upload 2>&1 | Out-Null
 				$istarcreated = CreateIbmTar -ip $hs1VIP -port $hs1bvmsshport
@@ -137,8 +144,8 @@ if ($isDeployed)
 				Write-host ""
 				Write-host "#################################################################################################"
 			
-			#Here Daytrader setup is Executing...
-				$dtr_setup_status = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1bvmsshport -command "python $($currentTestData.testScript) $($currentTestData.E2ESetupCmdLineArgument) 2>&1 > print.log" -runAsSudo -runmaxallowedtime 9000 -ignoreLinuxExitCode 2>&1 | Out-Null
+				#Here Daytrader setup is Executing...
+				$dtr_setup_status = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1bvmsshport -command "python $($currentTestData.testScript.Split(',')[0]) $($currentTestData.E2ESetupCmdLineArgument) 2>&1 > print.log" -runAsSudo -runmaxallowedtime 9000 -ignoreLinuxExitCode 2>&1 | Out-Null
 				$out = RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/dtr_test.txt,/home/$user/logs.tar.gz" -downloadTo $LogDir -port $hs1bvmsshport -username $user -password $password 2>&1 | Out-Null
 			}
 			elseif($currentTestData.E2ESetupCmdLineArgument -imatch "singleVM_setup")
@@ -182,7 +189,7 @@ if ($isDeployed)
 				}
 				else{
 					LogMsg "HostName is not correct -- need to be set.. `n Hostname in WA Portal: $hs1HostName `n Hostname in VM (with hosname command): $HostName"
-					RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "hostname $hs1HostName" -runAsSudo 2>&1 | Out-Null
+					$out=RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "hostname $hs1HostName" -runAsSudo 2>&1 | Out-Null
 					LogMsg "Setting of correct HostName done.."
 				}
 				
@@ -194,7 +201,7 @@ if ($isDeployed)
 				Write-host ""
 				Write-host "#################################################################################################"
 				
-				$dtr_setup_status = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "python $($currentTestData.testScript) $($currentTestData.E2ESetupCmdLineArgument) 2>&1 > print.log" -runAsSudo -runmaxallowedtime 9000 -ignoreLinuxExitCode 2>&1 | Out-Null
+				$dtr_setup_status = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "python $($currentTestData.testScript.Split(',')[0]) $($currentTestData.E2ESetupCmdLineArgument) 2>&1 > print.log" -runAsSudo -runmaxallowedtime 9000 -ignoreLinuxExitCode 2>&1 | Out-Null
 				$temp = RetryOperation -operation { Restart-AzureVM -ServiceName $hs1vm1.ServiceName -Name $hs1vm1.Name -Verbose } -description "Restarting VM.." -maxRetryCount 10 -retryInterval 5
 				if ( $temp.OperationStatus -eq "Succeeded" )
 				{
@@ -214,20 +221,20 @@ if ($isDeployed)
 				$testResult="FAIL"
 				LogErr "Command line argument not properly added for Daytrader Setup, add the argument for FourVM: loadbalancer_setup, SingleVM: singleVM_setup in azure_ica_all.xml file at E2ESetupCmdLineArgument tag"
 			}
-		#Verifying Daytrader setup id completed or not
+			#Verifying Daytrader setup is completed or not
 			try
 			{
 				$out = Select-String -Simple "DTR_INSTALL_PASS"  $LogDir\dtr_test.txt
 				if($out){
-					write-host "Daytrader setup finished successfully."
+					LogMsg "Daytrader setup finished successfully."
 					$testResult="PASS"
 
 				}else{
-					write-host "Daytrader setup failed."
+					LogMsg "Daytrader setup failed."
 					$testResult="FAIL"
 				}
 			}catch{
-				 write-host "Daytrader setup failed..."
+				LogMsg "Daytrader setup failed..."
 				$testResult="FAIL"
 			}
 		}
@@ -256,30 +263,112 @@ else
 	$testResult = "Aborted"
 	$resultArr += $testResult
 }
-
+$dburl = "$dturl`/config?action=buildDB"
+$dsurl = "$dturl`/scenario"
 #Verification of Daytrader URL
 try
 {
-	Start-Sleep -s 120
+	WaitFor -seconds 120
 	$webclient = New-Object System.Net.WebClient
 	$out = $webclient.DownloadString($dturl)
     
 	if($out -imatch "DayTrader"){
-		write-host "Daytrader verification using url: $dturl success." 
+		LogMsg "Daytrader verification using url: $dturl success." 
 		$testResult="PASS"
+		LogMsg  "Open $dturl in the browser and you should be able to see the Daytrader home page."
+		#re populating the database
+		LogMsg "Re-Populating the database ..."
+		$ie = New-Object -ComObject "InternetExplorer.Application"
+		$ie.Navigate($dburl) 
+		$ie.visible = $true
+		
+		#WaitFor -seconds 60
+		LogMsg "** SIEGE TEST **"
+		LogMsg "** Deploying New VM for Siege Client **"
+		$isNewDeployed = DeployVMS -setupType $currentTestData.newsetupType -Distro $Distro -xmlConfig $xmlConfig
+		
+		if ($isNewDeployed)
+		{
+			try
+			{
+				#region Get New Deployment Information
+				$NewtestServiceData = Get-AzureService -ServiceName $isNewDeployed
+				
+				#Get VM deployed in the service..
+				$NewtestVMsinService = $NewtestServiceData | Get-AzureVM 
+				$hs2vm1 = $NewtestVMsinService
+				$hs2vm1Endpoints = $hs2vm1 | Get-AzureEndpoint
+				$hs2vm1sshport = GetPort -Endpoints $hs2vm1Endpoints -usage ssh 
+				$hs2VIP = $hs2vm1Endpoints[0].Vip
+				$hs2ServiceUrl = $hs2vm1.DNSName
+				$hs2ServiceUrl = $hs2ServiceUrl.Replace("http://","")
+				$hs2ServiceUrl = $hs2ServiceUrl.Replace("/","")
+				
+				$SiegeLogDir="$Logdir\SiegeTest"
+				mkdir $SiegeLogDir -Force | Out-Null
+				
+				if($Distro -imatch "UBUNTU")
+				{
+					$out = RemoteCopy -uploadTo $hs2VIP -port $hs2vm1sshport -files .\remote-scripts\azuremodules.py,.\remote-scripts\E2E-SIEGE-TEST.py,.\remote-scripts\Packages\siege*.deb -username $user -password $password -upload 2>&1 | Out-Null	
+				}
+				else
+				{
+					$out = RemoteCopy -uploadTo $hs2VIP -port $hs2vm1sshport -files .\remote-scripts\azuremodules.py,.\remote-scripts\E2E-SIEGE-TEST.py,.\remote-scripts\Packages\siege*.rpm -username $user -password $password -upload 2>&1 | Out-Null	
+				}		
+				LogMsg "SIEGE TEST STARTED.. with $siegetime stime and $siegenumofusers users"
+				$siege_setup_status = RunLinuxCmd -username $user -password $password -ip $hs2VIP -port $hs2vm1sshport -command "python $($currentTestData.testScript.Split(',')[1]) -u $user -p $password -l $dsurl -t $siegetime -n $siegenumofusers 2>&1 > siege_print.log" -runAsSudo -runmaxallowedtime 9000 -ignoreLinuxExitCode 2>&1 | Out-Null
+				$out = RemoteCopy -download -downloadFrom $hs2VIP -files "/home/$user/SiegeConsoleOutput.txt,/home/$user/logs.tar.gz" -downloadTo $SiegeLogDir -port $hs2vm1sshport -username $user -password $password 2>&1 | Out-Null
+				$out=Get-Content -Path $SiegeLogDir\SiegeConsoleOutput.txt | Select -Last 20 > $SiegeLogDir\SiegeResult.txt
+				$sfile=Get-Content -Path $SiegeLogDir\SiegeResult.txt 
+				
+				foreach ($line in $sfile)
+				{ 
+					if($line -imatch "Availability:")
+					{
+						LogMsg "$line"
+						if($line -imatch "99.*" -or $line -imatch "100.*" )
+						{
+							LogMsg "siege test PASS"
+							$siegeResult="PASS"
+							$metaData = "SIEGE TEST"
+							LogMsg "** SIEGE TEST END **"
+						}
+						else{
+							LogErr "siege test FAIL"
+							$siegeResult="FAIL"
+							$metaData = "SIEGE TEST"
+						}
+						break	
+					}
+					else
+					{
+						$siegeResult="Aborted"
+						$metaData = "SIEGE TEST"
+					}	
+				}
+			}
+			catch
+			{
+				$ErrorMessage =  $_.Exception.Message
+				LogMsg "EXCEPTION : $ErrorMessage"  
+				$siegeResult="Aborted"
+				$metaData = "SIEGE TEST"
+			}
+		}
     }else{
 		write-host "Daytrader verification using url: $dturl failed." 
 		$testResult="FAIL"
+		$siegeResult="Aborted"
+		$metaData = "SIEGE TEST"
     }
 }
 catch
 {
 	write-host "Daytrader verification using url: $dturl failed..." 
 	$testResult="FAIL"
+	$siegeResult="Aborted"
+	$metaData = "SIEGE TEST"
 }
-$resultArr += $testResult
-$result = $testResult
-
 if ($testResult -eq "PASS")
 {
 	Write-host "#################################################################################################"
@@ -289,5 +378,14 @@ if ($testResult -eq "PASS")
 	Write-host ""
 	Write-host "#################################################################################################"
 }
+$resultArr += $testResult
+$resultSummary +=  CreateResultSummary -testResult $testResult -metaData "DAYTRADER INSTALL" -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName # if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
+$resultArr += $siegeResult
+$resultSummary +=  CreateResultSummary -testResult $siegeResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName # if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
+$result = GetFinalResultHeader -resultarr $resultArr
+#Clean up the setup
+DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed
+DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isNewDeployed
+
 #Return the result and summery to the test suite script..
-return $result
+return $result, $resultSummary

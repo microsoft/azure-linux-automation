@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 import re
 import time
 import imp
@@ -91,12 +90,16 @@ def set_variables_OS_dependent():
 		service_command		= "service "  #space character after service is mandatory here.
 
 	# Identify the Distro to Set OS Dependent Variables
-	if (current_distro == "Oracle"):
+	if ((current_distro == "Oracle") or (current_distro == "ol")):
 		pexpect_pkg_name	= "pexpect"
 		service_httpd_name	= "httpd"
 		service_mysqld_name = "mysqld"
 		mysql_pkg_name		= "mysql-server"
 		frontend_packages_list = common_packages_list + ["mysql.x86_64","mysql-client","httpd"]
+		if(distro_version == "7" or "7.0"):
+			service_mysqld_name	= "mariadb"
+			mysql_pkg_name		= "mariadb-server"
+			frontend_packages_list = common_packages_list + ["mariadb","httpd"]
 	elif ((current_distro == "centos")):
 		pexpect_pkg_name	= "pexpect"
 		service_httpd_name	= "httpd"
@@ -175,7 +178,7 @@ def update_repos():
 	RunLog.info( "\nUpdating the repositoriy information...")
 	if ((current_distro == "ubuntu") or (current_distro == "Debian")):
 		Run("echo '"+vm_password+"' | sudo -S apt-get update")
-	elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos')):
+	elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos') or (current_distro == "ol")):
 		Run("echo '"+vm_password+"' | sudo -S yum -y update")
 	elif (current_distro == "openSUSE") or (current_distro == "SUSE Linux") or (current_distro == "sles"):
 		Run("echo '"+vm_password+"' | sudo -S zypper --non-interactive --gpg-auto-import-keys update")
@@ -199,15 +202,16 @@ def disable_iptables():
 	RunLog.info( "\n Disabling ip-tables..")
 	if (current_distro == 'ubuntu'):
 		ufw = Run ("echo '"+vm_password+"' | sudo -S ufw disable")		
-	elif(current_distro == 'rhel'):
-		cmds = ("service iptables save","service iptables stop","chkconfig iptables off","service ip6tables save","service ip6tables stop","chkconfig ip6tables off")
+	elif(current_distro == 'rhel' or current_distro == 'centos' or current_distro == "Oracle" or current_distro == "ol"):
+		cmds = ("service iptables save","service iptables stop","chkconfig iptables off","service ip6tables save","service ip6tables stop","chkconfig ip6tables off","iptables -nL" ,"systemctl stop iptables.service","systemctl disable iptables.service","systemctl stop firewalld.service","systemctl disable firewalld.service")
 		output = exec_multi_cmds_local_sudo(cmds)
-		output = Run("echo '"+vm_password+"' | sudo -S service iptables status")
+		ioutput = Run("echo '"+vm_password+"' | sudo -S service iptables status")
+		foutput = Run("echo '"+vm_password+"' | sudo -S service firewalld status")
 		
-		if(output.find('dead') != -1):
-			RunLog.info( "Diasabling iptables..[done]")
+		if(ioutput.find('dead') != -1 or foutput.find('dead') != -1):
+			RunLog.info( "Diasabling iptables and firewalls..[done]")
 		else:
-			RunLog.info( "Diasabling iptables..[failed]")
+			RunLog.info( "Diasabling iptables and firewalls..[failed]")
 	elif((current_distro == 'SUSE Linux')or(current_distro == 'sles')):
 		cmds = ("/sbin/yast2 firewall startup manual","/sbin/rcSuSEfirewall2 stop","chkconfig SuSEfirewall2_setup off")
 		output = exec_multi_cmds_local_sudo(cmds)
@@ -389,7 +393,7 @@ def install_package(package):
 	RunLog.info( "\nInstall_package: "+package)
 	if ((current_distro == "ubuntu") or (current_distro == "Debian")):
 		return aptget_package_install(package)
-	elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos')):
+	elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos')or (current_distro == "ol")):
 		return yum_package_install(package)
 	elif (current_distro == "SUSE Linux") or (current_distro == "openSUSE") or (current_distro == "sles"):
 		return zypper_package_install(package)
@@ -402,7 +406,7 @@ def install_package_file(file_path):
 	RunLog.info( "\n Install_package_file: "+file_path)
 	if ((current_distro == "ubuntu") or (current_distro == "Debian")):
 		return install_deb(file_path)
-	elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos')):
+	elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos')or (current_distro == "ol")):
 		return install_rpm(file_path)
 	elif (current_distro == "SUSE Linux") or (current_distro == "openSUSE") or (current_distro == "sles"):
 		return install_rpm(file_path)
@@ -415,7 +419,7 @@ def uninstall_package(package):
 	RunLog.info( "\nUninstall package: "+package)
 	if ((current_distro == "ubuntu") or (current_distro == "Debian")):
 		return aptget_package_uninstall(package)
-	elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos')):
+	elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos')or (current_distro == "ol")):
 		return yum_package_uninstall(package)
 	elif (current_distro == "SUSE Linux") or (current_distro == "openSUSE") or (current_distro == "sles"):
 		return zypper_package_uninstall(package)
@@ -1076,6 +1080,11 @@ def RunTest():
 					RunLog.info(put_file_sftp(front_endVM_username, front_endVM_password, ip, "Daytrader_install.XML"))
 					RunLog.info( "Copying "+"IBMWebSphere.tar.gz"+" to "+ip)
 					RunLog.info( put_file_sftp(front_endVM_username, front_endVM_password, ip, "IBMWebSphere.tar.gz"))
+					if(current_distro == 'sles'):
+						RunLog.info( "Copying "+"Python pexpect rpm"+" to "+ip)
+						RunLog.info( put_file_sftp(front_endVM_username, front_endVM_password, ip, "python-pexpect-3.1-1.1.noarch.rpm"))
+					else:
+						RunLog.info( "Python pexpect is available in repository ")
 					RunLog.info( exec_cmd_remote_ssh(front_endVM_username, front_endVM_password, ip, "mv IBMWebSphere.tar.gz /tmp/IBMWebSphere.tar.gz"))
 					RunLog.info( "\nStarting frontend VM setup on "+ip)
 					RunLog.info( exec_cmd_remote_ssh(front_endVM_username, front_endVM_password, ip, "python "+file_name+" frontend_setup "+ back_endVM_ip))
@@ -1087,7 +1096,7 @@ def RunTest():
 			if len(sys.argv) == 3:
 				daytrader_db_hostname = sys.argv[2]
 				setup_Daytrader_E2ELoadBalance_frontend()
-#				#Keeping the server ins the startup and rebooting the VM.
+				#Keeping the server ins the startup and rebooting the VM.
 				output = Run('cat '+startup_file+'   | grep "^exit"')				
 				if "exit" in output:					
 					output = exec_multi_cmds_local_sudo(("sed -i 's_^exit 0_sh /opt/IBM/WebSphere/AppServerCommunityEdition/bin/startup.sh\\nexit 0_' "+startup_file,"\n"))					
@@ -1135,8 +1144,7 @@ except ImportError:
 		if(pythonversion.find('2.7.*')):
 			if((current_distro == "sles") and (distro_version == "12")):
 				RunLog.info( "Trying to install pexpect module using rpm package")
-				Run("echo '"+vm_password+"' | sudo -S wget ftp://rpmfind.net/linux/opensuse/ports/aarch64/factory/repo/oss/suse/noarch/python-pexpect-3.1-1.1.noarch.rpm")
-				out = Run("echo '"+vm_password+"' | sudo -S zypper install -y python-pexpect-3.1-1.1.noarch.rpm")								
+				out = Run("echo '"+vm_password+"' | sudo -S rpm -ivh python-pexpect-3.1-1.1.noarch.rpm")								
 				if(out.find('done')!= -1):
 					RunLog.info( " pexpect module rpm installation done..")
 				else:
