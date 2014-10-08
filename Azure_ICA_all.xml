@@ -2257,6 +2257,37 @@
 			<E2ESetupCmdLineArgument>loadbalancer_setup</E2ESetupCmdLineArgument>
 			<Priority>P0</Priority>
 		</test>
+		<!-- E2E DISK TEST DEFINITIONS -->
+		<test>
+			<testName>E2E-RAID0-DISK-TEST</testName>
+			<testScript>CreateDiskGroup.py</testScript>
+			<testScriptps1>E2E-DISK-RAID0-LVM-TEST.ps1</testScriptps1>
+			<files>remote-scripts\temp.txt,remote-scripts\azuremodules.py,remote-scripts\DoIOTest.py,remote-scripts\CreateDiskGroup.py</files>
+			<setupType></setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<TestID></TestID>
+			<!--ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM -->
+			<SubtestValues>MediumVM</SubtestValues>
+			<DiskType>RAID</DiskType>
+			<DiskFormat>ext4</DiskFormat>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>E2E-LVM-DISK-TEST</testName>
+			<testScript>CreateDiskGroup.py</testScript>
+			<testScriptps1>E2E-DISK-RAID0-LVM-TEST.ps1</testScriptps1>
+			<files>remote-scripts\temp.txt, remote-scripts\azuremodules.py,remote-scripts\DoIOTest.py,remote-scripts\CreateDiskGroup.py</files>
+			<setupType></setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<TestID></TestID>
+			<!--ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM -->
+			<SubtestValues>MediumVM</SubtestValues>
+			<DiskType>LVM</DiskType>
+			<DiskFormat>ext4</DiskFormat>
+			<Priority>P0</Priority>
+		</test>
 
 		<!-- E2E FEATURE TEST DEFINITIONS -->
 		<test>
@@ -2972,6 +3003,17 @@
 				<Name>E2E-WORDPRESS-FOUR-VM-SETUP</Name>
 			</test>
 		</Cycle>
+		
+		<Cycle>
+			<cycleName>E2E-DISK</cycleName>
+			<test>
+				<Name>E2E-RAID0-DISK-TEST</Name>
+			</test>
+			<test>
+				<Name>E2E-LVM-DISK-TEST</Name>
+			</test>
+		</Cycle>
+		
 		<Cycle>
 			<cycleName>E2E-1</cycleName>
 			<!-- We have separate cycles for Time Synch, as each time sync test takes 2 days for execution -->
