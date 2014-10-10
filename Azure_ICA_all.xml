@@ -2203,7 +2203,7 @@
 			<testName>E2E-WORDPRESS-SINGLE-VM-SETUP</testName>
 			<testScript>E2E-WORDPRESS-SETUP.py</testScript>
 			<testScriptps1>E2E-WORDPRESS-SETUP.ps1</testScriptps1>
-			<files>remote-scripts\wordpress.zip, remote-scripts\Wordpress.DDL, remote-scripts\E2E-WORDPRESS-SETUP.py, remote-scripts\azuremodules.py</files>
+			<files>remote-scripts\Packages\wordpress.zip, remote-scripts\Packages\Wordpress.DDL, remote-scripts\E2E-WORDPRESS-SETUP.py, remote-scripts\azuremodules.py</files>
 			<setupType>E2ESingleVM</setupType>
 			<TestType></TestType>
 			<E2ESetupCmdLineArgument>singleVM_setup</E2ESetupCmdLineArgument>
@@ -2213,23 +2213,26 @@
 		</test>
 		<test>
 			<testName>E2E-DAYTRADER-SINGLE-VM-SETUP</testName>
-			<testScript>E2E-DAYTRADER-SETUP.py</testScript>
+			<testScript>E2E-DAYTRADER-SETUP.py,E2E-SIEGE-TEST.py</testScript>
 			<testScriptPs1>E2E-DAYTRADER-SETUP.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\E2E-DAYTRADER-SETUP.py</files>
+			<files>remote-scripts\azuremodules.py,remote-scripts\E2E-DAYTRADER-SETUP.py,remote-scripts\Packages\IBMWebSphere\daytrader.tar.gz,remote-scripts\Packages\IBMWebSphere\wasce_setup-2.1.1.6-unix.bin,remote-scripts\Packages\python-pexpect-3.1-1.1.noarch.rpm</files>
 			<setupType>E2ESingleVM</setupType>
+			<newsetupType>PublicEndpoint</newsetupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID></TestID>
-			<!-- Pass the command line argument for E2E Java Setup (either loadbalancer_setup or loadbalancer_setup) -->
+			<SubtestValues>siege</SubtestValues>
+			<!--You must provide siege time with time format 's' for seconds, 'm' for minutes and 'h' for hours-->
+			<SiegeTime>120m</SiegeTime>
+			<SiegeNumberofUsers>64</SiegeNumberofUsers>
 			<E2ESetupCmdLineArgument>singleVM_setup</E2ESetupCmdLineArgument>
 			<Priority>P0</Priority>
 		</test>
-	
 		<test>
 			<testName>E2E-WORDPRESS-FOUR-VM-SETUP</testName>
 			<testScript>E2E-WORDPRESS-SETUP.py</testScript>
 			<testScriptps1>E2E-WORDPRESS-SETUP.ps1</testScriptps1>
-			<files>remote-scripts\wordpress.zip, remote-scripts\Wordpress.DDL, remote-scripts\E2E-WORDPRESS-SETUP.py, remote-scripts\azuremodules.py</files>
+			<files>remote-scripts\Packages\wordpress.zip, remote-scripts\Packages\Wordpress.DDL, remote-scripts\E2E-WORDPRESS-SETUP.py, remote-scripts\azuremodules.py</files>
 			<setupType>E2EFourVM</setupType>
 			<TestType></TestType>
 			<E2ESetupCmdLineArgument>loadbalancer_setup</E2ESetupCmdLineArgument>
@@ -2237,18 +2240,52 @@
 			<TestID></TestID>
 			<Priority>P0</Priority>
 		</test>
-	
 		<test>
 			<testName>E2E-DAYTRADER-FOUR-VM-SETUP</testName>
-			<testScript>E2E-DAYTRADER-SETUP.py</testScript>
+			<testScript>E2E-DAYTRADER-SETUP.py,E2E-SIEGE-TEST.py</testScript>
 			<testScriptPs1>E2E-DAYTRADER-SETUP.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\E2E-DAYTRADER-SETUP.py</files>
+			<files>remote-scripts\azuremodules.py,remote-scripts\E2E-DAYTRADER-SETUP.py,remote-scripts\Packages\IBMWebSphere\daytrader.tar.gz,remote-scripts\Packages\IBMWebSphere\wasce_setup-2.1.1.6-unix.bin,remote-scripts\Packages\python-pexpect-3.1-1.1.noarch.rpm</files>
 			<setupType>E2EFourVM</setupType>
+			<newsetupType>PublicEndpoint</newsetupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID></TestID>
-			<!-- Pass the command line argument for E2E Java Setup (either loadbalancer_setup or loadbalancer_setup) -->
+			<SubtestValues>siege</SubtestValues>
+			<!--You must provide siege time with time format 's' for seconds, 'm' for minutes and 'h' for hours-->
+			<SiegeTime>120m</SiegeTime>
+			<SiegeNumberofUsers>64</SiegeNumberofUsers>
 			<E2ESetupCmdLineArgument>loadbalancer_setup</E2ESetupCmdLineArgument>
+			<Priority>P0</Priority>
+		</test>
+		<!-- E2E DISK TEST DEFINITIONS -->
+		<test>
+			<testName>E2E-RAID0-DISK-TEST</testName>
+			<testScript>CreateDiskGroup.py</testScript>
+			<testScriptps1>E2E-DISK-RAID0-LVM-TEST.ps1</testScriptps1>
+			<files>remote-scripts\temp.txt,remote-scripts\azuremodules.py,remote-scripts\DoIOTest.py,remote-scripts\CreateDiskGroup.py</files>
+			<setupType></setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<TestID></TestID>
+			<!--ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM -->
+			<SubtestValues>MediumVM</SubtestValues>
+			<DiskType>RAID</DiskType>
+			<DiskFormat>ext4</DiskFormat>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>E2E-LVM-DISK-TEST</testName>
+			<testScript>CreateDiskGroup.py</testScript>
+			<testScriptps1>E2E-DISK-RAID0-LVM-TEST.ps1</testScriptps1>
+			<files>remote-scripts\temp.txt, remote-scripts\azuremodules.py,remote-scripts\DoIOTest.py,remote-scripts\CreateDiskGroup.py</files>
+			<setupType></setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<TestID></TestID>
+			<!--ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM -->
+			<SubtestValues>MediumVM</SubtestValues>
+			<DiskType>LVM</DiskType>
+			<DiskFormat>ext4</DiskFormat>
 			<Priority>P0</Priority>
 		</test>
 
@@ -2966,6 +3003,17 @@
 				<Name>E2E-WORDPRESS-FOUR-VM-SETUP</Name>
 			</test>
 		</Cycle>
+		
+		<Cycle>
+			<cycleName>E2E-DISK</cycleName>
+			<test>
+				<Name>E2E-RAID0-DISK-TEST</Name>
+			</test>
+			<test>
+				<Name>E2E-LVM-DISK-TEST</Name>
+			</test>
+		</Cycle>
+		
 		<Cycle>
 			<cycleName>E2E-1</cycleName>
 			<!-- We have separate cycles for Time Synch, as each time sync test takes 2 days for execution -->
