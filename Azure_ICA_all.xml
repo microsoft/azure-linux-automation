@@ -351,33 +351,6 @@
 						<DataDisk></DataDisk>
 					</VirtualMachine>
 				</HostedService>
-				<HostedService>
-					<VirtualMachine>
-						<state></state>
-						<InstanceSize>Small</InstanceSize>
-						<EndPoints>
-							<Name>SSH</Name>
-							<Protocol>tcp</Protocol>
-							<LocalPort>22</LocalPort>
-							<PublicPort>22</PublicPort>
-						</EndPoints>
-						<EndPoints>
-							<Name>TCPtest</Name>
-							<Protocol>tcp</Protocol>
-							<LocalPort>750</LocalPort>
-							<PublicPort>750</PublicPort>
-							<LoadBalanced>False</LoadBalanced>
-						</EndPoints>
-						<EndPoints>
-							<Name>UDPtest</Name>
-							<Protocol>udp</Protocol>
-							<LocalPort>990</LocalPort>
-							<PublicPort>990</PublicPort>
-							<LoadBalanced>False</LoadBalanced>
-						</EndPoints>
-						<DataDisk></DataDisk>
-					</VirtualMachine>
-				</HostedService>								
 			</IEndpointSingleHS>
 
 
