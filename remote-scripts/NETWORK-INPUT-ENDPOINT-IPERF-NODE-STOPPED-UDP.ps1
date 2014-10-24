@@ -5,26 +5,34 @@ $resultArr = @()
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
-	$hs1Name = $isDeployed
+	$hsNames = $isDeployed.Split("^")
+	$hs1Name = $hsNames[0]
+	$hs2Name = $hsNames[1]
 	$testServiceData = Get-AzureService -ServiceName $hs1Name
-
-    #Get VMs deployed in the service..
+	$dtapServiceData = Get-AzureService -ServiceName $hs2Name
+	#Extract Test VM Data
 	$testVMsinService = $testServiceData | Get-AzureVM
-
 	$hs1vm1 = $testVMsinService
 	$hs1vm1Endpoints = $hs1vm1 | Get-AzureEndpoint
-
 	$hs1VIP = $hs1vm1Endpoints[0].Vip
 	$hs1ServiceUrl = $hs1vm1.DNSName
 	$hs1ServiceUrl = $hs1ServiceUrl.Replace("http://","")
 	$hs1ServiceUrl = $hs1ServiceUrl.Replace("/","")
-
 	$hs1vm1tcpport = GetPort -Endpoints $hs1vm1Endpoints -usage tcp
-	$dtapServerTcpport = "750"
 	$hs1vm1udpport = GetPort -Endpoints $hs1vm1Endpoints -usage udp
-	$dtapServerUdpport = "990"
 	$hs1vm1sshport = GetPort -Endpoints $hs1vm1Endpoints -usage ssh	
-	$dtapServerSshport = "22"
+	#Extract DTAP VM data
+   	$dtapServer = $dtapServiceData | Get-AzureVM
+	$dtapServerEndpoints = $dtapServer | Get-AzureEndpoint
+	$dtapServerIp = $dtapServerEndpoints[0].Vip
+	$dtapServerUrl = $dtapServer.DNSName
+	$dtapServerUrl = $dtapServerUrl.Replace("http://","")
+	$dtapServerUrl = $dtapServerUrl.Replace("/","")
+	$dtapServerTcpport = GetPort -Endpoints $dtapServerEndpoints -usage tcp
+	$dtapServerUdpport = GetPort -Endpoints $dtapServerEndpoints -usage udp
+	$dtapServerSshport = GetPort -Endpoints $dtapServerEndpoints -usage ssh
+	LogMsg "Test Machine : $hs1VIP : $hs1vm1sshport"
+	LogMsg "DTAP Machine : $dtapServerIp : $hs1vm1sshport"
 
 	$server = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -nodeTcpPort $hs1vm1tcpport  -nodeIperfCmd $cmd1 -user $user -password $password -files $currentTestData.files -logDir $LogDir
 	$client = CreateIperfNode -nodeIp $dtapServerIp -nodeSshPort $dtapServerSshport  -nodeTcpPort $dtapServerTcpport -nodeIperfCmd $cmd2 -user $user -password $password -files $currentTestData.files -logDir $LogDir
@@ -33,7 +41,7 @@ if ($isDeployed)
 	{
 		try
 		{
-            $testResult = $null
+			$testResult = $null
 			mkdir $LogDir\$mode -ErrorAction SilentlyContinue | out-null
 			$server.cmd ="./start-server.py -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log -f"
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
@@ -63,16 +71,16 @@ if ($isDeployed)
 			if($isServerStarted -eq $true)
 			{
 				LogMsg "iperf Server started successfully. Listening TCP port $($client.tcpPort) ..."
-                
-                #>>>On confirmation, of server starting, let's start iperf client...
+				
+				#>>>On confirmation, of server starting, let's start iperf client...
 				StartIperfClient $client
-                $suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo ClientStopped1 >> iperf-client.txt" -runAsSudo
+				$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo ClientStopped1 >> iperf-client.txt" -runAsSudo
 				$isClientStarted = IsIperfClientStarted $client -beginningText ClientStarted1 -endText ClientStopped1
 
 				if($isClientStarted -eq $true)
 				{
 					$serverState = IsIperfServerRunning $server
-                 
+				 
 					if($serverState -eq $true)
 					{
 						LogMsg "Stopping Server.."
@@ -82,7 +90,7 @@ if ($isDeployed)
 						$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "./stop-client.py" -runAsSudo
 						
 
-                        #Step 2. Do not start iperf server and start the client..
+						#Step 2. Do not start iperf server and start the client..
 						LogMsg "Starting the client without starting the server.."
 						$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo ClientStarted2 >> iperf-client.txt" -runAsSudo
 
@@ -90,7 +98,7 @@ if ($isDeployed)
 						$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "./stop-client.py" -runAsSudo
 						$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo ClientStopped2 >> iperf-client.txt" -runAsSudo
 						$isClientStarted = IsIperfClientStarted $client -beginningText ClientStarted2 -endText ClientStopped2
-                        Write-Host "isClientConnecte : $isClientStarted"
+						Write-Host "isClientConnecte : $isClientStarted"
 						if($isClientStarted -eq $true)
 						{
 							LogMsg "Becasue of UDP test, client shows that it is connected to server even thought not connected."
@@ -101,11 +109,11 @@ if ($isDeployed)
 							if($isServerStarted -eq $true)
 							{
 								LogMsg "iperf Server started successfully. Listening TCP port $($client.tcpPort) ..."
-                                
-                                #On confirmation, of server starting, let's start iperf client...
+								
+								#On confirmation, of server starting, let's start iperf client...
 								$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo ClientStarted3 >> iperf-client.txt" -runAsSudo
 								StartIperfClient $client
-                                $suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo ClientStopped3 >> iperf-client.txt" -runAsSudo
+								$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo ClientStopped3 >> iperf-client.txt" -runAsSudo
 								$isClientStarted = IsIperfClientStarted $client -beginningText ClientStarted3 -endText ClientStopped3
 								if($isClientStarted -eq $true)
 								{
@@ -163,7 +171,7 @@ if ($isDeployed)
 				LogMsg "Unable to start iperf-server. Aborting test."
 				$testResult = "Aborted"
 			}
-            LogMsg "$($currentTestData.testName) : $mode : $testResult"
+			LogMsg "$($currentTestData.testName) : $mode : $testResult"
 		}
 		catch
 		{

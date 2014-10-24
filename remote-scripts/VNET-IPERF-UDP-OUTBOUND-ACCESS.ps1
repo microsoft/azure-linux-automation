@@ -14,8 +14,10 @@ if($isDeployed)
 	$hsNames = $hsNames.Split("^")
 	$hs1Name = $hsNames[0]
 	$hs2Name = $hsNames[1]
+	$hs3Name = $hsNames[2]
 	$testService1Data = Get-AzureService -ServiceName $hs1Name
 	$testService2Data =  Get-AzureService -ServiceName $hs2Name
+	$externalServiceData = Get-AzureService -ServiceName $hs3Name
 #Get VMs deployed in the service..
 	$hs1vms = $testService1Data | Get-AzureVM
 	$hs2vms = $testService2Data | Get-AzureVM
@@ -23,6 +25,7 @@ if($isDeployed)
 	$hs1vm2 = $hs1vms[1]
 	$hs2vm1 = $hs2vms[0]
 	$hs2vm2 = $hs2vms[1]
+
 #Get the IP addresses
 	$hs1vm1IP = $hs1vm1.IPaddress
 	$hs1vm2IP = $hs1vm2.IPaddress
@@ -56,40 +59,52 @@ if($isDeployed)
 	$hs1vm2sshport = GetPort -Endpoints $hs1vm2Endpoints -usage ssh	
 	$hs2vm1sshport = GetPort -Endpoints $hs2vm1Endpoints -usage ssh	
 	$hs2vm2sshport = GetPort -Endpoints $hs2vm2Endpoints -usage ssh	
-	$SSHDetails = Get-SSHDetailofVMs -DeployedServices $isDeployed
-	$HostnameDIPDetails = Get-AllVMHostnameAndDIP $isDeployed
+   	#Extract External Server Data
+	$externalServer = $externalServiceData | Get-AzureVM
+	$externalServerEndpoints = $externalServer | Get-AzureEndpoint
+	$externalServerIP = $externalServerEndpoints[0].Vip
+	$externalServerUrl = $externalServer.DNSName
+	$externalServerUrl = $externalServerUrl.Replace("http://","")
+	$externalServerUrl = $externalServerUrl.Replace("/","")
+	$externalServerTcpport = GetPort -Endpoints $externalServerEndpoints -usage tcp
+	$externalServerUdpport = GetPort -Endpoints $externalServerEndpoints -usage udp
+	$externalServerSshport = GetPort -Endpoints $externalServerEndpoints -usage ssh
+	
+	LogMsg "Test Machine 1 : $hs1VIP : $hs1vm1sshport"
+	LogMsg "Test Machine 2 : $hs1VIP : $hs1vm2sshport"
+	LogMsg "Test Machine 3 : $hs2VIP : $hs2vm1sshport"
+	LogMsg "Test Machine 4 : $hs2VIP : $hs2vm2sshport"
+	LogMsg "External Machine : $externalServerIP : $externalServerSshport"
+
+	$VnetVMSSHDetails = Get-SSHDetailofVMs -DeployedServices "$hs1Name^$hs2Name"
+	$VnetVMHostnameDIPDetails = Get-AllVMHostnameAndDIP "$hs1Name^$hs2Name"
+	$AllVMSSHDetails = Get-SSHDetailofVMs -DeployedServices $isDeployed
 #endregion
 
 	try
 	{
-    
+	
 #region CONFIGURE VNET VMS AND MAKE THEM READY FOR VNET TEST EXECUTION...
 
 #region DEFINE LOCAL NET VMS
 		$dnsServer = CreateVMNode -nodeIp "192.168.3.120" -nodeSshPort 22 -user "root" -password "redhat"
 		$nfsServer = CreateVMNode -nodeIp "192.168.3.125" -nodeSshPort 22 -user "root" -password "redhat"
 		$mysqlServer = CreateVMNode -nodeIp "192.168.3.127" -nodeSshPort 22 -user "root" -password "redhat"
-		$externalServerIP = $xmlConfig.config.Azure.Deployment.Data.ExternalPingServer.IP
-		$externalServerUser = $xmlConfig.config.Azure.Deployment.Data.ExternalPingServer.Username
-		$externalServerPass= $xmlConfig.config.Azure.Deployment.Data.ExternalPingServer.Password
-		$externalServerSSHport = $xmlConfig.config.Azure.Deployment.Data.ExternalPingServer.SSH
-		$externalServerUDPport = $xmlConfig.config.Azure.Deployment.Data.ExternalPingServer.UDPport
-		$externalServerURL = $xmlConfig.config.Azure.Deployment.Data.ExternalPingServer.Url
 
 #endregion
-        
+		
 #region DEFINE A INTERMEDIATE VM THAT WILL BE USED FOR ALL OPERATIONS DONE ON THE LOCAL NET VMS [DNS SERVER, NFSSERVER, MYSQL SERVER]
 		$intermediateVM = CreateVMNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -user $user -password $password -nodeDip $hs1vm1.IpAddress -nodeHostname $hs1vm1Hostname
 #endregion
 
-		ConfigureVNETVMs -SSHDetails $SSHDetails
+		ConfigureVNETVMs -SSHDetails $VnetVMSSHDetails
 
 #region Upload all files to VNET VMS.. [All files are uploaded at once, to minimise re-upload process, at the execution time of every child method]
 		$currentWindowsfiles = $currentTestData.files
-		UploadFilesToAllDeployedVMs -SSHDetails $SSHDetails -files $currentWindowsfiles
+		UploadFilesToAllDeployedVMs -SSHDetails $AllVMSSHDetails -files $currentWindowsfiles
 
 #Make python files executable
-		RunLinuxCmdOnAllDeployedVMs -SSHDetails $SSHDetails -command "chmod +x *"
+		RunLinuxCmdOnAllDeployedVMs -SSHDetails $AllVMSSHDetails -command "chmod +x *"
 
 #endregion
 
@@ -98,23 +113,23 @@ if($isDeployed)
 #Assuming that all files will be available at VNET VMS..
 
 		$currentLinuxFiles = ConvertFileNames -ToLinux -currentWindowsFiles $currentTestData.files -expectedLinuxPath "/home/test"
-        #Assuming that all files will be available at VNET VMS..
-        #RemoteCopyRemoteVM -upload -intermediateVM $intermediateVM -remoteVM $dnsServer  -remoteFiles $currentLinuxFiles
-        #RemoteCopy -uploadTo $externalServerIP -port $externalServerSSHport -files "remote-scripts\azuremodules.py,remote-scripts\start-server.py,remote-scripts\start-client.py,remote-scripts\check-server.py" -username $externalServerUser -password $externalServerPass -upload
-        #RunLinuxCmd -username $externalServerUser -password $externalServerPass -ip $externalServerIP  -port $externalServerSSHport -command "rm -rf *.txt" -runAsSudo
-        #RunLinuxCmd -username $externalServerUser -password $externalServerPass -ip $externalServerIP  -port $externalServerSSHport -command "chmod +x *.py" -runAsSudo
-        #RemoteCopyRemoteVM -upload -intermediateVM $intermediateVM -remoteVM $nfsServer  -remoteFiles $currentLinuxFiles
-        #RemoteCopyRemoteVM -upload -intermediateVM $intermediateVM -remoteVM $mysqlServer  -remoteFiles $currentLinuxFiles
+		#Assuming that all files will be available at VNET VMS..
+		#RemoteCopyRemoteVM -upload -intermediateVM $intermediateVM -remoteVM $dnsServer  -remoteFiles $currentLinuxFiles
+		#RemoteCopy -uploadTo $externalServerIP -port $externalServerSSHport -files "remote-scripts\azuremodules.py,remote-scripts\start-server.py,remote-scripts\start-client.py,remote-scripts\check-server.py" -username $externalServerUser -password $externalServerPass -upload
+		#RunLinuxCmd -username $externalServerUser -password $externalServerPass -ip $externalServerIP  -port $externalServerSSHport -command "rm -rf *.txt" -runAsSudo
+		#RunLinuxCmd -username $externalServerUser -password $externalServerPass -ip $externalServerIP  -port $externalServerSSHport -command "chmod +x *.py" -runAsSudo
+		#RemoteCopyRemoteVM -upload -intermediateVM $intermediateVM -remoteVM $nfsServer  -remoteFiles $currentLinuxFiles
+		#RemoteCopyRemoteVM -upload -intermediateVM $intermediateVM -remoteVM $mysqlServer  -remoteFiles $currentLinuxFiles
 
-        # Make them executable..
-        #$temp = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $dnsServer -remoteCommand "chmod +x /home/$user/*.py" -runAsSudo
-        #$temp = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $nfsServer -remoteCommand "chmod +x /home/$user/*.py" -runAsSudo
-        #$temp = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $mysqlServer -remoteCommand "chmod +x /home/$user/*.py" -runAsSudo
+		# Make them executable..
+		#$temp = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $dnsServer -remoteCommand "chmod +x /home/$user/*.py" -runAsSudo
+		#$temp = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $nfsServer -remoteCommand "chmod +x /home/$user/*.py" -runAsSudo
+		#$temp = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $mysqlServer -remoteCommand "chmod +x /home/$user/*.py" -runAsSudo
 
 #endregion
 
 #region CONFIGURE DSN SERVER WITH IP ADDRESSES OF DEPLOYED VNET VMs...
-        ConfigureDnsServer -intermediateVM $intermediateVM -DnsServer $dnsServer -HostnameDIPDetails $HostnameDIPDetails
+		ConfigureDnsServer -intermediateVM $intermediateVM -DnsServer $dnsServer -HostnameDIPDetails $HostnameDIPDetails
 #endregion
 		$isAllConfigured = "True"
 #endregion
@@ -142,7 +157,7 @@ if($isDeployed)
 				$testResult = ""
 				try
 				{
-					$udpServer = CreateIperfNode -nodeIp $externalServerIP -nodeSshPort $externalServerSSHport -user $externalServerUser -password $externalServerPass -nodeUdpPort $externalServerUDPport -nodeIperfCmd "./start-server.py -i1 -p $externalServerUDPport -u yes && mv Runtime.log start-server.py.log"
+					$udpServer = CreateIperfNode -nodeIp $externalServerIP -nodeSshPort $externalServerSSHport -user $user -password $password -nodeUdpPort $externalServerUDPport -nodeIperfCmd "./start-server.py -i1 -p $externalServerUDPport -u yes && mv Runtime.log start-server.py.log"
 					switch ($Value)
 					{
 						"HS1VM1" {
@@ -177,23 +192,23 @@ if($isDeployed)
 					$udpClient.logDir = $LogDir + "\$Value\$mode"
 
 					$testResult = IperfClientServerUDPDatagramTest -server $udpServer -client $udpClient -VNET
-                    LogMsg "testResult = $testResult"
-                    
-                    #$testResult = "PASS"
-                    
+					LogMsg "testResult = $testResult"
+					
+					#$testResult = "PASS"
+					
 					if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 					{
-                    $expectedResult = "FAIL"
+					$expectedResult = "FAIL"
 						if ($expectedResult -eq $testResult)
 						{
 							LogMsg "Expected iperf resutl : FAIL. Got the iperf result : FAIL. Hence marking this test as PASS"
-                            $testResult = "PASS"
+							$testResult = "PASS"
 						}
-                        else
-					    {
-						    $testResult = "FAIL"
-					    }
-                    
+						else
+						{
+							$testResult = "FAIL"
+						}
+					
 					}
 					
 					LogMsg "Test Status for $mode mode - $testResult"

@@ -608,7 +608,14 @@ Function CreateAllDeployments($setupType, $xmlConfig, $Distro){
 		$curtime = Get-Date
 		$isServiceDeployed = "False"
 		$retryDeployment = 0
-		$serviceName = "ICA-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
+		if ( $HS.Tag -ne $null )
+		{
+			$serviceName = "ICA-" + $HS.Tag + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
+		}
+		else
+		{
+			$serviceName = "ICA-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
+		}
 		if($isMultiple -eq "True")
 		{
 			$serviceName = $serviceName + "-" + $hostedServiceCount
@@ -4604,8 +4611,8 @@ Function PerformIOTestOnDisk($testVMObject, [string]$attachedDisk, [string]$disk
             $retValue = "FAIL"
         }
         $suppressedOut = RemoteCopy -downloadFrom $testVMVIP -port $testVMSSHport -files "/home/$testVMUsername/Runtime.log" -downloadTo $testVMObject.logDir -username $testVMUsername -password $testVMPassword -download
-        Rename-Item -Path "$($testVMObject.logdir)\Runtime.log" -NewName ( $attachedDisk.Replace("/dev/","dev-") + "-IO-Test-Logs.txt")
-        LogMsg "I/O logs saved as $($attachedDisk.Replace("/dev/","dev-"))-IO-Test-Logs.txt"
+        Rename-Item -Path "$($testVMObject.logdir)\Runtime.log" -NewName ( $attachedDisk.Replace("/dev/","dev-") + "-IO-Test-Logs-$diskFileSystem.txt")
+        LogMsg "I/O logs saved as $($attachedDisk.Replace("/dev/","dev-"))-IO-Test-Logs-$diskFileSystem.txt"
     }
     else
     {
@@ -4662,8 +4669,9 @@ Function DoHotAddNewDataDiskTest ($testVMObject, [int]$diskSizeInGB )
                         $newDiskAdded = "PASS"
 					    LogMsg "New Disk detected."
                         $newDisknames = GetNewPhysicalDiskNames -FdiskOutputBeforeAddingDisk $fdiskOutputBeforeAddingDisk -FdiskOutputAfterAddingDisk $fdiskOutputAfterAddingDisk
-                        $ioResult =  PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisknames -diskFileSystem "ext4"
-                        if ($ioResult -eq "PASS")
+                        $extResult =  PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisknames -diskFileSystem "ext4"
+                        $xfsResult =  PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisknames -diskFileSystem "xfs"
+                        if ( ($extResult  -eq "PASS") -and ($xfsResult  -eq "PASS") )
                         {
                             $retValue = "PASS"
                         }
@@ -4847,9 +4855,11 @@ Function DoHotAddNewDataDiskTestParallel ($testVMObject, $TotalLuns)
                         $errorCount = 0
                         foreach ( $newDisk in $newDisks.split("^"))
                         {
-                            $ioResult = $null
-                            $ioResult = PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisk -diskFileSystem "ext4"
-                            if ($ioResult -eq "PASS")
+                            $extResult = $null
+                            $xfsResult = $null
+                            $extResult = PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisk -diskFileSystem "ext4"
+                            $xfsResult = PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisk -diskFileSystem "xfs"
+                            if ( ($extResult  -eq "PASS") -and ($xfsResult  -eq "PASS") )
                             {
                                 $successCount += 1
                             }
@@ -5047,8 +5057,9 @@ Function DoHotAddExistingDataDiskTest($testVMObject)
 					    LogMsg "Existing Disk detected."
 					    $newDiskAdded = "PASS"
                         $newDisknames = GetNewPhysicalDiskNames -FdiskOutputBeforeAddingDisk $fdiskOutputBeforeAddingDisk -FdiskOutputAfterAddingDisk $fdiskOutputAfterAddingDisk
-                        $ioResult =  PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisknames -diskFileSystem "ext4"
-                        if ($ioResult -eq "PASS")
+                        $extResult =  PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisknames -diskFileSystem "ext4"
+                        $xfsResult =  PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisknames -diskFileSystem "xfs"
+                        if ( ($extResult -eq "PASS") -and ($xfsResult -eq "PASS"))
                         {
                             $retValue = "PASS"
                         }
@@ -5155,9 +5166,11 @@ Function DoHotAddExistingDataDiskTestParallel ($testVMObject, $TotalLuns)
                         $errorCount = 0
                         foreach ( $newDisk in $newDisks.split("^"))
                         {
-                            $ioResult = $null
-                            $ioResult = PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisk -diskFileSystem "ext4"
-                            if ($ioResult -eq "PASS")
+                            $extResult = $null
+                            $xfsResult = $null
+                            $extResult = PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisk -diskFileSystem "ext4"
+                            $xfsResult = PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisk -diskFileSystem "xfs"
+                            if (($extResult -eq "PASS") -and ($xfsResult -eq "PASS"))
                             {
                                 $successCount += 1
                             }

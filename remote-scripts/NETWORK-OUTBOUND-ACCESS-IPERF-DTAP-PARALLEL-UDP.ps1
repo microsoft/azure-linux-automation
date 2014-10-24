@@ -7,25 +7,34 @@ $resultArr = @()
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if($isDeployed)
 {
-	$hs1Name = $isDeployed
+	$hsNames = $isDeployed.Split("^")
+	$hs1Name = $hsNames[0]
+	$hs2Name = $hsNames[1]
 	$testServiceData = Get-AzureService -ServiceName $hs1Name
-    #Get VMs deployed in the service..
+	$dtapServiceData = Get-AzureService -ServiceName $hs2Name
+	#Extract Test VM Data
 	$testVMsinService = $testServiceData | Get-AzureVM
-
 	$hs1vm1 = $testVMsinService
 	$hs1vm1Endpoints = $hs1vm1 | Get-AzureEndpoint
-
 	$hs1VIP = $hs1vm1Endpoints[0].Vip
 	$hs1ServiceUrl = $hs1vm1.DNSName
 	$hs1ServiceUrl = $hs1ServiceUrl.Replace("http://","")
 	$hs1ServiceUrl = $hs1ServiceUrl.Replace("/","")
-
 	$hs1vm1tcpport = GetPort -Endpoints $hs1vm1Endpoints -usage tcp
-	$dtapServerTcpport = "750"
 	$hs1vm1udpport = GetPort -Endpoints $hs1vm1Endpoints -usage udp
-	$dtapServerUdpport = "990"
 	$hs1vm1sshport = GetPort -Endpoints $hs1vm1Endpoints -usage ssh	
-	$dtapServerSshport = "22"
+	#Extract DTAP VM data
+   	$dtapServer = $dtapServiceData | Get-AzureVM
+	$dtapServerEndpoints = $dtapServer | Get-AzureEndpoint
+	$dtapServerIp = $dtapServerEndpoints[0].Vip
+	$dtapServerUrl = $dtapServer.DNSName
+	$dtapServerUrl = $dtapServerUrl.Replace("http://","")
+	$dtapServerUrl = $dtapServerUrl.Replace("/","")
+	$dtapServerTcpport = GetPort -Endpoints $dtapServerEndpoints -usage tcp
+	$dtapServerUdpport = GetPort -Endpoints $dtapServerEndpoints -usage udp
+	$dtapServerSshport = GetPort -Endpoints $dtapServerEndpoints -usage ssh	
+	LogMsg "Test Machine : $hs1VIP : $hs1vm1sshport"
+	LogMsg "DTAP Machine : $dtapServerIp : $hs1vm1sshport"
 
 	$cmd1="./start-server.py -p $dtapServerUDPport -u yes && mv Runtime.log start-server.py.log -f"
 	$cmd2="./start-client.py -c $dtapServerIp -p $dtapServerUDPport -t20 -P1 -u yes"
@@ -39,7 +48,7 @@ if($isDeployed)
 	{
 		try
 		{
-            $testResult = $null
+			$testResult = $null
 			LogMsg "Test Started for Parallel Connections $Value"
 			$client.cmd = "./start-client.py -c $dtapServerIp -p $dtapServerUDPport -t20 -P$Value -u yes"
 			mkdir $LogDir\$Value -ErrorAction SilentlyContinue | out-null
