@@ -51,8 +51,8 @@
 			<Data>
 				<!-- You can add your own distro and Image names here -->
 				<Distro>
-					<Name>Ubuntu1404ICA</Name>
-					<OsImage>ICA-CAPTURED-UBUNTU1404DAILY-7-21-2014-4-39.VHD</OsImage>
+					<Name>U1410xfs</Name>
+					<OsImage>UBUNTU1410-xfs-capture</OsImage>
 				</Distro> 
 				<Distro>
 					<Name>Ubuntu1404Daily</Name>
@@ -109,18 +109,7 @@
 				<Password>"Your_Preferred_Password"</Password>
 				<sshKey>myPrivateKey.ppk</sshKey>
 				<sshPublicKey>myCert.cer</sshPublicKey>
-				<WaagentVersion>$CommitBranch:master$|$LastCommitDate:2013-02-20 15:51:16 -0800$|$LastCommitHash:797c97b556e1672c6efa7febf28d0575d54999dd$</WaagentVersion>
-				<DTAP>
-					<IP>LINUX_MACHINE_PUBLIC_IP</IP>
-					<SshPort>SSH_PORT</SshPort>
-					<user>USERNAME</user>
-					<password>"PASSWORD"</password>
-					<tcpPort>750</tcpPort>
-					<udpPort>990</udpPort>
-				</DTAP>
-				<DTAPBkup>
-					<IP>168.61.65.46</IP>
-				</DTAPBkup>
+				<WaagentVersion>"2.0.8"</WaagentVersion>
 				<dnsServer>
 					<IP>192.168.3.120</IP>
 					<Hostname>ubuntudns</Hostname>
@@ -141,16 +130,7 @@
 					<Username>root</Username>
 					<Password>redhat</Password>
 				</nfsServer>
-				<ExternalPingServer>
-					<IP>PublicPingServerIP(LinuxMachine)</IP>
-					<Url>URL_of_Ping_Server</Url>
-					<Username>test</Username>
-					<Password>"Password_of_LinuxMachine"</Password>
-					<SSH>22</SSH>
-					<UDPport>750</UDPport>
-				</ExternalPingServer>
 			</Data>
-
 			<PublicEndpoint>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -180,6 +160,34 @@
 						<DataDisk></DataDisk>
 					</VirtualMachine>
 				</HostedService>
+				<HostedService>
+					<Tag>DTAP</Tag>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>750</LocalPort>
+							<PublicPort>750</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>UDPtest</Name>
+							<Protocol>udp</Protocol>
+							<LocalPort>990</LocalPort>
+							<PublicPort>990</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>				
 			</PublicEndpoint>
 			<InternalEndpoint>
 				<isDeployed>NO</isDeployed>
@@ -854,6 +862,149 @@
 					</VirtualMachine>
 				</HostedService>
 			</VNETVMPR>
+			<VNETVM-EXT>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VnetName>VNet</VnetName>
+					<DnsServerIP>"192.168.3.120"</DnsServerIP>
+					<VirtualMachine>
+						<state></state>
+						<SubnetName>Subnet1</SubnetName>
+						<InstanceSize>Small</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>750</LocalPort>
+							<PublicPort>750</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>UDPtest</Name>
+							<Protocol>udp</Protocol>
+							<LocalPort>990</LocalPort>
+							<PublicPort>990</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<SubnetName>Subnet2</SubnetName>
+						<InstanceSize>Small</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>222</PublicPort>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>2750</LocalPort>
+							<PublicPort>2750</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>UDPtest</Name>
+							<Protocol>udp</Protocol>
+							<LocalPort>2990</LocalPort>
+							<PublicPort>2990</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+				<HostedService>
+					<VnetName>VNet</VnetName>
+					<DnsServerIP>"192.168.3.120"</DnsServerIP>
+					<VirtualMachine>
+						<state></state>
+						<SubnetName>Subnet2</SubnetName>
+						<InstanceSize>Small</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>750</LocalPort>
+							<PublicPort>750</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>UDPtest</Name>
+							<Protocol>udp</Protocol>
+							<LocalPort>990</LocalPort>
+							<PublicPort>990</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<SubnetName>Subnet1</SubnetName>
+						<InstanceSize>Small</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>222</PublicPort>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>2750</LocalPort>
+							<PublicPort>2750</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>UDPtest</Name>
+							<Protocol>udp</Protocol>
+							<LocalPort>2990</LocalPort>
+							<PublicPort>2990</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+				<HostedService>
+					<Tag>EXTERNAL</Tag>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>750</LocalPort>
+							<PublicPort>750</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>UDPtest</Name>
+							<Protocol>udp</Protocol>
+							<LocalPort>990</LocalPort>
+							<PublicPort>990</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>				
+			</VNETVM-EXT>
 			<IEndpointTwoHS>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -916,7 +1067,6 @@
 				<isDeployed>NO</isDeployed>
 				<HostedService>
 					<VnetName></VnetName>
-
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
@@ -956,13 +1106,40 @@
 						<DataDisk></DataDisk>
 					</VirtualMachine>
 				</HostedService>
+				<HostedService>
+					<Tag>DTAP</Tag>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>750</LocalPort>
+							<PublicPort>750</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>UDPtest</Name>
+							<Protocol>udp</Protocol>
+							<LocalPort>990</LocalPort>
+							<PublicPort>990</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>								
 			</LoadBalancedNoCP>
 
 			<CustomProbeSamePort>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
 					<VnetName></VnetName>
-
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
@@ -1016,8 +1193,36 @@
 							<LoadBalanced>True</LoadBalanced>
 						</EndPoints>
 						<DataDisk></DataDisk>
-					</VirtualMachine>
+					</VirtualMachine>					
 				</HostedService>
+				<HostedService>
+					<Tag>DTAP</Tag>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>750</LocalPort>
+							<PublicPort>750</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>UDPtest</Name>
+							<Protocol>udp</Protocol>
+							<LocalPort>990</LocalPort>
+							<PublicPort>990</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>												
 			</CustomProbeSamePort>
 
 			<CustomProbeOtherPort>
@@ -1079,6 +1284,34 @@
 						<DataDisk></DataDisk>
 					</VirtualMachine>
 				</HostedService>
+				<HostedService>
+					<Tag>DTAP</Tag>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>750</LocalPort>
+							<PublicPort>750</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>UDPtest</Name>
+							<Protocol>udp</Protocol>
+							<LocalPort>990</LocalPort>
+							<PublicPort>990</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>								
 			</CustomProbeOtherPort>
 
 			<BVTDeployment>
@@ -1993,7 +2226,7 @@
 			<testScript></testScript>
 			<testScriptps1>VNET-PING-OUTBOUND-ACCESS.ps1</testScriptps1>
 			<files>remote-scripts\azuremodules.py,remote-scripts\ConfigureDnsServer.py,remote-scripts\CleanupDnsServer.py,remote-scripts\ConfigureResolvConf.py,remote-scripts\RunSSHCmd.py,remote-scripts\RemoteCopy.py,remote-scripts\ping.py</files>
-			<setupType>VNETVMPR</setupType>
+			<setupType>VNETVM-EXT</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureVNET_OA_001</TestID>
@@ -2077,7 +2310,7 @@
 			<testScript></testScript>
 			<testScriptps1>VNET-VERIFY-REMOTE-SSH-SCP-OUTBOUND-ACCESS.ps1</testScriptps1>
 			<files>remote-scripts\azuremodules.py,remote-scripts\CleanupDnsServer.py,remote-scripts\ConfigureResolvConf.py,remote-scripts\RunSSHCmd.py,remote-scripts\RemoteCopy.py</files>
-			<setupType>VNETVMPR</setupType>
+			<setupType>VNETVM-EXT</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureVNET_OA_002</TestID>
@@ -2128,7 +2361,7 @@
 			<testScript></testScript>
 			<testScriptps1>VNET-IPERF-UDP-OUTBOUND-ACCESS.ps1</testScriptps1>
 			<files>remote-scripts\azuremodules.py,remote-scripts\CleanupDnsServer.py,remote-scripts\ConfigureResolvConf.py,remote-scripts\RunSSHCmd.py,remote-scripts\RemoteCopy.py,remote-scripts\start-server.py,remote-scripts\start-client.py,remote-scripts\check-server.py</files>
-			<setupType>VNETVMPR</setupType>
+			<setupType>VNETVM-EXT</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureVNET_OA_003</TestID>
@@ -2719,9 +2952,6 @@
 		<Cycle>
 			<cycleName>LoadBalancer</cycleName>
 			<test>
-				<Name>NETWORK-LB-NO-PROBE-PORT-IPERF-TCP</Name>
-			</test>
-			<test>
 				<Name>NETWORK-LB-NO-PROBE-PORT-IPERF-NON-CONNETIVITY</Name>
 			</test>
 			<test>
@@ -3029,7 +3259,7 @@
 			<test>
 				<Name>E2E-HOT-ADD-REMOVE-EXISTING-DATA-DISK-PARALLEL</Name>
 			</test> 
-				<test>
+			<test>
 				<Name>E2E-CHANGE-USER-PASSWORD</Name>
 			</test>
 			<test>
@@ -3040,7 +3270,7 @@
 			</test>
 			<test>
 				<Name>E2E-VM-CAPTURE-IMAGE-WITH-WAAGENT-DEPROVISION</Name>
-			</test> 
+			</test>
 		</Cycle>
 		
 		<Cycle>
@@ -3059,7 +3289,7 @@
 			<cycleName>DEBUG</cycleName>
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
 			<test>
-				<Name>BVT-VERIFY-SSHD-CONFIG</Name>
+				<Name>VNET-VERIFY-REMOTE-SSH-SCP-OUTBOUND-ACCESS</Name>
 			</test>
 		</Cycle>
 	</testCycles>

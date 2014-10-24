@@ -126,7 +126,7 @@ foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
                         }
                     
                         Add-Member -InputObject $diskResult.$newSetupType.$LunString -NotePropertyName $newTask -NotePropertyValue $testResult
-                        LogMsg "$($currentTestData.TestName) : $newSetupType : $newTask : $diskSize.0GB: $testResult"
+                        LogMsg "$($currentTestData.TestName) : $newSetupType : $newTask : $testResult"
                     }
                     catch
                     {

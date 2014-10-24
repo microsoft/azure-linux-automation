@@ -16,8 +16,10 @@ if($isDeployed)
 	$hsNames = $hsNames.Split("^")
 	$hs1Name = $hsNames[0]
 	$hs2Name = $hsNames[1]
+	$hs3Name = $hsNames[2]
 	$testService1Data = Get-AzureService -ServiceName $hs1Name
 	$testService2Data =  Get-AzureService -ServiceName $hs2Name
+	$externalServiceData = Get-AzureService -ServiceName $hs3Name
 #Get VMs deployed in the service..
 	$hs1vms = $testService1Data | Get-AzureVM
 	$hs2vms = $testService2Data | Get-AzureVM
@@ -59,25 +61,39 @@ if($isDeployed)
 	$hs1vm2sshport = GetPort -Endpoints $hs1vm2Endpoints -usage ssh	
 	$hs2vm1sshport = GetPort -Endpoints $hs2vm1Endpoints -usage ssh	
 	$hs2vm2sshport = GetPort -Endpoints $hs2vm2Endpoints -usage ssh	
-	$SSHDetails = Get-SSHDetailofVMs -DeployedServices $isDeployed
-	$HostnameDIPDetails = Get-AllVMHostnameAndDIP $isDeployed
+   	#Extract External Server Data
+	$externalServer = $externalServiceData | Get-AzureVM
+	$externalServerEndpoints = $externalServer | Get-AzureEndpoint
+	$externalServerIP = $externalServerEndpoints[0].Vip
+	$externalServerUrl = $externalServer.DNSName
+	$externalServerUrl = $externalServerUrl.Replace("http://","")
+	$externalServerUrl = $externalServerUrl.Replace("/","")
+	$externalServerTcpport = GetPort -Endpoints $externalServerEndpoints -usage tcp
+	$externalServerUdpport = GetPort -Endpoints $externalServerEndpoints -usage udp
+	$externalServerSshport = GetPort -Endpoints $externalServerEndpoints -usage ssh
+	
+	LogMsg "Test Machine 1 : $hs1VIP : $hs1vm1sshport"
+	LogMsg "Test Machine 2 : $hs1VIP : $hs1vm2sshport"
+	LogMsg "Test Machine 3 : $hs2VIP : $hs2vm1sshport"
+	LogMsg "Test Machine 4 : $hs2VIP : $hs2vm2sshport"
+	LogMsg "External Machine : $externalServerIP : $externalServerSshport"
+
+	$VnetVMSSHDetails = Get-SSHDetailofVMs -DeployedServices "$hs1Name^$hs2Name"
+	$VnetVMHostnameDIPDetails = Get-AllVMHostnameAndDIP "$hs1Name^$hs2Name"
+	$AllVMSSHDetails = Get-SSHDetailofVMs -DeployedServices $isDeployed
 #endregion
 
 #region CONFIGURE VNET VMS AND MAKE THEM READY FOR VNET TEST EXECUTION...
 	try
 	{
-		$externalServerIP = $xmlConfig.config.Azure.Deployment.Data.ExternalPingServer.IP
-		$externalServerUser = $xmlConfig.config.Azure.Deployment.Data.ExternalPingServer.Username
-		$externalServerPass= $xmlConfig.config.Azure.Deployment.Data.ExternalPingServer.Password
-		$externalServerSSHport = $xmlConfig.config.Azure.Deployment.Data.ExternalPingServer.SSH
 		$dnsServer = CreateVMNode -nodeIp '192.168.3.120' -nodeSshPort 22 -user root -password "redhat" -nodeHostname "ubuntudns"
 		$intermediateVM = CreateVMNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -user $user -password $password -nodeDip $hs1vm1IP -nodeHostname $hs1vm1Hostname
-		$externalServer = CreateVMNode -nodeIp $externalServerIP -nodeSshPort $externalServerSSHport -user $externalServerUser -password $externalServerPass
-		ConfigureVNETVMs -SSHDetails $SSHDetails
-		UploadFilesToAllDeployedVMs -SSHDetails $SSHDetails -files $currentTestData.files
-		RunLinuxCmdOnAllDeployedVMs -SSHDetails $SSHDetails -command "chmod +x *.py"
-        #NO DNS CONFUGURATION NEEDED.
-        #ConfigureDnsServer -intermediateVM $intermediateVM -DnsServer $dnsServer -HostnameDIPDetails $HostnameDIPDetails
+		$externalServer = CreateVMNode -nodeIp $externalServerIP -nodeSshPort $externalServerSSHport -user $user -password $password
+		ConfigureVNETVMs -SSHDetails $VnetVMSSHDetails
+		UploadFilesToAllDeployedVMs -SSHDetails $AllVMSSHDetails  -files $currentTestData.files
+		RunLinuxCmdOnAllDeployedVMs -SSHDetails $AllVMSSHDetails  -command "chmod +x *.py"
+		#NO DNS CONFUGURATION NEEDED.
+		#ConfigureDnsServer -intermediateVM $intermediateVM -DnsServer $dnsServer -HostnameDIPDetails $HostnameDIPDetails
 		$isAllConfigured = "True"
 	}
 	catch
@@ -163,7 +179,7 @@ if($isDeployed)
 					$resultArr += $testResult
 					$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
 
-				}     
+				}	 
 			}
 		}
 	}

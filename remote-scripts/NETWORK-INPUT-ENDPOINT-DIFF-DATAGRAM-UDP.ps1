@@ -7,26 +7,34 @@ $resultArr = @()
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
-	$hs1Name = $isDeployed
+	$hsNames = $isDeployed.Split("^")
+	$hs1Name = $hsNames[0]
+	$hs2Name = $hsNames[1]
 	$testServiceData = Get-AzureService -ServiceName $hs1Name
-
-    #Get VMs deployed in the service..
+	$dtapServiceData = Get-AzureService -ServiceName $hs2Name
+	#Extract Test VM Data
 	$testVMsinService = $testServiceData | Get-AzureVM
-
 	$hs1vm1 = $testVMsinService
 	$hs1vm1Endpoints = $hs1vm1 | Get-AzureEndpoint
-
 	$hs1VIP = $hs1vm1Endpoints[0].Vip
 	$hs1ServiceUrl = $hs1vm1.DNSName
 	$hs1ServiceUrl = $hs1ServiceUrl.Replace("http://","")
 	$hs1ServiceUrl = $hs1ServiceUrl.Replace("/","")
-
 	$hs1vm1tcpport = GetPort -Endpoints $hs1vm1Endpoints -usage tcp
-	$dtapServerTcpport = "750"
 	$hs1vm1udpport = GetPort -Endpoints $hs1vm1Endpoints -usage udp
-	$dtapServerUdpport = "990"
 	$hs1vm1sshport = GetPort -Endpoints $hs1vm1Endpoints -usage ssh	
-	$dtapServerSshport = "22"
+	#Extract DTAP VM data
+   	$dtapServer = $dtapServiceData | Get-AzureVM
+	$dtapServerEndpoints = $dtapServer | Get-AzureEndpoint
+	$dtapServerIp = $dtapServerEndpoints[0].Vip
+	$dtapServerUrl = $dtapServer.DNSName
+	$dtapServerUrl = $dtapServerUrl.Replace("http://","")
+	$dtapServerUrl = $dtapServerUrl.Replace("/","")
+	$dtapServerTcpport = GetPort -Endpoints $dtapServerEndpoints -usage tcp
+	$dtapServerUdpport = GetPort -Endpoints $dtapServerEndpoints -usage udp
+	$dtapServerSshport = GetPort -Endpoints $dtapServerEndpoints -usage ssh
+	LogMsg "Test Machine : $hs1VIP : $hs1vm1sshport"
+	LogMsg "DTAP Machine : $dtapServerIp : $hs1vm1sshport"
 
 	$client = CreateIperfNode -nodeIp $dtapServerIp -nodeSshPort $dtapServerSshport -nodeTcpPort $dtapServerTcpport -nodeIperfCmd $cmd1 -user $user -password $password -files $currentTestData.files -logDir $LogDir
 	$server = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -nodeTcpPort $hs1vm1tcpport -nodeIperfCmd $cmd2 -user $user -password $password -files $currentTestData.files -logDir $LogDir
@@ -37,11 +45,11 @@ if ($isDeployed)
 		{
 			try
 			{
-                $testResult = $null
-                RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
-                RemoteCopy -uploadTo $dtapServerIp -port $dtapServerSshport -files $currentTestData.files -username $user -password $password -upload
-                $suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *.py && rm -rf *.txt *.log" -runAsSudo
-                $suppressedOut = RunLinuxCmd -username $user -password $password -ip $dtapServerIp -port $dtapServerSshport -command "chmod +x *.py && rm -rf *.txt *.log" -runAsSudo
+				$testResult = $null
+				RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
+				RemoteCopy -uploadTo $dtapServerIp -port $dtapServerSshport -files $currentTestData.files -username $user -password $password -upload
+				$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *.py && rm -rf *.txt *.log" -runAsSudo
+				$suppressedOut = RunLinuxCmd -username $user -password $password -ip $dtapServerIp -port $dtapServerSshport -command "chmod +x *.py && rm -rf *.txt *.log" -runAsSudo
 				mkdir $LogDir\$Value\$mode -ErrorAction SilentlyContinue | out-null
 				$server.cmd = "./start-server.py -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log -f"
 				if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))

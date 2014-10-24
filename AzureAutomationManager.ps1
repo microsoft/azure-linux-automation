@@ -19,13 +19,11 @@ $user = $xmlConfig.config.Azure.Deployment.Data.UserName
 $password = $xmlConfig.config.Azure.Deployment.Data.Password
 $sshKey = $xmlConfig.config.Azure.Deployment.Data.sshKey
 $sshPublickey = $xmlConfig.config.Azure.Deployment.Data.sshPublicKey
-$dtapServerIp = $xmlConfig.config.Azure.Deployment.Data.DTAP.IP
 
 Set-Variable -Name user -Value $user -Scope Global
 Set-Variable -Name password -Value $password -Scope Global
 Set-Variable -Name sshKey -Value $sshKey -Scope Global
 Set-Variable -Name sshPublicKey -Value $sshPublicKey -Scope Global
-Set-Variable -Name dtapServerIp -Value $dtapServerIp -Scope Global
 
 try
 {
