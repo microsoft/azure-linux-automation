@@ -5,38 +5,43 @@ $resultArr = @()
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
-	$hs1Name = $isDeployed
+	$hsNames = $isDeployed.Split("^")
+	$hs1Name = $hsNames[0]
+	$hs2Name = $hsNames[1]
 	$testServiceData = Get-AzureService -ServiceName $hs1Name
-
-    #Get VMs deployed in the service..
+	$dtapServiceData = Get-AzureService -ServiceName $hs2Name
+	#Extract Test VM Data
 	$testVMsinService = $testServiceData | Get-AzureVM
-
 	$hs1vm1 = $testVMsinService[0]
 	$hs1vm1Endpoints = $hs1vm1 | Get-AzureEndpoint
-
 	$hs1VIP = $hs1vm1Endpoints[0].Vip
 	$hs1ServiceUrl = $hs1vm1.DNSName
 	$hs1ServiceUrl = $hs1ServiceUrl.Replace("http://","")
 	$hs1ServiceUrl = $hs1ServiceUrl.Replace("/","")
 	$hs1vm1IP = $hs1vm1.IpAddress
 	$hs1vm1Hostname = $hs1vm1.InstanceName
-
 	$hs1vm2 = $testVMsinService[1]
 	$hs1vm2Endpoints = $hs1vm2 | Get-AzureEndpoint
 	$hs1vm2IP = $hs1vm2.IpAddress
 	$hs1vm2Hostname = $hs1vm2.InstanceName
-
-
 	$hs1vm1tcpport = GetPort -Endpoints $hs1vm1Endpoints -usage tcp
 	$hs1vm2tcpport = GetPort -Endpoints $hs1vm2Endpoints -usage tcp
 	$hs1vm1sshport = GetPort -Endpoints $hs1vm1Endpoints -usage ssh
 	$hs1vm2sshport = GetPort -Endpoints $hs1vm2Endpoints -usage ssh
 	$hs1vm1ProbePort = GetProbePort -Endpoints $hs1vm1Endpoints -usage TCPtest
 	$hs1vm2ProbePort = GetProbePort -Endpoints $hs1vm2Endpoints -usage TCPtest
-
-	$dtapServerTcpport = "750"
-	$dtapServerUdpport = "990"
-	$dtapServerSshport = "22"
+	#Extract DTAP VM data
+   	$dtapServer = $dtapServiceData | Get-AzureVM
+	$dtapServerEndpoints = $dtapServer | Get-AzureEndpoint
+	$dtapServerIp = $dtapServerEndpoints[0].Vip
+	$dtapServerUrl = $dtapServer.DNSName
+	$dtapServerUrl = $dtapServerUrl.Replace("http://","")
+	$dtapServerUrl = $dtapServerUrl.Replace("/","")
+	$dtapServerTcpport = GetPort -Endpoints $dtapServerEndpoints -usage tcp
+	$dtapServerUdpport = GetPort -Endpoints $dtapServerEndpoints -usage udp
+	$dtapServerSshport = GetPort -Endpoints $dtapServerEndpoints -usage ssh	
+	LogMsg "Test Machine : $hs1VIP : $hs1vm1sshport"
+	LogMsg "DTAP Machine : $dtapServerIp : $hs1vm1sshport"
 
 	$wait=30
 
@@ -55,7 +60,7 @@ if ($isDeployed)
 		mkdir $LogDir\$mode -ErrorAction SilentlyContinue | out-null
 		try
 		{
-            $testResult = $null
+			$testResult = $null
 			LogMsg "Starting test for $Value parallel connections in $mode mode.."
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 			{#.........................................................................Client command will decided according to TestMode....

@@ -11,7 +11,7 @@ if($isDeployed)
 	$hs2Name = $hsNames[1]
 	$testService1Data = Get-AzureService -ServiceName $hs1Name
 	$testService2Data =  Get-AzureService -ServiceName $hs2Name
-    #Get VMs deployed in the service..
+	#Get VMs deployed in the service..
 	$hs1vm1 = $testService1Data | Get-AzureVM
 	$hs2vm1 = $testService2Data | Get-AzureVM
 	$hs1vm1IP = $hs1vm1.IPaddress
@@ -42,42 +42,42 @@ if($isDeployed)
 		RemoteCopy -upload -uploadTo $vm1.ip -port $vm1.SShport -username $vm1.user -password $vm1.password -files $currentTestData.files
 		RemoteCopy -upload -uploadTo $vm2.ip -port $vm2.SShport -username $vm2.user -password $vm2.password -files $currentTestData.files
 		$suppressedOut = RunLinuxCmd -username $vm1.user -password $vm1.password -ip $vm1.Ip -port $vm1.SshPort -command "chmod +x *" -runAsSudo
-        if(!$vm1.fqdn -and !$vm2.fqdn)
-        {
-            $vm1.fqdn =  RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "hostname --fqdn"
-            $vm2.fqdn =  RunLinuxCmd -username $user -password $password -ip $hs2VIP -port $hs2vm1sshport -command "hostname --fqdn"
-        }
+		if(!$vm1.fqdn -and !$vm2.fqdn)
+		{
+			$vm1.fqdn =  RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "hostname --fqdn"
+			$vm2.fqdn =  RunLinuxCmd -username $user -password $password -ip $hs2VIP -port $hs2vm1sshport -command "hostname --fqdn"
+		}
 
 		$vm1.hostname = $vm1.fqdn
 		$vm2.hostname = $vm2.fqdn
 
-        #Start the NSLOOKup test..
-        $nslookupResult = DoNslookupTest -vm1 $vm1 -vm2 $vm2
-        #Start Dig test..
-        $digResult = DoDigTest -vm1 $vm1 -vm2 $vm2
+		#Start the NSLOOKup test..
+		$nslookupResult = DoNslookupTest -vm1 $vm1 -vm2 $vm2
+		#Start Dig test..
+		$digResult = DoDigTest -vm1 $vm1 -vm2 $vm2
 
 		LogMsg "NSLOOKUP : $nslookupResult. DIG : $digResult"
 
-		if(($nslookupResult -imatch "PASS") -and ($digResult -imatch "PASS"))
+		if(($nslookupResult -imatch "FAIL") -and ($digResult -imatch "FAIL"))
 		{
 			$testResult = "PASS"
-			LogMsg "NSLOOKUP : PASS. DIG : PASS. Expected behavior."
+			LogMsg "NSLOOKUP : FAIL. DIG : FAIL. Expected behavior."
 		}
 		else
 		{
 			$testResult = "FAIL"
-			if($nslookupResult -imatch "FAIL")
+			if($nslookupResult -imatch "PASS")
 			{
-				LogErr "NSLOOKUP didn't resolved VM DIP using VM fqdn. This is unexpected behaviour."
+				LogErr "NSLOOKUP resolved VM DIP using VM fqdn. This is unexpected behaviour."
 			}
-			if($digResult -imatch "FAIL")
+			if($digResult -imatch "PASS")
 			{
-				LogErr "DIG didn't resolved VM DIP using VM fqdn. This is unexpected behaviour."
+				LogErr "DIG resolved VM DIP using VM fqdn. This is unexpected behaviour."
 			}
-            LogMsg "Test Result : FAIL"
+			LogMsg "Test Result : FAIL"
 
 		}
-        LogMsg "$($currentTestData.testName) : $testResult"
+		LogMsg "$($currentTestData.testName) : $testResult"
 	}
 	catch
 	{

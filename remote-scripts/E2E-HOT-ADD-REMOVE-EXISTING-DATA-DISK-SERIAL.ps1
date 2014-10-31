@@ -10,6 +10,7 @@ $SmallVMLUNs = 0..1
 $MediumVMLUNs = 0..3
 $LargeVMLUNs = 0..7
 $ExtraLargeVMLUNs= 0..15
+$diskResult = New-Object -TypeName System.Object
 #Get Medial Links of existing disks from XML file.
 $ExistingDisks = @()
 foreach ($newDisk in $currentTestData.ExistingDisks.MediaLink)
@@ -21,6 +22,7 @@ foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
 {
     #Deploy A new VM..
     LogMsg "Test started for : $newSetupType."
+    
     $isAllDisksAvailable = CleanUpExistingDiskReferences -ExistingDiskMediaLinks $ExistingDisks
     if ($isAllDisksAvailable -eq $true)
     {
@@ -28,10 +30,11 @@ foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
         if ($isDeployed)
         {
     #region COLLECTE DEPLOYED VM DATA
-            $testServiceData = Get-AzureService -ServiceName $isDeployed
-
+            $testServiceData = RetryOperation -operation { Get-AzureService -ServiceName $isDeployed } -description "Getting service details..." -maxRetryCount 10 -retryInterval 5
+            Add-Member -InputObject $diskResult -MemberType MemberSet -Name $newSetupType
             #Get VMs deployed in the service..
-            $testVMsinService = $testServiceData | Get-AzureVM
+            
+            $testVMsinService = RetryOperation -operation { $testServiceData | Get-AzureVM } -description "Getting VM details..." -maxRetryCount 10 -retryInterval 5
 
             $hs1vm1 = $testVMsinService
             $hs1vm1Endpoints = $hs1vm1 | Get-AzureEndpoint
@@ -92,7 +95,8 @@ foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
                     
                         $testVMObject.Lun = $newLUN
                         $testVMObject.ExistingDiskMediaLink = $ExistingDisks[$newLUN]
-
+                        $LunString = "LUN$newLUN"
+                        Add-Member -InputObject $diskResult.$newSetupType -MemberType MemberSet -Name $LunString -ErrorAction SilentlyContinue
                         if ($newTask -eq "Add")
                         {
                             $testCommand = $HotAddDiskCommand
@@ -104,9 +108,25 @@ foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
                             $metaData = "$newSetupType : Remove Existing Disk : LUN$newLUN"
                         }
 
-                        #Execute Test Here
-                        $testResult = Invoke-Expression $testCommand
-                        #$testResult = "PASS"
+                        if ($newTask -eq "Remove")
+                        {
+                            if($diskResult.$newSetupType.$LunString.Add -eq "PASS")
+                            {
+                                $testResult = Invoke-Expression $testCommand
+                            }
+                            else
+                            {
+                                LogErr "Not executing remove disk test because Add Disk test was $($diskResult.$newSetupType.$LunString.Add)."
+                                $testResult = "FAIL"
+                            }
+                        }
+                        else
+                        {
+                            $testResult = Invoke-Expression $testCommand
+                        }
+                    
+                        Add-Member -InputObject $diskResult.$newSetupType.$LunString -NotePropertyName $newTask -NotePropertyValue $testResult
+                        LogMsg "$($currentTestData.TestName) : $newSetupType : $newTask : $testResult"
                     }
                     catch
                     {
@@ -127,20 +147,6 @@ foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
     #endregion
             $result = GetFinalResultHeader -resultarr $resultArr   
             DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed
-         
-            foreach ($disk in $testVMObject.AttachedDisks)
-            {
-                $ret = RetryOperation -operation {Remove-AzureDisk -DiskName $disk -DeleteVHD} -description "Deleting disk $disk.."
-            
-                if($ret -and ($ret.OperationStatus -eq "Succeeded"))
-                {
-                    LogMsg "Deleted disk $disk"
-                }
-                else
-                {
-                    LogMsg "Delete disk $disk unsuccessful.. Please delete the disk manually."
-                }
-            }
         }
 
         else

@@ -9,6 +9,7 @@ $SmallVMLUNs = 2
 $MediumVMLUNs = 4
 $LargeVMLUNs = 8
 $ExtraLargeVMLUNs= 16
+$diskResult = New-Object -TypeName System.Object
 foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
 {
     #Deploy A new VM..
@@ -18,7 +19,7 @@ foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
     {
 #region COLLECTE DEPLOYED VM DATA
         $testServiceData = Get-AzureService -ServiceName $isDeployed
-
+        Add-Member -InputObject $diskResult -MemberType MemberSet -Name $newSetupType
         #Get VMs deployed in the service..
         $testVMsinService = $testServiceData | Get-AzureVM
 
@@ -34,9 +35,6 @@ foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
 #endregion
 
         mkdir "$LogDir\$newSetupType"
- 
-        <#This script doesn't need any file to upload, however, we need to upload at least one file to New deployment in order to cache the key to our server. 
-        RemoteCypy function is written to cache the server key. So that RunLinuxCmd function can work well..#>
         RemoteCopy -uploadTo $testVMObject.ip -port $testVMObject.sshPort -files $currentTestData.files -username $testVMObject.user -password $testVMObject.password -upload
 
         switch ($hs1vm1.InstanceSize)
@@ -62,7 +60,7 @@ foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
                 $testLUNs = $ExtraLargeVMLUNs
             }
         }
-
+        
 #region HOT ADD / REMOVE DISKS..
             $testTasks = ("Add","Remove")
             $HotAddDiskParallelCoammnd =  "DoHotAddNewDataDiskTestParallel -testVMObject `$testVMObject -TotalLuns `$testLUNs"
@@ -83,8 +81,23 @@ foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
                     }
 
                     #Execute Test Here
-                    $testResult = Invoke-Expression $testCommand
-                    #$testResult = "PASS"
+                    if ($newTask -eq "Remove")
+                    {
+                        if($diskResult.$newSetupType.Add -eq "PASS")
+                        {
+                            $testResult = Invoke-Expression $testCommand
+                        }
+                        else
+                        {
+                            LogErr "Not executing remove disk test because Add Disk test was $($diskResult.$newSetupType.Add)."
+                            $testResult = "FAIL"
+                        }
+                    }
+                    else
+                    {
+                        $testResult = Invoke-Expression $testCommand
+                    }
+                    Add-Member -InputObject $diskResult.$newSetupType -NotePropertyName $newTask -NotePropertyValue $testResult
                 }
                 catch
                 {
@@ -104,20 +117,6 @@ foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
 #endregion
         $result = GetFinalResultHeader -resultarr $resultArr   
         DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed
-        
-        foreach ($disk in $testVMObject.AttachedDisks)
-        {
-            $ret = RetryOperation -operation {Remove-AzureDisk -DiskName $disk -DeleteVHD} -description "Deleting disk $disk.."
-            
-            if($ret -and ($ret.OperationStatus -eq "Succeeded"))
-            {
-                LogMsg "Deleted disk $disk"
-            }
-            else
-            {
-                LogMsg "Delete disk $disk unsuccessful.. Please delete the disk manually."
-            }
-        }
     }
 
     else

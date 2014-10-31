@@ -13,7 +13,6 @@ import commands
 import time
 import os.path
 import array
-#added v-sirebb
 import linecache
 import sys
 import re
@@ -40,6 +39,62 @@ ResultScreen = logging.StreamHandler()
 ResultScreen.setFormatter(ResultFormatter)
 #ResultLog.addHandler(ResultScreen)
 ResultLog.addHandler(WResultLog)
+
+def DetectDistro():
+	distribution = 'unknown'
+	version = 'unknown'
+	
+	RunLog.info("Detecting Distro ")
+	output = Run("cat /etc/*-release")
+	outputlist = re.split("\n", output)
+	
+	for line in outputlist:
+		line = re.sub('"', '', line)
+		if (re.match(r'^ID=(.*)',line,re.M|re.I) ):
+			matchObj = re.match( r'^ID=(.*)', line, re.M|re.I)
+			distribution  = matchObj.group(1)
+		elif (re.match(r'^VERSION_ID=(.*)',line,re.M|re.I) ):
+			matchObj = re.match( r'^VERSION_ID=(.*)', line, re.M|re.I)
+			version = matchObj.group(1)
+
+	if(distribution == "ol"):
+		distribution = 'Oracle'
+		
+	if(distribution == 'unknown'):
+		# Finding the Distro
+		for line in outputlist:
+			if (re.match(r'.*Ubuntu.*',line,re.M|re.I) ):
+				distribution = 'ubuntu'
+				break
+			elif (re.match(r'.*SUSE Linux.*',line,re.M|re.I)):
+				distribution = 'SUSE Linux'
+				break
+			elif (re.match(r'.*openSUSE.*',line,re.M|re.I)):
+				distribution = 'openSUSE'
+				break
+			elif (re.match(r'.*centos.*',line,re.M|re.I)):
+				distribution = 'centos'
+				break
+			elif (re.match(r'.*Oracle.*',line,re.M|re.I)):
+				distribution = 'Oracle'
+				break
+			elif (re.match(r'.*Red Hat.*',line,re.M|re.I)):
+				distribution = 'rhel'
+				break	
+	return [distribution, version]
+
+def FileGetContents(filename):
+    with open(filename) as f:
+        return f.read()
+
+def ExecMultiCmdsLocalSudo(cmd_list):
+	f = open('/tmp/temp_script.sh','w')
+	for line in cmd_list:
+			f.write(line+'\n')
+	f.close()
+	Run ("chmod +x /tmp/temp_script.sh")
+	Run ("/tmp/temp_script.sh 2>&1 > /tmp/exec_multi_cmds_local_sudo.log")
+	return FileGetContents("/tmp/exec_multi_cmds_local_sudo.log")
 
 def DetectLinuxDistro():
     if os.path.isfile("/etc/redhat-release"):
@@ -100,6 +155,148 @@ def GetFileContents(filepath):
     finally:
         file.close()
 
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+# Instlaltion routines
+		
+def YumPackageInstall(package):
+	RunLog.info(("\nyum_package_install: " + package))
+	output = Run("yum install -y "+package)
+	outputlist = re.split("\n", output)
+
+	for line in outputlist:
+		#Package installed successfully
+		if (re.match(r'Complete!', line, re.M|re.I)):
+			RunLog.info((package+": package installed successfully.\n"+line))
+			return True
+		#package is already installed
+		elif (re.match(r'.* already installed and latest version', line, re.M|re.I)):
+			RunLog.info((package + ": package is already installed.\n"+line))
+			return True
+		elif (re.match(r'^Nothing to do', line, re.M|re.I)):
+			RunLog.info((package + ": package already installed.\n"+line))
+			return True
+		#Package installation failed
+		elif (re.match(r'^Error: Nothing to do', line, re.M|re.I)):
+			break
+		#package is not found on the repository
+		elif (re.match(r'^No package '+ re.escape(package)+ r' available', line, re.M|re.I)):
+			break
+			
+	#Consider package installation failed if non of the above matches.
+	RunLog.error((package + ": package installation failed!\n" +output))
+	return False
+
+def AptgetPackageInstall(package):
+	RunLog.info("Installing Package: " + package)
+	# Identify the package for Ubuntu
+	# We Haven't installed mysql-secure_installation for Ubuntu Distro
+	output = Run("apt-get install -y  --force-yes "+package)
+	
+	outputlist = re.split("\n", output)	
+ 
+	unpacking = False
+	setting_up = False
+
+	for line in outputlist:
+		#package is already installed
+		if (re.match(re.escape(package) + r' is already the newest version', line, re.M|re.I)):
+			RunLog.info(package + ": package is already installed."+line)
+			return True
+		#package installation check 1	
+		elif (re.match(r'Unpacking '+ re.escape(package) + r" \(.*" , line, re.M|re.I)):
+			unpacking = True
+		#package installation check 2
+		elif (re.match(r'Setting up '+ re.escape(package) + r" \(.*" , line, re.M|re.I)):
+			setting_up = True
+		#Package installed successfully
+		if (setting_up and unpacking):
+			RunLog.info(package+": package installed successfully.")
+			return True
+		#package is not found on the repository
+		elif (re.match(r'E: Unable to locate package '+ re.escape(package), line, re.M|re.I)):
+			break
+		#package installation failed due to server unavailability
+		elif (re.match(r'E: Unable to fetch some archives', line, re.M|re.I)):
+			break
+		
+	#Consider package installation failed if non of the above matches.
+	RunLog.info(package + ": package installation failed!\n")
+	RunLog.info("Error log: "+output)
+	return False
+
+def ZypperPackageInstall(package):
+	RunLog.info( "\nzypper_package_install: " + package)
+
+	output = Run("zypper --non-interactive in "+package)
+	outputlist = re.split("\n", output)
+		
+	for line in outputlist:
+		#Package installed successfully
+		if (re.match(r'.*Installing: '+re.escape(package)+r'.*done', line, re.M|re.I)):
+			RunLog.info((package+": package installed successfully.\n"+line))
+			return True
+		#package is already installed
+		elif (re.match(r'\''+re.escape(package)+r'\' is already installed', line, re.M|re.I)):
+			RunLog.info((package + ": package is already installed.\n"+line))
+			return True
+		#package is not found on the repository
+		elif (re.match(r'^No provider of \''+ re.escape(package) + r'\' found', line, re.M|re.I)):
+			break
+
+	#Consider package installation failed if non of the above matches.
+	RunLog.error((package + ": package installation failed!\n"+output))
+	return False
+
+def IinstallPackage(package):
+	RunLog.info( "\nInstall_package: "+package)
+	[current_distro, distro_version] = DetectDistro()
+	if ((current_distro == "ubuntu") or (current_distro == "Debian")):
+		return AptgetPackageInstall(package)
+	elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos')):
+		return YumPackageInstall(package)
+	elif (current_distro == "SUSE Linux") or (current_distro == "openSUSE") or (current_distro == "sles"):
+		return ZypperPackageInstall(package)
+	else:
+		RunLog.error((package + ": package installation failed!"))
+		RunLog.info((current_distro + ": Unrecognised Distribution OS Linux found!"))
+		return False
+
+def InstallDeb(file_path):
+	RunLog.info( "\nInstalling package: "+file_path)
+	output = Run("dpkg -i "+file_path+" 2>&1")
+	RunLog.info(output)
+	outputlist = re.split("\n", output)
+
+	for line in outputlist:
+		#package is already installed
+		if(re.match("installation successfully completed", line, re.M|re.I)):
+			RunLog.info(file_path + ": package installed successfully."+line)
+			return True			
+			
+	RunLog.info(file_path+": Installation failed"+output)
+	return False
+
+def InstallRpm(file_path):
+	RunLog.info( "\nInstalling package: "+file_path)
+	output = Run("rpm -ivh --nodeps "+file_path+" 2>&1")
+	RunLog.info(output)
+	outputlist = re.split("\n", output)
+	package = re.split("/", file_path )[-1]
+	matchObj = re.match( r'(.*?)\.rpm', package, re.M|re.I)
+	package = matchObj.group(1)
+	
+	for line in outputlist:
+		#package is already installed
+		if (re.match(r'.*package'+re.escape(package) + r'.*is already installed', line, re.M|re.I)):
+			RunLog.info(file_path + ": package is already installed."+line)
+			return True
+		elif(re.match(re.escape(package) + r'.*######', line, re.M|re.I)):
+			RunLog.info(package + ": package installed successfully."+line)
+			return True
+			
+	RunLog.info(file_path+": Installation failed"+output)
+	return False
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -472,4 +669,3 @@ def ConfigureResolvConf():
 def ConfigureHostsFile():
     hostName = JustRun('hostname')
     AppendTextToFile(hosts_filepath,"127.0.0.1 %s\n" % hostName)
-    

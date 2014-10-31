@@ -9,7 +9,7 @@ if($isDeployed)
 {
 	$hs1Name = $isDeployed
 	$testServiceData = Get-AzureService -ServiceName $hs1Name
-    #Get VMs deployed in the service..
+	#Get VMs deployed in the service..
 	$testVMsinService = $testServiceData | Get-AzureVM
 	$hs1vm1 = $testVMsinService[0]
 	$hs1vm1Endpoints = $hs1vm1 | Get-AzureEndpoint
@@ -34,7 +34,7 @@ if($isDeployed)
 	{ 
 		try
 		{
-            $testResult = $null
+			$testResult = $null
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 			{
 				$pingFrom.cmd = "./ping.py -x $hs1vm2IP -c 10"
