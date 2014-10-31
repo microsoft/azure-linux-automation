@@ -231,12 +231,37 @@ Function InstallPackages ($VMIpAddress, $VMSshPort, $VMUserName, $VMPassword)
 	return $retValue
 }
 
-Function SetSubscription ($subscriptionID, $subscriptionName, $certificateThumbprint, $managementEndpoint, $storageAccount)
+Function IsEnvironmentSupported()
 {
-	$myCert = Get-Item cert:\CurrentUser\My\$certificateThumbprint
-	Set-AzureSubscription -SubscriptionName $subscriptionName -Certificate $myCert -SubscriptionID $subscriptionID -ServiceEndpoint $managementEndpoint
-	Set-AzureSubscription -SubscriptionName $subscriptionName -CurrentStorageAccountName $storageAccount
-	Select-AzureSubscription -Current $subscriptionName
+    $version = (Get-Module -Name "Azure").Version
+    If ($version.Major -GT 0 -OR
+        $version.Minor -GT 8 -OR
+        (($version.Minor -EQ 8) -And ($version.Build -GE 8)))
+    {
+        return $true
+    }
+    Else
+    {
+        return $false
+    }
+}
+
+Function SetSubscription ($subscriptionID, $subscriptionName, $certificateThumbprint, $managementEndpoint, $storageAccount, $environment = "AzureCloud")
+{
+    $myCert = Get-Item cert:\CurrentUser\My\$certificateThumbprint
+
+    # For Azure Powershell Version >= 0.8.8, Environment is used in Set-AzureSubscription for replacing ManagementEndpoint
+    if (IsEnvironmentSupported)
+    {
+        Set-AzureSubscription -SubscriptionName $subscriptionName -Certificate $myCert -SubscriptionID $subscriptionID `
+                              -CurrentStorageAccountName $storageAccount -Environment $environment
+    }
+    Else
+    {
+        Set-AzureSubscription -SubscriptionName $subscriptionName -Certificate $myCert -SubscriptionID $subscriptionID `
+                              -CurrentStorageAccountName $storageAccount -ServiceEndpoint $managementEndpoint
+    }
+    Select-AzureSubscription -Current $subscriptionName
 }
 
 <#
