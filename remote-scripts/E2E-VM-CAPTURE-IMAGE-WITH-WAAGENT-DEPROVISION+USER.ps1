@@ -8,6 +8,7 @@ $OldUserLoginStatus = ""
 $NewUserLoginStatus = ""
 $resultArr = @()
 
+$olduser = $user
 $newuser = "NewAutomationUser"
 $BaseOsImageName = GetOSImageFromDistro -Distro $Distro -xmlConfig $xmlConfig
 
@@ -46,7 +47,6 @@ if ($isDeployed)
 
 		#region Deprovision
 		LogMsg "Executing: waagent -deprovision+user..."
-		#RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "/usr/sbin/waagent -version" -runAsSudo
 		$WADeprovisionInfo = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "/usr/sbin/waagent -force -deprovision+user" -runAsSudo #2>&1 | Out-Null
 			
 		LogMsg $WADeprovisionInfo
@@ -62,12 +62,10 @@ if ($isDeployed)
 	#Deploy A New VM with captured image after this line..   
 		write-host "Deployment of A New VM with diffrent user name using captured image started..."
 		LogMsg "Deployment of A New VM with diffrent user name using captured image started..."
-		#$CaptureVMImageName = "ICA-CAPTURED-CentOS65-4-1-2014-7-8.vhd"
 		
 	#Providing new user name for new deployement     
-		$xmlConfig.config.Azure.Deployment.Data.UserName = $newuser         
-		LogMsg "newuser: $newuser"
-		#$xmlConfig.config.Azure.Deployment.Data.Password = "Redhat.Redhat.777"
+		$xmlConfig.config.Azure.Deployment.Data.UserName = $newuser
+		LogMsg "newuser: $newuser `t user: $user `t olduser: $olduser"
 		
 	#Passing the captured image name for new deployement
 		$newOsImage = SetOSImageToDistro -Distro $Distro -xmlConfig $xmlConfig -ImageName $CaptureVMImageName
@@ -75,7 +73,7 @@ if ($isDeployed)
 		$isNewDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 		#resetting of Base OS image name
 		$oldOsImage = SetOSImageToDistro -Distro $Distro -xmlConfig $xmlConfig -ImageName $BaseOsImageName 
-        if ($isNewDeployed)
+		if ($isNewDeployed)
 		{
 			try
 			{
@@ -97,12 +95,11 @@ if ($isDeployed)
 			#region for New User Login Check....   
 				try
 				{
-                    write-host "Verifying the new user should able to login started ..."
+					write-host "Verifying the new user should able to login started ..."
 					LogMsg "Verifying the new user should able to login started ..."
 					$out = RemoteCopy -uploadTo $hs2VIP -port $hs2vm1sshport -files .\remote-scripts\temp.txt -username $newuser -password $password -upload 2>&1 | Out-Null
-					$NewUserLoginStatus = RunLinuxCmd -username $newuser -password $password -ip $hs2VIP -port $hs2vm1sshport -command "/usr/sbin/waagent -version" -runAsSudo #2>&1 | Out-Null
-	                #LogMsg "Newuserlogininfo:  $NewUserLoginStatus"
-    				if($NewUserLoginStatus)
+					$NewUserLoginStatus = RunLinuxCmd -username $newuser -password $password -ip $hs2VIP -port $hs2vm1sshport -command "/usr/sbin/waagent -version" -runAsSudo 
+					if($NewUserLoginStatus)
 					{
 						$NewUserTestResult = "PASS"
 						LogMsg "New user able to login into VM..."
@@ -122,8 +119,7 @@ if ($isDeployed)
 					$metaData = "NewUser : $newuser should able to login"
 				}
 				#resetting of User name
-				$xmlConfig.config.Azure.Deployment.Data.UserName = $user
-				
+				$user = $olduser
 				$resultArr += $NewUserTestResult
 				$resultSummary +=  CreateResultSummary -testResult $NewUserTestResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
 			#endregion
@@ -133,7 +129,6 @@ if ($isDeployed)
 				{
 					write-host "Verifying old user should not able to login started..."
 					LogMsg "Verifying old user should not able to login started..."
-					#$out = RemoteCopy -uploadTo $hs2VIP -port $hs2vm1sshport -files .\remote-scripts\temp.txt -username $user -password $password -upload
 					$OldUserLoginStatus = RunLinuxCmd -username $user -password $password -ip $hs2VIP -port $hs2vm1sshport -command "/usr/sbin/waagent -version" -runAsSudo #2>&1 | Out-Null
 					
 					if($OldUserLoginStatus)
@@ -178,7 +173,6 @@ if ($isDeployed)
 		else
 		{
 			$testResult = "Aborted"
-			#New VM deploment failed..
 		}
 	}
 	catch
@@ -205,10 +199,10 @@ else
 	}
 }
 $result = GetFinalResultHeader -resultarr $resultArr
-#Write-Host $resultSummary
 
 #Clean up the setup
+$xmlConfig.config.Azure.Deployment.Data.UserName = $newuser        
 DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isNewDeployed
-
+$xmlConfig.config.Azure.Deployment.Data.UserName = $olduser   
 #Return the result and summery to the test suite script..
 return $result, $resultSummary

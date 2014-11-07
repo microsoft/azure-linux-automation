@@ -867,7 +867,7 @@ Function RemoveICAUnusedDataDisks()
 	}
 }
 
-#function to collect and compare kernel logs added by v-sirebb
+#function to collect and compare kernel logs
 Function GetAndCheckKernelLogs($DeployedServices, $status)
 {
 	$retValue = $false
@@ -983,7 +983,8 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro)
 						$retValue = $VerifiedServices
 						$vnetIsAllConfigured = $false
 						$xmlConfig.config.Azure.Deployment.$setupType.isDeployed = $retValue
-					#Collecting Initial Kernel logs --- v-sirebb
+					#Collecting Initial Kernel
+						$user=$xmlConfig.config.Azure.Deployment.Data.UserName
 						$KernelLogOutput= GetAndCheckKernelLogs -DeployedServices $deployedServices -status "Initial"
 					}
 					else
@@ -1652,6 +1653,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, [switch]$keepUserD
 	{
 		if($DeployedServices)
 		{
+			$user=$xmlConfig.config.Azure.Deployment.Data.UserName
 			$KernelLogOutput=GetAndCheckKernelLogs -DeployedServices $deployedServices -status "Final" #Collecting kernel logs after execution of test case : v-sirebb
 			$isClened = @()
 			$hsNames = $DeployedServices
