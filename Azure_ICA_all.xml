@@ -481,6 +481,23 @@
 				</HostedService>
 			</ExtraLargeVM>
 
+			<xSMBVM>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Large</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</xSMBVM>
+			
 			<E2EFourVM>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -2522,6 +2539,23 @@
 			<Priority>P0</Priority>
 		</test>
 
+		<!-- xSMB CIFS TESTS -->
+		<test>
+			<testName>XSMB-XFS-TEST</testName>
+			<testScript>XSMB-XFS-TEST.py</testScript>
+			<testScriptps1>XSMB-XFS-TEST.ps1</testScriptps1>
+			<files>remote-scripts\azuremodules.py,remote-scripts\XSMB-XFS-TEST.py,remote-scripts\GetXsmbXfsTestStatus.sh,remote-scripts\Packages\xfstests.tar,remote-scripts\Packages\xfsprogs.tar</files>
+			<setupType>xSMBVM</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<TestID></TestID>
+			<SubtestValues></SubtestValues>
+			<MountPoint>'/azureshare'</MountPoint>
+			<AzureShareUrl>'//ostcsmbtest.file.core.windows.net/sirebbshare'</AzureShareUrl>
+			<AccessKey>'bh1ViaUop7GLs51246E9WHg9y7goc1Y+IXMBxJfj379GQLe4Ha81gdlL9zBZQt7QdeuFb+076tIO7wuFVoQNog=='</AccessKey>
+			<Priority>P0</Priority>
+		</test>
+		
 		<!-- E2E FEATURE TEST DEFINITIONS -->
 		<test>
 			<testName>E2E-HOT-ADD-REMOVE-NEW-DATA-DISK-SERIAL</testName>
@@ -3203,6 +3237,13 @@
 			</test>
 			<test>
 				<Name>VNET-VERIFY-CA-AFTER-REBOOT</Name>
+			</test>
+		</Cycle>
+		<!-- xSMB tests -->
+		<Cycle>
+			<cycleName>XSMB</cycleName>
+			<test>
+				<Name>XSMB-XFS-TEST</Name>
 			</test>
 		</Cycle>
 		
