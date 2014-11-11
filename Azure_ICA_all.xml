@@ -2712,7 +2712,7 @@
 			<testScript></testScript>
 			<testScriptps1>E2E-VM-CAPTURE-IMAGE-WITH-WAAGENT-DEPROVISION+USER.ps1</testScriptps1>
 			<files>remote-scripts\temp.txt</files>
-			<setupType>PublicEndpoint</setupType>
+			<setupType>SmallVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID></TestID>
@@ -2725,7 +2725,7 @@
 			<testScript></testScript>
 			<testScriptps1>E2E-VM-CAPTURE-IMAGE-WITH-WAAGENT-DEPROVISION.ps1</testScriptps1>
 			<files>remote-scripts\temp.txt</files>
-			<setupType>PublicEndpoint</setupType>
+			<setupType>SmallVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID></TestID>
