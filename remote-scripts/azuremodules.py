@@ -40,6 +40,34 @@ ResultScreen.setFormatter(ResultFormatter)
 #ResultLog.addHandler(ResultScreen)
 ResultLog.addHandler(WResultLog)
 
+def UpdateRepos(current_distro):
+	RunLog.info ("\nUpdating the repositoriy information...")
+	if ((current_distro == "ubuntu") or (current_distro == "Debian")):
+		Run("apt-get update")
+	elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos')):
+		Run("yum -y update")
+	elif (current_distro == "openSUSE") or (current_distro == "SUSE Linux"):
+		Run("zypper --non-interactive --gpg-auto-import-keys update")
+	else:
+		RunLog.info("Repo upgradation failed on:"+current_distro)
+		return False
+
+	RunLog.info ("Updating the repositoriy information... [done]")
+	return True
+
+def DownloadUrl(url, destination_folder):
+    rtrn = Run("wget -P "+destination_folder+" "+url+ " 2>&1")
+
+    if(rtrn.rfind("wget: command not found") != -1):
+        install_package("wget")
+        rtrn = Run("wget -P "+destination_folder+" "+url+ " 2>&1")
+
+    if( rtrn.rfind("100%") != -1):
+        return True
+    else:
+        RunLog.info (rtrn)
+        return False
+
 def DetectDistro():
 	distribution = 'unknown'
 	version = 'unknown'
@@ -248,12 +276,12 @@ def ZypperPackageInstall(package):
 	RunLog.error((package + ": package installation failed!\n"+output))
 	return False
 
-def IinstallPackage(package):
+def InstallPackage(package):
 	RunLog.info( "\nInstall_package: "+package)
 	[current_distro, distro_version] = DetectDistro()
 	if ((current_distro == "ubuntu") or (current_distro == "Debian")):
 		return AptgetPackageInstall(package)
-	elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos')):
+	elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos') or (current_distro == 'fedora')):
 		return YumPackageInstall(package)
 	elif (current_distro == "SUSE Linux") or (current_distro == "openSUSE") or (current_distro == "sles"):
 		return ZypperPackageInstall(package)
