@@ -30,12 +30,7 @@ if ($isDeployed)
 
 
         LogMsg "Executing : $($currentTestData.testScript)"
-        $output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "./$($currentTestData.testScript) -e $hs1vm1Hostname" -runAsSudo
-        #RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "mv Runtime.log $($currentTestData.testScript).log" -runAsSudo
-        #RemoteCopy -download -downloadFrom $hs1VIP -files "/home/test/state.txt, /home/test/Summary.log, /home/test/$($currentTestData.testScript).log" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
-        #$testResult = Get-Content $LogDir\Summary.log
-        #$testStatus = Get-Content $LogDir\state.txt
-        #write-host $output
+        $output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "python ./$($currentTestData.testScript) -e $hs1vm1Hostname" -runAsSudo
         $testResult = "PASS"
         
         LogMsg "Test result : $testResult"
@@ -70,7 +65,6 @@ if ($isDeployed)
             LogMsg "Test Completed"
         }
     }
-
     catch
     {
         $ErrorMessage =  $_.Exception.Message
@@ -83,15 +77,12 @@ if ($isDeployed)
         {
             $testResult = "Aborted"
         }
-        $resultArr += $testResult
-#$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
-    
+        $resultArr += $testResult 
         # Remove the Cloud Service
         LogMsg "Executing: Remove-AzureService -ServiceName $isDeployed -Force"
         Remove-AzureService -ServiceName $isDeployed -Force
     }
 }
-
 else
 {
     $testResult = "Aborted"
