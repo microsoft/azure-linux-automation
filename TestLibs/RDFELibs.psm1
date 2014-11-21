@@ -103,6 +103,10 @@ Function DetectLinuxDistro($VIP, $SSHport, $testVMUser, $testVMPassword)
 		{
 			$CleanedDistroName = "REDHAT"
 		}
+		elseif ($DistroName -imatch "FEDORA")
+		{
+			$CleanedDistroName = "FEDORA"
+		}
 		else
 		{
 			$CleanedDistroName = "UNKNOWN"

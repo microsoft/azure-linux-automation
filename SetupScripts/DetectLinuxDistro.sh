@@ -7,6 +7,7 @@
 #  OPENSUSE [VERSION INDEPENDANT]
 #  REDHAT
 #  ORACLELINUX
+#  FEDORA
 DetectDistro()
 {
 while echo $1 | grep ^- > /dev/null; do
@@ -25,6 +26,9 @@ done
                 elif [[ "$tmp" == *Red* ]]; then
                     echo "REDHAT"
                     exitVal=0
+                elif [[ "$tmp" == *Fedora* ]]; then
+                    echo "FEDORA"
+                    exitVal=0				
                 else
                     tmp=`cat /etc/system-release`
                     if [[ "$tmp" == *Oracle* ]]; then
