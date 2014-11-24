@@ -4,7 +4,7 @@ from azuremodules import *
 
 import argparse
 import sys
- #for error checking
+#for error checking
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-d', '--distro', help='Please mention which distro you are testing', required=True, type = str)
@@ -13,79 +13,79 @@ args = parser.parse_args()
 distro = args.distro
 
 def verify_default_targetpw(distro):
-        RunLog.info("Checking Defaults targetpw is commented or not..")
-        sudoers_out = Run("cat /etc/sudoers")
-        if "Defaults targetpw" in sudoers_out:
-                if "#Defaults targetpw" in sudoers_out:
-                        print(distro+"_TEST_SUDOERS_VERIFICATION_SUCCESS")
-                        RunLog.info("Defaults targetpw is commented")
+	RunLog.info("Checking Defaults targetpw is commented or not..")
+	sudoers_out = Run("cat /etc/sudoers")
+	if "Defaults targetpw" in sudoers_out:
+		if "#Defaults targetpw" in sudoers_out:
+			print(distro+"_TEST_SUDOERS_VERIFICATION_SUCCESS")
+			RunLog.info("Defaults targetpw is commented")
 			return True
-                else:
-                        RunLog.error("Defaults targetpw is present in /etc sudoers but it is not commented.")
-                        print(distro+"_TEST_SUDOERS_VERIFICATION_FAIL")
+		else:
+			RunLog.error("Defaults targetpw is present in /etc sudoers but it is not commented.")
+			print(distro+"_TEST_SUDOERS_VERIFICATION_FAIL")
 			return False
-        else:
-                RunLog.info("Defaults targetpw is not present in /etc/sudoers")
-                print(distro+"_TEST_SUDOERS_VERIFICATION_SUCCESS")
+	else:
+		RunLog.info("Defaults targetpw is not present in /etc/sudoers")
+		print(distro+"_TEST_SUDOERS_VERIFICATION_SUCCESS")
 		return True
 
 def verify_grub(distro):
-        import os.path
+	import os.path
 	RunLog.info("Checking console=ttyS0 earlyprintk=ttyS0 rootdelay=300..")
 	if distro == "UBUNTU" or distro == "SUSE":
 		grub_out = Run("cat /etc/default/grub")
-	if distro == "CENTOS" or distro == "ORACLELINUX" or distro == "REDHAT" or distro == "SLES":
+	if distro == "CENTOS" or distro == "ORACLELINUX" or distro == "REDHAT" or distro == "SLES" or distro == "FEDORA":
 		if os.path.isfile("/boot/grub2/grub.cfg"):
 			RunLog.info("Getting Contents of /boot/grub2/grub.cfg")
 			grub_out = Run("cat /boot/grub2/grub.cfg")
 		elif os.path.isfile("/boot/grub/menu.lst"):
 			RunLog.info("Getting Contents of /boot/grub/menu.lst")
-                        grub_out = Run("cat /boot/grub/menu.lst")
+			grub_out = Run("cat /boot/grub/menu.lst")
 		else:
 			RunLog.error("Unable to locate grub file")
 			print(distro+"_TEST_GRUB_VERIFICATION_FAIL")
 			return False
-        if "console=ttyS0" in grub_out and "earlyprintk=ttyS0" in grub_out and "rootdelay=300" in grub_out and "libata.atapi_enabled=0" not in grub_out and "reserve=0x1f0,0x8" not in grub_out:
+	if "console=ttyS0" in grub_out and "earlyprintk=ttyS0" in grub_out and "rootdelay=300" in grub_out and "libata.atapi_enabled=0" not in grub_out and "reserve=0x1f0,0x8" not in grub_out:
 		if distro == "CENTOS" or distro == "ORACLELINUX":
 			if "numa=off" in grub_out:
-       	        		print(distro+"_TEST_GRUB_VERIFICATION_SUCCESS")
+				print(distro+"_TEST_GRUB_VERIFICATION_SUCCESS")
 			else : 
 				RunLog.error("numa=off not present in etc/default/grub")
 				print(distro+"_TEST_GRUB_VERIFICATION_FAIL")
 		else:
 			print(distro+"_TEST_GRUB_VERIFICATION_SUCCESS")
-		return True
-        else:
-       	        print(distro+"_TEST_GRUB_VERIFICATION_FAIL")
-           	if "console=ttyS0" not in grub_out:
-                        RunLog.error("console=ttyS0 not present")
-                if "earlyprintk=ttyS0" not in grub_out:
-                        RunLog.error("earlyprintk=ttyS0 not present")
-                if "rootdelay=300" not in grub_out:
-                        RunLog.error("rootdelay=300 not present")
+			return True
+	else:
+		print(distro+"_TEST_GRUB_VERIFICATION_FAIL")
+		if "console=ttyS0" not in grub_out:
+			RunLog.error("console=ttyS0 not present")
+		if "earlyprintk=ttyS0" not in grub_out:
+			RunLog.error("earlyprintk=ttyS0 not present")
+		if "rootdelay=300" not in grub_out:
+			RunLog.error("rootdelay=300 not present")
 		if "libata.atapi_enabled=0" in grub_out:
 			RunLog.error("libata.atapi_enabled=0 is present")
 		if "reserve=0x1f0,0x8" in grub_out:
-                        RunLog.error("reserve=0x1f0,0x8 is present")
+			RunLog.error("reserve=0x1f0,0x8 is present")
 		return False
 
 def verify_network_manager(distro):
 	RunLog.info("Verifying that network manager is not installed")
-	if distro == "CENTOS" or distro == "ORACLELINUX" or distro == "REDHAT":
+	if distro == "CENTOS" or distro == "ORACLELINUX" or distro == "REDHAT" or distro == "FEDORA":
 		n_out = Run ("rpm -q NetworkManager")
 		if "is not installed" in n_out:
 			RunLog.info("Network Manager is not installed")
 			print(distro+"_TEST_NETWORK_MANAGER_NOT_INSTALLED")
 			return True
 		else:
-                        RunLog.error("Network Manager is installed")
-                        print(distro+"_TEST_NETWORK_MANAGER_INSTALLED")
+			RunLog.error("Network Manager is installed")
+			print(distro+"_TEST_NETWORK_MANAGER_INSTALLED")
 			return False
 
 def verify_network_file_in_sysconfig(distro):
 	import os.path
 	RunLog.info("Checking if network file exists in /etc/sysconfig")
-	if distro == "CENTOS" or distro == "ORACLELINUX" or distro == "REDHAT":
+	if distro == "CENTOS" or distro == "ORACLELINUX" or distro == "REDHAT" or distro == "FEDORA":
 		if os.path.isfile("/etc/sysconfig/network"):
 			RunLog.info("File Exists.")
 			n_out = Run("cat /etc/sysconfig/network")
@@ -95,7 +95,7 @@ def verify_network_file_in_sysconfig(distro):
 				return True
 			else:
 				RunLog.error("NETWORKING=yes not present in network file")
-                                print(distro+"_TEST_NETWORK_FILE_ERROR")
+				print(distro+"_TEST_NETWORK_FILE_ERROR")
 				return False
 		else:
 			RunLog.error("File not present")
@@ -104,7 +104,7 @@ def verify_network_file_in_sysconfig(distro):
 
 def verify_ifcfg_eth0(distro):
 	RunLog.info("Verifying contents of ifcfg-eth0 file")
-	if distro == "CENTOS" or distro == "ORACLELINUX" or distro == "REDHAT":
+	if distro == "CENTOS" or distro == "ORACLELINUX" or distro == "REDHAT" or distro == "FEDORA":
 		i_out = Run("cat /etc/sysconfig/network-scripts/ifcfg-eth0")
 		#if "DEVICE=eth0" in i_out and "ONBOOT=yes" in i_out and "BOOTPROTO=dhcp" in i_out and "DHCP=yes" in i_out:
 		if "DEVICE=eth0" in i_out and "ONBOOT=yes" in i_out and "BOOTPROTO=dhcp" in i_out  :
@@ -126,7 +126,7 @@ def verify_ifcfg_eth0(distro):
 def verify_udev_rules(distro):
 	import os.path
 	RunLog.info("Verifying if udev rules are moved to /var/lib/waagent/")
-	if distro == "CENTOS" or distro == "ORACLELINUX" or distro == "REDHAT":
+	if distro == "CENTOS" or distro == "ORACLELINUX" or distro == "REDHAT" or distro == "FEDORA":
 		if not os.path.isfile("/lib/udev/rules.d/75-persistent-net-generator.rules") and not os.path.isfile("/etc/udev/rules.d/70-persistent-net.rules"):
 			RunLog.info("rules are moved.")
 			print(distro+"_TEST_UDEV_RULES_SUCCESS")
@@ -134,8 +134,8 @@ def verify_udev_rules(distro):
 		else:
 			if os.path.isfile("/lib/udev/rules.d/75-persistent-net-generator.rules"):
 				RunLog.error("/lib/udev/rules.d/75-persistent-net-generator.rules file present")
-                        if os.path.isfile("/etc/udev/rules.d/70-persistent-net.rules"):
-                                RunLog.error("/etc/udev/rules.d/70-persistent-net.rules file present")
+			if os.path.isfile("/etc/udev/rules.d/70-persistent-net.rules"):
+				RunLog.error("/etc/udev/rules.d/70-persistent-net.rules file present")
 			print(distro+"_TEST_UDEV_RULES_ERROR")
 			return False
 
@@ -165,7 +165,7 @@ if distro == "UBUNTU":
 	result = verify_grub(distro)
 
 	#Test 4 : Make sure that default targetpw is commented in /etc/sudoers file.
-        result = verify_default_targetpw(distro)
+	result = verify_default_targetpw(distro)
 
 if distro == "SUSE":
 	#Make sure that distro contains Cloud specific repositories
@@ -191,7 +191,7 @@ if distro == "SUSE":
 	#Verify Grub
 	result = verify_grub(distro)
 	#Test : Make sure that default targetpw is commented in /etc/sudoers file.
-        result = verify_default_targetpw(distro)
+	result = verify_default_targetpw(distro)
 
 if distro == "CENTOS":
 	#Test 1 : Make sure Network Manager is not installed
@@ -212,78 +212,79 @@ if distro == "CENTOS":
 		print(distro+"_TEST_REPOSITORIES_ERROR")
 	#Verify etc/yum.conf
 	y_out = Run("cat /etc/yum.conf")
-        if "http_caching=packages" in y_out:
-                RunLog.info("http_caching=packages present in /etc/yum.conf")
-                print(distro+"_TEST_YUM_CONF_SUCCESS")
-        else:
+	if "http_caching=packages" in y_out:
+		RunLog.info("http_caching=packages present in /etc/yum.conf")
+		print(distro+"_TEST_YUM_CONF_SUCCESS")
+	else:
 		RunLog.error("http_caching=packages not present in /etc/yum.conf")
-                print(distro+"_TEST_YUM_CONF_ERROR")
+		print(distro+"_TEST_YUM_CONF_ERROR")
 	result = verify_grub(distro)
 
-if distro == "REDHAT":
-        #Test 1 : Make sure Network Manager is not installed
-        result = verify_network_manager(distro)
-        result = verify_network_file_in_sysconfig(distro)
-        result = verify_ifcfg_eth0(distro)
-        result = verify_udev_rules(distro)
-        #Verify repositories
-        r_out = Run("yum repolist")
-        if "base" in r_out and "updates" in r_out:
-                RunLog.info("Expected repositories are present")
-                print(distro+"_TEST_REPOSITORIES_AVAILABLE")
-        else:
-                if "base" not in r_out:
-                        RunLog.error("Base repository not present")
-                if "updates" not in r_out:
-                        RunLog.error("Updates repository not present")
-                print(distro+"_TEST_REPOSITORIES_ERROR")
-        #Verify etc/yum.conf
-        y_out = Run("cat /etc/yum.conf")
-        if "http_caching=packages" in y_out:
-                RunLog.info("http_caching=packages present in /etc/yum.conf")
-                print(distro+"_TEST_YUM_CONF_SUCCESS")
-        else:
-                RunLog.error("http_caching=packages not present in /etc/yum.conf")
-                print(distro+"_TEST_YUM_CONF_ERROR")
-        result = verify_grub(distro)
+if distro == "REDHAT" or distro == "FEDORA":
+	#Test 1 : Make sure Network Manager is not installed
+	result = verify_default_targetpw(distro)
+	result = verify_network_manager(distro)
+	result = verify_network_file_in_sysconfig(distro)
+	result = verify_ifcfg_eth0(distro)
+	result = verify_udev_rules(distro)
+	#Verify repositories
+	r_out = Run("yum repolist")
+	if "base" in r_out and "updates" in r_out:
+		RunLog.info("Expected repositories are present")
+		print(distro+"_TEST_REPOSITORIES_AVAILABLE")
+	else:
+		if "base" not in r_out:
+			RunLog.error("Base repository not present")
+		if "updates" not in r_out:
+			RunLog.error("Updates repository not present")
+			print(distro+"_TEST_REPOSITORIES_ERROR")
+	#Verify etc/yum.conf
+	y_out = Run("cat /etc/yum.conf")
+	if "http_caching=packages" in y_out:
+		RunLog.info("http_caching=packages present in /etc/yum.conf")
+		print(distro+"_TEST_YUM_CONF_SUCCESS")
+	else:
+		RunLog.error("http_caching=packages not present in /etc/yum.conf")
+		print(distro+"_TEST_YUM_CONF_ERROR")
+		result = verify_grub(distro)
 
 if distro == "ORACLELINUX":
-        #Test 1 : Make sure Network Manager is not installed
-        result = verify_network_manager(distro)
-        result = verify_network_file_in_sysconfig(distro)
-        result = verify_ifcfg_eth0(distro)
-        result = verify_udev_rules(distro)
-        #Verify repositories
-        r_out = Run("yum repolist")
-        if "base" in r_out and "updates" in r_out:
-                RunLog.info("Expected repositories are present")
-                print(distro+"_TEST_REPOSITORIES_AVAILABLE")
-        else:
-                if "base" not in r_out:
-                        RunLog.error("Base repository not present")
-                if "updates" not in r_out:
-                        RunLog.error("Updates repository not present")
-                print(distro+"_TEST_REPOSITORIES_ERROR")
-        #Verify etc/yum.conf
-        y_out = Run("cat /etc/yum.conf")
-        if "http_caching=packages" in y_out:
-                RunLog.info("http_caching=packages present in /etc/yum.conf")
-                print(distro+"_TEST_YUM_CONF_SUCCESS")
-        else:
-                RunLog.error("http_caching=packages not present in /etc/yum.conf")
-                print(distro+"_TEST_YUM_CONF_ERROR")
-        result = verify_grub(distro)
+	#Test 1 : Make sure Network Manager is not installed
+	result = verify_network_manager(distro)
+	result = verify_network_file_in_sysconfig(distro)
+	result = verify_ifcfg_eth0(distro)
+	result = verify_udev_rules(distro)
+	#Verify repositories
+	r_out = Run("yum repolist")
+	if "base" in r_out and "updates" in r_out:
+		RunLog.info("Expected repositories are present")
+		print(distro+"_TEST_REPOSITORIES_AVAILABLE")
+	else:
+		if "base" not in r_out:
+			RunLog.error("Base repository not present")
+		if "updates" not in r_out:
+			RunLog.error("Updates repository not present")
+			print(distro+"_TEST_REPOSITORIES_ERROR")
+	#Verify etc/yum.conf
+	y_out = Run("cat /etc/yum.conf")
+	if "http_caching=packages" in y_out:
+		RunLog.info("http_caching=packages present in /etc/yum.conf")
+		print(distro+"_TEST_YUM_CONF_SUCCESS")
+	else:
+		RunLog.error("http_caching=packages not present in /etc/yum.conf")
+		print(distro+"_TEST_YUM_CONF_ERROR")
+	result = verify_grub(distro)
 
 if distro == "SLES":
 	#Verify Repositories..
 	r_out = Run("zypper lr")
-        if "SUSE_Linux_Enterprise_Server" in r_out and "Pool" in r_out and "Updates" in r_out:
-                RunLog.info("All expected repositories are present")
-                RunLog.info("All expected repositories are enabled and refreshed")
-                print(distro+"_TEST_REPOSITORIES_AVAILABLE")
-        else:
-                RunLog.error("One or more expected repositories are not present")
-                print(distro+"_TEST_REPOSITORIES_ERROR")
+	if "SUSE_Linux_Enterprise_Server" in r_out and "Pool" in r_out and "Updates" in r_out:
+		RunLog.info("All expected repositories are present")
+		RunLog.info("All expected repositories are enabled and refreshed")
+		print(distro+"_TEST_REPOSITORIES_AVAILABLE")
+	else:
+		RunLog.error("One or more expected repositories are not present")
+		print(distro+"_TEST_REPOSITORIES_ERROR")
 	#Verify Grub
 	result = verify_grub(distro)
 	#Verify sudoers file
