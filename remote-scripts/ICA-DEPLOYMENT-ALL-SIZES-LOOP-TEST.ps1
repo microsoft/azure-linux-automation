@@ -10,6 +10,7 @@ $DeploymentCount = $currentTestData.DeploymentCount
 	try
 	{
         $count = 0
+        $allowedFails = 5
         $successCount = 0
         $failCount = 0
         $VMSizeNumber = 0
@@ -33,7 +34,14 @@ $DeploymentCount = $currentTestData.DeploymentCount
                 $failCount += 1
                 LogErr "ATTEMPT : $count/$DeploymentCount : Deploying $($VMSizes[$VMSizeNumber]) VM.. FAIL"
                 $deployResult = "FAIL"
-                break;
+                if ( $failCount -lt $allowedFails )
+                {
+                    continue;
+                }
+                else
+                {
+                    break;
+                }
             }
             if($VMSizeNumber -gt ($NumberOfSizes-2))
             {
