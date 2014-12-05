@@ -1411,7 +1411,38 @@
 					</VirtualMachine>
 				</HostedService>
 			</D4>
-
+			<A8>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>A8</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</A8>
+			<A9>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>A9</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</A9>
 		</Deployment>
 		
 
@@ -2856,7 +2887,18 @@
 			<DeploymentCount>100</DeploymentCount>
 			<TestID>Reboot_01</TestID>
 		</test>
-	
+		<test>
+			<testName>ICA-LINPACK-TEST</testName>
+			<testScript></testScript>
+			<testScriptPs1>ICA-LINPACK-TEST.ps1</testScriptPs1>
+			<files>remote-scripts\azuremodules.py,remote-scripts\start-linpack-test-in-background.py</files>
+			<setupType>A8</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<!-- <SubtestValues>ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM,D1,D2,D3,D4</SubtestValues> -->
+			<SubtestValues></SubtestValues>
+			<TestID></TestID>
+		</test>
 	</testsDefinition>
 
 
@@ -3394,6 +3436,12 @@
 				<Name>E2E-TIME-SYNC-KERNBENCH</Name>
 			</test>
 		</Cycle>
+		<Cycle>
+			<cycleName>LINPACK-STREAM</cycleName>
+			<test>
+				<Name>ICA-LINPACK-TEST</Name>
+			</test>
+		</Cycle>		
 		<Cycle>
 			<cycleName>DEBUG</cycleName>
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
