@@ -34,7 +34,7 @@ def download_and_install_rpm(package):
 	RunLog.info("Installing Package: " + package+" from rpmlink")
 	if package in rpm_links:
 		if DownloadUrl(rpm_links.get(package), "/tmp/"):
-			if InstallRpm("/tmp/"+re.split("/",rpm_links.get(package))[-1]):
+			if InstallRpm("/tmp/"+re.split("/",rpm_links.get(package))[-1], package):
 				RunLog.info("Installing Package: " + package+" from rpmlink done!")
 				return True
 
@@ -97,6 +97,19 @@ def install_package(package):
 			RunLog.info (current_distro + ": Unrecognised Distribution OS Linux found!")
 			return False
 
+def DownloadUrl(url, destination_folder):
+    rtrn = Run("wget -P "+destination_folder+" "+url+ " 2>&1")
+
+    if(rtrn.rfind("wget: command not found") != -1):
+        install_package("wget")
+        rtrn = Run("wget -P "+destination_folder+" "+url+ " 2>&1")
+
+    if( rtrn.rfind("100%") != -1):
+        return True
+    else:
+        RunLog.info (rtrn)
+        return False
+		
 def ConfigFilesUpdate():
 	firewall_disabled = False
 	update_configuration = False
