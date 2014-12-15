@@ -2887,6 +2887,8 @@
 			<DeploymentCount>100</DeploymentCount>
 			<TestID>Reboot_01</TestID>
 		</test>
+		
+		<!-- PERFORMANCE TESTS DEFINITIONS -->
 		<test>
 			<testName>ICA-LINPACK-TEST</testName>
 			<testScript></testScript>
@@ -2899,6 +2901,18 @@
 			<SubtestValues></SubtestValues>
 			<TestID></TestID>
 		</test>
+		<test>
+			<testName>ICA-STREAM-TEST</testName>
+			<testScript>ICA-STREAM-TEST.py</testScript>
+			<testScriptPs1>ICA-STREAM-TEST.ps1</testScriptPs1>
+			<files>remote-scripts\azuremodules.py,remote-scripts\ICA-STREAM-TEST.py,remote-scripts\stream.c</files>
+			<setupType>A8</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<!-- <SubtestValues>ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM,D1,D2,D3,D4</SubtestValues> -->
+			<SubtestValues></SubtestValues>
+			<TestID></TestID>
+		</test>		
 	</testsDefinition>
 
 
@@ -3441,6 +3455,9 @@
 			<test>
 				<Name>ICA-LINPACK-TEST</Name>
 			</test>
+			<test>
+				<Name>ICA-STREAM-TEST</Name>
+			</test>			
 		</Cycle>		
 		<Cycle>
 			<cycleName>DEBUG</cycleName>
