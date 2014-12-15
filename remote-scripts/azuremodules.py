@@ -55,19 +55,6 @@ def UpdateRepos(current_distro):
 	RunLog.info ("Updating the repositoriy information... [done]")
 	return True
 
-def DownloadUrl(url, destination_folder):
-    rtrn = Run("wget -P "+destination_folder+" "+url+ " 2>&1")
-
-    if(rtrn.rfind("wget: command not found") != -1):
-        install_package("wget")
-        rtrn = Run("wget -P "+destination_folder+" "+url+ " 2>&1")
-
-    if( rtrn.rfind("100%") != -1):
-        return True
-    else:
-        RunLog.info (rtrn)
-        return False
-
 def DetectDistro():
 	distribution = 'unknown'
 	version = 'unknown'
@@ -305,7 +292,7 @@ def InstallDeb(file_path):
 	RunLog.info(file_path+": Installation failed"+output)
 	return False
 
-def InstallRpm(file_path):
+def InstallRpm(file_path, package_name):
 	RunLog.info( "\nInstalling package: "+file_path)
 	output = Run("rpm -ivh --nodeps "+file_path+" 2>&1")
 	RunLog.info(output)
@@ -322,6 +309,9 @@ def InstallRpm(file_path):
 		elif(re.match(re.escape(package) + r'.*######', line, re.M|re.I)):
 			RunLog.info(package + ": package installed successfully."+line)
 			return True
+		elif(re.match(re.escape(package_name) + r'.*######', line, re.M|re.I)): 
+			RunLog.info(package + ": package installed successfully."+line) 
+			return True 
 			
 	RunLog.info(file_path+": Installation failed"+output)
 	return False

@@ -889,7 +889,7 @@ Function GetAndCheckKernelLogs($DeployedServices, $status)
 			LogMsg "Collecting $($VM.Name) VM Kernel $status Logs.."
 			$InitailBootLog="$BootLogDir\InitialBootLogs.txt"
 			$FinalBootLog="$BootLogDir\FinalBootLogs.txt"
-			$KernelLogStatus="$BootLogDir\KernalLogStatus.txt"
+			$KernelLogStatus="$BootLogDir\KernelLogStatus.txt"
 			$VMEndpoints = Get-AzureEndpoint -VM $VM
 			$VMSSHPort = GetPort -Endpoints $VMEndpoints -usage "SSH"
 			if($status -imatch "Initial")
