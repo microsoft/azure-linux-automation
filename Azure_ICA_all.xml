@@ -1347,6 +1347,22 @@
 					</VirtualMachine>
 				</HostedService>
 			</BVTDeployment>
+			<VMImage>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</VMImage>			
 			<D1>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -1463,7 +1479,7 @@
 			<testScript>SETUP-INSTALL-PACKAGES.py</testScript>
 			<testScriptPs1>SETUP-INSTALL-PACKAGES.ps1</testScriptPs1>
 			<files>remote-scripts\azuremodules.py,remote-scripts\SETUP-INSTALL-PACKAGES.py,remote-scripts\packages.xml</files>
-			<setupType>BVTDeployment</setupType>
+			<setupType>VMImage</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureSetup_001</TestID>

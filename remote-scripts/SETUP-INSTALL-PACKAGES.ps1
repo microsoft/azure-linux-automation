@@ -2,6 +2,7 @@
 Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""
+$SetupStatus= ""
 $resultArr = @()
 
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
@@ -28,42 +29,92 @@ if ($isDeployed)
         RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
         RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *" -runAsSudo
 
-
         LogMsg "Executing : $($currentTestData.testScript)"
-        $output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "python ./$($currentTestData.testScript) -e $hs1vm1Hostname" -runAsSudo
-        $testResult = "PASS"
-        
-        LogMsg "Test result : $testResult"
-
-        LogMsg "Stopping prepared OS image : $hs1vm1Hostname"
-        $tmp = Stop-AzureVM -ServiceName $isDeployed -Name $hs1vm1Hostname -Force
-        LogMsg "Stopped the VM succussfully"
-        
-        LogMsg "Capturing the OS Image"
-        $NewImageName = $isDeployed + '-prepared'
-        $tmp = Save-AzureVMImage -ServiceName $isDeployed -Name $hs1vm1Hostname -NewImageName $NewImageName -NewImageLabel $NewImageName
-        LogMsg "Successfully captured VM image : $NewImageName"
-        
-        # Capture the prepared image names
-        $PreparedImageInfoLogPath = "$pwd\PreparedImageInfoLog.xml"
-        if((Test-Path $PreparedImageInfoLogPath) -eq $False)
-        {
-            $PreparedImageInfoLog = New-Object -TypeName xml
-            $root = $PreparedImageInfoLog.CreateElement("PreparedImages")
-            $content = "<PreparedImageName></PreparedImageName>"
-            $root.set_InnerXML($content)
-            $PreparedImageInfoLog.AppendChild($root)
-            $PreparedImageInfoLog.Save($PreparedImageInfoLogPath)
-        }
-        [xml]$xml = Get-Content $PreparedImageInfoLogPath
-        $xml.PreparedImages.PreparedImageName = $NewImageName
-        $xml.Save($PreparedImageInfoLogPath)
-        
-        
-        if ($testStatus -eq "TestCompleted")
-        {
-            LogMsg "Test Completed"
-        }
+        try{
+			$output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "python ./$($currentTestData.testScript)" -runAsSudo
+			$output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "ls /home/$user/SetupStatus.txt  2>&1" -runAsSudo
+			
+			if($output -imatch "/home/$user/SetupStatus.txt")
+			{
+				$SetupStatus = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat /home/$user/SetupStatus.txt" -runAsSudo
+				$out = RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/PackageStatus.txt" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password 2>&1 | Out-Null
+				$sfile=Get-Content -Path $LogDir\PackageStatus.txt 
+				$i=0
+				foreach ($line in $sfile)
+				{
+					if($line -imatch "Started" -or $line -imatch "Completed" -or $line -imatch "successfully")
+					{
+						LogMsg "$i : $line"
+					}
+					elseif($line -imatch "failed")
+					{
+						LogErr "$i : $line"
+					}
+					$i=$i+1
+				}
+				if($SetupStatus -imatch "PACKAGE-INSTALL-CONFIG-PASS")
+				{
+					LogMsg "** All the required packages for the distro installed successfully **"					
+					GetVMLogs -DeployedServices $isDeployed
+					#VM De-provision
+					$output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "/usr/sbin/waagent -force -deprovision+user 2>&1" -runAsSudo
+					if($output -match "home directory will be deleted")
+					{
+						LogMsg "** VM De-provisioned Successfully **"
+						LogMsg "Stopping a VM to prepare OS image : $hs1vm1Hostname"
+						$tmp = Stop-AzureVM -ServiceName $isDeployed -Name $hs1vm1Hostname -Force
+						LogMsg "VM stopped successful.."
+						
+						LogMsg "Capturing the OS Image"
+						$NewImageName = $isDeployed + '-prepared'
+						$tmp = Save-AzureVMImage -ServiceName $isDeployed -Name $hs1vm1Hostname -NewImageName $NewImageName -NewImageLabel $NewImageName
+						LogMsg "Successfully captured VM image : $NewImageName"
+						
+						#Remove the Cloud Service
+						LogMsg "Executing: Remove-AzureService -ServiceName $isDeployed -Force"
+						Remove-AzureService -ServiceName $isDeployed -Force
+						
+						# Capture the prepared image names
+						$PreparedImageInfoLogPath = "$pwd\PreparedImageInfoLog.xml"
+						if((Test-Path $PreparedImageInfoLogPath) -eq $False)
+						{
+							$PreparedImageInfoLog = New-Object -TypeName xml
+							$root = $PreparedImageInfoLog.CreateElement("PreparedImages")
+							$content = "<PreparedImageName></PreparedImageName>"
+							$root.set_InnerXML($content)
+							$PreparedImageInfoLog.AppendChild($root)
+							$PreparedImageInfoLog.Save($PreparedImageInfoLogPath)
+						}
+						[xml]$xml = Get-Content $PreparedImageInfoLogPath
+						$xml.PreparedImages.PreparedImageName = $NewImageName
+						$xml.Save($PreparedImageInfoLogPath)						
+						
+						$testResult = "PASS"
+						LogMsg "Test result : $testResult"
+					}
+					else{
+						LogMsg "** VM De-provision Failed**"
+						$testResult = "FAIL"
+						LogMsg "Test result : $testResult"
+					}
+				}
+				else{
+					$testResult = "FAIL"
+					LogMsg "Test result : $testResult"
+					GetVMLogs -DeployedServices $isDeployed
+				}
+			}
+			else{
+					$testResult = "FAIL"
+					GetVMLogs -DeployedServices $isDeployed
+			}
+		}
+		catch{
+			$ErrorMessage =  $_.Exception.Message
+			LogMsg "EXCEPTION : $ErrorMessage"
+			$testResult = "FAIL"
+			GetVMLogs -DeployedServices $isDeployed
+		}
     }
     catch
     {
@@ -78,9 +129,6 @@ if ($isDeployed)
             $testResult = "Aborted"
         }
         $resultArr += $testResult 
-        # Remove the Cloud Service
-        LogMsg "Executing: Remove-AzureService -ServiceName $isDeployed -Force"
-        Remove-AzureService -ServiceName $isDeployed -Force
     }
 }
 else

@@ -46,7 +46,7 @@ def UpdateRepos(current_distro):
 		Run("apt-get update")
 	elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos')):
 		Run("yum -y update")
-	elif (current_distro == "openSUSE") or (current_distro == "SUSE Linux"):
+	elif (current_distro == "opensuse") or (current_distro == "SUSE") or (current_distro == "sles"):
 		Run("zypper --non-interactive --gpg-auto-import-keys update")
 	else:
 		RunLog.info("Repo upgradation failed on:"+current_distro)
@@ -54,6 +54,19 @@ def UpdateRepos(current_distro):
 
 	RunLog.info ("Updating the repositoriy information... [done]")
 	return True
+
+def DownloadUrl(url, destination_folder):
+    rtrn = Run("wget -P "+destination_folder+" "+url+ " 2>&1")
+
+    if(rtrn.rfind("wget: command not found") != -1):
+        install_package("wget")
+        rtrn = Run("wget -P "+destination_folder+" "+url+ " 2>&1")
+
+    if( rtrn.rfind("100%") != -1):
+        return True
+    else:
+        RunLog.info (rtrn)
+        return False
 
 def DetectDistro():
 	distribution = 'unknown'
@@ -82,10 +95,10 @@ def DetectDistro():
 				distribution = 'ubuntu'
 				break
 			elif (re.match(r'.*SUSE Linux.*',line,re.M|re.I)):
-				distribution = 'SUSE Linux'
+				distribution = 'SUSE'
 				break
 			elif (re.match(r'.*openSUSE.*',line,re.M|re.I)):
-				distribution = 'openSUSE'
+				distribution = 'opensuse'
 				break
 			elif (re.match(r'.*centos.*',line,re.M|re.I)):
 				distribution = 'centos'
@@ -95,7 +108,10 @@ def DetectDistro():
 				break
 			elif (re.match(r'.*Red Hat.*',line,re.M|re.I)):
 				distribution = 'rhel'
-				break	
+				break
+			elif (re.match(r'.*Fedora.*',line,re.M|re.I)):
+				distribution = 'fedora'
+				break					
 	return [distribution, version]
 
 def FileGetContents(filename):
@@ -202,12 +218,17 @@ def YumPackageInstall(package):
 	RunLog.error((package + ": package installation failed!\n" +output))
 	return False
 
-def AptgetPackageInstall(package):
+def AptgetPackageInstall(package,dbpasswd = "root"):
 	RunLog.info("Installing Package: " + package)
 	# Identify the package for Ubuntu
 	# We Haven't installed mysql-secure_installation for Ubuntu Distro
-	output = Run("apt-get install -y  --force-yes "+package)
-	
+	if (package == 'mysql-server'):
+		RunLog.info( "apt-get function package:" + package) 		
+		cmds = ("export DEBIAN_FRONTEND=noninteractive","echo mysql-server mysql-server/root_password select " + dbpasswd + " | debconf-set-selections", "echo mysql-server mysql-server/root_password_again select " + dbpasswd  + "| debconf-set-selections", "apt-get install -y  --force-yes mysql-server")
+		output = ExecMultiCmdsLocalSudo(cmds)
+	else:
+		output = Run("apt-get install -y  --force-yes "+package)
+		
 	outputlist = re.split("\n", output)	
  
 	unpacking = False
@@ -270,7 +291,7 @@ def InstallPackage(package):
 		return AptgetPackageInstall(package)
 	elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos') or (current_distro == 'fedora')):
 		return YumPackageInstall(package)
-	elif (current_distro == "SUSE Linux") or (current_distro == "openSUSE") or (current_distro == "sles"):
+	elif ((current_distro == "SUSE") or (current_distro == "opensuse") or (current_distro == "sles")):
 		return ZypperPackageInstall(package)
 	else:
 		RunLog.error((package + ": package installation failed!"))
