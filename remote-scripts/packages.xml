@@ -2,13 +2,14 @@
 <setup>
     <branch>
 		
-	    <packages distro="ubuntu">iperf mysql-server gcc bind9 python libpython2.7-stdlib python-crypto python-paramiko nfs-common psmisc tcpdump ntp libaio1 xfsprogs</packages>
-	    <packages distro="SUSE Linux">iperf mysql-community-server gcc bind9 python python-argparse python-crypto python-paramiko nfs-utils psmisc tcpdump ntp libaio xfsprogs</packages>
-	    <packages distro="openSUSE">iperf mysql-community-server gcc bind9 python python-argparse python-crypto python-paramiko nfs-utils psmisc tcpdump ntp libaio xfsprogs</packages>
-	    <packages distro="centos">mysql iperf gcc bind python python-argparse python-crypto python-paramiko nfs-utils psmisc tcpdump ntp libaio xfsprogs nfs-utils</packages>
-	    <packages distro="Oracle">iperf mysql gcc bind python python-argparse python-crypto python-paramiko nfs-utils psmisc tcpdump ntp libaio xfsprogs</packages>
-	    <packages distro="rhel">iperf mysql gcc bind python python-argparse python-crypto python-paramiko nfs-utils psmisc tcpdump ntp libaio xfsprogs</packages>
-	    <packages distro="fedora">iperf  mysql  gcc  bind  python python-argparse  python-crypto python-paramiko nfs-utils  psmisc tcpdump ntp xfsprogs libaio wget vim gnuplot </packages>
+	    <packages distro="ubuntu">iperf,mysql-server,gcc,bind9,python-crypto,python-paramiko,nfs-common,psmisc,tcpdump,ntp,libaio1,xfsprogs</packages>
+	    <packages distro="SUSE">iperf,mysql,gcc,bind,python,python-argparse,python-paramiko,nfs-kernel-server,psmisc,tcpdump,ntp,libaio,xfsprogs</packages>
+		<packages distro="sles">iperf,mariadb,gcc,bind,python,python-argparse,python-paramiko,nfs-kernel-server,psmisc,tcpdump,ntp,libaio1,xfsprogs</packages>
+	    <packages distro="opensuse">wget,iperf,mysql-community-server,gcc,bind,python,python-argparse,python-crypto,python-paramiko,nfs-kernel-server,psmisc,tcpdump,ntp,libaio1,xfsprogs</packages>
+	    <packages distro="centos">wget,mysql,iperf,gcc,bind,python,python-argparse,python-crypto,python-paramiko,nfs-utils,psmisc,tcpdump,ntp,libaio,xfsprogs</packages>
+	    <packages distro="Oracle">wget,iperf,mysql,gcc,bind,python,python-argparse,python-crypto,python-paramiko,nfs-utils,psmisc,tcpdump,ntp,libaio,xfsprogs</packages>
+	    <packages distro="rhel">wget,iperf mysql gcc bind python python-argparse python-crypto python-paramiko nfs-utils psmisc tcpdump ntp libaio xfsprogs</packages>
+	    <packages distro="fedora">wget,iperf,mysql,gcc,bind,python,python-argparse,python-crypto,python-paramiko,nfs-utils,psmisc,tcpdump,ntp,xfsprogs,libaio,vim,gnuplot</packages>
 	    <waLinuxAgent_link>https://raw.githubusercontent.com/Azure/WALinuxAgent/2.0/waagent</waLinuxAgent_link>
 	    <rpm_link name="iperf">ftp://ftp.pbone.net/mirror/ftp.freshrpms.net/pub/freshrpms/pub/dag/fedora/5/en/x86_64/RPMS.dries/iperf-2.0.4-1.fc5.rf.x86_64.rpm</rpm_link>
 	    <rpm_link name="iozone"></rpm_link>

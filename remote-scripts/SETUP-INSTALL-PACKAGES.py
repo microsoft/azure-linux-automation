@@ -11,6 +11,7 @@ import os.path
 current_distro	= "unknown"
 distro_version	= "unknown"
 sudo_password	= "rdPa$$w0rd"
+startup_file = ""
 
 rpm_links = {}
 tar_link = {}
@@ -20,6 +21,7 @@ packages_list_xml = "./packages.xml"
 def set_variables_OS_dependent():
 	global current_distro
 	global distro_version
+	global startup_file
 
 	RunLog.info ("\nset_variables_OS_dependent ..")
 	[current_distro, distro_version] = DetectDistro()
@@ -27,7 +29,12 @@ def set_variables_OS_dependent():
 		RunLog.info ("unknown distribution found exitting")
 		ResultLog.info('ABORTED')
 		exit()
-
+	if(current_distro == "ubuntu" or current_distro == "Debian"):
+		startup_file = '/etc/rc.local'
+	elif(current_distro == "centos" or current_distro == "rhel" or current_distro == "fedora" or current_distro == "Oracle"):
+		startup_file = '/etc/rc.d/rc.local'
+	elif(current_distro == "SUSE" or current_distro == "sles" or current_distro == "opensuse"):
+		startup_file = '/etc/rc.d/after.local'
 	RunLog.info ("\nset_variables_OS_dependent ..[done]")
 
 def download_and_install_rpm(package):
@@ -90,30 +97,17 @@ def install_package(package):
 			return AptgetPackageInstall(package)
 		elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos') or (current_distro == 'fedora')):
 			return yum_package_install(package)
-		elif (current_distro == "SUSE Linux") or (current_distro == "openSUSE"):
+		elif (current_distro == "SUSE") or (current_distro == "openSUSE") or (current_distro == "sles") or (current_distro == "opensuse"):
 			return zypper_package_install(package)
 		else:
 			RunLog.info (package + ": package installation failed!")
 			RunLog.info (current_distro + ": Unrecognised Distribution OS Linux found!")
 			return False
 
-def DownloadUrl(url, destination_folder):
-    rtrn = Run("wget -P "+destination_folder+" "+url+ " 2>&1")
-
-    if(rtrn.rfind("wget: command not found") != -1):
-        install_package("wget")
-        rtrn = Run("wget -P "+destination_folder+" "+url+ " 2>&1")
-
-    if( rtrn.rfind("100%") != -1):
-        return True
-    else:
-        RunLog.info (rtrn)
-        return False
-		
 def ConfigFilesUpdate():
 	firewall_disabled = False
 	update_configuration = False
-
+	IsStartUp = False
 	RunLog.info("Updating configuration files..")
 
 	# Disable 'requiretty' in sudoers
@@ -125,18 +119,20 @@ def ConfigFilesUpdate():
 	pamconf = Run("cat /etc/security/pam_env.conf")
 
 	if ((pamconf.find('#REMOTEHOST') == -1) and (pamconf.find('#DISPLAY') == -1)):
-		RunLog.info("/etc/security/pam_env.conf\n")
+		RunLog.info("/etc/security/pam_env.conf updated successfully\n")
 		update_configuration = True
+		Run("echo '** Config files are updated successfully **' >> PackageStatus.txt")
 	else:
 		RunLog.error('Config file not updated\n')
+		Run("echo '** updating of config file is failed **' >> PackageStatus.txt")
 		update_configuration = False
 
 	if (update_configuration == True):
 		RunLog.info('Config file updation succesfully!\n')
-		UpdateState("Config file updation succesfully!")
+		
 	else:
 		RunLog.error('[Error] Config file updation failed!')
-		UpdateState("Config file updation failed!")
+		
 
 	#Configuration of Firewall(Disable)
 	if (current_distro == "ubuntu"):
@@ -148,7 +144,7 @@ def ConfigFilesUpdate():
 			RunLog.error('**Failed to disable Firewall**')
 			firewall_disabled = False
 
-	if ((current_distro == "SUSE Linux") or (current_distro == "openSUSE") or (current_distro == "sles")):
+	if ((current_distro == "SUSE") or (current_distro == "openSUSE")):
 		FWBootInfo = Run("/sbin/yast2 firewall startup manual")
 		if(FWBootInfo.find('Removing firewall from the boot process')):
 			RunLog.info('Firewall Removed successfully from boot process \n')
@@ -161,37 +157,33 @@ def ConfigFilesUpdate():
 		else:
 			RunLog.error('**Failed to disable Firewall**')
 			firewall_disabled = False
-	
-	if(firewall_disabled and update_configuration):
-		return True
 	else:
-		return False
+		FirewallCmds = ("iptables -F","iptables -X","iptables -t nat -F","iptables -t nat -X","iptables -t mangle -F","iptables -t mangle -X","iptables -P INPUT ACCEPT","iptables -P OUTPUT ACCEPT","iptables -P FORWARD ACCEPT","systemctl stop iptables.service","systemctl disable iptables.service","systemctl stop firewalld.service","systemctl disable firewalld.service")
+		output = ExecMultiCmdsLocalSudo(FirewallCmds)
+		RunLog.info("Firewall disabled successfully\n")
+		Run("echo '** Firewall disabled successfully **' >> PackageStatus.txt")
+	#Verify startup file	
+	StartupStatus= Run('ls '+startup_file+' 2>&1')
+	if("No such file or directory" in StartupStatus):
+		RunLog.info( "'"+startup_file+"' not available.. ")
+		RunLog.info( "creating '+startup_file+'.. ")
+		cmds=["touch "+startup_file,"chmod a+x "+startup_file,"echo '#!/bin/sh' > "+startup_file,"echo ' ' >> "+startup_file,"echo 'exit 0' >> "+startup_file]
+		ExecMultiCmdsLocalSudo(cmds)
+		if(current_distro == "fedora"):
+			cmds = ["service rc-local start","service rc-local status"]
+			ExecMultiCmdsLocalSudo(cmds)
+		RunLog.info("'+startup_file+' created successfully\n")
+		Run("echo '** Is '"+startup_file+"' created successfully **' >> PackageStatus.txt")
+		IsStartUp = True
+		
+	else:
+		RunLog.info("'"+startup_file+"' available.. ")
+		Run("echo '** Is '"+startup_file+"' verified successfully **' >> PackageStatus.txt")
+		IsStartUp = True
 
-def deprovision():
-	success = False
-	# These commads will do deprovision and set the root password with out using any pexpect module.
-	# Using openssl command to generate passwd hash and keeping it in /etc/shadow file.
-	deprovision_commands = (
-	"/usr/sbin/waagent -force -deprovision+user 2>&1", \
-	"sudo_hash=$(openssl passwd -1 '"+sudo_password+"')", \
-	"echo $sudo_hash",\
-	"sed -i 's_\(^root:\)\(.*\)\(:.*:.*:.*:.*:.*:.*:.*.*\)_\\1'$sudo_hash'\\3_' /etc/shadow")
-
-	output = ExecMultiCmdsLocalSudo(deprovision_commands)
-	outputlist = re.split("\n", output)
-
-	for line in outputlist:
-		if (re.match(r'WARNING!.*account and entire home directory will be deleted', line, re.M|re.I)):
-			RunLog.info ("'waagent -deprovision+user' command succesful\n")
-			success = True
-			break
-
-	if (success == False):
-		RunLog.info ("'waagent -deprovision+user' command failed\n")
-	
-	output = Run("ls /home/ |wc -l")
-	if(not output.find("0")):
-		RunLog.info ("'waagent -deprovision+user' command failed\nCould not delete '/home/test1/'")
+	if(firewall_disabled and update_configuration and IsStartUp):
+		success = True
+	else:
 		success = False
 
 	return success
@@ -199,41 +191,50 @@ def deprovision():
 def RunTest():
 	UpdateState("TestRunning")
 	success = True
-
 	try:
 		import xml.etree.cElementTree as ET
 	except ImportError:
 		import xml.etree.ElementTree as ET
 
-	# Parse the packages.xml file into memory
+	#Parse the packages.xml file into memory
 	packages_xml_file = ET.parse(packages_list_xml)
 	xml_root = packages_xml_file.getroot()
 
 	parse_success = False
-
+	Run("echo '** Installing Packages for '"+current_distro+"' Started.. **' > PackageStatus.txt")
 	for branch in xml_root:
 		for node in branch:
 			if (node.tag == "packages"):
 				if(current_distro == node.attrib["distro"]):
-					packages_list = node.text.split(" ")
+					packages_list = node.text.split(",")
 			elif node.tag == "waLinuxAgent_link":
 				pass
 			elif node.tag == "rpm_link":
 				rpm_links[node.attrib["name"]] = node.text
 			elif node.tag == "tar_link":
 				tar_link[node.attrib["name"]] = node.text
-
+	
 	for package in packages_list:
 		if(not install_package(package)):
-			success == False
-			break
-
+			success = False
+			Run("echo '"+package+"' failed to install >> PackageStatus.txt")
+			#break
+		else:
+			Run("echo '"+package+"' installed successfully >> PackageStatus.txt")
+			
+	Run("echo '** Packages Installation Completed **' >> PackageStatus.txt")		
 	if success == True:
 		ConfigFilesUpdate()
-		deprovision()
-		ResultLog.info('PASS')
+		if success == True:
+			RunLog.info('PACKAGE-INSTALL-CONFIG-PASS')
+			Run("echo 'PACKAGE-INSTALL-CONFIG-PASS' >> SetupStatus.txt")
+		else:
+			RunLog.info('PACKAGE-INSTALL-CONFIG-FAIL')
+			Run("echo 'PACKAGE-INSTALL-CONFIG-FAIL' >> SetupStatus.txt")
 	else:
-		ResultLog.info('FAIL')
+		RunLog.info('PACKAGE-INSTALL-CONFIG-FAIL')
+		Run("echo 'PACKAGE-INSTALL-CONFIG-FAIL' >> SetupStatus.txt")
+	
 
 #Code execution starts from here
 if not os.path.isfile("packages.xml"):
@@ -244,4 +245,4 @@ set_variables_OS_dependent()
 UpdateRepos(current_distro)
 
 RunTest()
-Run("mkdir logs;cp -rf ~/* /tmp/logs")
+
