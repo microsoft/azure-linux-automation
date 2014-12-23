@@ -972,7 +972,7 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro)
 			$position = 1
 			$i = 0
 			$role = 1
-			$setupTypeData = $xml.config.Azure.Deployment.$setupType
+			$setupTypeData = $xmlConfig.config.Azure.Deployment.$setupType
 			$isAllDeployed = CreateAllDeployments -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro
 			$isAllVerified = "False"
 			$isAllConnected = "False"

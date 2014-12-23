@@ -2652,6 +2652,26 @@
 			<DiskFormat>ext4</DiskFormat>
 			<Priority>P0</Priority>
 		</test>
+		<test>
+			<testName>ICA-FIO-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-FIO-TEST.ps1</testScriptps1>
+			<files>remote-scripts\start-fio.py,remote-scripts\azuremodules.py,SetupScripts\packageInstall.sh</files>
+			<setupType>ExtraLargeVM</setupType>
+			<!-- ioSizes in kiloBytes only 1,2,4,8,16,32,... ,1024. Don't add "k" after integer-->
+			<ioSizes>4,8,16,32,64,128,256</ioSizes>
+			<!-- you can specifiy que depths with commaa separated integer values. 1,2,4,16......-->
+			<queueDepths>16</queueDepths>
+			<TestFileSizeinGB>8</TestFileSizeinGB>
+			<!-- if ioengine is empty here, libaio will be used as default io engine-->
+			<ioengine></ioengine>
+			<runtimeSeconds>600</runtimeSeconds>
+			<SubtestValues>Here_some_text_is_required_due_to_automation_structure</SubtestValues>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<TestID></TestID>
+			<Priority>P0</Priority>
+		</test>
 
 		<!-- xSMB CIFS TESTS -->
 		<test>
