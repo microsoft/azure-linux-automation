@@ -39,8 +39,7 @@ $testResult = ""
 $resultArr = @()
 
 #Deploy A new VM..
-#$isDeployed = DeployVMS -setupType $currentTestData.setupType  -Distro $Distro -xmlConfig $xmlConfig
-$isDeployed = "ICA-ExtraLargeVM-U1410xfs-12-23-20-32-16"
+$isDeployed = DeployVMS -setupType $currentTestData.setupType  -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
     try
