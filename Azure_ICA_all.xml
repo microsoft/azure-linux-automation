@@ -1704,6 +1704,7 @@
 			<testScriptps1>NETWORK-OUTBOUND-ACCESS-IPERF-DTAP-UDP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_OA_004</TestID>
@@ -1715,6 +1716,7 @@
 			<testScriptps1>NETWORK-OUTBOUND-ACCESS-IPERF-DTAP-TCP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_OA_001</TestID>
@@ -1727,6 +1729,7 @@
 			<SubtestValues>2,4</SubtestValues>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_OA_003</TestID>
@@ -1740,6 +1743,7 @@
 			<SubtestValues>100,300,500,700,900,1100,1300,1420</SubtestValues>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_OA_005</TestID>
@@ -1752,6 +1756,7 @@
 			<SubtestValues>2,4</SubtestValues>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_OA_006</TestID>
@@ -1799,6 +1804,7 @@
 			<testScriptps1>NETWORK-IE-UDP-SINGLE-HS.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>IEndpointSingleHS</setupType>
+			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_INT_003</TestID>
@@ -1811,6 +1817,7 @@
 			<testScriptps1>NETWORK-IE-TCP-SINGLE-HS.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>IEndpointSingleHS</setupType>
+			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_INT_001</TestID>
@@ -1824,6 +1831,7 @@
 			<SubtestValues>2,4</SubtestValues>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>IEndpointSingleHS</setupType>
+			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_INT_002</TestID>
@@ -1837,6 +1845,7 @@
 			<SubtestValues>2,4</SubtestValues>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>IEndpointSingleHS</setupType>
+			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_INT_005</TestID>
@@ -1901,6 +1910,7 @@
 			<testScriptps1>NETWORK-INPUT-ENDPOINT-IPERF-TCP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
+			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_INP_001</TestID>
@@ -1913,6 +1923,7 @@
 			<testScriptps1>NETWORK-INPUT-ENDPOINT-IPERF-NODE-STOPPED-TCP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py, remote-scripts\stop-server.py, remote-scripts\stop-client.py </files>
 			<setupType>PublicEndpoint</setupType>
+			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_INP_003</TestID>
@@ -1925,6 +1936,7 @@
 			<testScriptps1>NETWORK-INPUT-ENDPOINT-IPERF-NODE-STOPPED-UDP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py, remote-scripts\stop-server.py, remote-scripts\stop-client.py </files>
 			<setupType>PublicEndpoint</setupType>
+			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_INP_008</TestID>
@@ -1938,6 +1950,7 @@
 			<testScriptps1>NETWORK-INPUT-ENDPOINT-IPERF-UDP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
+			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_INP_005</TestID>
@@ -1951,6 +1964,7 @@
 			<SubtestValues>2,4</SubtestValues>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
+			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_INP_002</TestID>
@@ -1964,6 +1978,7 @@
 			<SubtestValues>2,4</SubtestValues>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
+			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_INP_007</TestID>
@@ -1977,6 +1992,7 @@
 			<SubtestValues>100,300,500,700,900,1100,1300,1420</SubtestValues>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
+			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_INP_006</TestID>
@@ -1991,6 +2007,7 @@
 			<SubtestValues>100,300,500,700,900,1100,1300,1420</SubtestValues>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>IEndpointSingleHS</setupType>
+			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_INT_004</TestID>
@@ -2002,6 +2019,7 @@
 			<testScriptps1>NETWORK-LB-NO-PROBE-PORT-IPERF-TCP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>LoadBalancedNoCP</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_LB_001</TestID>
@@ -2015,6 +2033,7 @@
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<SubtestValues>4,6,8,10</SubtestValues>
 			<setupType>LoadBalancedNoCP</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_LB_002</TestID>
@@ -2028,6 +2047,7 @@
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<SubtestValues></SubtestValues>
 			<setupType>LoadBalancedNoCP</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_LB_003</TestID>
@@ -2041,6 +2061,7 @@
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<SubtestValues></SubtestValues>
 			<setupType>LoadBalancedNoCP</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_LB_004</TestID>
@@ -2054,6 +2075,7 @@
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py,remote-scripts\start-server-without-stopping.py, remote-scripts\stop-server.py, remote-scripts\stop-client.py</files>
 			<SubtestValues></SubtestValues>
 			<setupType>LoadBalancedNoCP</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_LB_005</TestID>
@@ -2066,7 +2088,8 @@
 			<testScript></testScript>
 			<testScriptps1>NETWORK-LB-NO-PROBE-PORT-TWO-NODE-DOWN-TCP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py,remote-scripts\stop-server.py, remote-scripts\azuremodules.py, remote-scripts\start-server-without-stopping.py</files>
-			<setupType>CustomProbeSamePort</setupType>
+			<setupType>LoadBalancedNoCP</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_LB_006</TestID>
@@ -2080,6 +2103,7 @@
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-SAME-PORT-IPERF-TCP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>CustomProbeSamePort</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_CPSP_001</TestID>
@@ -2092,6 +2116,7 @@
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-SAME-PORT-IPERF-PARALLEL-TCP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>CustomProbeSamePort</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_CPSP_002</TestID>
@@ -2105,6 +2130,7 @@
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-OTHER-PORT-IPERF-PARALLEL-TCP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py, remote-scripts\start-server-without-stopping.py</files>
 			<setupType>CustomProbeOtherPort</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_CPSP_007</TestID>
@@ -2121,6 +2147,7 @@
 			<testScriptps1>NETWORK-VERIFY-CUSTOMPROBE-SAME-PORT-TCP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>CustomProbeSamePort</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID></TestID>
@@ -2133,6 +2160,7 @@
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-SAME-PORT-IPERF-TCP-NONCONNECTIVITY.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>CustomProbeSamePort</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_CPSP_003</TestID>
@@ -2145,6 +2173,7 @@
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-OTHER-PORT-IPERF-TCP-NONCONNECTIVITY.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py, remote-scripts\start-server-without-stopping.py</files>
 			<setupType>CustomProbeOtherPort</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_CPOP_002</TestID>
@@ -2157,6 +2186,7 @@
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-SAME-PORT-TWO-NODES-DOWN-TCP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py,remote-scripts\stop-server.py, remote-scripts\azuremodules.py, remote-scripts\start-server-without-stopping.py</files>
 			<setupType>CustomProbeSamePort</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_CPSP_006</TestID>
@@ -2169,6 +2199,7 @@
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-OTHER-PORT-TWO-NODES-DOWN-TCP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\stop-server.py, remote-scripts\azuremodules.py, remote-scripts\start-server-without-stopping.py</files>
 			<setupType>CustomProbeOtherPort</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_CPOP_005</TestID>
@@ -2182,6 +2213,7 @@
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-OTHER-PORT-IPERF-TCP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py,remote-scripts\start-server-without-stopping.py</files>
 			<setupType>CustomProbeOtherPort</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_CPOP_001</TestID>
@@ -2194,6 +2226,7 @@
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-SAME-PORT-ONE-NODE-DOWN-TCP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py,remote-scripts\start-server-without-stopping.py, remote-scripts\stop-server.py, remote-scripts\stop-client.py</files>
 			<setupType>CustomProbeSamePort</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_CPSP_005</TestID>
@@ -2205,6 +2238,7 @@
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-OTHER-PORT-ONE-NODE-DOWN-TCP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py,remote-scripts\start-server-without-stopping.py, remote-scripts\stop-server.py, remote-scripts\stop-client.py</files>
 			<setupType>CustomProbeOtherPort</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_CPOP_004</TestID>
@@ -2217,6 +2251,7 @@
 			<testScriptps1>NETWORK-VERIFY-CUSTOMPROBE-OTHER-PORT-TCP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>CustomProbeOtherPort</setupType>
+			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID></TestID>
@@ -2227,6 +2262,7 @@
 			<testScriptps1>INT-ENDPOINT-SINGLE-HS-NON-CONN-TCP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>IEndpointSingleHS</setupType>
+			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID></TestID>
@@ -2237,6 +2273,7 @@
 			<testScriptps1>INP-ENDPOINT-NON-CONN-TCP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
+			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_INP_004</TestID>
@@ -2248,6 +2285,7 @@
 			<testScriptps1>INP-ENDPOINT-NON-CONN-UDP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
+			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_INP_009</TestID>
@@ -2259,6 +2297,7 @@
 			<testScriptps1>INT-ENDPOINT-NON-CONN-TCP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>IEndpointTwoHS</setupType>
+			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_INT_008</TestID>
@@ -2270,6 +2309,7 @@
 			<testScriptps1>INT-ENDPOINT-NON-CONN-UDP.ps1</testScriptps1>
 			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
 			<setupType>IEndpointTwoHS</setupType>
+			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<TestID>AzureNetwork_INT_009</TestID>
@@ -2652,6 +2692,7 @@
 			<DiskFormat>ext4</DiskFormat>
 			<Priority>P0</Priority>
 		</test>
+
 		<test>
 			<testName>ICA-FIO-TEST</testName>
 			<testScript></testScript>
@@ -2672,7 +2713,6 @@
 			<TestID></TestID>
 			<Priority>P0</Priority>
 		</test>
-
 		<!-- xSMB CIFS TESTS -->
 		<test>
 			<testName>XSMB-XFS-TEST</testName>
@@ -2950,6 +2990,7 @@
 			<TestID></TestID>
 		</test>		
 	</testsDefinition>
+
 
 
 	<testCycles>
