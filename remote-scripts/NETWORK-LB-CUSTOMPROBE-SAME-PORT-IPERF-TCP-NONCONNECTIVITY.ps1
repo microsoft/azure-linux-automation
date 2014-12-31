@@ -43,6 +43,7 @@ if($isDeployed)
 	LogMsg "Test Machine 1 : $hs1VIP : $hs1vm1sshport"
 	LogMsg "Test Machine 2 : $hs1VIP : $hs1vm2sshport"
 	LogMsg "DTAP Machine : $dtapServerIp : $hs1vm1sshport"
+	$iperfTimeoutSeconds = $currentTestData.iperfTimeoutSeconds
 
 	$testPort = $hs1vm1tcpport + 10
 	$pSize = 6
@@ -61,11 +62,11 @@ if($isDeployed)
 			$testResult = $null
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 			{
-				$client.cmd = "./start-client.py -c $hs1VIP -p $testPort -t10 -P$pSize"
+				$client.cmd = "./start-client.py -c $hs1VIP -p $testPort -t$iperfTimeoutSeconds -P$pSize"
 			}
 			if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 			{
-				$client.cmd = "./start-client.py -c $hs1ServiceUrl -p $testPort -t10 -P$pSize"
+				$client.cmd = "./start-client.py -c $hs1ServiceUrl -p $testPort -t$iperfTimeoutSeconds -P$pSize"
 			}
 			mkdir $LogDir\$mode -ErrorAction SilentlyContinue | out-null
 			mkdir $LogDir\$mode\Server1 -ErrorAction SilentlyContinue | out-null
