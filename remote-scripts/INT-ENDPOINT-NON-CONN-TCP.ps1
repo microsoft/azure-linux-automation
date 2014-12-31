@@ -43,6 +43,7 @@ if($isDeployed)
     $hs2vm1sshport = GetPort -Endpoints $hs2vm1Endpoints -usage ssh	
 
     $testPort = $hs1vm1tcpport + 10
+	$iperfTimeoutSeconds = $currentTestData.iperfTimeoutSeconds
 
     foreach ($mode in $currentTestData.TestMode.Split(","))
     {
@@ -53,11 +54,11 @@ if($isDeployed)
 	    
             if(($mode -eq "IP") -or ($mode -eq "VIP"))
             {
-	            $cmd2="./start-client.py -c $hs1vm1IP -p $testPort  -t10"
+	            $cmd2="./start-client.py -c $hs1vm1IP -p $testPort  -t$iperfTimeoutSeconds"
 	        }
             if(($mode -eq "URL") -or ($mode -eq "Hostname"))
             {
-    	        $cmd2="./start-client.py -c $hs1vm1Hostname -p $testPort  -t10"
+    	        $cmd2="./start-client.py -c $hs1vm1Hostname -p $testPort  -t$iperfTimeoutSeconds"
 	        }
 
             $server = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -nodeIperfCmd $cmd1 -user $user -password $password -files $currentTestData.files -logDir $LogDir -nodetcpPort $testPort

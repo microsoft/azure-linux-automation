@@ -38,6 +38,7 @@ if($isDeployed)
     $hs1vm1sshport = GetPort -Endpoints $hs1vm1Endpoints -usage ssh	
     $hs2vm1sshport = GetPort -Endpoints $hs2vm1Endpoints -usage ssh	
     $testPort = $hs1vm1UDPport + 10
+	$iperfTimeoutSeconds = $currentTestData.iperfTimeoutSeconds
 
 	$server = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport  -user $user -password $password -files $currentTestData.files -logDir $LogDir -nodetcpPort $hs1vm1tcpport
     LogMsg "$hs1VIP set as iperf server."
@@ -52,11 +53,11 @@ if($isDeployed)
             $testResult = $null
             if(($mode -eq "IP") -or ($mode -eq "VIP"))
             {
-	            $client.cmd ="./start-client.py -c $hs1vm1IP -p $testPort  -t10 -u yes"
+	            $client.cmd ="./start-client.py -c $hs1vm1IP -p $testPort  -t$iperfTimeoutSeconds -u yes"
 	        }
             if(($mode -eq "URL") -or ($mode -eq "Hostname"))
             {
-	            $client.cmd ="./start-client.py -c $hs1vm1Hostname -p $testPort  -t10 -u yes"
+	            $client.cmd ="./start-client.py -c $hs1vm1Hostname -p $testPort  -t$iperfTimeoutSeconds -u yes"
 	        }
             LogMsg "Starting the test in $mode mode.."
             $server.cmd="./start-server.py -p $testPort -u yes  && mv Runtime.log start-server.py.log"
