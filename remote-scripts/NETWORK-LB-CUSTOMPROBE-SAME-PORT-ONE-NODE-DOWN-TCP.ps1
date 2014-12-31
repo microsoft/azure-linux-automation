@@ -43,6 +43,7 @@ if ($isDeployed)
 	LogMsg "Test Machine 1 : $hs1VIP : $hs1vm1sshport"
 	LogMsg "Test Machine 2 : $hs1VIP : $hs1vm2sshport"
 	LogMsg "DTAP Machine : $dtapServerIp : $hs1vm1sshport"
+	$iperfTimeoutSeconds = $currentTestData.iperfTimeoutSeconds
 
 	$wait=45
 	$cmd1="./start-server.py -p $hs1vm1tcpport && mv Runtime.log start-server.py.log -f"
@@ -66,11 +67,11 @@ if ($isDeployed)
 			mkdir $LogDir\$mode\Server2 -ErrorAction SilentlyContinue | out-null
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 			{
-				$cmd3="./start-client.py -c $hs1VIP -p $hs1vm1tcpport -t10 -P2" 
+				$cmd3="./start-client.py -c $hs1VIP -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P2" 
 			}
 			if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 			{
-				$cmd3="./start-client.py -c $hs1ServiceUrl -p $hs1vm1tcpport -t10 -P2"
+				$cmd3="./start-client.py -c $hs1ServiceUrl -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P2"
 			}
 			$server1.logDir = $LogDir + "\$mode" + "\Server1"
 			$server2.logDir = $LogDir + "\$mode" + "\Server2"
