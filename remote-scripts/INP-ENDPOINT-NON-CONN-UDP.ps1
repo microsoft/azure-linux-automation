@@ -33,6 +33,7 @@ if($isDeployed)
 	$dtapServerSshport = GetPort -Endpoints $dtapServerEndpoints -usage ssh
 	LogMsg "Test Machine : $hs1VIP : $hs1vm1sshport"
 	LogMsg "DTAP Machine : $dtapServerIp : $hs1vm1sshport"
+	$iperfTimeoutSeconds = $currentTestData.iperfTimeoutSeconds
 
 	$testPort = $hs1vm1tcpport + 10
 	foreach ($mode in $currentTestData.TestMode.Split(","))
@@ -43,12 +44,12 @@ if($isDeployed)
 			$cmd1="./start-server.py -p $testPort -u yes&& mv Runtime.log start-server.py.log"
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 			{
-				$cmd2="./start-client.py -c $hs1VIP -p $testPort -t10 -u yes -l 1420"
+				$cmd2="./start-client.py -c $hs1VIP -p $testPort -t$iperfTimeoutSeconds -u yes -l 1420"
 			}
 
 			if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 			{
-				$cmd2="./start-client.py -c $hs1ServiceUrl -p $testPort -t10 -u yes -l 1420"
+				$cmd2="./start-client.py -c $hs1ServiceUrl -p $testPort -t$iperfTimeoutSeconds -u yes -l 1420"
 			}
 
 			$a = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -nodeIperfCmd $cmd1 -user $user -password $password -files $currentTestData.files -logDir $LogDir -nodetcpPort $hs1vm1tcpport
