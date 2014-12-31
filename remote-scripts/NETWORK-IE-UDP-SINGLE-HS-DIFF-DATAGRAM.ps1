@@ -29,6 +29,7 @@ if ($isDeployed)
 	$hs1vm2udpport = GetPort -Endpoints $hs1vm2Endpoints -usage udp
 	$hs1vm1sshport = GetPort -Endpoints $hs1vm1Endpoints -usage ssh
 	$hs1vm2sshport = GetPort -Endpoints $hs1vm2Endpoints -usage ssh
+	$iperfTimeoutSeconds = $currentTestData.iperfTimeoutSeconds
 
 	foreach ($Value in $SubtestValues)
 	{
@@ -40,11 +41,11 @@ if ($isDeployed)
 				$cmd1="./start-server.py -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log -f"
 				if ($mode -eq "VIP")
 				{
-					$cmd2="./start-client.py -c $($hs1vm1.IpAddress)  -p $hs1vm1udpport -t10 -u yes -l $Value" 
+					$cmd2="./start-client.py -c $($hs1vm1.IpAddress)  -p $hs1vm1udpport -t$iperfTimeoutSeconds -u yes -l $Value" 
 				}
 				elseif($mode -eq "URL")
 				{
-					$cmd2="./start-client.py -c $($hs1vm1.IpAddress)  -p $hs1vm1udpport -t10 -u yes -l $Value"
+					$cmd2="./start-client.py -c $($hs1vm1.IpAddress)  -p $hs1vm1udpport -t$iperfTimeoutSeconds -u yes -l $Value"
 				}
 				LogMsg "Starting in $mode mode.."
 				$a = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -nodeUdpPort $hs1vm1udpport -nodeIperfCmd $cmd1 -user $user -password $password -files $currentTestData.files -logDir $LogDir

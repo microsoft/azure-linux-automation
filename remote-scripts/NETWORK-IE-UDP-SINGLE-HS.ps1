@@ -37,6 +37,7 @@ if($isDeployed)
 			RemoteCopy -uploadTo $hs1VIP -port $hs1vm2sshport -files $currentTestData.files -username $user -password $password -upload
 			$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x * && rm -rf *.txt *.log" -runAsSudo
 			$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "chmod +x * && rm -rf *.txt *.log" -runAsSudo
+			$iperfTimeoutSeconds = $currentTestData.iperfTimeoutSeconds
 			
             #>>>Start server...
 			LogMsg "Starting the test in $mode mode.."
@@ -58,11 +59,11 @@ if($isDeployed)
 				LogMsg "Startin iperf client and trying to connect to port $hs1vm1udpport..."
 				if(($mode -eq "IP") -or ($mode -eq "VIP"))
                 {
-					$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "./start-client.py -c $hs1vm1IP -i1 -p $hs1vm1udpport -t10 -u yes " -runAsSudo
+					$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "./start-client.py -c $hs1vm1IP -i1 -p $hs1vm1udpport -t$iperfTimeoutSeconds -u yes " -runAsSudo
 				}
 				if(($mode -eq "URL") -or ($mode -eq "Hostname"))
                 {
-					$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "./start-client.py -c $hs1vm1Hostname -i1 -p $hs1vm1udpport -t10 -u yes " -runAsSudo
+					$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "./start-client.py -c $hs1vm1Hostname -i1 -p $hs1vm1udpport -t$iperfTimeoutSeconds -u yes " -runAsSudo
 				}
 				$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "mv Runtime.log start-client.py.log -f" -runAsSudo
 				RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/start-client.py.log, /home/$user/iperf-client.txt" -downloadTo $LogDir\$mode  -port $hs1vm2sshport -username $user -password $password
