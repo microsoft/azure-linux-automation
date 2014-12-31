@@ -35,14 +35,15 @@ if ($isDeployed)
 		$dtapServerSshport = GetPort -Endpoints $dtapServerEndpoints -usage ssh	
 		LogMsg "Test Machine : $hs1VIP : $hs1vm1sshport"
 		LogMsg "DTAP Machine : $dtapServerIp : $hs1vm1sshport"
-		
+		$iperfTimeoutSeconds = $currentTestData.iperfTimeoutSeconds
+
 		RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
 		RemoteCopy -uploadTo $dtapServerIp -port $dtapServerSshport -files $currentTestData.files -username $user -password $password -upload
 		$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x * && rm -rf *.log *.txt" -runAsSudo
 		$suppressedOut = RunLinuxCmd -username $user -password $password -ip $dtapServerIp -port $dtapServerSshport -command "chmod +x * && rm -rf *.log *.txt" -runAsSudo
 
 		$cmd1="./start-server.py -p $dtapServerTcpport && mv Runtime.log start-server.py.log -f"
-		$cmd2="./start-client.py -c $dtapServerIp -p $dtapServerTcpport -t10"
+		$cmd2="./start-client.py -c $dtapServerIp -p $dtapServerTcpport -t$iperfTimeoutSeconds"
 		$server = CreateIperfNode -nodeIp $dtapServerIp -nodeSshPort $dtapServerSshport -nodeTcpPort $dtapServerTcpport -nodeIperfCmd $cmd1 -user $user -password $password -files $currentTestData.files -logDir $LogDir
 		$client = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -nodeTcpPort $hs1vm1tcpport -nodeIperfCmd $cmd2 -user $user -password $password -files $currentTestData.files -logDir $LogDir
 		$testresult=IperfClientServerTest -server $server -client $client

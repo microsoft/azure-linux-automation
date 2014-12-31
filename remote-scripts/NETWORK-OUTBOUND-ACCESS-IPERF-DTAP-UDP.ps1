@@ -33,7 +33,7 @@ if ($isDeployed)
 	$dtapServerSshport = GetPort -Endpoints $dtapServerEndpoints -usage ssh
 	LogMsg "Test Machine : $hs1VIP : $hs1vm1sshport"
 	LogMsg "DTAP Machine : $dtapServerIp : $hs1vm1sshport"
-
+	$iperfTimeoutSeconds = $currentTestData.iperfTimeoutSeconds
 	RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
 	RemoteCopy -uploadTo $dtapServerIp -port $dtapServerSshport -files $currentTestData.files -username $user -password $password -upload
 	$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x * && rm -rf *.log *.txt" -runAsSudo
@@ -53,7 +53,7 @@ if ($isDeployed)
 			LogMsg "iperf Server started successfully. Listening TCP port $hs1vm1tcpport..."
 			#On confirmation, of server starting, let's start iperf client...
 			LogMsg "Startin iperf client and trying to connect to port $dtapServerTcpport..."
-			$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "./start-client.py -c $dtapServerIp -i1 -p $dtapServerUDPport -t20 -u yes" -runAsSudo
+			$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "./start-client.py -c $dtapServerIp -i1 -p $dtapServerUDPport -t$iperfTimeoutSeconds -u yes" -runAsSudo
 			$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "mv Runtime.log start-client.py.log -f" -runAsSudo
 			RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/start-client.py.log, /home/$user/iperf-client.txt" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
 			RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/state.txt, /home/$user/Summary.log" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password

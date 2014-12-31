@@ -36,9 +36,10 @@ if ($isDeployed)
 	$dtapServerSshport = GetPort -Endpoints $dtapServerEndpoints -usage ssh	
 	LogMsg "Test Machine : $hs1VIP : $hs1vm1sshport"
 	LogMsg "DTAP Machine : $dtapServerIp : $hs1vm1sshport"
+	$iperfTimeoutSeconds = $currentTestData.iperfTimeoutSeconds
 
 	$cmd1="./start-server.py -i1 -p $dtapServerTcpport && mv Runtime.log start-server.py.log -f"
-	$cmd2="./start-client.py -c $dtapServerIp -p $dtapServerTcpport -t20 -P$Value"
+	$cmd2="./start-client.py -c $dtapServerIp -p $dtapServerTcpport -t$iperfTimeoutSeconds -P$Value"
 
 	$server = CreateIperfNode -nodeIp $dtapServerIp -nodeSshPort $dtapServerSshport -nodeTcpPort $dtapServerTcpport -nodeIperfCmd $cmd1 -user $user -password $password -files $currentTestData.files -logDir $LogDir
 	LogMsg "$dtapServerIp set as iperf server"

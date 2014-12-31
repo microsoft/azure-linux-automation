@@ -35,6 +35,7 @@ if($isDeployed)
 	$dtapServerSshport = GetPort -Endpoints $dtapServerEndpoints -usage ssh	
 	LogMsg "Test Machine : $hs1VIP : $hs1vm1sshport"
 	LogMsg "DTAP Machine : $dtapServerIp : $hs1vm1sshport"
+	$iperfTimeoutSeconds = $currentTestData.iperfTimeoutSeconds
 
 	$cmd1="./start-server.py -p $dtapServerUDPport -u yes && mv Runtime.log start-server.py.log -f"
 	$cmd2="./start-client.py -c $dtapServerIp -p $dtapServerUDPport -t20 -P1 -u yes"
@@ -50,7 +51,7 @@ if($isDeployed)
 		{
 			$testResult = $null
 			LogMsg "Test Started for Parallel Connections $Value"
-			$client.cmd = "./start-client.py -c $dtapServerIp -p $dtapServerUDPport -t20 -P$Value -u yes"
+			$client.cmd = "./start-client.py -c $dtapServerIp -p $dtapServerUDPport -t$iperfTimeoutSeconds -P$Value -u yes"
 			mkdir $LogDir\$Value -ErrorAction SilentlyContinue | out-null
 			$server.logDir = $LogDir + "\$Value"
 			$client.logDir = $LogDir + "\$Value"
