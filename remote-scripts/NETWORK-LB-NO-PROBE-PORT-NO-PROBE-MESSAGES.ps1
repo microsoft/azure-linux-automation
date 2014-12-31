@@ -43,6 +43,7 @@ if ($isDeployed)
 	LogMsg "Test Machine 1 : $hs1VIP : $hs1vm1sshport"
 	LogMsg "Test Machine 2 : $hs1VIP : $hs1vm2sshport"
 	LogMsg "DTAP Machine : $dtapServerIp : $hs1vm1sshport"
+	$iperfTimeoutSeconds = $currentTestData.iperfTimeoutSeconds
 
 	$wait=30
 
@@ -67,11 +68,11 @@ if ($isDeployed)
 			LogMsg "Trying to access non defined TCP port ... $hs1vm1tcpport."
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 			{#.........................................................................Client command will decided according to TestMode....
-				$cmd3="./start-client.py -c $hs1VIP -p $hs1vm1tcpport -t20 -P$Value" 
+				$cmd3="./start-client.py -c $hs1VIP -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P$Value" 
 			}
 			if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 			{
-				$cmd3="./start-client.py -c $hs1ServiceUrl -p $hs1vm1tcpport -t20 -P$Value"
+				$cmd3="./start-client.py -c $hs1ServiceUrl -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P$Value"
 			}
 			$client.cmd = $cmd3
 			mkdir $LogDir\$mode\Server1 -ErrorAction SilentlyContinue | out-null
