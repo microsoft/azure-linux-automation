@@ -2988,7 +2988,25 @@
 			<!-- <SubtestValues>ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM,D1,D2,D3,D4</SubtestValues> -->
 			<SubtestValues></SubtestValues>
 			<TestID></TestID>
-		</test>		
+		</test>	
+		<test>
+			<testName>ICA-BUILD-LINUX-KERNEL</testName>
+			<testScript>Perf_BuildKernel.sh</testScript>
+			<testScriptPs1>ICA-BUILD-LINUX-KERNEL.ps1</testScriptPs1>
+			<files>remote-scripts\Perf_BuildKernel.sh,remote-scripts\Packages\linux-3.18.1.tar.xz,SetupScripts\DetectLinuxDistro.sh</files>
+			<setupType>MediumVM</setupType>
+			<testParams>
+				<param>SOURCE_TYPE=ONLINE</param>
+				<param>LINUX_KERNEL_LOCATION=https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git</param>
+				<param>KERNEL_VERSION=linux-next</param>
+				<!-- <param>SOURCE_TYPE=TARBALL</param>
+				<param>TARBALL=linux-3.18.1.tar.xz</param>
+				<param>KERNEL_VERSION=linux-3.18.1</param>  -->
+			</testParams>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<TestID></TestID>
+		</test>
 	</testsDefinition>
 
 
@@ -3534,6 +3552,9 @@
 			</test>
 			<test>
 				<Name>ICA-STREAM-TEST</Name>
+			</test>
+			<test>
+				<Name>ICA-BUILD-LINUX-KERNEL</Name>
 			</test>			
 		</Cycle>		
 		<Cycle>
