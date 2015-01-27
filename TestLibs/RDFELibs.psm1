@@ -905,6 +905,8 @@ Function GetAndCheckKernelLogs($DeployedServices, $status)
 				$out = RunLinuxCmd -ip $VMEndpoints[0].Vip -port $VMSSHPort -username $user -password $password -command "dmesg > /home/$user/InitialBootLogs.txt" -runAsSudo
 				$out = RemoteCopy -download -downloadFrom $VMEndpoints[0].Vip -port $VMSSHPort -files "/home/$user/InitialBootLogs.txt" -downloadTo $BootLogDir -username $user -password $password
 				LogMsg "$($VM.Name): $status Kernel logs collected ..SUCCESSFULLY"
+				$detectedDistro = DetectLinuxDistro -VIP $VMEndpoints[0].Vip -SSHport $VMSSHPort -testVMUser $user -testVMPassword $password
+				SetDistroSpecificVariables -detectedDistro $detectedDistro
 				$retValue = $true
 			}
 			elseif($status -imatch "Final")
@@ -958,6 +960,20 @@ Function GetAndCheckKernelLogs($DeployedServices, $status)
 	return $retValue
 }
 
+Function SetDistroSpecificVariables($detectedDistro)
+{
+	if ( $detectedDistro -imatch "COREOS" )
+	{
+		$python_cmd = "/usr/share/oem/python/bin/python"
+		LogMsg "Set `$python_cmd > /usr/share/oem/python/bin/python"
+	}
+	else
+	{
+		$python_cmd = "python"
+		LogMsg "Set `$python_cmd > python"
+	}
+	Set-Variable -Name python_cmd -Value $python_cmd -Scope Global
+}
 
 Function DeployVMs ($xmlConfig, $setupType, $Distro)
 {
