@@ -964,18 +964,8 @@ Function GetAndCheckKernelLogs($DeployedServices, $status)
 
 Function SetDistroSpecificVariables($detectedDistro)
 {
-	if ( $detectedDistro -imatch "COREOS" )
-	{
-		#$python_cmd = "/usr/share/oem/python/bin/python"
-		#LogMsg "Set `$python_cmd > /usr/share/oem/python/bin/python"
-		$python_cmd = "python"
-		LogMsg "Set `$python_cmd > python"
-	}
-	else
-	{
-		$python_cmd = "python"
-		LogMsg "Set `$python_cmd > python"
-	}
+    $python_cmd = "python"
+	LogMsg "Set `$python_cmd > python"    
 	Set-Variable -Name python_cmd -Value $python_cmd -Scope Global
 }
 
@@ -1526,8 +1516,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 		if ( $detectedDistro -eq "COREOS" )
 		{
 			$linuxCommand = "`"export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/usr/share/oem/python/bin:/opt/bin && echo $plainTextPassword | sudo -S env `"PATH=`$PATH`" $command && echo AZURE-LINUX-EXIT-CODE-`$? || echo AZURE-LINUX-EXIT-CODE-`$?`""
-			$logCommand = "`"export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/usr/share/oem/python/bin:/opt/bin && echo $plainTextPassword | sudo -S env `"PATH=`$PATH`" $command && echo AZURE-LINUX-EXIT-CODE-`$? || echo AZURE-LINUX-EXIT-CODE-`$?`""
-            #$logCommand = "`"echo $plainTextPassword | sudo -S env `"PATH=`$PATH`" $command`""		
+			$logCommand = "`"export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/usr/share/oem/python/bin:/opt/bin && echo $plainTextPassword | sudo -S env `"PATH=`$PATH`" $command`""
 		}
 		else
 		{
@@ -1825,7 +1814,10 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, [switch]$keepUserD
 		if($DeployedServices)
 		{
             $currentTestBackgroundJobs = Get-Content $LogDir\CurrentTestBackgroundJobs.txt -ErrorAction SilentlyContinue
-            $currentTestBackgroundJobs = $currentTestBackgroundJobs.Split()
+            if ( $currentTestBackgroundJobs )
+            {
+                $currentTestBackgroundJobs = $currentTestBackgroundJobs.Split()
+            }
             foreach ( $taskID in $currentTestBackgroundJobs )
             {
                 #Removal of background 
