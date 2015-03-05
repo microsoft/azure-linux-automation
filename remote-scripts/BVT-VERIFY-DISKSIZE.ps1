@@ -22,8 +22,8 @@ if ($isDeployed)
 		$hs1ServiceUrl = $hs1ServiceUrl.Replace("/","")
 		$hs1vm1Hostname =  $hs1vm1.Name
 
-		$OsImageSize = Get-AzureVMImage | where {$_.Label -eq $BaseOsImage} | % {$_.LogicalSizeInGB}
-		$OsImageSizeKB = $OsImageSize*1024*1024
+		$OsImageSize = Get-AzureVMImage | where {$_.ImageName -eq $BaseOsImage} | % {$_.LogicalSizeInGB}
+		$OsImageSizeKB = $OsImageSize*1024*1024*1024
 
 
 		RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
