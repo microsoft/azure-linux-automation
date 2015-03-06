@@ -478,6 +478,21 @@ Function GenerateCommand ($Setup, $serviceName, $osImage, $HSData)
 		{
 			$vmName = $serviceName +"-role-"+$role
 		}
+        $diskCommand = ""
+        foreach ( $dataDisk in $newVM.DataDisk)
+        {
+            if ( $dataDisk.LUN -and $dataDisk.DiskSizeInGB -and $dataDisk.HostCaching )
+            {
+                if ($diskCommand)
+                {
+                    $diskCommand = $diskCommand + " | " + "Add-AzureDataDisk -CreateNew -DiskSizeInGB $($dataDisk.DiskSizeInGB) -LUN $($dataDisk.LUN) -HostCaching $($dataDisk.HostCaching) -DiskLabel `"$vmName-Disk-$($dataDisk.LUN)`"" 
+                }
+                else
+                {
+                    $diskCommand = "Add-AzureDataDisk -CreateNew -DiskSizeInGB $($dataDisk.DiskSizeInGB) -LUN $($dataDisk.LUN) -HostCaching $($dataDisk.HostCaching) -DiskLabel `"$vmName-Disk-$($dataDisk.LUN)`""
+                }
+            }
+        }
 		$sshPath = '/home/' + $defaultuser + '/.ssh/authorized_keys'		 	
 		$vmRoleConfig = "New-AzureVMConfig -Name $vmName -InstanceSize $instanceSize -ImageName $osImage"
 		$vmProvConfig = "Add-AzureProvisioningConfig -Linux -LinuxUser $defaultuser -Password $defaultPassword -SSHPublicKeys (New-AzureSSHKey -PublicKey -Fingerprint 690076D4C41C1DE677CD464EA63B44AE94C2E621 -Path $sshPath)"
@@ -486,7 +501,8 @@ Function GenerateCommand ($Setup, $serviceName, $osImage, $HSData)
 			$vmProvConfig = $vmProvConfig + "| Set-AzureSubnet -SubnetNames $SubnetName"
 		}
 		$vmPortConfig =  $portCommand.Substring(0,$portCommand.Length-1)
-		$singleVMCommand = "( " + $vmRoleConfig + " | " + $vmProvConfig + " | " + $vmPortConfig + " )"
+        
+		$singleVMCommand = "( " + $vmRoleConfig + " | " + $vmProvConfig + " | " + $vmPortConfig + " | " + $diskCommand + " )"
 		$totalVMs = $totalVMs + 1
 		$role = $role + 1
 		if ($totalVMs -gt 1)
@@ -4653,7 +4669,7 @@ Function IperfVnetToLocalUdpTest ($vnetAsClient, $localAsServer)
 Function GetTotalPhysicalDisks($FdiskOutput)
 {
 	$physicalDiskNames = ("sda","sdb","sdc","sdd","sde","sdf","sdg","sdh","sdi","sdj","sdk","sdl","sdm","sdn",
-			"sdo","sdp","sdq","sdr","sds","sdt","sdu","sdv","sdw","sdx","sdy","sdz")
+			"sdo","sdp","sdq","sdr","sds","sdt","sdu","sdv","sdw","sdx","sdy","sdz", "sdaa", "sdab", "sdac", "sdad","sdae", "sdaf", "sdag", "sdah", "sdai")
 	$diskCount = 0
 	foreach ($physicalDiskName in $physicalDiskNames)
 	{
@@ -4670,7 +4686,7 @@ Function GetNewPhysicalDiskNames($FdiskOutputBeforeAddingDisk, $FdiskOutputAfter
 	$availableDisksBeforeAddingDisk = ""
 	$availableDisksAfterAddingDisk = ""
 	$physicalDiskNames = ("sda","sdb","sdc","sdd","sde","sdf","sdg","sdh","sdi","sdj","sdk","sdl","sdm","sdn",
-			"sdo","sdp","sdq","sdr","sds","sdt","sdu","sdv","sdw","sdx","sdy","sdz")
+			"sdo","sdp","sdq","sdr","sds","sdt","sdu","sdv","sdw","sdx","sdy","sdz", "sdaa", "sdab", "sdac", "sdad","sdae", "sdaf", "sdag", "sdah", "sdai")
 	foreach ($physicalDiskName in $physicalDiskNames)
 	{
 		if ($FdiskOutputBeforeAddingDisk -imatch "Disk /dev/$physicalDiskName")
