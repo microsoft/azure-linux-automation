@@ -293,7 +293,7 @@ Deletes Azure Service
 .PARAMETER servicename
 Specifies the servicename
 #>
-Function DeleteService ($serviceName)
+Function DeleteService ($serviceName, [switch]$KeepDisks)
 {
 	$j= 0 
 	$ExistingServices = Get-AzureService
@@ -318,7 +318,14 @@ Function DeleteService ($serviceName)
 			$retryCount = 1
 			while (($retValue -eq "False") -and ($retryCount -lt 10))
 			{
-				$out = Remove-AzureService -ServiceName $serviceName -DeleteAll -Force  -Verbose
+                if ( $KeepDisks )
+                {
+				$out = Remove-AzureService -ServiceName $serviceName -Force  -Verbose
+                }
+                else
+                {
+                $out = Remove-AzureService -ServiceName $serviceName -DeleteAll -Force  -Verbose
+                }
 				$RemoveServiceExitCode =  $?
 				if(($out -imatch "Complete") -or $RemoveServiceExitCode)
 				{
@@ -501,8 +508,14 @@ Function GenerateCommand ($Setup, $serviceName, $osImage, $HSData)
 			$vmProvConfig = $vmProvConfig + "| Set-AzureSubnet -SubnetNames $SubnetName"
 		}
 		$vmPortConfig =  $portCommand.Substring(0,$portCommand.Length-1)
-        
-		$singleVMCommand = "( " + $vmRoleConfig + " | " + $vmProvConfig + " | " + $vmPortConfig + " | " + $diskCommand + " )"
+        if ( $diskCommand )
+        {
+		    $singleVMCommand = "( " + $vmRoleConfig + " | " + $vmProvConfig + " | " + $vmPortConfig + " | " + $diskCommand + " )"
+        }
+        else
+        {
+            $singleVMCommand = "( " + $vmRoleConfig + " | " + $vmProvConfig + " | " + $vmPortConfig + " )"
+        }
 		$totalVMs = $totalVMs + 1
 		$role = $role + 1
 		if ($totalVMs -gt 1)
@@ -5601,7 +5614,7 @@ Specifies the maximum retry count. The default value is 18.
 .PARAMETER retryInterval
 Specifies the retry interval. The default value is 10 seconds.
 #>
-Function RetryOperation($operation, $description, $expectResult=$null, $maxRetryCount=18, $retryInterval=10, [switch]$NoLogsPlease)
+Function RetryOperation($operation, $description, $expectResult=$null, $maxRetryCount=10, $retryInterval=10, [switch]$NoLogsPlease)
 {
 	$retryCount = 1
 	
@@ -5633,7 +5646,8 @@ Function RetryOperation($operation, $description, $expectResult=$null, $maxRetry
 		}
 		catch
 		{
-			
+            $retryCount ++
+			continue
 		}
 		finally
 		{
