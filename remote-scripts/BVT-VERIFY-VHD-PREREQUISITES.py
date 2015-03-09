@@ -45,6 +45,9 @@ def verify_grub(distro):
 			RunLog.error("Unable to locate grub file")
 			print(distro+"_TEST_GRUB_VERIFICATION_FAIL")
 			return False
+	if distro == "COREOS":
+		#in core os we don't have access to boot partition
+		grub_out = Run("dmesg")
 	if "console=ttyS0" in grub_out and "earlyprintk=ttyS0" in grub_out and "rootdelay=300" in grub_out and "libata.atapi_enabled=0" not in grub_out and "reserve=0x1f0,0x8" not in grub_out:
 		if distro == "CENTOS" or distro == "ORACLELINUX":
 			if "numa=off" in grub_out:
@@ -138,6 +141,19 @@ def verify_udev_rules(distro):
 				RunLog.error("/etc/udev/rules.d/70-persistent-net.rules file present")
 			print(distro+"_TEST_UDEV_RULES_ERROR")
 			return False
+        if distro == "COREOS":
+                if not os.path.isfile("/usr/lib64/udev/rules.d/75-persistent-net-generator.rules") and not os.path.isfile("/usr/lib64/udev/rules.d/70-persistent-net.rules"):
+                        RunLog.info("rules are moved.")
+                        print(distro+"_TEST_UDEV_RULES_SUCCESS")
+                        return True
+                else:
+                        if os.path.isfile("/usr/lib64/udev/rules.d/75-persistent-net-generator.rules"):
+                                RunLog.error("/usr/lib64/udev/rules.d/75-persistent-net-generator.rules file present")
+                        if os.path.isfile("/usr/lib64/udev/rules.d/70-persistent-net.rules"):
+                                RunLog.error("/usr/lib64/udev/rules.d/70-persistent-net.rules file present")
+                        print(distro+"_TEST_UDEV_RULES_ERROR")
+                        return False
+
 
 if distro == "UBUNTU":
 	RunLog.info("DISTRO PROVIDED : "+distro)
@@ -298,3 +314,6 @@ if distro == "SLES":
 	else:
 		RunLog.error('DHCLIENT_SET_HOSTNAME="no" not present in /etc/sysconfig/network/dhcp')
 		print(distro+"_TEST_DHCLIENT_SET_HOSTNAME_IS_NO_FAIL")
+if distro == "COREOS":
+	result = verify_grub(distro)
+	result = verify_udev_rules(distro)

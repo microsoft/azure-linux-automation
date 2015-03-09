@@ -50,6 +50,10 @@ if ($isDeployed)
 		{
 			$matchstrings = @("_TEST_SUDOERS_VERIFICATION_SUCCESS","_TEST_GRUB_VERIFICATION_SUCCESS", "_TEST_DHCLIENT_SET_HOSTNAME_IS_NO_SUCCESS", "_TEST_REPOSITORIES_AVAILABLE")
 		}
+		if ($detectedDistro -imatch "COREOS")
+		{
+			$matchstrings = @("_TEST_GRUB_VERIFICATION_SUCCESS","_TEST_UDEV_RULES_SUCCESS")
+		}
       
 		RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
 		RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *.py" -runAsSudo
