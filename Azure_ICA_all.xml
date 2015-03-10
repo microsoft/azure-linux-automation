@@ -1620,7 +1620,7 @@
 			<testName>BVT-VERIFY-BOOT-ERROR-WARNINGS</testName>
 			<testScript>BVT-VERIFY-BOOT-ERROR-WARNINGS.py</testScript>
 			<testScriptPs1>BVT-VERIFY-BOOT-ERROR-WARNINGS.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\BVT-VERIFY-BOOT-ERROR-WARNINGS.py</files>
+			<files>remote-scripts\azuremodules.py,remote-scripts\BVT-VERIFY-BOOT-ERROR-WARNINGS.py,remote-scripts\ignorable-boot-errors.xml</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
