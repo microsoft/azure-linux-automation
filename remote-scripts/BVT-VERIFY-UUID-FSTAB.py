@@ -36,6 +36,14 @@ def RunTest():
     if(uuid_from_demesg and uuid_from_fstab and (uuid_from_demesg == uuid_from_fstab) and (dmsg_dev_count == 0) and (fstab_dev_count == 0)):
         ResultLog.info('PASS')
         #print "UUID are valid and matched"
+    elif (DetectDistro()[0] == 'coreos'):
+        output = JustRun("dmesg | grep root")
+        if ("root=LABEL" in output):
+            RunLog.info('CoreOS uses disk labels to specify drives.')
+            ResultLog.info('PASS')
+        else:
+            RunLog.info('root partition is not mounted using LABEL in dmesg.')
+            ResultLog.info('FAIL')
     else:
         
         if (uuid_from_demesg == 0): 
