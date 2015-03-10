@@ -4453,13 +4453,12 @@ Function DoSSHTestFromLocalVM($intermediateVM, $LocalVM, $toVM,[switch]$hostname
 	if($hostnameMode)
 	{
 		LogMsg "Executing - date - command on $($toVM.Hostname) .."
-		$sshOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "/home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'/home/$user/RunSSHCmd.py -s `"$($toVM.hostname)`" -u test -p `"$($toVM.password)`"`"  -P 22 -c `"date`" -o yes`'"
-
+		$sshOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "python /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RunSSHCmd.py -s `"$($toVM.hostname)`" -u test -p `"$($toVM.password)`"`"  -P 22 -c `"date`" -o yes`'"
 	}
 	else
 	{
 		LogMsg "Executing - date - command on $($toVM.DIP) .."
-		$sshOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "/home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'/home/$user/RunSSHCmd.py -s `"$($toVM.dip)`" -u test -p `"$($toVM.password)`"`"  -P 22 -c `"date`" -o yes`'"
+		$sshOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "python /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RunSSHCmd.py -s `"$($toVM.dip)`" -u test -p `"$($toVM.password)`"`"  -P 22 -c `"date`" -o yes`'"
 	}
 	LogMsg "Verifying output.."
 	$logfilepath = $toVM.logDir + "\sshOutput.log"
@@ -4487,12 +4486,12 @@ Function DoSCPTestFromLocalVM( $intermediateVM, $LocalVM, $toVM, [switch]$hostna
 	if($hostnameMode)
 	{
 		LogMsg "File Created. Now copying it to $($toVM.Hostname) ..."
-		$scpOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "/home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'/home/$user/RemoteCopy.py -c `"$($toVM.Hostname)`" -m upload -u `"$($toVM.user)`" -p `"$($toVM.password)`"`" -P 22 -r `"/home/$user`" -f `"/home/$user/testfile`"`'"
+		$scpOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "python /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RemoteCopy.py -c `"$($toVM.Hostname)`" -m upload -u `"$($toVM.user)`" -p `"$($toVM.password)`"`" -P 22 -r `"/home/$user`" -f `"/home/$user/testfile`"`'"
 	}
 	else
 	{
 		LogMsg "File Created. Now copying it to $($toVM.DIP) ..."
-		$scpOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "/home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'/home/$user/RemoteCopy.py -c `"$($toVM.DIP)`" -m upload -u `"$($toVM.user)`" -p `"$($toVM.password)`"`" -P 22 -r `"/home/$user`" -f `"/home/$user/testfile`"`'"
+		$scpOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "python /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RemoteCopy.py -c `"$($toVM.DIP)`" -m upload -u `"$($toVM.user)`" -p `"$($toVM.password)`"`" -P 22 -r `"/home/$user`" -f `"/home/$user/testfile`"`'"
 	}
 	LogMsg "Writing output to $logfilepath ..."
 	Set-Content -Path $logFilepath -Value $scpOutput

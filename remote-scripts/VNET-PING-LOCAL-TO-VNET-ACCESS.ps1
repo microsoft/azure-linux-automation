@@ -153,13 +153,13 @@ if($isDeployed)
 					if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 					{
 						Write-Host $VnetTestIP
-						$pingFrom.cmd = "/home/$user/ping.py -x $TestVMIP -c 10"
+						$pingFrom.cmd = "python /home/$user/ping.py -x $TestVMIP -c 10"
 					}
 
 					if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 					{
 						Write-Host $VnetTestHostName
-						$pingFrom.cmd = "/home/$user/ping.py -x $TestVMHostname  -c 10"
+						$pingFrom.cmd = "python /home/$user/ping.py -x $TestVMHostname  -c 10"
 					}
 					LogMsg "Test Started for $Value in $mode mode.."
 

@@ -75,11 +75,11 @@ if ($isDeployed)
 					$cmd3="python start-client.py -c $hs1ServiceUrl -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P$Value"
 				}
 				$client.cmd = $cmd3
-				mkdir $LogDir\$mode\Server1 -ErrorAction SilentlyContinue | out-null
-				mkdir $LogDir\$mode\Server2 -ErrorAction SilentlyContinue | out-null
-				$server1.logDir = "$LogDir\$mode\Server1"
-				$server2.logDir = "$LogDir\$mode\Server2"
-				$client.logDir = $LogDir + "\$mode"
+				mkdir $LogDir\$Value\$mode\Server1 -ErrorAction SilentlyContinue | out-null
+				mkdir $LogDir\$Value\$mode\Server2 -ErrorAction SilentlyContinue | out-null
+				$server1.logDir = "$LogDir\$Value\$mode\Server1"
+				$server2.logDir = "$LogDir\$Value\$mode\Server2"
+				$client.logDir = "$LogDir\$Value\$mode"
 				$client.cmd = $cmd3
 
 				RemoteCopy -uploadTo $server1.ip -port $server1.sshPort -files $server1.files -username $server1.user -password $server1.password -upload
