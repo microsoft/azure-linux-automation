@@ -29,7 +29,12 @@ Collect_Waagent_Logs() {
 echo "Collecting Waagent Details...."
 Log "Collecting Waagent Details at" 'date' $dirname/Waagent.txt
 Log "Waagent Process Running Status" 'ps -ef | grep waagent' $dirname/Waagent.txt
+if [ -f /usr/share/oem/bin/waagent ]
+then
+Log "Waagent Version is" '/usr/share/oem/python/bin/python /usr/share/oem/bin/waagent --version' $dirname/Waagent.txt
+else
 Log "Waagent Version is" '/usr/sbin/waagent --version' $dirname/Waagent.txt
+fi
 Log "Root Device Timeout" 'cat /sys/block/sda/device/timeout' $dirname/Waagent.txt
 if [[ $dist == *Debian* ]] || [[  $dist == *Ubuntu* ]]
 then
