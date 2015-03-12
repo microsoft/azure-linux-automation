@@ -1836,7 +1836,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 #endregion
 
 #region Test Case Logging
-Function DoTestCleanUp($result, $testName, $DeployedServices, [switch]$keepUserDirectory)
+Function DoTestCleanUp($result, $testName, $DeployedServices, $setupType = "BVTDeployment", [switch]$keepUserDirectory)
 {
 	try
 	{
