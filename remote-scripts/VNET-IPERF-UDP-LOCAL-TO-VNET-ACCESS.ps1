@@ -149,16 +149,16 @@ if($isDeployed)
 			{ 
 				try
 				{
-					$udpServer.cmd = "/home/$user/start-server.py -u yes -m yes -p 990 && mv Runtime.log start-server.py.log"
+					$udpServer.cmd = "python /home/$user/start-server.py -u yes -m yes -p 990 && mv Runtime.log start-server.py.log"
 
 					if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 					{
-						$udpClient.cmd  = "/home/$user/start-client.py -c $($udpServer.Dip) -p 990 -t10 -u yes -l 1420"
+						$udpClient.cmd  = "python /home/$user/start-client.py -c $($udpServer.Dip) -p 990 -t10 -u yes -l 1420"
 					}
 
 					if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 					{
-						$udpClient.cmd  = "/home/$user/start-client.py -c $($udpServer.hostname) -p 990 -t10 -u yes -l 1420"
+						$udpClient.cmd  = "python /home/$user/start-client.py -c $($udpServer.hostname) -p 990 -t10 -u yes -l 1420"
 					}
 					LogMsg "UDP Test Started for $Value in $mode mode.."
 

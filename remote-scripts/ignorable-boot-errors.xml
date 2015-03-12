@@ -1,0 +1,12 @@
+<!--#This list contains the ignorable boot errors of different images.-->
+<messages>		
+	<distro name="coreos">
+		<failures>
+			<keywords>Fast TSC calibration</keywords>
+			<keywords>acpi PNP0A03:00</keywords>
+			<keywords>systemd-journald-audit.socket</keywords>
+		</failures>
+		<errors/>
+		<warnings/>
+	</distro>
+</messages>
