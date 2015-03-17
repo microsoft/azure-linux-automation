@@ -314,6 +314,7 @@ if distro == "SLES":
 	else:
 		RunLog.error('DHCLIENT_SET_HOSTNAME="no" not present in /etc/sysconfig/network/dhcp')
 		print(distro+"_TEST_DHCLIENT_SET_HOSTNAME_IS_NO_FAIL")
-if distro == "COREOS":
-	result = verify_grub(distro)
+if distro == "COREOS": 
+	#"rootdelay=300" has issues with CoreOS which causes extra long boot time
+	#result = verify_grub(distro)
 	result = verify_udev_rules(distro)
