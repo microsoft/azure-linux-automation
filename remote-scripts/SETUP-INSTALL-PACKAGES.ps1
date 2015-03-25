@@ -5,10 +5,9 @@ $testResult = ""
 $SetupStatus= ""
 $resultArr = @()
 
-$isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
+$isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig -getLogsIfFailed $true
 if ($isDeployed)
 {
-
     try
     {
         $testServiceData = Get-AzureService -ServiceName $isDeployed
@@ -31,7 +30,17 @@ if ($isDeployed)
 
         LogMsg "Executing : $($currentTestData.testScript)"
         try{
-			$output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "python ./$($currentTestData.testScript)" -runAsSudo
+            $DistroName = DetectLinuxDistro -VIP $hs1VIP -SSHport $hs1vm1sshport -testVMUser $user -testVMPassword $password
+ 
+            if ($DistroName -eq "COREOS")  
+            {  
+                RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files "Tools\CoreosPreparationTools.zip" -username $user -password $password -upload  
+                $output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "/usr/share/oem/python/bin/python ./$($currentTestData.testScript)" -runAsSudo
+            }  
+            else{  
+                $output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "python ./$($currentTestData.testScript)" -runAsSudo -runMaxAllowedTime 1200
+            }  
+
 			$output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "ls /home/$user/SetupStatus.txt  2>&1" -runAsSudo
 			
 			if($output -imatch "/home/$user/SetupStatus.txt")
@@ -55,9 +64,17 @@ if ($isDeployed)
 				if($SetupStatus -imatch "PACKAGE-INSTALL-CONFIG-PASS")
 				{
 					LogMsg "** All the required packages for the distro installed successfully **"					
-					GetVMLogs -DeployedServices $isDeployed
-					#VM De-provision
-					$output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "/usr/sbin/waagent -force -deprovision+user 2>&1" -runAsSudo
+
+                    #VM De-provision
+                    if ($DistroName -eq "COREOS")   
+                    {  
+                        $output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "/usr/share/oem/python/bin/python /usr/share/oem/bin/waagent -force -deprovision+user 2>&1" -runAsSudo  
+                    }  
+                    else {  
+                        GetVMLogs -DeployedServices $isDeployed 
+                        $output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "/usr/sbin/waagent -force -deprovision+user 2>&1" -runAsSudo  
+                    }  
+					
 					if($output -match "home directory will be deleted")
 					{
 						LogMsg "** VM De-provisioned Successfully **"

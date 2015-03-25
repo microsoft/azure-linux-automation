@@ -9,7 +9,7 @@
 #              - Invokes azure test suite
 ## Author : v-ampaw@microsoft.com
 ###############################################################################################
-param ([string] $xmlConfigFile, [switch] $eMail, [string] $logFilename="azure_ica.log", [switch] $runtests, [switch]$onCloud, [switch] $vhdprep, [switch]$upload, [switch] $help, [string] $Distro, [string] $cycleName, [string] $TestPriority, [string]$osImage, [switch]$EconomyMode, [switch]$keepReproInact)
+param ([string] $xmlConfigFile, [switch] $eMail, [string] $logFilename="azure_ica.log", [switch] $runtests, [switch]$onCloud, [switch] $vhdprep, [switch]$upload, [switch] $help, [string] $Distro, [string] $cycleName, [string] $TestPriority, [string]$osImage, [switch]$EconomyMode, [switch]$keepReproInact, [string] $DebugDistro)
 
 #Import-Module .\TestLibs\RDFELibs.psm1 -Force
 Import-Module .\TestLibs\AzureWinUtils.psm1 -Force
@@ -93,7 +93,6 @@ try
         Set-Variable -Name EconomyMode -Value $false -Scope Global
         Set-Variable -Name keepReproInact -Value $false -Scope Global
     }
-
     
     $AzureSetup = $xmlConfig.config.Azure.General
     LogMsg  ("Info : AzureAutomationManager.ps1 - LIS on Azure Automation")
@@ -162,6 +161,11 @@ try
 	        #cd ...\Win8_ICA\ica
 	        #.\ica.ps1 .\XML\test.xml -runtests 
 	        exit
+        }
+        if ($DebugDistro)
+        {
+            $OsImage = $xmlConfig.config.Azure.Deployment.Data.Distro | ? { $_.name -eq $DebugDistro} | % { $_.OsImage }
+            Set-Variable -Name DebugOsImage -Value $OsImage -Scope Global
         }
         $testCycle =  GetCurrentCycleData -xmlConfig $xmlConfig -cycleName $cycleName
         #Invoke Azure Test Suite  
