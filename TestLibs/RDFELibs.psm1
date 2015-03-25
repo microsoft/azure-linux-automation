@@ -3084,13 +3084,13 @@ Function DoNslookupTest ($vm1, $vm2)
 {
 	$out = RunLinuxCmd -username $vm1.user -password $vm1.password -ip $vm1.Ip -port $vm1.SshPort -command "echo TestStarted > nslookup12.log" -runAsSudo
 	if ($detectedDistro -eq "COREOS")
-    {
-        $nslookupCommand = "python nslookup.py -n $($vm2.Hostname)"
-    }
-    else
-    {
-        $nslookupCommand = "nslookup $($vm2.Hostname)"
-    }
+	{
+		$nslookupCommand = "python nslookup.py -n $($vm2.Hostname)"
+	}
+	else
+	{
+		$nslookupCommand = "nslookup $($vm2.Hostname)"
+	}
 	$out = RunLinuxCmd -username $vm1.user -password $vm1.password -ip $vm1.Ip -port $vm1.SshPort -command "echo Executing : $nslookupCommand >> nslookup12.log" -runAsSudo
 	$out = RunLinuxCmd -username $vm1.user -password $vm1.password -ip $vm1.Ip -port $vm1.SshPort -command "$nslookupCommand >> nslookup12.log" -runAsSudo -ignoreLinuxExitCode
 	$out = RunLinuxCmd -username $vm1.user -password $vm1.password -ip $vm1.Ip -port $vm1.SshPort -command "echo TestCompleted >> nslookup12.log" -runAsSudo
@@ -3119,13 +3119,13 @@ Function DoDigTest ($vm1, $vm2)
 {
 	$out = RunLinuxCmd -username $vm1.user -password $vm1.password -ip $vm1.Ip -port $vm1.SshPort -command "echo TestStarted > dig12.log" -runAsSudo
 	if ($detectedDistro -eq "COREOS")
-    {
-        $digCommand = "python dig.py -n $($vm2.fqdn)"
-    }
-    else
-    {
-        $digCommand = "dig $($vm2.fqdn)"
-    }
+	{
+		$digCommand = "python dig.py -n $($vm2.fqdn)"
+	}
+	else
+	{
+		$digCommand = "dig $($vm2.fqdn)"
+	}
 	$out = RunLinuxCmd -username $vm1.user -password $vm1.password -ip $vm1.Ip -port $vm1.SshPort -command "echo Executing : $digCommand >> dig12.log" -runAsSudo
 	$out = RunLinuxCmd -username $vm1.user -password $vm1.password -ip $vm1.Ip -port $vm1.SshPort -command "$digCommand >> dig12.log" -runAsSudo -ignoreLinuxExitCode
 	$out = RunLinuxCmd -username $vm1.user -password $vm1.password -ip $vm1.Ip -port $vm1.SshPort -command "echo TestCompleted >> dig12.log" -runAsSudo
