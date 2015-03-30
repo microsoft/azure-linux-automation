@@ -41,10 +41,13 @@ if($isDeployed)
 		RemoteCopy -upload -uploadTo $vm1.ip -port $vm1.SShport -username $vm1.user -password $vm1.password -files $currentTestData.files 
 		RemoteCopy -upload -uploadTo $vm2.ip -port $vm2.SShport -username $vm2.user -password $vm2.password -files $currentTestData.files
 
+		$vm1.fqdn = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "hostname --fqdn"
+		$vm2.fqdn = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "hostname --fqdn"
+
 		$nslookupResult = DoNslookupTest -vm1 $vm1 -vm2 $vm2
 		$digResult = DoDigTest -vm1 $vm1 -vm2 $vm2
 
-		if (($nslookupResult -eq "PASS") -and ($digResult -eq "FAIL"))
+		if (($nslookupResult -eq "PASS") -and ($digResult -eq "PASS"))
 		{
 			$testResult = "PASS"
 		}

@@ -43,8 +43,8 @@ if($isDeployed)
     $filesUploaded = $false
     $uploadFiles = 
     {
-        RemoteCopy -upload -uploadTo $vm1.ip -port $vm1.SShport -username $vm1.user -password $vm1.password -files .\remote-scripts\temp.txt
-		RemoteCopy -upload -uploadTo $vm2.ip -port $vm2.SShport -username $vm2.user -password $vm2.password -files .\remote-scripts\temp.txt
+        RemoteCopy -upload -uploadTo $vm1.ip -port $vm1.SShport -username $vm1.user -password $vm1.password -files $currentTestData.files
+        RemoteCopy -upload -uploadTo $vm2.ip -port $vm2.SShport -username $vm2.user -password $vm2.password -files $currentTestData.files
         $filesUploaded = $true
     }
 	foreach ($mode in $currentTestData.TestMode.Split(","))

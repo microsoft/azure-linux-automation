@@ -1,29 +1,19 @@
 #!/usr/bin/python
 
-from azuremodules import *
-
 import argparse
 import sys
+import dns.resolver
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-x', '--client', help='hostname or fqdn', required=True)
-#parser.add_argument('-d', '--dig', help='specifies packet count' )
-parser.add_argument('-n', '--nslookup', help='specifies packet size')
+parser.add_argument('-n', '--hostname', help='hostname or fqdn', required=True)
 args = parser.parse_args()
 
-command = 'dig ' + args.client
-
-finalCommand = command + ' >>  dig.log'
-
-
-
-def RunTest(command):
-    UpdateState("TestRunning")
-    RunLog.info("Executing Command : %s", command)
-    temp = Run(command)
-    UpdateState("TestCompleted")
-    
-
-#Run('echo "TestStarted" > iperf-client.txt')
-RunTest(finalCommand)
+n = args.hostname
+try:
+	while true:
+		for rdata in dns.resolver.query(n, 'CNAME'):
+			n = rdata.target
+except:
+	for rdata in dns.resolver.query(n):
+		print rdata
