@@ -26,7 +26,7 @@ def set_variables_OS_dependent():
 	RunLog.info ("\nset_variables_OS_dependent ..")
 	[current_distro, distro_version] = DetectDistro()
 	if(current_distro == 'unknown'):
-		RunLog.info ("unknown distribution found exitting")
+		RunLog.error ("unknown distribution found, exiting")
 		ResultLog.info('ABORTED')
 		exit()
 	if(current_distro == "ubuntu" or current_distro == "Debian"):
@@ -45,7 +45,7 @@ def download_and_install_rpm(package):
 				RunLog.info("Installing Package: " + package+" from rpmlink done!")
 				return True
 
-	RunLog.info("Installing Package: " + package+" from rpmlink failed!!")
+	RunLog.error("Installing Package: " + package+" from rpmlink failed!!")
 	return False
 
 def yum_package_install(package):
@@ -63,6 +63,57 @@ def zypper_package_install(package):
 		return True
 	else:
 		return False
+
+def coreos_package_install():
+	binpath="/usr/share/oem/bin"
+	pythonlibrary="/usr/share/oem/python/lib64/python2.7"
+
+	# create /etc/hosts
+	ExecMultiCmdsLocalSudo(["touch /etc/hosts",\
+		"echo '127.0.0.1 localhost' > /etc/hosts",\
+		"echo '** modify /etc/hosts successfully **' >> PackageStatus.txt"])
+	# copy tools to bin folder
+	Run("unzip -d CoreosPreparationTools ./CoreosPreparationTools.zip")
+	ExecMultiCmdsLocalSudo(["cp ./CoreosPreparationTools/killall " + binpath, \
+		"cp ./CoreosPreparationTools/iperf " + binpath,\
+		"cp ./CoreosPreparationTools/iozone " + binpath,\
+		"cp ./CoreosPreparationTools/dos2unix " + binpath,\
+		"cp ./CoreosPreparationTools/at " + binpath,\
+		"chmod 755 "+ binpath + "/*",\
+		"echo '** copy tools successfully **' >> PackageStatus.txt"])
+	# copy python library to python library folder
+	Run("tar zxvf ./CoreosPreparationTools/pycrypto.tar.gz -C "+ pythonlibrary)
+	ExecMultiCmdsLocalSudo(["tar zxvf ./CoreosPreparationTools/ecdsa-0.13.tar.gz -C ./CoreosPreparationTools",\
+		"cd ./CoreosPreparationTools/ecdsa-0.13",\
+		"/usr/share/oem/python/bin/python setup.py install",\
+		"cd ../.."])
+	ExecMultiCmdsLocalSudo(["tar zxvf ./CoreosPreparationTools/paramiko-1.15.1.tar.gz -C ./CoreosPreparationTools",\
+		"cd ./CoreosPreparationTools/paramiko-1.15.1",\
+		"/usr/share/oem/python/bin/python setup.py install",\
+		"cd ../..",\
+		"tar zxvf ./CoreosPreparationTools/pexpect-3.3.tar.gz -C ./CoreosPreparationTools",\
+		"cd ./CoreosPreparationTools/pexpect-3.3",\
+		"/usr/share/oem/python/bin/python setup.py install",\
+		"cd ../.."])
+	ExecMultiCmdsLocalSudo(["tar zxvf ./CoreosPreparationTools/dnspython-1.12.0.tar.gz -C ./CoreosPreparationTools",\
+		"cd ./CoreosPreparationTools/dnspython-1.12.0",\
+		"/usr/share/oem/python/bin/python setup.py install",\
+		"cd ../.."])
+	if not os.path.exists (pythonlibrary + "/site-packages/pexpect"):
+		RunLog.error ("pexpect package installation failed!")
+		Run("echo '** pexpect package installation failed **' >> PackageStatus.txt")
+		return False
+	if not os.path.exists (pythonlibrary + "/site-packages/paramiko"):
+		RunLog.error ("paramiko packages installation failed!")
+		Run("echo '** paramiko packages installed failed **' >> PackageStatus.txt")
+		return False
+	if not os.path.exists (pythonlibrary + "/site-packages/dns"):
+		RunLog.error ("dnspython packages installation failed!")
+		Run("echo '** dnspython packages installed failed **' >> PackageStatus.txt")
+		return False
+	RunLog.info ("pexpect, paramiko and dnspython packages installed successfully!")
+	Run("echo '** pexpect, paramiko and dnspython packages installed successfully **' >> PackageStatus.txt")
+	return True
 
 def install_waagent_from_github():
 	RunLog.info ("Installing waagent from github...")
@@ -84,7 +135,7 @@ def install_waagent_from_github():
 		"rm -rf /tmp/"+folder_name])
 		return True		
 	else:
-		RunLog.info ("Installing waagent from github...[failed]")
+		RunLog.error ("Installing waagent from github...[failed]")
 
 	return False
 
@@ -100,7 +151,7 @@ def install_package(package):
 		elif (current_distro == "SUSE") or (current_distro == "openSUSE") or (current_distro == "sles") or (current_distro == "opensuse"):
 			return zypper_package_install(package)
 		else:
-			RunLog.info (package + ": package installation failed!")
+			RunLog.error (package + ": package installation failed!")
 			RunLog.info (current_distro + ": Unrecognised Distribution OS Linux found!")
 			return False
 
@@ -214,17 +265,25 @@ def RunTest():
 			elif node.tag == "tar_link":
 				tar_link[node.attrib["name"]] = node.text
 	
-	for package in packages_list:
-		if(not install_package(package)):
+	if not (current_distro=="coreos"):
+		for package in packages_list:
+			if(not install_package(package)):
+				success = False
+				Run("echo '"+package+"' failed to install >> PackageStatus.txt")
+				#break
+			else:
+				Run("echo '"+package+"' installed successfully >> PackageStatus.txt")
+	else:
+		if (not coreos_package_install()):
 			success = False
-			Run("echo '"+package+"' failed to install >> PackageStatus.txt")
-			#break
+			Run("echo 'coreos packages failed to install' >> PackageStatus.txt")
 		else:
-			Run("echo '"+package+"' installed successfully >> PackageStatus.txt")
+			Run("echo 'coreos support tools installed successfully' >> PackageStatus.txt")		
 			
 	Run("echo '** Packages Installation Completed **' >> PackageStatus.txt")		
 	if success == True:
-		ConfigFilesUpdate()
+		if not (current_distro=="coreos"):
+			ConfigFilesUpdate()
 		if success == True:
 			RunLog.info('PACKAGE-INSTALL-CONFIG-PASS')
 			Run("echo 'PACKAGE-INSTALL-CONFIG-PASS' >> SetupStatus.txt")

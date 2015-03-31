@@ -779,7 +779,7 @@ Function VerifyAllDeployments($servicesToVerify)
 		}
 		else
 		{
-			LogErr "$serviceName Failed.."
+			LogErr "$serviceName provision Failed.."
 			$retValue = "False"
 		}
 	}
@@ -998,7 +998,7 @@ Function SetDistroSpecificVariables($detectedDistro)
 	Set-Variable -Name python_cmd -Value $python_cmd -Scope Global
 }
 
-Function DeployVMs ($xmlConfig, $setupType, $Distro)
+Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false)
 {
    if( (!$EconomyMode) -or ( $EconomyMode -and ($xmlConfig.config.Azure.Deployment.$setupType.isDeployed -eq "NO")))
    {
@@ -1052,6 +1052,22 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro)
 				Write-Host "One or More Deployments are Failed..!"
 				$retValue = $NULL
 			}
+            # get the logs of the first provision-failed VM
+            if ($retValue -eq $NULL -and $getLogsIfFailed -and $DebugOsImage)
+            {
+                foreach ($service in $servicesToVerify)
+                {
+                    $VMs = Get-AzureVM -ServiceName $service
+                    foreach ($vm in $VMs)
+                    {
+                        if ($vm.InstanceStatus -ne "ReadyRole" )
+                        {
+                            $out = GetLogsFromProvisionFailedVM -vmName $vm.Name -serviceName $service -xmlConfig $xmlConfig
+                            return $NULL
+                        }
+                    }
+                }
+            }
 		}
 		catch
 		{
@@ -1072,6 +1088,81 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro)
 		$KernelLogOutput= GetAndCheckKernelLogs -DeployedServices $retValue -status "Initial"
 	}
 	return $retValue
+}
+
+function GetLogsFromProvisionFailedVM ($vmName, $serviceName, $xmlConfig)
+{
+    try
+    {
+        LogMsg "Stopping the provision-failed VM : $vmName"
+        $tmp = Stop-AzureVM -ServiceName $serviceName -Name $vmName -Force
+        LogMsg "Stopped the VM succussfully"
+        
+        LogMsg "Capturing the provision-failed VM Image"
+        $ErrorImageName = "$serviceName-fail"
+        $tmp = Save-AzureVMImage -ServiceName $serviceName -Name $vmName -NewImageName $ErrorImageName -NewImageLabel $ErrorImageName
+        LogMsg "Successfully captured VM image : $ErrorImageName"
+        $vhdLink = (Get-AzureVMImage -ImageName $ErrorImageName).MediaLink
+
+        $debugVMName = "$serviceName-debug"
+        $debugVMUser = $xmlConfig.config.Azure.Deployment.Data.UserName
+        $debugVMPasswd = $xmlConfig.config.Azure.Deployment.Data.Password
+
+        $debugSshPath = "/home/$debugVMUser/.ssh/authorized_keys"
+
+        LogMsg "Creating debug VM $debugVMName in service $serviceName"
+        $newVmConfigCmd = "New-AzureVMConfig -Name $debugVMName -InstanceSize `"Basic_A1`" -ImageName $DebugOsImage | Add-AzureProvisioningConfig -Linux -LinuxUser $debugVMUser -Password $debugVMPasswd -SSHPublicKeys (New-AzureSSHKey -PublicKey -Fingerprint `"690076D4C41C1DE677CD464EA63B44AE94C2E621`" -Path $debugSshPath) | Set-AzureEndpoint -Name `"SSH`" -LocalPort 22 -PublicPort 22 -Protocol `"TCP`""
+        $newVmCmd = "New-AzureVM -ServiceName $serviceName -VMs ($newVmConfigCmd)"
+        
+        $out = RunAzureCmd -AzureCmdlet $newVmCmd
+
+        $isVerified = VerifyAllDeployments -servicesToVerify @($serviceName)
+        if ($isVerified -eq "True")
+        {
+            $isConnected = isAllSSHPortsEnabled -DeployedServices $serviceName
+            if ($isConnected -ne "True")
+            {
+                return
+            }
+        }
+
+        LogMsg "Removing image $ErrorImageName, keep the VHD $vhdLink"
+        Remove-AzureVMImage -ImageName $ErrorImageName
+
+        LogMsg "Attaching VHD $vhdLink to VM $debugVMName"    
+        $vm = Get-AzureVM -ServiceName $serviceName -Name $debugVMName
+        $vm | Add-AzureDataDisk -ImportFrom -MediaLocation $vhdLink -DiskLabel "main" -LUN 0 | Update-AzureVM
+
+        $ip = (Get-AzureEndpoint -VM $vm)[0].Vip
+
+        $runFile = "remote-scripts\GetLogFromDataDisk.py"
+	    $out = RemoteCopy -uploadTo $ip -port 22  -files "$runFile" -username $debugVMUser -password $debugVMPasswd -upload
+
+        $out = RunLinuxCmd -ip $ip -port 22 -username $debugVMUser -password $debugVMPasswd -command "chmod +x *" -runAsSudo
+        $out = RunLinuxCmd -ip $ip -port 22 -username $debugVMUser -password $debugVMPasswd -command "./GetLogFromDataDisk.py -u $debugVMUser" -runAsSudo
+
+        $dir = "$LogDir\$vmName"
+        if (-not (Test-Path $dir))
+        {
+            mkdir $dir
+        }
+        LogMsg "Downloading logs from the VHD"
+        $out = RemoteCopy -download -downloadFrom $ip -port 22 -files "/home/$debugVMUser/waagent.log" -downloadTo $dir -username $debugVMUser -password $debugVMPasswd
+        $out = RemoteCopy -download -downloadFrom $ip -port 22 -files "/home/$debugVMUser/messages.log" -downloadTo $dir -username $debugVMUser -password $debugVMPasswd
+        $out = RemoteCopy -download -downloadFrom $ip -port 22 -files "/home/$debugVMUser/dmesg.log" -downloadTo $dir -username $debugVMUser -password $debugVMPasswd
+
+        LogMsg "Stopping VM $debugVMName"
+        $tmp = Stop-AzureVM -ServiceName $serviceName -Name $debugVMName -Force
+
+        # Remove the Cloud Service
+        LogMsg "Executing: Remove-AzureService -ServiceName $serviceName -Force -DeleteAll"
+        Remove-AzureService -ServiceName $serviceName -Force -DeleteAll
+    }
+    catch
+    {
+        $ErrorMessage =  $_.Exception.Message
+		LogMsg "EXCEPTION in GetLogsFromProvisionFailedVM() : $ErrorMessage"
+    }
 }
 
 Function Test-TCP($testIP, $testport)
@@ -4077,7 +4168,7 @@ Function StartAllDeployments($DeployedServices)
 			$retryCount = 3
 			While(($retryCount -gt 0) -and !($isRestarted))
 			{
-				LogMsg "Staring : $($VM.Name)"
+				LogMsg "Starting : $($VM.Name)"
 				$out = Start-AzureVM -ServiceName $hsName -Name $VM.Name
 				$isRestarted = $?
 				if ($isRestarted)
