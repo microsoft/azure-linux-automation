@@ -26,7 +26,7 @@ def set_variables_OS_dependent():
 	RunLog.info ("\nset_variables_OS_dependent ..")
 	[current_distro, distro_version] = DetectDistro()
 	if(current_distro == 'unknown'):
-		RunLog.info ("unknown distribution found exitting")
+		RunLog.error ("unknown distribution found, exiting")
 		ResultLog.info('ABORTED')
 		exit()
 	if(current_distro == "ubuntu" or current_distro == "Debian"):
@@ -45,7 +45,7 @@ def download_and_install_rpm(package):
 				RunLog.info("Installing Package: " + package+" from rpmlink done!")
 				return True
 
-	RunLog.info("Installing Package: " + package+" from rpmlink failed!!")
+	RunLog.error("Installing Package: " + package+" from rpmlink failed!!")
 	return False
 
 def yum_package_install(package):
@@ -100,15 +100,15 @@ def coreos_package_install():
 		"/usr/share/oem/python/bin/python setup.py install",\
 		"cd ../.."])
 	if not os.path.exists (pythonlibrary + "/site-packages/pexpect"):
-		RunLog.info ("pexpect package installation failed!")
+		RunLog.error ("pexpect package installation failed!")
 		Run("echo '** pexpect package installation failed **' >> PackageStatus.txt")
 		return False
 	if not os.path.exists (pythonlibrary + "/site-packages/paramiko"):
-		RunLog.info ("paramiko packages installation failed!")
+		RunLog.error ("paramiko packages installation failed!")
 		Run("echo '** paramiko packages installed failed **' >> PackageStatus.txt")
 		return False
 	if not os.path.exists (pythonlibrary + "/site-packages/dns"):
-		RunLog.info ("dnspython packages installation failed!")
+		RunLog.error ("dnspython packages installation failed!")
 		Run("echo '** dnspython packages installed failed **' >> PackageStatus.txt")
 		return False
 	RunLog.info ("pexpect, paramiko and dnspython packages installed successfully!")
@@ -135,7 +135,7 @@ def install_waagent_from_github():
 		"rm -rf /tmp/"+folder_name])
 		return True		
 	else:
-		RunLog.info ("Installing waagent from github...[failed]")
+		RunLog.error ("Installing waagent from github...[failed]")
 
 	return False
 
@@ -151,7 +151,7 @@ def install_package(package):
 		elif (current_distro == "SUSE") or (current_distro == "openSUSE") or (current_distro == "sles") or (current_distro == "opensuse"):
 			return zypper_package_install(package)
 		else:
-			RunLog.info (package + ": package installation failed!")
+			RunLog.error (package + ": package installation failed!")
 			RunLog.info (current_distro + ": Unrecognised Distribution OS Linux found!")
 			return False
 
