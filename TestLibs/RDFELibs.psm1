@@ -5751,19 +5751,21 @@ Function RetryOperation($operation, $description, $expectResult=$null, $maxRetry
 		catch
 		{
             $retryCount ++
-			continue
+			WaitFor -seconds $retryInterval
+			if ( $retryCount -le $maxRetryCount )
+			{
+				continue
+			}
 		}
 		finally
 		{
 			$ErrorActionPreference = $oldErrorActionValue
 		}
-		
 		if ($retryCount -ge $maxRetryCount)
 		{
+			LogErr "Opearation Failed." 
 			break;
 		}
-		$retryCount += 1
-		WaitFor -seconds $retryInterval
 	} while ($True)
 	
 	return $null
