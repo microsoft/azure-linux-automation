@@ -24,7 +24,7 @@ if ($isDeployed)
 		$detectedDistro = DetectLinuxDistro -VIP $hs1VIP -SSHport $hs1vm1sshport -testVMUser $user -testVMPassword $password
 		if ($detectedDistro -imatch "UBUNTU")
 		{
-			$matchstrings = @("_TEST_SUDOERS_VERIFICATION_SUCCESS","_TEST_GRUB_VERIFICATION_SUCCESS", "_TEST_KVP_INSTALLED", "_TEST_REPOSITORIES_AVAILABLE")
+			$matchstrings = @("_TEST_SUDOERS_VERIFICATION_SUCCESS","_TEST_GRUB_VERIFICATION_SUCCESS", "_TEST_REPOSITORIES_AVAILABLE")
 		}
 		elseif ($detectedDistro -imatch "SUSE")
 		{
@@ -32,11 +32,11 @@ if ($isDeployed)
 		}
 		elseif ($detectedDistro -imatch "CENTOS")
 		{
-			$matchstrings = @("_TEST_NETWORK_MANAGER_NOT_INSTALLED","_TEST_NETWORK_FILE_SUCCESS", "_TEST_IFCFG_ETH0_FILE_SUCCESS", "_TEST_UDEV_RULES_SUCCESS", "_TEST_REPOSITORIES_AVAILABLE", "_TEST_YUM_CONF_ERROR", "_TEST_GRUB_VERIFICATION_SUCCESS")
+			$matchstrings = @("_TEST_NETWORK_MANAGER_NOT_INSTALLED","_TEST_NETWORK_FILE_SUCCESS", "_TEST_IFCFG_ETH0_FILE_SUCCESS", "_TEST_UDEV_RULES_SUCCESS", "_TEST_REPOSITORIES_AVAILABLE", "_TEST_GRUB_VERIFICATION_SUCCESS")
 		}
 		elseif ($detectedDistro -imatch "ORACLELINUX")
 		{
-			$matchstrings = @("_TEST_NETWORK_MANAGER_NOT_INSTALLED","_TEST_NETWORK_FILE_SUCCESS", "_TEST_IFCFG_ETH0_FILE_SUCCESS", "_TEST_UDEV_RULES_SUCCESS", "_TEST_REPOSITORIES_AVAILABLE", "_TEST_YUM_CONF_ERROR", "_TEST_GRUB_VERIFICATION_SUCCESS")
+			$matchstrings = @("_TEST_NETWORK_MANAGER_NOT_INSTALLED","_TEST_NETWORK_FILE_SUCCESS", "_TEST_IFCFG_ETH0_FILE_SUCCESS", "_TEST_UDEV_RULES_SUCCESS", "_TEST_REPOSITORIES_AVAILABLE", "_TEST_GRUB_VERIFICATION_SUCCESS")
 		}
 		elseif ($detectedDistro -imatch "REDHAT")
 		{
@@ -48,11 +48,11 @@ if ($isDeployed)
 		}
 		elseif ($detectedDistro -imatch "SLES")
 		{
-			$matchstrings = @("_TEST_SUDOERS_VERIFICATION_SUCCESS","_TEST_GRUB_VERIFICATION_SUCCESS", "_TEST_DHCLIENT_SET_HOSTNAME_IS_NO_SUCCESS", "_TEST_REPOSITORIES_AVAILABLE")
+			$matchstrings = @("_TEST_SUDOERS_VERIFICATION_SUCCESS","_TEST_GRUB_VERIFICATION_SUCCESS", "_TEST_REPOSITORIES_AVAILABLE")
 		}
 		if ($detectedDistro -imatch "COREOS")
 		{
-			$matchstrings = @("_TEST_UDEV_RULES_SUCCESS")
+			$matchstrings = @("_TEST_GRUB_VERIFICATION_SUCCESS","_TEST_UDEV_RULES_SUCCESS")
 		}
       
 		RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload

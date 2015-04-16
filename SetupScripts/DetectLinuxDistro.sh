@@ -20,17 +20,8 @@ done
                 exitVal=0
         elif [ -e /etc/redhat-release ]; then
                 tmp=`cat /etc/redhat-release`
-                if [[ "$tmp" == *CentOS* ]]; then
-                    echo "CENTOS"
-                    exitVal=0
-                elif [[ "$tmp" == *Red* ]]; then
-                    echo "REDHAT"
-                    exitVal=0
-                elif [[ "$tmp" == *Fedora* ]]; then
-                    echo "FEDORA"
-                    exitVal=0				
-                else
-                    tmp=`cat /etc/system-release`
+                if [ -e /etc/oracle-release ]; then
+                    tmp=`cat /etc/oracle-release`
                     if [[ "$tmp" == *Oracle* ]]; then
                         echo "ORACLELINUX"
                         exitVal=0
@@ -38,6 +29,18 @@ done
                         echo "Unknown"
                         exitVal=1
                     fi
+                elif [[ "$tmp" == *CentOS* ]]; then
+                    echo "CENTOS"
+                    exitVal=0
+                elif [[ "$tmp" == *Fedora* ]]; then
+                    echo "FEDORA"
+                    exitVal=0
+                elif [[ "$tmp" == *Red* ]]; then
+                    echo "REDHAT"
+                    exitVal=0
+                else
+                    echo "Unknown"
+                    exitVal=1
                 fi
         elif [ -e /etc/SuSE-release ]; then
                 tmp=`cat /etc/SuSE-release`
