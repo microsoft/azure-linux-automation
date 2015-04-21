@@ -52,7 +52,7 @@ if ($isDeployed)
 		}
 		if ($detectedDistro -imatch "COREOS")
 		{
-			$matchstrings = @("_TEST_GRUB_VERIFICATION_SUCCESS","_TEST_UDEV_RULES_SUCCESS")
+			$matchstrings = @("_TEST_UDEV_RULES_SUCCESS")
 		}
       
 		RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload

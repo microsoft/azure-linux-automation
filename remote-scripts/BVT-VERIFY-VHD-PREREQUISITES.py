@@ -35,11 +35,14 @@ def verify_grub(distro):
 	if distro == "UBUNTU":
 		grub_out = Run("cat /etc/default/grub")
 	if distro == "SUSE":
-		suse_ver = Run("cat /etc/SuSE-release | grep -i version | awk -F ' ' '{print $3}' | tr -d '\n'")
-		if suse_ver == "13.2":
+		if os.path.exists("/boot/grub2/grub.cfg"):
 			grub_out = Run("cat /boot/grub2/grub.cfg")
-		if suse_ver == "13.1":
+		elif os.path.exists("/boot/grub/grub.conf"):
 			grub_out = Run("cat /boot/grub/grub.conf")
+		else:
+			RunLog.error("Unable to locate grub file")
+			print(distro+"_TEST_GRUB_VERIFICATION_FAIL")
+			return False
 	if distro == "CENTOS" or distro == "ORACLELINUX" or distro == "REDHAT" or distro == "SLES" or distro == "FEDORA":
 		if os.path.isfile("/boot/grub2/grub.cfg"):
 			RunLog.info("Getting Contents of /boot/grub2/grub.cfg")
@@ -55,7 +58,7 @@ def verify_grub(distro):
 		#in core os we don't have access to boot partition
 		grub_out = Run("dmesg")
 	if "console=ttyS0" in grub_out and "rootdelay=300" in grub_out and "libata.atapi_enabled=0" not in grub_out and "reserve=0x1f0,0x8" not in grub_out:
-		if distro == "CENTOS" or distro == "ORACLELINUX":
+		if distro == "CENTOS" or distro == "ORACLELINUX" or distro == "REDHAT":
 			# check numa=off in grub for CentOS 6.x and Oracle Linux 6.x
 			version_release = Run("cat /etc/system-release | grep -o [0-9].[0-9] | head -1 | tr -d '\n'")
 			if float(version_release) < 7.0:
@@ -328,6 +331,6 @@ if distro == "SLES":
 		RunLog.info("DHCLIENT_SET_HOSTNAME='no' not present in /etc/sysconfig/network/dhcp, it's not strict.")
 
 if distro == "COREOS":
-    #"rootdelay=300" has issues with CoreOS which causes extra long boot time
+	#"rootdelay=300" has issues with CoreOS which causes extra long boot time
 	#result = verify_grub(distro)
 	result = verify_udev_rules(distro)

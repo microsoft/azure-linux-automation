@@ -5,6 +5,8 @@
 			<keywords>Fast TSC calibration</keywords>
 			<keywords>acpi PNP0A03:00</keywords>
 			<keywords>systemd-journald-audit.socket</keywords>
+			<keywords>Failed to set file attributes: Inappropriate ioctl for device</keywords>
+			<keywords>Failed to create new system journal: No such file or directory</keywords>
 		</failures>
 		<errors/>
 		<warnings/>
