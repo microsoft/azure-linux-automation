@@ -11,6 +11,7 @@ parser.add_argument('-wl', '--whitelist', help='specify the xml file which conta
 args = parser.parse_args()
 distro_name = args.distro.lower()
 white_list_xml = args.whitelist
+RunLog.info(distro_name)
 
 def RunTest():
     UpdateState("TestRunning")
@@ -45,9 +46,12 @@ def RunTest():
                     break
         if (errors or warnings or failures):
             RunLog.info('ERROR/WARNING/FAILURE are  present in kernel boot line.')
-            RunLog.info('Errors: ' + ''.join(errors))
-            RunLog.info('warnings: ' + ''.join(warnings))
-            RunLog.info('failures: ' + ''.join(failures))
+            if(errors):
+               RunLog.info('Errors: ' + ''.join(errors))
+            if(warnings):
+               RunLog.info('warnings: ' + ''.join(warnings))
+            if(failures):
+               RunLog.info('failures: ' + ''.join(failures))
             ResultLog.error('FAIL')
         else:
             ResultLog.info('PASS')

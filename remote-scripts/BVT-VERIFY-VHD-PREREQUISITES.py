@@ -31,9 +31,18 @@ def verify_default_targetpw(distro):
 
 def verify_grub(distro):
 	import os.path
-	RunLog.info("Checking console=ttyS0 earlyprintk=ttyS0 rootdelay=300..")
-	if distro == "UBUNTU" or distro == "SUSE":
+	RunLog.info("Checking console=ttyS0 rootdelay=300..")
+	if distro == "UBUNTU":
 		grub_out = Run("cat /etc/default/grub")
+	if distro == "SUSE":
+		if os.path.exists("/boot/grub2/grub.cfg"):
+			grub_out = Run("cat /boot/grub2/grub.cfg")
+		elif os.path.exists("/boot/grub/grub.conf"):
+			grub_out = Run("cat /boot/grub/grub.conf")
+		else:
+			RunLog.error("Unable to locate grub file")
+			print(distro+"_TEST_GRUB_VERIFICATION_FAIL")
+			return False
 	if distro == "CENTOS" or distro == "ORACLELINUX" or distro == "REDHAT" or distro == "SLES" or distro == "FEDORA":
 		if os.path.isfile("/boot/grub2/grub.cfg"):
 			RunLog.info("Getting Contents of /boot/grub2/grub.cfg")
@@ -48,13 +57,18 @@ def verify_grub(distro):
 	if distro == "COREOS":
 		#in core os we don't have access to boot partition
 		grub_out = Run("dmesg")
-	if "console=ttyS0" in grub_out and "earlyprintk=ttyS0" in grub_out and "rootdelay=300" in grub_out and "libata.atapi_enabled=0" not in grub_out and "reserve=0x1f0,0x8" not in grub_out:
-		if distro == "CENTOS" or distro == "ORACLELINUX":
-			if "numa=off" in grub_out:
+	if "console=ttyS0" in grub_out and "rootdelay=300" in grub_out and "libata.atapi_enabled=0" not in grub_out and "reserve=0x1f0,0x8" not in grub_out:
+		if distro == "CENTOS" or distro == "ORACLELINUX" or distro == "REDHAT":
+			# check numa=off in grub for CentOS 6.x and Oracle Linux 6.x
+			version_release = Run("cat /etc/system-release | grep -o [0-9].[0-9] | head -1 | tr -d '\n'")
+			if float(version_release) < 7.0:
+				if "numa=off" in grub_out:
+					print(distro+"_TEST_GRUB_VERIFICATION_SUCCESS")
+				else : 
+					RunLog.error("numa=off not present in etc/default/grub")
+					print(distro+"_TEST_GRUB_VERIFICATION_FAIL")
+			else:
 				print(distro+"_TEST_GRUB_VERIFICATION_SUCCESS")
-			else : 
-				RunLog.error("numa=off not present in etc/default/grub")
-				print(distro+"_TEST_GRUB_VERIFICATION_FAIL")
 		else:
 			print(distro+"_TEST_GRUB_VERIFICATION_SUCCESS")
 			return True
@@ -62,8 +76,6 @@ def verify_grub(distro):
 		print(distro+"_TEST_GRUB_VERIFICATION_FAIL")
 		if "console=ttyS0" not in grub_out:
 			RunLog.error("console=ttyS0 not present")
-		if "earlyprintk=ttyS0" not in grub_out:
-			RunLog.error("earlyprintk=ttyS0 not present")
 		if "rootdelay=300" not in grub_out:
 			RunLog.error("rootdelay=300 not present")
 		if "libata.atapi_enabled=0" in grub_out:
@@ -74,12 +86,23 @@ def verify_grub(distro):
 
 def verify_network_manager(distro):
 	RunLog.info("Verifying that network manager is not installed")
-	if distro == "CENTOS" or distro == "ORACLELINUX" or distro == "REDHAT" or distro == "FEDORA":
-		n_out = Run ("rpm -q NetworkManager")
-		if "is not installed" in n_out:
-			RunLog.info("Network Manager is not installed")
-			print(distro+"_TEST_NETWORK_MANAGER_NOT_INSTALLED")
-			return True
+	n_out = Run ("rpm -q NetworkManager")
+	if "is not installed" in n_out:
+		RunLog.info("Network Manager is not installed")
+		print(distro+"_TEST_NETWORK_MANAGER_NOT_INSTALLED")
+		return True
+	else:
+		# NetworkManager package no longer conflicts with the wwagent on CentOS 7.0+ and Oracle Linux 7.0+
+		if distro == "CENTOS" or distro == "ORACLELINUX":
+			version_release = Run("cat /etc/system-release | grep -o [0-9].[0-9] | head -1 | tr -d '\n'")
+			if float(version_release) < 7.0:
+				RunLog.error("Network Manager is installed")
+				print(distro+"_TEST_NETWORK_MANAGER_INSTALLED")
+				return False
+			else:
+				RunLog.info("Network Manager is installed but not confict with waagent.")
+				print(distro+"_TEST_NETWORK_MANAGER_NOT_INSTALLED")
+				return True
 		else:
 			RunLog.error("Network Manager is installed")
 			print(distro+"_TEST_NETWORK_MANAGER_INSTALLED")
@@ -157,7 +180,7 @@ def verify_udev_rules(distro):
 
 if distro == "UBUNTU":
 	RunLog.info("DISTRO PROVIDED : "+distro)
-	#Test 1 : make sure that hv-kvp-daemon-init is installed
+	#Test 1 : verify that hv-kvp-daemon-init is installed or not, it's optional not strict.
 	RunLog.info("Checking if hv-kvp-daemon-init is installed or not..")
 	#kvp_install_status = Run("dpkg -s hv-kvp-daemon-init")
 	kvp_install_status = Run("pgrep -lf hv_kvp_daemon")
@@ -177,7 +200,7 @@ if distro == "UBUNTU":
 	else:
 		print(distro+"_TEST_REPOSITORIES_ERROR")
 
-	#Test 3 : Make sure to have console=ttyS0 earlyprintk=ttyS0 rootdelay=300 in /etc/default/grub.
+	#Test 3 : Make sure to have console=ttyS0 rootdelay=300 in /etc/default/grub.
 	result = verify_grub(distro)
 
 	#Test 4 : Make sure that default targetpw is commented in /etc/sudoers file.
@@ -186,22 +209,20 @@ if distro == "UBUNTU":
 if distro == "SUSE":
 	#Make sure that distro contains Cloud specific repositories
 	RunLog.info("Verifying Cloud specific repositories")
-	r_out = Run("zypper lr")
-	if "Cloud:Tools_" in r_out and "_OSS" in r_out and "_Updates" in r_out:
+	Oss_repo_count = Run("zypper lr | grep -vi debug | grep -vi non | grep Oss | wc -l | tr -d '\n'")
+	Update_repo_count = Run("zypper lr | grep -vi debug | grep -vi non | grep Update | wc -l | tr -d '\n'")
+	Oss_repo_enable_refresh = Run("zypper lr | grep -vi debug | grep -vi non | grep Oss  | grep -o Yes | wc -l | tr -d '\n'")
+	Update_repo_enable_refresh = Run("zypper lr | grep -vi debug | grep -vi non | grep Update | grep -o Yes | wc -l | tr -d '\n'")
+	if int(Oss_repo_count) > 0 and int(Update_repo_count) > 0:
 		RunLog.info("All expected repositories are present")
-		r_out_words = r_out.split(" ")
-		yesCount = 0
-		for eachWord in r_out_words:
-			if eachWord == "Yes":
-				yesCount = yesCount + 1
-		if yesCount == 6:
+		if int(Oss_repo_enable_refresh) == 2 and int(Update_repo_enable_refresh) == 2:
 			RunLog.info("All expected repositories are enabled and refreshed")
 			print(distro+"_TEST_REPOSITORIES_AVAILABLE")
 		else:
-			RunLog.error("One or more expected repositories are not present")
+			RunLog.error("One or more expected repositories are not enabled/refreshed.")
 			print(distro+"_TEST_REPOSITORIES_ERROR")
 	else:
-		RunLog.error("One or more expected repositories are not enabled/refreshed.")
+		RunLog.error("One or more expected repositories are not present")
 		print(distro+"_TEST_REPOSITORIES_ERROR")
 	
 	#Verify Grub
@@ -228,12 +249,17 @@ if distro == "CENTOS":
 		print(distro+"_TEST_REPOSITORIES_ERROR")
 	#Verify etc/yum.conf
 	y_out = Run("cat /etc/yum.conf")
-	if "http_caching=packages" in y_out:
-		RunLog.info("http_caching=packages present in /etc/yum.conf")
-		print(distro+"_TEST_YUM_CONF_SUCCESS")
+	# check http_caching=packages in yum.conf for CentOS 6.x
+	version_release = Run("cat /etc/system-release | grep -o [0-9].[0-9] | head -1 | tr -d '\n'")
+	if float(version_release) < 7.0:
+		if "http_caching=packages" in y_out:
+			RunLog.info("http_caching=packages present in /etc/yum.conf")
+			print(distro+"_TEST_YUM_CONF_SUCCESS")
+		else:
+			RunLog.error("http_caching=packages not present in /etc/yum.conf")
+			print(distro+"_TEST_YUM_CONF_ERROR")
 	else:
-		RunLog.error("http_caching=packages not present in /etc/yum.conf")
-		print(distro+"_TEST_YUM_CONF_ERROR")
+		print(distro+"_TEST_YUM_CONF_SUCCESS")
 	result = verify_grub(distro)
 
 if distro == "REDHAT" or distro == "FEDORA":
@@ -272,29 +298,20 @@ if distro == "ORACLELINUX":
 	result = verify_udev_rules(distro)
 	#Verify repositories
 	r_out = Run("yum repolist")
-	if "base" in r_out and "updates" in r_out:
-		RunLog.info("Expected repositories are present")
+	if "latest" in r_out:
+		RunLog.info("Expected latest repositories are present")
 		print(distro+"_TEST_REPOSITORIES_AVAILABLE")
 	else:
-		if "base" not in r_out:
-			RunLog.error("Base repository not present")
-		if "updates" not in r_out:
-			RunLog.error("Updates repository not present")
-			print(distro+"_TEST_REPOSITORIES_ERROR")
-	#Verify etc/yum.conf
-	y_out = Run("cat /etc/yum.conf")
-	if "http_caching=packages" in y_out:
-		RunLog.info("http_caching=packages present in /etc/yum.conf")
-		print(distro+"_TEST_YUM_CONF_SUCCESS")
-	else:
-		RunLog.error("http_caching=packages not present in /etc/yum.conf")
-		print(distro+"_TEST_YUM_CONF_ERROR")
+		RunLog.error("Expected latest repository not present")
+		print(distro+"_TEST_REPOSITORIES_ERROR")
+	# no need to verify yum.conf since http_caching is not required for Oracle Linux.
+
 	result = verify_grub(distro)
 
 if distro == "SLES":
 	#Verify Repositories..
 	r_out = Run("zypper lr")
-	if "SUSE_Linux_Enterprise_Server" in r_out and "Pool" in r_out and "Updates" in r_out:
+	if "Pool" in r_out and "Updates" in r_out:
 		RunLog.info("All expected repositories are present")
 		RunLog.info("All expected repositories are enabled and refreshed")
 		print(distro+"_TEST_REPOSITORIES_AVAILABLE")
@@ -306,15 +323,14 @@ if distro == "SLES":
 	#Verify sudoers file
 	result = verify_default_targetpw(distro)
 	#Vefiry : It is recommended that you set /etc/sysconfig/network/dhcp or equivalent from DHCLIENT_SET_HOSTNAME="yes" to DHCLIENT_SET_HOSTNAME="no"
-	RunLog.info('Checking if DHCLIENT_SET_HOSTNAME="no" present in /etc/sysconfig/network/dhcp')
+	RunLog.info('Checking recommended setting if DHCLIENT_SET_HOSTNAME="no" present in /etc/sysconfig/network/dhcp')
 	d_out = Run("cat /etc/sysconfig/network/dhcp")
 	if 'DHCLIENT_SET_HOSTNAME="no"' in d_out:
 		RunLog.info('DHCLIENT_SET_HOSTNAME="no" present in /etc/sysconfig/network/dhcp')
-		print(distro+"_TEST_DHCLIENT_SET_HOSTNAME_IS_NO_SUCCESS")
 	else:
-		RunLog.error('DHCLIENT_SET_HOSTNAME="no" not present in /etc/sysconfig/network/dhcp')
-		print(distro+"_TEST_DHCLIENT_SET_HOSTNAME_IS_NO_FAIL")
-if distro == "COREOS": 
+		RunLog.info("DHCLIENT_SET_HOSTNAME='no' not present in /etc/sysconfig/network/dhcp, it's not strict.")
+
+if distro == "COREOS":
 	#"rootdelay=300" has issues with CoreOS which causes extra long boot time
 	#result = verify_grub(distro)
 	result = verify_udev_rules(distro)
