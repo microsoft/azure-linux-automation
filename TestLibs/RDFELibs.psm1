@@ -1951,7 +1951,16 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $setupType = "BVTD
                 Remove-Job -Id $taskID -Force
             }
 			$user=$xmlConfig.config.Azure.Deployment.Data.UserName
-			$KernelLogOutput=GetAndCheckKernelLogs -DeployedServices $deployedServices -status "Final" #Collecting kernel logs after execution of test case : v-sirebb
+			try
+			{
+				$KernelLogOutput=GetAndCheckKernelLogs -DeployedServices $deployedServices -status "Final" #Collecting kernel logs after execution of test case : v-sirebb
+			}
+			catch 
+			{
+				$ErrorMessage =  $_.Exception.Message
+				LogMsg "EXCEPTION in GetAndCheckKernelLogs(): $ErrorMessage"	
+			}
+			
 			$isClened = @()
 			$hsNames = $DeployedServices
 			$hsNames = $hsNames.Split("^")

@@ -37,9 +37,6 @@ if ($isDeployed)
 			LogErr "Virtual machine shut down failed."
 			$testResult = "FAIL"
 		}
-		
-		LogMsg "Boot $hs1vm1Hostname after test complete ..."
-		startAllDeployments -DeployedServices $isDeployed
 	}
 
 	catch
