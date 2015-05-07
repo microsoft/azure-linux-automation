@@ -1,7 +1,7 @@
 Configure DNS server with newly deployed Virtual Machine details.
 	1.	Get the DIPs of all deployed VM's.
 	2.	Login to one of the deployed VM and from there, SSH into DNS SERVER.
-	3.	edit file : /etc/bind/zones/lisvnet.com.db
+	3.	edit file : /etc/bind/zones/lisvnetlab.com.db
 		a.	Add (Append) each VM's DIP and HOSTNAME details here in following format.
 			VM1_hostname    IN      A       VM1_DIP
 			VM2_hostname    IN      A       VM2_DIP

@@ -67,8 +67,7 @@ if($isDeployed)
 	try
 	{
 		$dnsServer = CreateVMNode -nodeIp '192.168.3.120' -nodeSshPort 22 -user root -password "redhat" -nodeHostname "ubuntudns"
-		$intermediateVM = CreateVMNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -user $user -password $password -nodeDip $hs1vm1IP -nodeHostname $hs1vm1Hostname
-		$externalServer = CreateVMNode -nodeIp $externalServerIP -nodeSshPort $externalServerSSHport -user $externalServerUser -password $externalServerPass
+		$intermediateVM = CreateVMNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -user $user -password $password -nodeDip $hs1vm1IP -nodeHostname $hs1vm1Hostname		
 		ConfigureVNETVms -SSHDetails $SSHDetails
 		UploadFilesToAllDeployedVMs -SSHDetails $SSHDetails -files $currentTestData.files
 		RunLinuxCmdOnAllDeployedVMs -SSHDetails $SSHDetails -command "chmod +x *"
@@ -91,21 +90,19 @@ if($isDeployed)
 		{
 			mkdir $LogDir\$Value -ErrorAction SilentlyContinue | out-null
 
-			$LocalVM = $dnsServer
-
 			switch ($Value)
 			{
 				"HS1VM1" {
-					$ToVM = CreateVMNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -user $user -password $password -logDir $LogDir -nodeDip $hs1vm1IP -nodeHostname $hs1vm1Hostname
+					$ToVM = CreateVMNode -nodeIp $hs1vm1IP -nodeSshPort $hs1vm1sshport -user $user -password $password -logDir $LogDir -nodeDip $hs1vm1IP -nodeHostname $hs1vm1Hostname
 				}
 				"HS1VM2" {
-					$ToVM = CreateVMNode -nodeIp $hs1VIP -nodeSshPort $hs1vm2sshport -user $user -password $password -logDir $LogDir -nodeDip $hs1vm2IP -nodeHostname $hs1vm2Hostname
+					$ToVM = CreateVMNode -nodeIp $hs1vm2IP -nodeSshPort $hs1vm2sshport -user $user -password $password -logDir $LogDir -nodeDip $hs1vm2IP -nodeHostname $hs1vm2Hostname
 				}
 				"HS2VM1" {
-					$ToVM = CreateVMNode -nodeIp $hs2VIP -nodeSshPort $hs2vm1sshport -user $user -password $password -logDir $LogDir -nodeDip $hs2vm1IP -nodeHostname $hs2vm1Hostname
+					$ToVM = CreateVMNode -nodeIp $hs2vm1IP -nodeSshPort $hs2vm1sshport -user $user -password $password -logDir $LogDir -nodeDip $hs2vm1IP -nodeHostname $hs2vm1Hostname
 				}
 				"HS2VM2" {
-					$ToVM = CreateVMNode -nodeIp $hs2VIP -nodeSshPort $hs2vm2sshport -user $user -password $password -logDir $LogDir -nodeDip $hs2vm2IP -nodeHostname $hs2vm2Hostname
+					$ToVM = CreateVMNode -nodeIp $hs2vm2IP -nodeSshPort $hs2vm2sshport -user $user -password $password -logDir $LogDir -nodeDip $hs2vm2IP -nodeHostname $hs2vm2Hostname
 				}
 			}
 			foreach ($mode in $currentTestData.TestMode.Split(","))

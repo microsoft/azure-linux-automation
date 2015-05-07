@@ -996,6 +996,12 @@ Function SetDistroSpecificVariables($detectedDistro)
     $python_cmd = "python"
 	LogMsg "Set `$python_cmd > python"    
 	Set-Variable -Name python_cmd -Value $python_cmd -Scope Global
+	Set-Variable -Name ifconfig_cmd -Value "ifconfig" -Scope Global
+	if($detectedDistro -eq "SLES" -or $detectedDistro -eq "SUSE" )
+	{
+		Set-Variable -Name ifconfig_cmd -Value "/sbin/ifconfig" -Scope Global
+		LogMsg "Set `$ifconfig_cmd > $ifconfig_cmd for $detectedDistro"
+	}
 }
 
 Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false)
@@ -3980,7 +3986,7 @@ Function VerifyDIPafterInitialDeployment($DeployedServices)
 
 			$VMEndpoints = Get-AzureEndpoint -VM $VM
 			$VMSSHPort = GetPort -Endpoints $VMEndpoints -usage "SSH"
-			$out = RunLinuxCmd -ip $VMEndpoints[0].Vip -port $VMSSHPort -username $user -password $password -command "ifconfig -a" -runAsSudo
+			$out = RunLinuxCmd -ip $VMEndpoints[0].Vip -port $VMSSHPort -username $user -password $password -command "$ifconfig_cmd -a" -runAsSudo
 			if ($out -imatch $VM.IpAddress)
 			{
 				LogMsg "Expected DIP : $($VM.IpAddress); Recorded DIP : $($VM.IpAddress);"

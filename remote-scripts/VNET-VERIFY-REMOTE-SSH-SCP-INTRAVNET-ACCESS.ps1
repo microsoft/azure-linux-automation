@@ -114,13 +114,13 @@ if($isDeployed)
 
 					if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 					{
-						$sshResult = DoSSHTest -fromVM $FromVM -toVM $ToVM -command "ifconfig" -runAsSudo
+						$sshResult = DoSSHTest -fromVM $FromVM -toVM $ToVM -command "$ifconfig_cmd" -runAsSudo
 						$scpResult = DoSCPTest -fromVM $FromVM -toVM $ToVM -filesToCopy "/home/$user/azuremodules.py"
 
 					}
 					if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 					{
-						$sshResult = DoSSHTest -fromVM $FromVM -toVM $ToVM -command "ifconfig" -runAsSudo -hostnameMode
+						$sshResult = DoSSHTest -fromVM $FromVM -toVM $ToVM -command "$ifconfig_cmd" -runAsSudo -hostnameMode
 						$scpResult = DoSCPTest -fromVM $FromVM -toVM $ToVM -filesToCopy "/home/$user/azuremodules.py" -hostnameMode
 					}
 					LogMsg "SSH result : $sshResult"
