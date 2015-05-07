@@ -37,7 +37,6 @@ if ($isDeployed)
 			LogErr "Virtual machine shut down failed."
 			$testResult = "FAIL"
 		}
-
 	}
 
 	catch
