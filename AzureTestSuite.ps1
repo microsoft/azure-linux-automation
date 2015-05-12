@@ -114,19 +114,19 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 	StartLogReport("$reportFolder/report_$($testCycle.cycleName).xml")
 	$testsuite = StartLogTestSuite "CloudTesting"
 	
-    $testCount = $currentCycleData.test.Length
-    if (-not $testCount)
-    {
-        $testCount = 1
-    }
-    
-    for ($counter = 0; $counter -lt $testCount; $counter++)
+	$testCount = $currentCycleData.test.Length
+	if (-not $testCount)
 	{
-        $test = $currentCycleData.test[$counter]
-        if (-not $test)
-        {
-            $test = $currentCycleData.test
-        }
+		$testCount = 1
+	}
+
+	for ($counter = 0; $counter -lt $testCount; $counter++)
+	{
+		$test = $currentCycleData.test[$counter]
+		if (-not $test)
+		{
+			$test = $currentCycleData.test
+		}
 		$currentTestData = GetCurrentTestData -xmlConfig $xmlConfig -testName $test.Name
 		# Generate Unique Test
 		$server = $xmlConfig.config.global.ServerEnv.Server		
