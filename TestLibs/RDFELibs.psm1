@@ -115,10 +115,9 @@ Function DetectLinuxDistro($VIP, $SSHport, $testVMUser, $testVMPassword)
 		{
 			$CleanedDistroName = "UNKNOWN"
 		}
-        Set-Variable -Name detectedDistro -Value $CleanedDistroName -Scope Global
-        SetDistroSpecificVariables -detectedDistro $detectedDistro
+		Set-Variable -Name detectedDistro -Value $CleanedDistroName -Scope Global
+		SetDistroSpecificVariables -detectedDistro $detectedDistro
 		LogMsg "Linux distro detected : $CleanedDistroName"
-		
 	}
 	return $CleanedDistroName
 }
@@ -173,7 +172,7 @@ Function InstallPackages ($VMIpAddress, $VMSshPort, $VMUserName, $VMPassword)
 #LogMsg "Invoking command : /root/packageInstall.sh -install $currentPackageName -isLocal no"
 			try
 			{
-			$out = RunLinuxCmd -username $VMUserName -password $VMPassword -ip $VMIpAddress -port $VMSshPort -command "./packageInstall.sh -install $currentPackageName -isLocal no" -runAsSudo
+				$out = RunLinuxCmd -username $VMUserName -password $VMPassword -ip $VMIpAddress -port $VMSshPort -command "./packageInstall.sh -install $currentPackageName -isLocal no" -runAsSudo
 			}
 			catch
 			{
@@ -318,14 +317,14 @@ Function DeleteService ($serviceName, [switch]$KeepDisks)
 			$retryCount = 1
 			while (($retValue -eq "False") -and ($retryCount -lt 10))
 			{
-                if ( $KeepDisks )
-                {
-				$out = Remove-AzureService -ServiceName $serviceName -Force  -Verbose
-                }
-                else
-                {
-                $out = Remove-AzureService -ServiceName $serviceName -DeleteAll -Force  -Verbose
-                }
+				if ( $KeepDisks )
+				{
+					$out = Remove-AzureService -ServiceName $serviceName -Force  -Verbose
+				}
+				else
+				{
+					$out = Remove-AzureService -ServiceName $serviceName -DeleteAll -Force  -Verbose
+				}
 				$RemoveServiceExitCode =  $?
 				if(($out -imatch "Complete") -or $RemoveServiceExitCode)
 				{
@@ -508,14 +507,14 @@ Function GenerateCommand ($Setup, $serviceName, $osImage, $HSData)
 			$vmProvConfig = $vmProvConfig + "| Set-AzureSubnet -SubnetNames $SubnetName"
 		}
 		$vmPortConfig =  $portCommand.Substring(0,$portCommand.Length-1)
-        if ( $diskCommand )
-        {
-		    $singleVMCommand = "( " + $vmRoleConfig + " | " + $vmProvConfig + " | " + $vmPortConfig + " | " + $diskCommand + " )"
-        }
-        else
-        {
-            $singleVMCommand = "( " + $vmRoleConfig + " | " + $vmProvConfig + " | " + $vmPortConfig + " )"
-        }
+		if ( $diskCommand )
+		{
+			$singleVMCommand = "( " + $vmRoleConfig + " | " + $vmProvConfig + " | " + $vmPortConfig + " | " + $diskCommand + " )"
+		}
+		else
+		{
+			$singleVMCommand = "( " + $vmRoleConfig + " | " + $vmProvConfig + " | " + $vmPortConfig + " )"
+		}
 		$totalVMs = $totalVMs + 1
 		$role = $role + 1
 		if ($totalVMs -gt 1)
@@ -993,7 +992,7 @@ Function GetAndCheckKernelLogs($DeployedServices, $status)
 
 Function SetDistroSpecificVariables($detectedDistro)
 {
-    $python_cmd = "python"
+	$python_cmd = "python"
 	LogMsg "Set `$python_cmd > python"    
 	Set-Variable -Name python_cmd -Value $python_cmd -Scope Global
 	Set-Variable -Name ifconfig_cmd -Value "ifconfig" -Scope Global
@@ -1058,22 +1057,22 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false)
 				Write-Host "One or More Deployments are Failed..!"
 				$retValue = $NULL
 			}
-            # get the logs of the first provision-failed VM
-            if ($retValue -eq $NULL -and $getLogsIfFailed -and $DebugOsImage)
-            {
-                foreach ($service in $servicesToVerify)
-                {
-                    $VMs = Get-AzureVM -ServiceName $service
-                    foreach ($vm in $VMs)
-                    {
-                        if ($vm.InstanceStatus -ne "ReadyRole" )
-                        {
-                            $out = GetLogsFromProvisionFailedVM -vmName $vm.Name -serviceName $service -xmlConfig $xmlConfig
-                            return $NULL
-                        }
-                    }
-                }
-            }
+			# get the logs of the first provision-failed VM
+			if ($retValue -eq $NULL -and $getLogsIfFailed -and $DebugOsImage)
+			{
+				foreach ($service in $servicesToVerify)
+				{
+					$VMs = Get-AzureVM -ServiceName $service
+					foreach ($vm in $VMs)
+					{
+						if ($vm.InstanceStatus -ne "ReadyRole" )
+						{
+							$out = GetLogsFromProvisionFailedVM -vmName $vm.Name -serviceName $service -xmlConfig $xmlConfig
+							return $NULL
+						}
+					}
+				}
+			}
 		}
 		catch
 		{
@@ -1085,7 +1084,7 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false)
 			{
 				Write-Host "Exception detected. Source : DeployVMs()"
 			}
-		$retValue = $NULL
+			$retValue = $NULL
 		}
 	}
 	else
@@ -1093,7 +1092,7 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false)
 		$retValue = $xmlConfig.config.Azure.Deployment.$setupType.isDeployed
 		$KernelLogOutput= GetAndCheckKernelLogs -DeployedServices $retValue -status "Initial"
 	}
-    Set-Variable -Name setupType -Value $setupType -Scope Global
+	Set-Variable -Name setupType -Value $setupType -Scope Global
 	return $retValue
 }
 
@@ -1668,7 +1667,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 	$returnCode = 1
 	$attempts = 0
 	$notExceededTimeLimit = $true
-    $isBackGroundProcessStarted = $false
+	$isBackGroundProcessStarted = $false
 	while ( ($returnCode -ne 0) -and ($attempts -lt $maxRetryCount) -and $notExceededTimeLimit)
 	{
 		$attempts += 1
@@ -1683,105 +1682,104 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 		$RunLinuxCmdOutput = ""
 		$debugOutput = ""
         
-        if ( $RunInBackGround )
-        {
-            While(($runLinuxCmdJob.State -eq "Running") -and ($isBackGroundProcessStarted -eq $false ) -and $notExceededTimeLimit)
-            {
-                $SSHOut = Receive-Job $runLinuxCmdJob 2> $LogDir\$randomFileName
-                $JobOut = Get-Content $LogDir\$randomFileName
-			    if($jobOut)
-			    {
-				    foreach($outLine in $jobOut)
-				    {
-					    if($outLine -imatch "Started a shell")
-					    {
-						    $LinuxExitCode = $outLine
-                            $isBackGroundProcessStarted = $true
-                            $returnCode = 0
-					    }
-					    else
-					    {
-						    $RunLinuxCmdOutput += "$outLine`n"
-					    }
-				    }
-			    }
-			    $debugLines = Get-Content $LogDir\$randomFileName
-			    if($debugLines)
-			    {
-				    $debugString = ""
-				    foreach ($line in $debugLines)
-				    {
-					    $debugString += $line
-				    }
-				    $debugOutput += "$debugString`n"
-			    }
-			    Write-Progress -Activity "Attempt : $attempts : Initiating command in Background Mode : $logCommand on $ip : $port" -Status "Timeout in $($RunMaxAllowedTime - $RunElaplsedTime) seconds.." -Id 87678 -PercentComplete (($RunElaplsedTime/$RunMaxAllowedTime)*100) -CurrentOperation "SSH ACTIVITY : $debugString"
-			    $RunCurrentTime = Get-Date
-			    $RunDiffTime = $RunCurrentTime - $RunStartTime
-			    $RunElaplsedTime =  $RunDiffTime.TotalSeconds
-			    if($RunElaplsedTime -le $RunMaxAllowedTime)
-			    {
-				    $notExceededTimeLimit = $true
-			    }
-			    else
-			    {
-				    $notExceededTimeLimit = $false
-				    Stop-Job $runLinuxCmdJob
-				    $timeOut = $true
-			    }
-            }
-            WaitFor -seconds 5
-            $SSHOut = Receive-Job $runLinuxCmdJob 2> $LogDir\$randomFileName
-		    if($SSHOut )
-		    {
-			    foreach ($outLine in $SSHOut)
-			    {
-				    if($outLine -imatch "AZURE-LINUX-EXIT-CODE-")
-				    {
-					    $LinuxExitCode = $outLine
-                        $isBackGroundProcessTerminated = $true
-				    }
-				    else
-				    {
-					    $RunLinuxCmdOutput += "$outLine`n"
-				    }
-			    }
-		    }
+		if ( $RunInBackGround )
+		{
+			While(($runLinuxCmdJob.State -eq "Running") -and ($isBackGroundProcessStarted -eq $false ) -and $notExceededTimeLimit)
+			{
+				$SSHOut = Receive-Job $runLinuxCmdJob 2> $LogDir\$randomFileName
+				$JobOut = Get-Content $LogDir\$randomFileName
+				if($jobOut)
+				{
+					foreach($outLine in $jobOut)
+					{
+						if($outLine -imatch "Started a shell")
+						{
+							$LinuxExitCode = $outLine
+							$isBackGroundProcessStarted = $true
+							$returnCode = 0
+						}
+						else
+						{
+							$RunLinuxCmdOutput += "$outLine`n"
+						}
+					}
+				}
+				$debugLines = Get-Content $LogDir\$randomFileName
+				if($debugLines)
+				{
+					$debugString = ""
+					foreach ($line in $debugLines)
+					{
+						$debugString += $line
+					}
+					$debugOutput += "$debugString`n"
+				}
+				Write-Progress -Activity "Attempt : $attempts : Initiating command in Background Mode : $logCommand on $ip : $port" -Status "Timeout in $($RunMaxAllowedTime - $RunElaplsedTime) seconds.." -Id 87678 -PercentComplete (($RunElaplsedTime/$RunMaxAllowedTime)*100) -CurrentOperation "SSH ACTIVITY : $debugString"
+				$RunCurrentTime = Get-Date
+				$RunDiffTime = $RunCurrentTime - $RunStartTime
+				$RunElaplsedTime =  $RunDiffTime.TotalSeconds
+				if($RunElaplsedTime -le $RunMaxAllowedTime)
+				{
+					$notExceededTimeLimit = $true
+				}
+				else
+				{
+					$notExceededTimeLimit = $false
+					Stop-Job $runLinuxCmdJob
+					$timeOut = $true
+				}
+			}
+			WaitFor -seconds 5
+			$SSHOut = Receive-Job $runLinuxCmdJob 2> $LogDir\$randomFileName
+			if($SSHOut )
+			{
+				foreach ($outLine in $SSHOut)
+				{
+					if($outLine -imatch "AZURE-LINUX-EXIT-CODE-")
+					{
+						$LinuxExitCode = $outLine
+						$isBackGroundProcessTerminated = $true
+					}
+					else
+					{
+						$RunLinuxCmdOutput += "$outLine`n"
+					}
+				}
+			}
             
-		    $debugLines = Get-Content $LogDir\$randomFileName
-		    if($debugLines)
-		    {
-			    $debugString = ""
-			    foreach ($line in $debugLines)
-			    {
-				    $debugString += $line
-			    }
-			    $debugOutput += "$debugString`n"
-		    }
-		    Write-Progress -Activity "Attempt : $attempts : Executing $logCommand on $ip : $port" -Status $runLinuxCmdJob.State -Id 87678 -SecondsRemaining ($RunMaxAllowedTime - $RunElaplsedTime) -Completed
-            if ( $isBackGroundProcessStarted -and !$isBackGroundProcessTerminated )
-            {
-                LogMsg "$command is running in background with ID $($runLinuxCmdJob.Id) ..."
-                Add-Content -Path $LogDir\CurrentTestBackgroundJobs.txt -Value $runLinuxCmdJob.Id
-            }
-            else
-            {
-                Remove-Job $runLinuxCmdJob 
-                if (!$isBackGroundProcessStarted)
-                {
-                    LogErr "Failed to start process in background.."
-                }
-                if ( $isBackGroundProcessTerminated )
-                {
-                    LogErr "Background Process terminated from Linux side with error code :  $($LinuxExitCode.Split("-")[4])"
-                    $returnCode = $($LinuxExitCode.Split("-")[4])
-                    LogErr $SSHOut
-                }
-			    if($debugOutput -imatch "Unable to authenticate")
+			$debugLines = Get-Content $LogDir\$randomFileName
+			if($debugLines)
+			{
+				$debugString = ""
+				foreach ($line in $debugLines)
+				{
+					$debugString += $line
+				}
+				$debugOutput += "$debugString`n"
+			}
+			Write-Progress -Activity "Attempt : $attempts : Executing $logCommand on $ip : $port" -Status $runLinuxCmdJob.State -Id 87678 -SecondsRemaining ($RunMaxAllowedTime - $RunElaplsedTime) -Completed
+			if ( $isBackGroundProcessStarted -and !$isBackGroundProcessTerminated )
+			{
+				LogMsg "$command is running in background with ID $($runLinuxCmdJob.Id) ..."
+				Add-Content -Path $LogDir\CurrentTestBackgroundJobs.txt -Value $runLinuxCmdJob.Id
+			}
+			else
+			{
+				Remove-Job $runLinuxCmdJob 
+				if (!$isBackGroundProcessStarted)
+				{
+					LogErr "Failed to start process in background.."
+				}
+				if ( $isBackGroundProcessTerminated )
+				{
+					LogErr "Background Process terminated from Linux side with error code :  $($LinuxExitCode.Split("-")[4])"
+					$returnCode = $($LinuxExitCode.Split("-")[4])
+					LogErr $SSHOut
+				}
+				if($debugOutput -imatch "Unable to authenticate")
 				{
 					LogMsg "Unable to authenticate. Not retrying!"
 					Throw "Unable to authenticate"
-
 				}
 				if($timeOut)
 				{
@@ -1800,134 +1798,134 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 						LogMsg "Failed to execute : $command. Retrying..."
 					}
 				}
-            }
-		    Remove-Item $LogDir\$randomFileName -Force | Out-Null   
-        }
-        else
-        {
-		    While($notExceededTimeLimit -and ($runLinuxCmdJob.State -eq "Running"))
-		    {
-			    $jobOut = Receive-Job $runLinuxCmdJob 2> $LogDir\$randomFileName
-			    if($jobOut)
-			    {
-				    foreach ($outLine in $jobOut)
-				    {
-					    if($outLine -imatch "AZURE-LINUX-EXIT-CODE-")
-					    {
-						    $LinuxExitCode = $outLine
-					    }
-					    else
-					    {
-						    $RunLinuxCmdOutput += "$outLine`n"
-					    }
-				    }
-			    }
-			    $debugLines = Get-Content $LogDir\$randomFileName
-			    if($debugLines)
-			    {
-				    $debugString = ""
-				    foreach ($line in $debugLines)
-				    {
-					    $debugString += $line
-				    }
-				    $debugOutput += "$debugString`n"
-			    }
-			    Write-Progress -Activity "Attempt : $attempts : Executing $logCommand on $ip : $port" -Status "Timeout in $($RunMaxAllowedTime - $RunElaplsedTime) seconds.." -Id 87678 -PercentComplete (($RunElaplsedTime/$RunMaxAllowedTime)*100) -CurrentOperation "SSH ACTIVITY : $debugString"
-			    $RunCurrentTime = Get-Date
-			    $RunDiffTime = $RunCurrentTime - $RunStartTime
-			    $RunElaplsedTime =  $RunDiffTime.TotalSeconds
-			    if($RunElaplsedTime -le $RunMaxAllowedTime)
-			    {
-				    $notExceededTimeLimit = $true
-			    }
-			    else
-			    {
-				    $notExceededTimeLimit = $false
-				    Stop-Job $runLinuxCmdJob
-				    $timeOut = $true
-			    }
-		    }
-		    $jobOut = Receive-Job $runLinuxCmdJob 2> $LogDir\$randomFileName
-		    if($jobOut)
-		    {
-			    foreach ($outLine in $jobOut)
-			    {
-				    if($outLine -imatch "AZURE-LINUX-EXIT-CODE-")
-				    {
-					    $LinuxExitCode = $outLine
-				    }
-				    else
-				    {
-					    $RunLinuxCmdOutput += "$outLine`n"
-				    }
-			    }
-		    }
-		    $debugLines = Get-Content $LogDir\$randomFileName
-		    if($debugLines)
-		    {
-			    $debugString = ""
-			    foreach ($line in $debugLines)
-			    {
-				    $debugString += $line
-			    }
-			    $debugOutput += "$debugString`n"
-		    }
-		    Write-Progress -Activity "Attempt : $attempts : Executing $logCommand on $ip : $port" -Status $runLinuxCmdJob.State -Id 87678 -SecondsRemaining ($RunMaxAllowedTime - $RunElaplsedTime) -Completed
-		    Remove-Job $runLinuxCmdJob 
-		    Remove-Item $LogDir\$randomFileName -Force | Out-Null
-		    if ($LinuxExitCode -imatch "AZURE-LINUX-EXIT-CODE-0") 
-		    {
-			    $returnCode = 0
-			    LogMsg "$command executed successfully in $RunElaplsedTime seconds." -WriteHostOnly $WriteHostOnly -NoLogsPlease $NoLogsPlease
-			    $retValue = $RunLinuxCmdOutput.Trim()
-		    }
-		    else
-		    {
-			    if (!$ignoreLinuxExitCode)
-			    {
-				    $debugOutput = ($debugOutput.Split("`n")).Trim()
-				    foreach ($line in $debugOutput)
-				    {
-					    if($line)
-					    {
-						    LogErr $line
-					    }
-				    }
-			    }
-			    if($debugOutput -imatch "Unable to authenticate")
-				    {
-					    LogMsg "Unable to authenticate. Not retrying!"
-					    Throw "Unable to authenticate"
+			}
+			Remove-Item $LogDir\$randomFileName -Force | Out-Null   
+		}
+		else
+		{
+			While($notExceededTimeLimit -and ($runLinuxCmdJob.State -eq "Running"))
+			{
+				$jobOut = Receive-Job $runLinuxCmdJob 2> $LogDir\$randomFileName
+				if($jobOut)
+				{
+					foreach ($outLine in $jobOut)
+					{
+						if($outLine -imatch "AZURE-LINUX-EXIT-CODE-")
+						{
+							$LinuxExitCode = $outLine
+						}
+						else
+						{
+							$RunLinuxCmdOutput += "$outLine`n"
+						}
+					}
+				}
+				$debugLines = Get-Content $LogDir\$randomFileName
+				if($debugLines)
+				{
+					$debugString = ""
+					foreach ($line in $debugLines)
+					{
+						$debugString += $line
+					}
+					$debugOutput += "$debugString`n"
+				}
+				Write-Progress -Activity "Attempt : $attempts : Executing $logCommand on $ip : $port" -Status "Timeout in $($RunMaxAllowedTime - $RunElaplsedTime) seconds.." -Id 87678 -PercentComplete (($RunElaplsedTime/$RunMaxAllowedTime)*100) -CurrentOperation "SSH ACTIVITY : $debugString"
+				$RunCurrentTime = Get-Date
+				$RunDiffTime = $RunCurrentTime - $RunStartTime
+				$RunElaplsedTime =  $RunDiffTime.TotalSeconds
+				if($RunElaplsedTime -le $RunMaxAllowedTime)
+				{
+					$notExceededTimeLimit = $true
+				}
+				else
+				{
+					$notExceededTimeLimit = $false
+					Stop-Job $runLinuxCmdJob
+					$timeOut = $true
+				}
+			}
+			$jobOut = Receive-Job $runLinuxCmdJob 2> $LogDir\$randomFileName
+			if($jobOut)
+			{
+				foreach ($outLine in $jobOut)
+				{
+					if($outLine -imatch "AZURE-LINUX-EXIT-CODE-")
+					{
+						$LinuxExitCode = $outLine
+					}
+					else
+					{
+						$RunLinuxCmdOutput += "$outLine`n"
+					}
+				}
+			}
+			$debugLines = Get-Content $LogDir\$randomFileName
+			if($debugLines)
+			{
+				$debugString = ""
+				foreach ($line in $debugLines)
+				{
+					$debugString += $line
+				}
+				$debugOutput += "$debugString`n"
+			}
+			Write-Progress -Activity "Attempt : $attempts : Executing $logCommand on $ip : $port" -Status $runLinuxCmdJob.State -Id 87678 -SecondsRemaining ($RunMaxAllowedTime - $RunElaplsedTime) -Completed
+			Remove-Job $runLinuxCmdJob 
+			Remove-Item $LogDir\$randomFileName -Force | Out-Null
+			if ($LinuxExitCode -imatch "AZURE-LINUX-EXIT-CODE-0") 
+			{
+				$returnCode = 0
+				LogMsg "$command executed successfully in $RunElaplsedTime seconds." -WriteHostOnly $WriteHostOnly -NoLogsPlease $NoLogsPlease
+				$retValue = $RunLinuxCmdOutput.Trim()
+			}
+			else
+			{
+				if (!$ignoreLinuxExitCode)
+				{
+					$debugOutput = ($debugOutput.Split("`n")).Trim()
+					foreach ($line in $debugOutput)
+					{
+						if($line)
+						{
+							LogErr $line
+						}
+					}
+				}
+				if($debugOutput -imatch "Unable to authenticate")
+				{
+					LogMsg "Unable to authenticate. Not retrying!"
+					Throw "Unable to authenticate"
 
-				    }
-			    if(!$ignoreLinuxExitCode)
-			    {
-				    if($timeOut)
-				    {
-					    $retValue = $null
-					    Throw "Tmeout while executing command : $command"
-				    }
-				    LogErr "Linux machine returned exit code : $($LinuxExitCode.Split("-")[4])"
-				    if ($attempts -eq $maxRetryCount)
-				    {
-					    Throw "Failed to execute : $command."
-				    }
-				    else
-				    {
-					    if ($notExceededTimeLimit)
-					    {
-						    LogMsg "Failed to execute : $command. Retrying..."
-					    }
-				    }
-			    }
-			    else
-			    {
-				    LogMsg "Command execution returned return code $($LinuxExitCode.Split("-")[4]) Ignoring.."
-				    $retValue = $RunLinuxCmdOutput.Trim()
-				    break
-			    }
-		    }
-        }
+				}
+				if(!$ignoreLinuxExitCode)
+				{
+					if($timeOut)
+					{
+						$retValue = $null
+						Throw "Tmeout while executing command : $command"
+					}
+					LogErr "Linux machine returned exit code : $($LinuxExitCode.Split("-")[4])"
+					if ($attempts -eq $maxRetryCount)
+					{
+						Throw "Failed to execute : $command."
+					}
+					else
+					{
+						if ($notExceededTimeLimit)
+						{
+							LogMsg "Failed to execute : $command. Retrying..."
+						}
+					}
+				}
+				else
+				{
+					LogMsg "Command execution returned return code $($LinuxExitCode.Split("-")[4]) Ignoring.."
+					$retValue = $RunLinuxCmdOutput.Trim()
+					break
+				}
+			}
+		}
 	}
 	return $retValue
 }
