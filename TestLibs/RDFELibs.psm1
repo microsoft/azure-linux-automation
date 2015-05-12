@@ -1093,6 +1093,7 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false)
 		$retValue = $xmlConfig.config.Azure.Deployment.$setupType.isDeployed
 		$KernelLogOutput= GetAndCheckKernelLogs -DeployedServices $retValue -status "Initial"
 	}
+    Set-Variable -Name setupType -Value $setupType -Scope Global
 	return $retValue
 }
 
@@ -1933,7 +1934,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 #endregion
 
 #region Test Case Logging
-Function DoTestCleanUp($result, $testName, $DeployedServices, $setupType = "BVTDeployment", [switch]$keepUserDirectory)
+Function DoTestCleanUp($result, $testName, $DeployedServices, [switch]$keepUserDirectory)
 {
 	try
 	{
@@ -1971,9 +1972,9 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $setupType = "BVTD
 				{
 					if($result -eq "PASS")
 					{
-						if($EconomyMode)
+						if($EconomyMode -and (-not $IsLastCaseInCycle))
 						{
-							LogMsg "Skipping clenup of $hs."
+							LogMsg "Skipping cleanup of $hs."
 							if(!$keepUserDirectory)
 							{
 								RemoveAllFilesFromHomeDirectory -DeployedServices $hs
