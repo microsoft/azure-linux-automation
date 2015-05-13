@@ -282,7 +282,17 @@ def RunTest():
 			Run("echo 'coreos packages failed to install' >> PackageStatus.txt")
 		else:
 			Run("echo 'coreos support tools installed successfully' >> PackageStatus.txt")		
-			
+
+	if (current_distro == "SUSE") or (current_distro == "openSUSE") or (current_distro == "sles") or (current_distro == "opensuse"):
+		iperf_cmd = Run("command -v iperf")
+		iperf3_cmd = Run("command -v iperf3")
+		if not iperf_cmd and iperf3_cmd:
+			RunLog.info('iperf3 has been installed instead of iperf from default repository')			
+			if (ZypperPackageRemove('iperf') and download_and_install_rpm('iperf')):
+				Run("echo 'iperf' installed successfully >> PackageStatus.txt")
+			else:
+				Run("echo 'iperf' failed to install >> PackageStatus.txt")				
+				
 	Run("echo '** Packages Installation Completed **' >> PackageStatus.txt")		
 	if success == True:
 		if not (current_distro=="coreos"):

@@ -114,8 +114,19 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 	StartLogReport("$reportFolder/report_$($testCycle.cycleName).xml")
 	$testsuite = StartLogTestSuite "CloudTesting"
 	
-	foreach($test in $currentCycleData.test)
+	$testCount = $currentCycleData.test.Length
+	if (-not $testCount)
 	{
+		$testCount = 1
+	}
+
+	for ($counter = 0; $counter -lt $testCount; $counter++)
+	{
+		$test = $currentCycleData.test[$counter]
+		if (-not $test)
+		{
+			$test = $currentCycleData.test
+		}
 		$currentTestData = GetCurrentTestData -xmlConfig $xmlConfig -testName $test.Name
 		# Generate Unique Test
 		$server = $xmlConfig.config.global.ServerEnv.Server		
@@ -130,6 +141,16 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 		$lisBuildBranch = $xmlConfig.config.global.VMEnv.LISBuildBranch
 		$VMImageDetails = $xmlConfig.config.global.VMEnv.VMImageDetails
 		$waagentBuild=$xmlConfig.config.global.VMEnv.waagentBuild
+
+        # For the last test running in economy mode, set the IsLastCaseInCycle flag so that the deployments could be cleaned up
+        if ($EconomyMode -and $counter -eq ($testCount - 1))
+        {
+            Set-Variable -Name IsLastCaseInCycle -Value $true -Scope Global
+        }
+        else
+        {
+            Set-Variable -Name IsLastCaseInCycle -Value $false -Scope Global
+        }
 		if ($currentTestData)
 		{
 			$testcase = StartLogTestCase $testsuite "$($test.Name)" "CloudTesting.$($testCycle.cycleName)"

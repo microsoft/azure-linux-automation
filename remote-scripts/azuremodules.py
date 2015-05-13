@@ -228,7 +228,7 @@ def AptgetPackageInstall(package,dbpasswd = "root"):
 		output = ExecMultiCmdsLocalSudo(cmds)
 	else:
 		output = Run("apt-get install -y  --force-yes "+package)
-		
+	
 	outputlist = re.split("\n", output)	
  
 	unpacking = False
@@ -284,6 +284,29 @@ def ZypperPackageInstall(package):
 	RunLog.error((package + ": package installation failed!\n"+output))
 	return False
 
+def ZypperPackageRemove(package):
+	RunLog.info( "\nzypper_package_remove: " + package)
+
+	output = Run("zypper --non-interactive remove "+package)
+	outputlist = re.split("\n", output)
+		
+	for line in outputlist:
+		#Package removed successfully
+		if (re.match(r'.*Removing '+re.escape(package)+r'.*done', line, re.M|re.I)):
+			RunLog.info((package+": package removed successfully.\n"+line))
+			return True
+		#package is not installed
+		elif (re.match(r'\''+re.escape(package)+r'\' is not installed', line, re.M|re.I)):
+			RunLog.info((package + ": package is not installed.\n"+line))
+			return True
+		#package is not found on the repository
+		elif (re.match(r'\''+re.escape(package)+r'\' not found in package names', line, re.M|re.I)):
+			return True
+
+	#Consider package remove failed if non of the above matches.
+	RunLog.error((package + ": package remove failed!\n"+output))
+	return False
+	
 def InstallPackage(package):
 	RunLog.info( "\nInstall_package: "+package)
 	[current_distro, distro_version] = DetectDistro()
