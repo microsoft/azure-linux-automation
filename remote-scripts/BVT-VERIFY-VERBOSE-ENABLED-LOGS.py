@@ -36,11 +36,8 @@ def Restartwaagent():
         Run("echo 'Redhat.Redhat.777' | sudo -S sed -i s/Logs.Verbose=n/Logs.Verbose=y/g  /etc/waagent.conf")
     RunLog.info("Restart waagent service...")
     result = Run("echo 'Redhat.Redhat.777' | sudo -S find / -name systemctl |wc -l | tr -d '\n'")    
-    if (distro[0] == "Ubuntu") : 
-        if (result == "0") :
-            Run("echo 'Redhat.Redhat.777' | sudo -S service walinuxagent restart")
-        else :
-            Run("echo 'Redhat.Redhat.777' | sudo -S systemctl restart walinuxagent")
+    if (distro[0] == "Ubuntu") :
+        Run("echo 'Redhat.Redhat.777' | sudo -S service walinuxagent restart")
     else :  
         if (result == "0") :
             Run("echo 'Redhat.Redhat.777' | sudo -S service waagent restart")
