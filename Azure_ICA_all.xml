@@ -1698,6 +1698,36 @@
 			<TestID>AzureBVT_022</TestID>
 		</test>
 		<test>
+			<testName>BVT-VERIFY-MNT-RESOURCE-README</testName>
+			<testScript>BVT-VERIFY-MNT-RESOURCE-README.py</testScript>
+			<testScriptPs1>BVT-VERIFY-MNT-RESOURCE-README.ps1</testScriptPs1>
+			<files>remote-scripts\BVT-VERIFY-MNT-RESOURCE-README.py,remote-scripts\azuremodules.py</files>
+			<setupType>BVTDeployment</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<TestID>AzureBVT_023</TestID>
+		</test>
+		<test>
+			<testName>BVT-VERIFY-NO-ERROR-IN-LOGS</testName>
+			<testScript>BVT-VERIFY-NO-ERROR-IN-LOGS.py</testScript>
+			<testScriptPs1>BVT-VERIFY-NO-ERROR-IN-LOGS.ps1</testScriptPs1>
+			<files>remote-scripts\azuremodules.py,remote-scripts\BVT-VERIFY-NO-ERROR-IN-LOGS.py</files>
+			<setupType>BVTDeployment</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<TestID>AzureBVT_024</TestID>
+		</test>
+		<test>
+			<testName>BVT-VERIFY-VERBOSE-ENABLED-LOGS</testName>
+			<testScript>BVT-VERIFY-VERBOSE-ENABLED-LOGS.py</testScript>
+			<testScriptPs1>BVT-VERIFY-VERBOSE-ENABLED-LOGS.ps1</testScriptPs1>
+			<files>remote-scripts\azuremodules.py,remote-scripts\BVT-VERIFY-VERBOSE-ENABLED-LOGS.py</files>
+			<setupType>BVTDeployment</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<TestID>AzureBVT_025</TestID>
+		</test>
+		<test>
 			<testName>NETWORK-OUTBOUND-ACCESS-IPERF-DTAP-UDP</testName>
 			<TestMode>IP</TestMode>
 			<testScript></testScript>
@@ -2907,6 +2937,18 @@
 			<SubtestValues>Two</SubtestValues>
 			<Priority>P0</Priority>
 		</test>
+		<test>
+			<testName>E2E-WA-UNINST</testName>
+			<testScript>E2E-WA-UNINST.py</testScript>
+			<testScriptPs1>E2E-WA-UNINST.ps1</testScriptPs1>
+			<files>remote-scripts\azuremodules.py,remote-scripts\E2E-WA-UNINST.py</files>
+			<setupType>SmallVM</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<TestID></TestID>
+			<SubtestValues></SubtestValues>
+			<Priority>P0</Priority>
+		</test>
 
 		<test>
 			<testName>INJECTION-VERIFY-ENABLE</testName>
@@ -3030,6 +3072,12 @@
 		<Cycle>
 			<cycleName>BVT</cycleName>
 			<test>
+				<Name>BVT-VERIFY-NO-ERROR-IN-LOGS</Name>
+			</test>
+			<test>
+				<Name>BVT-VERIFY-VERBOSE-ENABLED-LOGS</Name>
+			</test>
+			<test>
 				<Name>BVT-VERIFY-VHD-PREREQUISITES</Name>
 			</test>
 			<test>
@@ -3061,6 +3109,9 @@
 			</test>
 			<test>
 				<Name>BVT-VERIFY-MNT-RESOURCE-WRITABLE</Name>
+			</test>
+			<test>
+				<Name>BVT-VERIFY-MNT-RESOURCE-README</Name>
 			</test>
 			<test>
 				<Name>BVT-VERIFY-DEPLOYMENT-PROVISION</Name>
@@ -3530,6 +3581,9 @@
 			</test>
 			<test>
 				<Name>E2E-VM-CAPTURE-IMAGE-WITH-WAAGENT-DEPROVISION</Name>
+			</test>
+			<test>
+				<Name>E2E-WA-UNINST</Name>
 			</test>
 		</Cycle>
 		

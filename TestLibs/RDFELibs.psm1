@@ -3371,15 +3371,14 @@ Function GetDataTxed([string] $logFile,[string] $beg,[string] $end, [string] $pt
 {
 	$match=GetStringMatchObject -logFile $logFile -beg $beg -end $end -str $ptrn
 	$match= $match | Select-String -Pattern "0.00 KBytes/sec" -NotMatch
-	$lastItem=$match.Item($match.Length-1)
+	$lastItem=$match[-1]
 	$lastItem=$lastItem.ToString()
-	$str1=@($lastItem.Split(']'))
-	$str2=@($lastItem.Split(" ",[StringSplitOptions]'RemoveEmptyEntries'))
-	foreach ($a in $str2) {
+	$str1=@($lastItem.Split(" ",[StringSplitOptions]'RemoveEmptyEntries'))
+	foreach ($a in $str1) {
 		if($a.Contains("Bytes") -and !($a.Contains("Bytes/sec")))
 		{
-			$i=$str2.IndexOf($a)
-			$result=$str2[$i-1]+$str2[$i]
+			$i=$str1.IndexOf($a)
+			$result=$str1[$i-1]+$str1[$i]
 		}
 	}
 	return $result
