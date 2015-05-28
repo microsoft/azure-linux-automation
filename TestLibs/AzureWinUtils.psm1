@@ -7,7 +7,7 @@ Import-Module .\TestLibs\RDFELibs.psm1 -Force
 
 function LogMsg([string]$msg, [Boolean]$WriteHostOnly, [Boolean]$NoLogsPlease)
 { 
-    $now = [Datetime]::Now.ToUniversalTime().ToString("MM/dd/yyyy hh:mm:ss : ")
+    $now = [Datetime]::Now.ToUniversalTime().ToString("MM/dd/yyyy HH:mm:ss : ")
     $tag="INFO : "
     $color = "green"
     if(!$WriteHostOnly -and !$NoLogsPlease)
@@ -27,7 +27,7 @@ function LogMsg([string]$msg, [Boolean]$WriteHostOnly, [Boolean]$NoLogsPlease)
 
 function LogErr([string]$msg)
 {      
-	$now = [Datetime]::Now.ToUniversalTime().ToString("MM/dd/yyyy hh:mm:ss : ")
+	$now = [Datetime]::Now.ToUniversalTime().ToString("MM/dd/yyyy HH:mm:ss : ")
 	$tag="ERROR : "
 	$color = "Red" 
 	($tag+ $now + $msg) | out-file -encoding ASCII -append -filePath $logFile
@@ -36,7 +36,7 @@ function LogErr([string]$msg)
 
 function LogWarn([string]$msg)
 {      
-	$now = [Datetime]::Now.ToUniversalTime().ToString("MM/dd/yyyy hh:mm:ss : ")
+	$now = [Datetime]::Now.ToUniversalTime().ToString("MM/dd/yyyy HH:mm:ss : ")
     $tag="WARNING : "
 	$color = "Yellow" 
 	($tag+ $now + $msg) | out-file -encoding ASCII -append -filePath $logFile
