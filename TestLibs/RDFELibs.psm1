@@ -780,6 +780,7 @@ Function VerifyAllDeployments($servicesToVerify)
 		{
 			LogErr "$serviceName provision Failed.."
 			$retValue = "False"
+            break
 		}
 	}
 

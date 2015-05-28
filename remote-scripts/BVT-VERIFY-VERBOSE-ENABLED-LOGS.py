@@ -7,27 +7,20 @@ import argparse
 import sys
 import time
 import platform
-        #for error checking
-parser = argparse.ArgumentParser()
 
-parser.add_argument('-e', '--expected', help='specify expected value', required=True)
-
-args = parser.parse_args()
-                #if no value specified then stop
-expectedValue = "1"
-def RunTest(expectedvalue):
+def RunTest():
     UpdateState("TestRunning")
     RunLog.info("Checking log waagent.log...")
-    temp = Run("grep -i 'iptables -I INPUT -p udp --dport' /var/log/waagent* | wc -l | tr -d '\n'")
-    output = temp
-    if (expectedvalue == output) :
-        RunLog.info('The log file contains the expected value')
+    output = Run("grep -i 'iptables -I INPUT -p udp --dport' /var/log/waagent* | wc -l | tr -d '\n'")
+    if not (output == "0") :
+        RunLog.info('The log file contains the verbose logs')
         ResultLog.info('PASS')
         UpdateState("TestCompleted")
     else :
-        RunLog.error('Verify waagent.log fail. Current value : %s Expected value : %s' % (output, expectedvalue))
+        RunLog.error('Verify waagent.log fail, the log file does not contain the verbose logs')
         ResultLog.error('FAIL')
         UpdateState("TestCompleted")
+
 def Restartwaagent():
     distro = platform.dist()
     if (distro[0] == "CoreOS") :
@@ -44,5 +37,6 @@ def Restartwaagent():
         else :
             Run("echo 'Redhat.Redhat.777' | sudo -S systemctl restart waagent")
     time.sleep(60)
+
 Restartwaagent()
-RunTest(expectedValue)
+RunTest()
