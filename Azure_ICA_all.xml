@@ -2722,7 +2722,35 @@
 			<DiskFormat>ext4</DiskFormat>
 			<Priority>P0</Priority>
 		</test>
-
+		
+		<!-- NETWORK PERF TESTS -->
+		<test>
+			<testName>NETWORK-PERF-CLOUDHARMONY-TEST</testName>
+			<testScript>network-perf-cloudharmony-server.sh,network-perf-cloudharmony-client.sh</testScript>
+			<testScriptps1>NETWORK-PERF-CLOUDHARMONY-TEST.ps1</testScriptps1>
+			<SubtestValues></SubtestValues>
+			<files1>remote-scripts\network-perf-cloudharmony-server.sh</files1>
+			<files>remote-scripts\network-perf-cloudharmony-client.sh,remote-scripts\perf-cloudharmony-options.txt</files>
+			<setupType>IEndpointSingleHS</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<TestID>Perf_001</TestID>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>NETWORK-PERF-THROUGHPUT-6K-CONNETCTIONS-TEST</testName>
+			<testScript>network-6k-connections-server.sh,network-6k-connections-client.sh</testScript>
+			<testScriptps1>NETWORK-PERF-THROUGHPUT-6K-CONNETCTIONS-TEST.ps1</testScriptps1>
+			<SubtestValues></SubtestValues>
+			<files1>remote-scripts\network-6k-connections-server.sh</files1>
+			<files>remote-scripts\network-6k-connections-client.sh,remote-scripts\perf-statistics.sh</files>
+			<setupType>IEndpointSingleHS</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<TestID>Perf_002</TestID>
+			<Priority>P0</Priority>
+		</test>
+		
 		<test>
 			<testName>ICA-FIO-TEST</testName>
 			<testScript></testScript>
@@ -3516,7 +3544,16 @@
 				<Name>XSMB-XFS-TEST</Name>
 			</test>
 		</Cycle>
-		
+		<!-- PERF tests -->
+		<Cycle>
+			<cycleName>PERF</cycleName>
+			<test>
+				<Name>NETWORK-PERF-CLOUDHARMONY-TEST</Name>
+			</test>
+			<test>
+				<Name>NETWORK-PERF-THROUGHPUT-6K-CONNETCTIONS-TEST</Name>
+			</test>
+		</Cycle>
 		<!-- E2E tests -->
 
 		<Cycle>
