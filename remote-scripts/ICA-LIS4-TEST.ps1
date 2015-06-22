@@ -54,6 +54,7 @@ Function VerifyAttachedDisks ( $VMObject, $PrevTestStatus, $metaData)
     }
     elseif ( $PrevTestStatus -eq  "ABORTED" )
     {
+        $ExitCode = "ABORTED"
         LogMsg "Skipping TEST : $metaData due to previous Aborted test"
     }
 return $ExitCode, $DetectedDisksInVM
@@ -132,6 +133,7 @@ Function InstallLIS($VMObject, $PrevTestStatus, $metaData)
     }
     elseif ( $PrevTestStatus -eq  "ABORTED" )
     {
+        $ExitCode = "ABORTED"
         LogMsg "Skipping TEST : $metaData due to previous Aborted test"
     }
 return $ExitCode
@@ -171,19 +173,26 @@ Function AttachAnotherDataDisk($VMObject, $LUN, $DiskSizeInGB=10, $DiskHostCachi
         $ExpectedDisks = (GetTotalPhysicalDisks -FdiskOutput $fdiskBefore)+1
         if ( $AddDiskStatus.OperationStatus -eq "Succeeded")
         {
-            WaitFor -seconds 30
-            $fdiskAfter = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "fdisk -l" -runAsSudo
-            $ActualDisks = (GetTotalPhysicalDisks -FdiskOutput $fdiskAfter)
-            if ( $ExpectedDisks -eq  $ActualDisks )
+            $maxTry = 10
+            $DiskIsNotVisible = $true
+            while ( $DiskIsNotVisible -and ( $maxTry -gt 0 ))
             {
-                $NewAttachedDiskName = GetNewPhysicalDiskNames -FdiskOutputBeforeAddingDisk $fdiskBefore -FdiskOutputAfterAddingDisk $fdiskAfter
-                LogMsg "Detected New Disk : $NewAttachedDiskName"
-                $ExitCode = "PASS"
-            }
-            else
-            {
-                LogErr "Failed to recognise the disk in VM. Further tests will be aborted."
-                $ExitCode = "FAIL"
+                $maxTry -= 1
+                WaitFor -seconds 30
+                $fdiskAfter = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "fdisk -l" -runAsSudo
+                $ActualDisks = (GetTotalPhysicalDisks -FdiskOutput $fdiskAfter)
+                if ( $ExpectedDisks -eq  $ActualDisks )
+                {
+                    $NewAttachedDiskName = GetNewPhysicalDiskNames -FdiskOutputBeforeAddingDisk $fdiskBefore -FdiskOutputAfterAddingDisk $fdiskAfter
+                    LogMsg "Detected New Disk : $NewAttachedDiskName"
+                    $ExitCode = "PASS"
+                    $DiskIsNotVisible = $false
+                }
+                else
+                {
+                    LogErr "Failed to recognise the disk in VM. Further tests will be aborted."
+                    $ExitCode = "FAIL"
+                }
             }
         }
         else
@@ -201,6 +210,7 @@ Function AttachAnotherDataDisk($VMObject, $LUN, $DiskSizeInGB=10, $DiskHostCachi
     }
     elseif ( $PrevTestStatus -eq  "ABORTED" )
     {
+        $ExitCode = "ABORTED"
         LogMsg "Skipping TEST : $metaData due to previous Aborted test"
     }
 return $ExitCode, $NewAttachedDiskName, $LUN
@@ -257,7 +267,7 @@ Function VerifyIO($VMObject, $NewAttachedDiskName, $PrevTestStatus, $metaData, $
         }
         $dmesgAfter = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "dmesg" -runAsSudo
         $addedLines = $dmesgAfter.Replace($dmesgBefore,$null)
-        LogMsg "Kernel Logs : $($addedLines.Replace('[32m','').Replace('[0m[33m','').Replace('[0m',''))" 
+        LogMsg "Kernel Logs : $($addedLines.Replace('[32m','').Replace('[0m[33m','').Replace('[0m',''))" -LinuxConsoleOuput
         $ExitCode = "PASS"    
     }
     elseif ( $PrevTestStatus -eq "FAIL" )
@@ -267,6 +277,7 @@ Function VerifyIO($VMObject, $NewAttachedDiskName, $PrevTestStatus, $metaData, $
     }
     elseif ( $PrevTestStatus -eq  "ABORTED" )
     {
+        $ExitCode = "ABORTED"
         LogMsg "Skipping TEST : $metaData due to previous Aborted test"
     }
 return $ExitCode
@@ -282,19 +293,26 @@ Function DetachDataDisk($VMObject, $LUN, $PrevTestStatus, $metaData)
         $ExpectedDisks = (GetTotalPhysicalDisks -FdiskOutput $fdiskBefore)-1
         if ( $RemoveDiskStatus.OperationStatus -eq "Succeeded")
         {
-            WaitFor -seconds 30
-            $fdiskAfter = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "fdisk -l" -runAsSudo
-            $ActualDisks = (GetTotalPhysicalDisks -FdiskOutput $fdiskAfter)
-            if ( $ExpectedDisks -eq  $ActualDisks )
+            $DiskIsVisible = $true
+            $maxTry = 10
+            while ( $DiskIsVisible -and ( $maxTry -gt 0 ))
             {
-                $NewAttachedDiskName = GetNewPhysicalDiskNames -FdiskOutputBeforeAddingDisk $fdiskAfter -FdiskOutputAfterAddingDisk $fdiskBefore
-                LogMsg "Removed Disk : $NewAttachedDiskName"
-                $ExitCode = "PASS"
-            }
-            else
-            {
-                LogErr "Disk is still visible in VM. Further tests will be aborted."
-                $ExitCode = "FAIL"
+                WaitFor -seconds 30
+                $maxTry -= 1
+                $fdiskAfter = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "fdisk -l" -runAsSudo
+                $ActualDisks = (GetTotalPhysicalDisks -FdiskOutput $fdiskAfter)
+                if ( $ExpectedDisks -eq  $ActualDisks )
+                {
+                    $NewAttachedDiskName = GetNewPhysicalDiskNames -FdiskOutputBeforeAddingDisk $fdiskAfter -FdiskOutputAfterAddingDisk $fdiskBefore
+                    LogMsg "Removed Disk : $NewAttachedDiskName"
+                    $ExitCode = "PASS"
+                    $DiskIsVisible = $false
+                }
+                else
+                {
+                    LogErr "Disk is still visible in VM."
+                    $ExitCode = "FAIL"
+                }
             }
         }
         else
@@ -312,6 +330,7 @@ Function DetachDataDisk($VMObject, $LUN, $PrevTestStatus, $metaData)
     }
     elseif ( $PrevTestStatus -eq  "ABORTED" )
     {
+        $ExitCode = "ABORTED"
         LogMsg "Skipping TEST : $metaData due to previous Aborted test"
     }
 return $ExitCode
@@ -390,7 +409,8 @@ Function FormatPartition ($VMObject, $PartitionName, $FileSystem, $LogFilePath)
 Function StopRaidArry($VMObject, $RaidName)
 {
     #Verify if raid is active
-    $df = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "df" -runAsSudo
+    $df = (RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "df").Split("`n")
+    LogMsg "unmounting $RaidName, if any."
     foreach ( $line in $df )
     {
         if ( $line -imatch $RaidName )
@@ -411,7 +431,6 @@ Function StopRaidArry($VMObject, $RaidName)
             $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "mdadm --stop $ActiveArray" -runAsSudo
         }
     }
-    $RaidStop = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "mdadm --stop $RaidName" -runAsSudo
 }
 
 Function CreateRAIDOnDevices($VMObject, $NewAttachedDiskNames, $PrevTestStatus, $RaidName, $metaData)
@@ -461,6 +480,7 @@ Function CreateRAIDOnDevices($VMObject, $NewAttachedDiskNames, $PrevTestStatus, 
     }
     elseif ( $PrevTestStatus -eq  "ABORTED" )
     {
+        $ExitCode = "ABORTED"
         LogMsg "Skipping TEST : $metaData due to previous Aborted test"
     }
 return $ExitCode
@@ -505,6 +525,7 @@ Function CreateRAIDOnPartitionsAlreadyFormatted($VMObject, $NewAttachedDiskNames
                     foreach ($partitionName in $newPartitions )
                     {
                         #format all partitions..
+                        $RaidPartitions = ""
                         $formatPart = FormatPartition -VMObject $VMObject -PartitionName $partitionName -FileSystem "ext4" -LogFilePath $LogPath
                         if ($formatPart)
                         {
@@ -556,6 +577,7 @@ Function CreateRAIDOnPartitionsAlreadyFormatted($VMObject, $NewAttachedDiskNames
     }
     elseif ( $PrevTestStatus -eq  "ABORTED" )
     {
+        $ExitCode = "ABORTED"
         LogMsg "Skipping TEST : $metaData due to previous Aborted test"
     }
 return $ExitCode
@@ -570,7 +592,7 @@ Function CreateRAIDOnPartitionsNotFormatted($VMObject, $NewAttachedDiskNames, $P
         $wipefs = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "wipefs -a $($NewAttachedDiskNames.Replace("^"," "))" -runAsSudo
         LogMsg $wipefs -LinuxConsoleOuput
         Add-Content -Value $wipefs -Path $LogPath -Force
-        $RaidPartitions = @()
+        $RaidPartitions = ""
         foreach ($disk in $RaidDisks)
         {
             $CreatePart = CreatePartitionOnDisk -VMObject $VMObject -diskName $disk -isItForRaid "yes" -LogFilePath $LogPath
@@ -600,6 +622,7 @@ Function CreateRAIDOnPartitionsNotFormatted($VMObject, $NewAttachedDiskNames, $P
                     LogMsg "Creating raid of $totalDisks disks."
                     LogMsg "Disks : $RaidPartitions"
                     $createRaidOut = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "./ManageRaid.sh -create yes -diskNames $($RaidPartitions.Replace(" ","^")) -totalDisks $totalDisks -RaidName $RaidName" -runAsSudo 
+                    LogMsg $createRaidOut -LinuxConsoleOuput
                     Add-Content -Value $createRaidOut -Path $LogPath -Force
                     $formatRaid = FormatPartition -VMObject $VMObject -PartitionName $RaidName -FileSystem ext4 -LogFilePath "$LogDir\FormatRaid.txt"
                     LogMsg (Get-Content "$LogDir\FormatRaid.txt") -LinuxConsoleOuput
@@ -629,6 +652,7 @@ Function CreateRAIDOnPartitionsNotFormatted($VMObject, $NewAttachedDiskNames, $P
     }
     elseif ( $PrevTestStatus -eq  "ABORTED" )
     {
+        $ExitCode = "ABORTED"
         LogMsg "Skipping TEST : $metaData due to previous Aborted test"
     }
 return $ExitCode 
@@ -703,13 +727,13 @@ Function RunSysBench($VMObject, $PrevTestStatus, $TestDirectory, $SysbenchConfig
                         LogMsg "=-=-=-=-=-=-=-=-=-=SYSBENCH TEST START :[$SysBenchTests/$TotalSysBenchTests] MODE:$($mode.ToUpper()), IO:$($io)K, Threads:$thread, RunTime:$($SysbenchConfigObject.ioRuntime) SECONDS=-=-=-=-=-=-=-=-=-="
                         Set-Content -Value "#!/bin/bash" -Path "$($VMObject.LogDir)\InvokeSys.sh" -Force
                         Add-Content -Value "cd $TestDirectory" -Path "$($VMObject.LogDir)\InvokeSys.sh" -Force
-                        Add-Content -Value "./sys-custom.sh -PrepareFiles no -RunTest yes -CleanUp no -CustomLogDir $SysbenchLogDir -fileSize $($SysbenchConfigObject.fileSize) -testIO $($io)K -testMode $mode -testThread $thread -CustomLogDir $SysbenchLogDir -ioRuntime $($SysbenchConfigObject.ioRuntime)" -Path "$($VMObject.LogDir)\InvokeSys.sh" -Force
+                        Add-Content -Value "./sys-custom.sh -RunTest yes -fileSize $($SysbenchConfigObject.fileSize) -testIO $($io)K -testMode $mode -testThread $thread -CustomLogDir $SysbenchLogDir -ioRuntime $($SysbenchConfigObject.ioRuntime)" -Path "$($VMObject.LogDir)\InvokeSys.sh" -Force
                         RemoteCopy -uploadTo $VMObject.VIP -port $VMObject.SSHPort -files "$($VMObject.LogDir)\InvokeSys.sh" -username $VMObject.username -password $VMObject.password -upload
                         Remove-Item -Path  "$($VMObject.LogDir)\InvokeSys.sh"
                         $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "chmod +x *.sh" -runAsSudo
-                        LogMsg "SYSBENCH COMMAND : ./sys-custom.sh -PrepareFiles no -RunTest yes -CleanUp no -CustomLogDir $SysbenchLogDir -fileSize $($SysbenchConfigObject.fileSize) -testIO $($io)K -testMode $mode -testThread $thread -CustomLogDir $SysbenchLogDir -ioRuntime $($SysbenchConfigObject.ioRuntime)" -Path "$($VMObject.LogDir)\InvokeSys.sh"
+                        LogMsg "SYSBENCH COMMAND : ./sys-custom.sh -RunTest yes -fileSize $($SysbenchConfigObject.fileSize) -testIO $($io)K -testMode $mode -testThread $thread -CustomLogDir $SysbenchLogDir -ioRuntime $($SysbenchConfigObject.ioRuntime)" -Path "$($VMObject.LogDir)\InvokeSys.sh"
                         $RunSysbenchOut = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "./InvokeSys.sh" -runAsSudo -RunInBackGround
-                        if ( ( isLinuxProcessRunning -VMObject $VMObject -ProcessName "sysbench" ) -eq 1)
+                        if ( ( isLinuxProcessRunning -VMObject $VMObject -ProcessName "sysbench --test" ) -eq 1)
                         {
                             LogMsg "Test sterted for mode : $mode, IO size : $($io)K, Total Threads : $thread, Run Time : $($SysbenchConfigObject.ioRuntime) seconds."
                             $currentStatus = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "cat $SysbenchLogDir/CurrentSysbenchStatus.txt"
@@ -749,7 +773,7 @@ Function RunSysBench($VMObject, $PrevTestStatus, $TestDirectory, $SysbenchConfig
             LogMsg "Starting sysbench clenup.."
             Set-Content -Value "#!/bin/bash" -Path "$($VMObject.LogDir)\InvokeSys.sh" -Force
             Add-Content -Value "cd $TestDirectory" -Path "$($VMObject.LogDir)\InvokeSys.sh" -Force
-            Add-Content -Value "./sys-custom.sh -PrepareFiles no -RunTest no -CleanUp yes -CustomLogDir $SysbenchLogDir -fileSize $($SysbenchConfigObject.fileSize) -testIO $io -testMode $mode -testThread $thread -CustomLogDir $SysbenchLogDir" -Path "$($VMObject.LogDir)\InvokeSys.sh" -Force
+            Add-Content -Value "./sys-custom.sh -CleanUp yes -CustomLogDir $SysbenchLogDir -fileSize $($SysbenchConfigObject.fileSize)" -Path "$($VMObject.LogDir)\InvokeSys.sh" -Force
             RemoteCopy -uploadTo $VMObject.VIP -port $VMObject.SSHPort -files "$($VMObject.LogDir)\InvokeSys.sh" -username $VMObject.username -password $VMObject.password -upload
             Remove-Item -Path  "$($VMObject.LogDir)\InvokeSys.sh"
             $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "chmod +x *.sh" -runAsSudo
@@ -822,6 +846,7 @@ Function UpgradeKernel($VMObject, $PrevTestStatus, $metaData)
     }
     elseif ( $PrevTestStatus -eq  "ABORTED" )
     {
+        $ExitCode = "ABORTED"
         LogMsg "Skipping TEST : $metaData due to previous Aborted test"
     }
 return $ExitCode
@@ -840,6 +865,7 @@ Function VerifyRaidDiskFunctional($VMObject, $PrevTestStatus, $metaData, $RaidNa
     }
     elseif ( $PrevTestStatus -eq  "ABORTED" )
     {
+        $ExitCode = "ABORTED"
         LogMsg "Skipping TEST : $metaData due to previous Aborted test"
     }
 return $ExitCode
@@ -927,6 +953,7 @@ Function UninstallLIS($VMObject, $PrevTestStatus, $metaData)
     }
     elseif ( $PrevTestStatus -eq  "ABORTED" )
     {
+        $ExitCode = "ABORTED"
         LogMsg "Skipping TEST : $metaData due to previous Aborted test"
     }
 return $ExitCode
@@ -945,11 +972,29 @@ Function ReinstallLIS($VMObject, $PrevTestStatus, $metaData)
     }
     elseif ( $PrevTestStatus -eq  "ABORTED" )
     {
+        $ExitCode = "ABORTED"
         LogMsg "Skipping TEST : $metaData due to previous Aborted test"
     }
 return $ExitCode
 }
 
+Function PreareVMForLIS4Test ($VMObject, $DetectedDistro)
+{
+    #This test needs sysbench, sysstat and mdadm packages to work correctly.
+    if ( $DetectedDistro -imatch "CENTOS" )
+    {
+        $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "yum install --nogpgcheck -y ./epel-release-7-5.noarch.rpm " -runAsSudo
+        $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "yum install --nogpgcheck -y sysstat" -runAsSudo
+        $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "yum install --nogpgcheck -y mdadm" -runAsSudo
+        $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "yum install --nogpgcheck -y sysbench" -runAsSudo
+    }
+    if ( $DetectedDistro -imatch "UBUNTU" )
+    {
+        $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "apt-get install --force-yes -y sysstat" -runAsSudo
+        $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "apt-get install --force-yes -y mdadm" -runAsSudo
+        $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "apt-get install --force-yes -y sysbench" -runAsSudo
+    }
+}
 Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $Subtests= $currentTestData.SubtestValues
 $SubtestValues = $Subtests.Split(",") 
@@ -977,14 +1022,9 @@ if($isDeployed)
     $DetectedDistro = DetectLinuxDistro -VIP $hs1VIP -SSHport $hs1vm1sshport -testVMUser $user -testVMPassword $password
     RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
     $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "chmod +x *.sh" -runAsSudo
-    if ( $DetectedDistro -imatch "CENTOS" )
-    {
-        $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "yum install --nogpgcheck -y ./epel-release-7-5.noarch.rpm " -runAsSudo
-        $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "yum install --nogpgcheck -y sysstat" -runAsSudo
-        $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "yum install --nogpgcheck -y mdadm" -runAsSudo
-        $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "yum install --nogpgcheck -y sysbench" -runAsSudo
-    }
-
+    
+    PreareVMForLIS4Test -VMObject $VMObject -DetectedDistro $DetectedDistro
+    
     $testResult = "PASS"
 	foreach ($TestID in $SubtestValues) 
 	{
@@ -1053,7 +1093,6 @@ if($isDeployed)
                 }
             "TestID2" #Install LIS4
                 {
-                    $metaData = "Install LIS4"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     if ( $DetectedDistro -imatch "CENTOS" )
@@ -1068,7 +1107,6 @@ if($isDeployed)
                 }
             "TestID3" #Attach another data disk 
                 {
-                    $metaData = "Attach another data disk"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $AttachAnotherDiskResult = AttachAnotherDataDisk -VMObject $VMObject -DiskSizeInGB $currentTestData.dataDiskConfig.DiskSizeInGB -DiskHostCaching $currentTestData.dataDiskConfig.HostCaching -PrevTestStatus $PrevTestResult -metaData $metaData
@@ -1079,29 +1117,27 @@ if($isDeployed)
                 }
             "TestID4" #Verify single data disk IO functional
                 {
-                    $metaData = "Verify IO on single disk"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = VerifyIO -PrevTestStatus $PrevTestResult  -VMObject $VMObject -DiskMountPoint "/mnt/datadisk" -NewAttachedDiskName $newAttachedDiskName -metaData $metaData
                 }
             "TestID5" #Detach data disk
                 {
-                    $metaData = "Detach data disk"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = DetachDataDisk -VMObject $VMObject -LUN $diskAttachedToLun -PrevTestStatus $PrevTestResult -metaData $metaData
                 }
             "TestID6" #Create RAID on devices
                 {
-                    $metaData = "Create Raid on Devices"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $RaidName = "/dev/md3"
-                    $testResult = CreateRAIDOnDevices -VMObject $VMObject -NewAttachedDiskNames $PreAttachedDisks -PrevTestStatus $PrevTestResult -RaidName $RaidName -metaData $metaData
+                    $VerifyPreAttachedDisksResult = VerifyAttachedDisks -VMObject $VMObject -PrevTestStatus "PASS" -metaData $metaData
+                    $PreAttachedDisks = $VerifyPreAttachedDisksResult[1]
+                    $testResult = CreateRAIDOnDevices -VMObject $VMObject -NewAttachedDiskNames $PreAttachedDisks -PrevTestStatus $VerifyPreAttachedDisksResult[0] -RaidName $RaidName -metaData $metaData
                 }
             "TestID7" #Create RAID on partitions already formatted 
                 {
-                    $metaData = "Create Raid partition on prev.formatted disks"
                     $RaidName = "/dev/md2"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
@@ -1109,7 +1145,6 @@ if($isDeployed)
                 }
             "TestID8" #Create RAID on partitions previously not formatted
                 {
-                    $metaData = "Create Raid partition on prev.NOT formatted disks"
                     $RaidName = "/dev/md1"
                     $RaidMountPoint = "/mnt/RaidVolume"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
@@ -1119,16 +1154,16 @@ if($isDeployed)
                 }
             "TestID9" #Run sysbench IO test on RAID volume
                 {
-                    $metaData = "Sysbench"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = RunSysBench -VMObject $VMObject -PrevTestStatus $PrevTestResult -TestDirectory $RaidMountPoint -SysbenchConfigObject $currentTestData.sysbenchConfig -metaData $metaData
-                    $out = StopRaidArry -VMObject $VMObject -RaidName $RaidName
-
+                    if ( $PrevTestResult -ne "ABORTED" )
+                    {
+                        $out = StopRaidArry -VMObject $VMObject -RaidName $RaidName
+                    }
                 }
             "TestID10" # Upgrade kernel
                 {
-                    $metaData = "Upgrade kernel"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = UpgradeKernel -VMObject $VMObject -PrevTestStatus $PrevTestResult -metaData $metaData
@@ -1137,14 +1172,12 @@ if($isDeployed)
                 {
                     $RaidName = "/dev/md1"
                     $RaidMountPoint = "/mnt/RaidVolume"
-                    $metaData = "Verify Raid After Kernel Upgrade"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = VerifyRaidDiskFunctional -VMObject $VMObject -PrevTestStatus $PrevTestResult -RaidName $RaidName -RaidMountPoint $RaidMountPoint -metaData $metaData
                 }
             "TestID12" # Re-install LIS4
                 {
-                    $metaData = "Re-install LIS"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     if ( $DetectedDistro -imatch "CENTOS" )
@@ -1158,7 +1191,6 @@ if($isDeployed)
                 }
             "TestID13" #Attach another data disk 
                 {
-                    $metaData = "Attach another data disk"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $AttachAnotherDiskResult = AttachAnotherDataDisk -VMObject $VMObject -DiskSizeInGB $currentTestData.dataDiskConfig.DiskSizeInGB -DiskHostCaching $currentTestData.dataDiskConfig.HostCaching -PrevTestStatus $PrevTestResult -metaData $metaData
@@ -1169,29 +1201,27 @@ if($isDeployed)
                 }
             "TestID14" #Verify single data disk IO functional
                 {
-                    $metaData = "Verify IO on single disk"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = VerifyIO -PrevTestStatus $PrevTestResult  -VMObject $VMObject -DiskMountPoint "/mnt/datadisk" -NewAttachedDiskName $newAttachedDiskName -metaData $metaData
                 }
             "TestID15" #Detach data disk
                 {
-                    $metaData = "Detach data disk"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = DetachDataDisk -VMObject $VMObject -LUN $diskAttachedToLun -PrevTestStatus $PrevTestResult -metaData $metaData
                 }
             "TestID16" #Create RAID on devices
                 {
-                    $metaData = "Create Raid on Devices"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $RaidName = "/dev/md3"
-                    $testResult = CreateRAIDOnDevices -VMObject $VMObject -NewAttachedDiskNames $PreAttachedDisks -PrevTestStatus $PrevTestResult -RaidName $RaidName -metaData $metaData
+                    $VerifyPreAttachedDisksResult = VerifyAttachedDisks -VMObject $VMObject -PrevTestStatus "PASS" -metaData $metaData
+                    $PreAttachedDisks = $VerifyPreAttachedDisksResult[1]
+                    $testResult = CreateRAIDOnDevices -VMObject $VMObject -NewAttachedDiskNames $PreAttachedDisks -PrevTestStatus $VerifyPreAttachedDisksResult[0] -RaidName $RaidName -metaData $metaData
                 }
             "TestID17" #Create RAID on partitions already formatted 
                 {
-                    $metaData = "Create Raid partition on prev.formatted disks"
                     $RaidName = "/dev/md2"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
@@ -1199,7 +1229,6 @@ if($isDeployed)
                 }
             "TestID18" #Create RAID on partitions previously not formatted
                 {
-                    $metaData = "Create Raid partition on prev.NOT formatted disks"
                     $RaidName = "/dev/md1"
                     $RaidMountPoint = "/mnt/RaidVolume"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
@@ -1209,14 +1238,16 @@ if($isDeployed)
                 }
             "TestID19" #Run sysbench IO test on RAID volume
                 {
-                    $metaData = "Sysbench"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = RunSysBench -VMObject $VMObject -PrevTestStatus $PrevTestResult -TestDirectory $RaidMountPoint -SysbenchConfigObject $currentTestData.sysbenchConfig -metaData $metaData
+                    if ( $PrevTestResult -ne "ABORTED" )
+                    {
+                        $out = StopRaidArry -VMObject $VMObject -RaidName $RaidName
+                    }
                 }            
             "TestID20" # Re-install LIS4
                 {
-                    $metaData = "Re-install LIS"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     if ( $DetectedDistro -imatch "CENTOS" )
@@ -1230,39 +1261,37 @@ if($isDeployed)
                 }
             "TestID21" #Attach another data disk 
                 {
-                    $metaData = "Attach another data disk"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $AttachAnotherDiskResult = AttachAnotherDataDisk -VMObject $VMObject -DiskSizeInGB $currentTestData.dataDiskConfig.DiskSizeInGB -DiskHostCaching $currentTestData.dataDiskConfig.HostCaching -PrevTestStatus $PrevTestResult -metaData $metaData
                     $testResult = $AttachAnotherDiskResult[0]
                     $diskAttachedToLun = $AttachAnotherDiskResult[2]
                     $newAttachedDiskName = $AttachAnotherDiskResult[1]
+
                 }
             "TestID22" #Verify single data disk IO functional
                 {
-                    $metaData = "Verify IO on single disk"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = VerifyIO -PrevTestStatus $PrevTestResult  -VMObject $VMObject -DiskMountPoint "/mnt/datadisk" -NewAttachedDiskName $newAttachedDiskName -metaData $metaData
                 }
             "TestID23" #Detach data disk
                 {
-                    $metaData = "Detach data disk"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = DetachDataDisk -VMObject $VMObject -LUN $diskAttachedToLun -PrevTestStatus $PrevTestResult -metaData $metaData
                 }
             "TestID24" #Create RAID on devices
                 {
-                    $metaData = "Create Raid on Devices"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $RaidName = "/dev/md3"
-                    $testResult = CreateRAIDOnDevices -VMObject $VMObject -NewAttachedDiskNames $PreAttachedDisks -PrevTestStatus $PrevTestResult -RaidName $RaidName -metaData $metaData
+                    $VerifyPreAttachedDisksResult = VerifyAttachedDisks -VMObject $VMObject -PrevTestStatus "PASS" -metaData $metaData
+                    $PreAttachedDisks = $VerifyPreAttachedDisksResult[1]
+                    $testResult = CreateRAIDOnDevices -VMObject $VMObject -NewAttachedDiskNames $PreAttachedDisks -PrevTestStatus $VerifyPreAttachedDisksResult[0] -RaidName $RaidName -metaData $metaData
                 }
             "TestID25" #Create RAID on partitions already formatted 
                 {
-                    $metaData = "Create Raid partition on prev.formatted disks"
                     $RaidName = "/dev/md2"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
@@ -1270,7 +1299,6 @@ if($isDeployed)
                 }
             "TestID26" #Create RAID on partitions previously not formatted
                 {
-                    $metaData = "Create Raid partition on prev.NOT formatted disks"
                     $RaidName = "/dev/md1"
                     $RaidMountPoint = "/mnt/RaidVolume"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
@@ -1280,11 +1308,14 @@ if($isDeployed)
                 }
             "TestID27" #Run sysbench IO test on RAID volume
                 {
-                    $metaData = "Sysbench"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = RunSysBench -VMObject $VMObject -PrevTestStatus $PrevTestResult -TestDirectory $RaidMountPoint -SysbenchConfigObject $currentTestData.sysbenchConfig -metaData $metaData
-                }            
+                    if ( $PrevTestResult -ne "ABORTED" )
+                    {
+                        $out = StopRaidArry -VMObject $VMObject -RaidName $RaidName
+                    }
+                }
             }
 		}
 		catch
