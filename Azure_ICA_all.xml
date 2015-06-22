@@ -1683,6 +1683,32 @@
 					</VirtualMachine>
 				</HostedService>
 			</A11>
+			<DS2DISK2>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS2</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk>
+							<LUN>0</LUN>
+							<DiskSizeInGB>10</DiskSizeInGB>
+							<HostCaching>ReadOnly</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>1</LUN>
+							<DiskSizeInGB>10</DiskSizeInGB>
+							<HostCaching>ReadOnly</HostCaching>
+						</DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</DS2DISK2>
+			
 		</Deployment>
 		
 
@@ -3301,6 +3327,30 @@
 			<TestFeature></TestFeature>
 			<TestID></TestID>
 		</test>
+		<test>
+			<testName>ICA-LIS4-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-LIS4-TEST.ps1</testScriptps1>
+			<files></files>
+			<LISExtractCommand>tar -xzf lis4.0.10-beta1.tar.gz^cp -ar lis4.0.10/* .</LISExtractCommand>
+			<setupType>DS2DISK2</setupType>
+			<files>remote-scripts\ManagePartitionOnDisk.sh,remote-scripts\ManageRaid.sh,remote-scripts\sys-custom.sh,remote-scripts\packageInstaller.sh,LinuxPackages\epel-release-7-5.noarch.rpm</files>
+			<!-- <SubtestValues>TestID1,TestID2,TestID3,TestID4,TestID5,TestID6,TestID7,TestID8,TestID9,TestID10,TestID12</SubtestValues> -->
+			<SubtestValues>TestID1,TestID3,TestID4,TestID5,TestID6,TestID7,TestID8,TestID9,TestID10</SubtestValues>
+			<sysbenchConfig>
+				<IOs>8</IOs>
+				<Threads>16,32</Threads>
+				<ioRuntime>60</ioRuntime>
+				<!-- <testModes>rndrd,rndwr,rndrw,seqrd,seqrewr</testModes> -->
+				<testModes>rndrd,rndwr</testModes>
+				<fileSize>20G</fileSize>
+			</sysbenchConfig>		
+			<dataDiskConfig>
+				<DiskSizeInGB>10</DiskSizeInGB>
+				<HostCaching>ReadOnly</HostCaching>
+			</dataDiskConfig>			
+			<Priority>P0</Priority>
+		</test>		
 	</testsDefinition>
 
 
