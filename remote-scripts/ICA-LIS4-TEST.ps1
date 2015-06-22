@@ -1093,6 +1093,7 @@ if($isDeployed)
                 }
             "TestID2" #Install LIS4
                 {
+                    $metaData = "Pass1 - Install LIS4"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     if ( $DetectedDistro -imatch "CENTOS" )
@@ -1107,6 +1108,7 @@ if($isDeployed)
                 }
             "TestID3" #Attach another data disk 
                 {
+                    $metaData = "Pass1 - Attach another data disk"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $AttachAnotherDiskResult = AttachAnotherDataDisk -VMObject $VMObject -DiskSizeInGB $currentTestData.dataDiskConfig.DiskSizeInGB -DiskHostCaching $currentTestData.dataDiskConfig.HostCaching -PrevTestStatus $PrevTestResult -metaData $metaData
@@ -1117,18 +1119,21 @@ if($isDeployed)
                 }
             "TestID4" #Verify single data disk IO functional
                 {
+                    $metaData = "Pass1 - Verify IO on single disk"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = VerifyIO -PrevTestStatus $PrevTestResult  -VMObject $VMObject -DiskMountPoint "/mnt/datadisk" -NewAttachedDiskName $newAttachedDiskName -metaData $metaData
                 }
             "TestID5" #Detach data disk
                 {
+                    $metaData = "Pass1 - Detach data disk"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = DetachDataDisk -VMObject $VMObject -LUN $diskAttachedToLun -PrevTestStatus $PrevTestResult -metaData $metaData
                 }
             "TestID6" #Create RAID on devices
                 {
+                    $metaData = "Pass1 - Create Raid on Devices"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $RaidName = "/dev/md3"
@@ -1138,6 +1143,7 @@ if($isDeployed)
                 }
             "TestID7" #Create RAID on partitions already formatted 
                 {
+                    $metaData = "Pass1 - Create Raid partition on prev.formatted disks"
                     $RaidName = "/dev/md2"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
@@ -1145,6 +1151,7 @@ if($isDeployed)
                 }
             "TestID8" #Create RAID on partitions previously not formatted
                 {
+                    $metaData = "Pass1 - Create Raid partition on prev.NOT formatted disks"
                     $RaidName = "/dev/md1"
                     $RaidMountPoint = "/mnt/RaidVolume"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
@@ -1154,6 +1161,7 @@ if($isDeployed)
                 }
             "TestID9" #Run sysbench IO test on RAID volume
                 {
+                    $metaData = "Pass1 - Sysbench"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = RunSysBench -VMObject $VMObject -PrevTestStatus $PrevTestResult -TestDirectory $RaidMountPoint -SysbenchConfigObject $currentTestData.sysbenchConfig -metaData $metaData
@@ -1164,6 +1172,7 @@ if($isDeployed)
                 }
             "TestID10" # Upgrade kernel
                 {
+                    $metaData = "Pass1 - Upgrade kernel"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = UpgradeKernel -VMObject $VMObject -PrevTestStatus $PrevTestResult -metaData $metaData
@@ -1172,12 +1181,14 @@ if($isDeployed)
                 {
                     $RaidName = "/dev/md1"
                     $RaidMountPoint = "/mnt/RaidVolume"
+                    $metaData = "Pass1 - Verify Raid After Kernel Upgrade"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = VerifyRaidDiskFunctional -VMObject $VMObject -PrevTestStatus $PrevTestResult -RaidName $RaidName -RaidMountPoint $RaidMountPoint -metaData $metaData
                 }
             "TestID12" # Re-install LIS4
                 {
+                    $metaData = "Pass1 - Re-install LIS"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     if ( $DetectedDistro -imatch "CENTOS" )
@@ -1191,6 +1202,7 @@ if($isDeployed)
                 }
             "TestID13" #Attach another data disk 
                 {
+                    $metaData = "Pass2 - Attach another data disk"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $AttachAnotherDiskResult = AttachAnotherDataDisk -VMObject $VMObject -DiskSizeInGB $currentTestData.dataDiskConfig.DiskSizeInGB -DiskHostCaching $currentTestData.dataDiskConfig.HostCaching -PrevTestStatus $PrevTestResult -metaData $metaData
@@ -1201,18 +1213,21 @@ if($isDeployed)
                 }
             "TestID14" #Verify single data disk IO functional
                 {
+                    $metaData = "Pass2 - Verify IO on single disk"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = VerifyIO -PrevTestStatus $PrevTestResult  -VMObject $VMObject -DiskMountPoint "/mnt/datadisk" -NewAttachedDiskName $newAttachedDiskName -metaData $metaData
                 }
             "TestID15" #Detach data disk
                 {
+                    $metaData = "Pass2 - Detach data disk"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = DetachDataDisk -VMObject $VMObject -LUN $diskAttachedToLun -PrevTestStatus $PrevTestResult -metaData $metaData
                 }
             "TestID16" #Create RAID on devices
                 {
+                    $metaData = "Pass2 - Create Raid on Devices"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $RaidName = "/dev/md3"
@@ -1222,6 +1237,7 @@ if($isDeployed)
                 }
             "TestID17" #Create RAID on partitions already formatted 
                 {
+                    $metaData = "Pass2 - Create Raid partition on prev.formatted disks"
                     $RaidName = "/dev/md2"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
@@ -1229,6 +1245,7 @@ if($isDeployed)
                 }
             "TestID18" #Create RAID on partitions previously not formatted
                 {
+                    $metaData = "Pass2 - Create Raid partition on prev.NOT formatted disks"
                     $RaidName = "/dev/md1"
                     $RaidMountPoint = "/mnt/RaidVolume"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
@@ -1238,6 +1255,7 @@ if($isDeployed)
                 }
             "TestID19" #Run sysbench IO test on RAID volume
                 {
+                    $metaData = "Pass2 - Sysbench"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = RunSysBench -VMObject $VMObject -PrevTestStatus $PrevTestResult -TestDirectory $RaidMountPoint -SysbenchConfigObject $currentTestData.sysbenchConfig -metaData $metaData
@@ -1248,6 +1266,7 @@ if($isDeployed)
                 }            
             "TestID20" # Re-install LIS4
                 {
+                    $metaData = "Pass2 - Re-install LIS"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     if ( $DetectedDistro -imatch "CENTOS" )
@@ -1261,6 +1280,7 @@ if($isDeployed)
                 }
             "TestID21" #Attach another data disk 
                 {
+                    $metaData = "Pass3 - Attach another data disk"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $AttachAnotherDiskResult = AttachAnotherDataDisk -VMObject $VMObject -DiskSizeInGB $currentTestData.dataDiskConfig.DiskSizeInGB -DiskHostCaching $currentTestData.dataDiskConfig.HostCaching -PrevTestStatus $PrevTestResult -metaData $metaData
@@ -1271,18 +1291,21 @@ if($isDeployed)
                 }
             "TestID22" #Verify single data disk IO functional
                 {
+                    $metaData = "Pass3 - Verify IO on single disk"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = VerifyIO -PrevTestStatus $PrevTestResult  -VMObject $VMObject -DiskMountPoint "/mnt/datadisk" -NewAttachedDiskName $newAttachedDiskName -metaData $metaData
                 }
             "TestID23" #Detach data disk
                 {
+                    $metaData = "Pass3 - Detach data disk"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = DetachDataDisk -VMObject $VMObject -LUN $diskAttachedToLun -PrevTestStatus $PrevTestResult -metaData $metaData
                 }
             "TestID24" #Create RAID on devices
                 {
+                    $metaData = "Pass3 - Create Raid on Devices"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $RaidName = "/dev/md3"
@@ -1292,6 +1315,7 @@ if($isDeployed)
                 }
             "TestID25" #Create RAID on partitions already formatted 
                 {
+                    $metaData = "Pass3 - Create Raid partition on prev.formatted disks"
                     $RaidName = "/dev/md2"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
@@ -1299,6 +1323,7 @@ if($isDeployed)
                 }
             "TestID26" #Create RAID on partitions previously not formatted
                 {
+                    $metaData = "Pass3 - Create Raid partition on prev.NOT formatted disks"
                     $RaidName = "/dev/md1"
                     $RaidMountPoint = "/mnt/RaidVolume"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
@@ -1308,6 +1333,7 @@ if($isDeployed)
                 }
             "TestID27" #Run sysbench IO test on RAID volume
                 {
+                    $metaData = "Pass3 - Sysbench"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = RunSysBench -VMObject $VMObject -PrevTestStatus $PrevTestResult -TestDirectory $RaidMountPoint -SysbenchConfigObject $currentTestData.sysbenchConfig -metaData $metaData
