@@ -69,7 +69,7 @@ Specifies the subsciption id
 Function DetectLinuxDistro($VIP, $SSHport, $testVMUser, $testVMPassword)
 {
 
-	$tempout = RemoteCopy  -upload -uploadTo $VIP -port $SSHport -files ".\SetupScripts\DetectLinuxDistro.sh" username $testVMUser -password $testVMPassword 2>&1 | Out-Null
+	$tempout = RemoteCopy  -upload -uploadTo $VIP -port $SSHport -files ".\SetupScripts\DetectLinuxDistro.sh" -username $testVMUser -password $testVMPassword 2>&1 | Out-Null
 	$tempout = RunLinuxCmd -username $testVMUser -password $testVMPassword -ip $VIP -port $SSHport -command "chmod +x *.sh" -runAsSudo 2>&1 | Out-Null
 	$DistroName = RunLinuxCmd -username $testVMUser -password $testVMPassword -ip $VIP -port $SSHport -command "/home/$user/DetectLinuxDistro.sh" -runAsSudo
 	if(($DistroName -imatch "Unknown") -or (!$DistroName))

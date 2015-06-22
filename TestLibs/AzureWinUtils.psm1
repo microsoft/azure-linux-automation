@@ -14,15 +14,16 @@ function LogMsg([string]$msg, [Boolean]$WriteHostOnly, [Boolean]$NoLogsPlease, [
         $color = "green"
         if(!$WriteHostOnly -and !$NoLogsPlease)
         {
-            ($tag+ $now + $line) | out-file -encoding ASCII -append -filePath $logFile 
-            if ( !$LinuxConsoleOuput )
-            {      
-                write-host -f $color "$tag $now $line"
+            if ( $LinuxConsoleOuput )
+            {   
+                $tag = "LinuxConsole"               
+                Write-Host "$tag $now $line" -ForegroundColor Gray
             }
             else
             {
-                Write-Host "$tag $now $line" -ForegroundColor Gray
+                write-host -f $color "$tag $now $line"
             }
+            ($tag+ $now + $line) | out-file -encoding ASCII -append -filePath $logFile 
         }
         elseif ($WriteHostOnly)
         {
@@ -30,7 +31,7 @@ function LogMsg([string]$msg, [Boolean]$WriteHostOnly, [Boolean]$NoLogsPlease, [
         }
         elseif ($NoLogsPlease)
         {
-            $tempLog = "temp"
+            #Nothing to do here.
         }
     }
 }
