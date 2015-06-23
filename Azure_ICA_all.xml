@@ -35,7 +35,7 @@
 			<CertificateThumbprint>Certificate_Associated_with_your_Azure_Subscription</CertificateThumbprint>
 			<ManagementEndpoint>https://management.core.windows.net</ManagementEndpoint>
 			<StorageAccount>Preferred_Stoarage_Account</StorageAccount>
-			<Location>"Preferred_Location"</Location>
+			<!--<Location>"Preferred_Location"</Location>-->
 			<AffinityGroup>Your_Affinity_Group</AffinityGroup>
 		</General>
 		<CSUpload>

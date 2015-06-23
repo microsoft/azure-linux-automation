@@ -9,7 +9,7 @@ function LogMsg([string]$msg, [Boolean]$WriteHostOnly, [Boolean]$NoLogsPlease, [
 { 
     foreach ( $line in $msg )
     {
-        $now = [Datetime]::Now.ToUniversalTime().ToString("MM/dd/yyyy hh:mm:ss : ")
+        $now = [Datetime]::Now.ToUniversalTime().ToString("MM/dd/yyyy HH:mm:ss : ")
         $tag="INFO : "
         $color = "green"
         if(!$WriteHostOnly -and !$NoLogsPlease)
