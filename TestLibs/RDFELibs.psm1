@@ -1960,7 +1960,6 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, [switch]$keepUserD
 				Remove-Job -Id $taskID -Force
 			}
 			$user=$xmlConfig.config.Azure.Deployment.Data.UserName
-			$KernelLogOutput=GetAndCheckKernelLogs -DeployedServices $deployedServices -status "Final" #Collecting kernel logs after execution of test case : v-sirebb
 			try
 			{
 				$KernelLogOutput=GetAndCheckKernelLogs -DeployedServices $deployedServices -status "Final" #Collecting kernel logs after execution of test case : v-sirebb
