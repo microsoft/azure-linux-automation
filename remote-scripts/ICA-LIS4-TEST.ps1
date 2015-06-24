@@ -246,7 +246,7 @@ Function VerifyIO($VMObject, $NewAttachedDiskName, $PrevTestStatus, $metaData, $
             }
         }
         Add-Content -Value $formatDiskOut -Path $LogPath -Force
-        $ddOut = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "dd if=/dev/zero bs=1024 count=1000000 of=$mountPoint/file_1GB" -runAsSudo 
+        $ddOut = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "dd if=/dev/zero bs=1024 count=1000000 of=$mountPoint/file_1GB" -runAsSudo -runMaxAllowedTime 1200
         WaitFor -seconds 10
         Add-Content -Value $ddOut -Path $LogPath
         if ( $DoNotUnmount )
@@ -522,10 +522,10 @@ Function CreateRAIDOnPartitionsAlreadyFormatted($VMObject, $NewAttachedDiskNames
                             $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "mdadm --stop $ActiveArray" -runAsSudo
                         }
                     }
+                    $RaidPartitions = ""
                     foreach ($partitionName in $newPartitions )
                     {
                         #format all partitions..
-                        $RaidPartitions = ""
                         $formatPart = FormatPartition -VMObject $VMObject -PartitionName $partitionName -FileSystem "ext4" -LogFilePath $LogPath
                         if ($formatPart)
                         {
