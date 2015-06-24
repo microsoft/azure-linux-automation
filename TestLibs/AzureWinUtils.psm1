@@ -6,7 +6,10 @@ Import-Module .\TestLibs\RDFELibs.psm1 -Force
 # Parameter : message string
 
 function LogMsg([string]$msg, [Boolean]$WriteHostOnly, [Boolean]$NoLogsPlease, [switch]$LinuxConsoleOuput)
-{ 
+{
+    #Masking the password.
+    $pass2 = $password.Replace('"','')
+    $msg = $msg.Replace($pass2,"$($pass2[0])***$($pass2[($pass2.Length) - 1])")
     foreach ( $line in $msg )
     {
         $now = [Datetime]::Now.ToUniversalTime().ToString("MM/dd/yyyy HH:mm:ss : ")
@@ -37,7 +40,10 @@ function LogMsg([string]$msg, [Boolean]$WriteHostOnly, [Boolean]$NoLogsPlease, [
 }
 
 function LogErr([string]$msg)
-{      
+{
+    #Masking the password.
+    $pass2 = $password.Replace('"','')
+    $msg = $msg.Replace($pass2,"$($pass2[0])***$($pass2[($pass2.Length) - 1])")
 	$now = [Datetime]::Now.ToUniversalTime().ToString("MM/dd/yyyy HH:mm:ss : ")
 	$tag="ERROR : "
 	$color = "Red" 
@@ -47,6 +53,9 @@ function LogErr([string]$msg)
 
 function LogWarn([string]$msg)
 {      
+    #Masking the password.
+    $pass2 = $password.Replace('"','')
+    $msg = $msg.Replace($pass2,"$($pass2[0])***$($pass2[($pass2.Length) - 1])")
 	$now = [Datetime]::Now.ToUniversalTime().ToString("MM/dd/yyyy HH:mm:ss : ")
     $tag="WARNING : "
 	$color = "Yellow" 
