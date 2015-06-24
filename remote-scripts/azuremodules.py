@@ -731,3 +731,13 @@ def ConfigureResolvConf():
 def ConfigureHostsFile():
     hostName = JustRun('hostname')
     AppendTextToFile(hosts_filepath,"127.0.0.1 %s\n" % hostName)
+
+def GetOSDisk():
+    if(IsUbuntu()):
+        resourceDiskPartition = JustRun("grep -i '/mnt' /etc/mtab | awk '{print $1;}' | tr -d '\n'")
+    else:
+        resourceDiskPartition = JustRun("grep -i '/mnt/resource' /etc/mtab | awk '{print $1;}' | tr -d '\n'")
+    if 'sda' in resourceDiskPartition:
+        return 'sdb'
+    else :
+        return 'sda'
