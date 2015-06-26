@@ -1682,6 +1682,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 		-ArgumentList $currentDir, $username, $password, $ip, $port, $linuxCommand
 		$RunLinuxCmdOutput = ""
 		$debugOutput = ""
+		$LinuxExitCode = ""
         
 		if ( $RunInBackGround )
 		{
