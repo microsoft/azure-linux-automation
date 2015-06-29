@@ -5,7 +5,6 @@ from azuremodules import *
 
 import argparse
 import sys
-import os
 import time
         #for error checking
 parser = argparse.ArgumentParser()
@@ -27,8 +26,6 @@ def RunTest(expectedvalue):
         UpdateState("TestCompleted")
     else :
         RunLog.error('Verify log waagent.log fail. Current value : %s Expected value : %s' % (output, expectedvalue))
-        errorInfo = Run("grep -i error /var/log/waagent.log")
-        RunLog.error('error Info from waagent.log as below: \n' + errorInfo)
         ResultLog.error('FAIL')
         UpdateState("TestCompleted")
 

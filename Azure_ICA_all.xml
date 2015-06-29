@@ -3327,6 +3327,9 @@
 				<Name>BVT-VERIFY-NO-ERROR-IN-LOGS</Name>
 			</test>
 			<test>
+				<Name>BVT-VERIFY-VERBOSE-ENABLED-LOGS</Name>
+			</test>
+			<test>
 				<Name>BVT-VERIFY-VHD-PREREQUISITES</Name>
 			</test>
 			<test>
@@ -3388,9 +3391,6 @@
 			</test>
 			<test>
 				<Name>BVT-VERIFY-SSHD-CONFIG</Name>
-			</test>
-			<test>
-				<Name>BVT-VERIFY-VERBOSE-ENABLED-LOGS</Name>
 			</test>
 			<test>
 				<Name>BVT-VERIFY-SHUTDOWN</Name>
