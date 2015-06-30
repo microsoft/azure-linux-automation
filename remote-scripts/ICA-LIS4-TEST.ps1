@@ -216,6 +216,104 @@ Function AttachAnotherDataDisk($VMObject, $LUN, $DiskSizeInGB=10, $DiskHostCachi
 return $ExitCode, $NewAttachedDiskName, $LUN
 }
 
+Function AttachMultipleDataDisks($VMObject, $DiskConfig , $PrevTestStatus, $metaData)
+{
+    #Here $LUNs is an array. E.g. 0..15
+    if ( $PrevTestStatus -eq "PASS" )
+    {
+        LogMsg "STARTING TEST : $metaData"
+        $HotAddLogFile = "$($VMObject.LogDir)\AttachMultipleDataDisk.txt"
+	    $isVMAlive = Test-TCP -testIP $VMObject.VIP -testport $VMObject.SSHPort
+	    if ($isVMAlive -eq "True")
+	    {
+		    Add-Content  -Value "--------------------ADD $($DiskConfig.Count) DISKS : START----------------------" -Path $HotAddLogFile -Encoding UTF8
+    #GetCurrentDiskInfo
+
+		    $FdiskOutputBeforeAddingDisk = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "fdisk -l" -runAsSudo
+		    Add-Content  -Value "Before Adding Disks : " -Path $HotAddLogFile -Encoding UTF8
+		    Add-Content  -Value $FdiskOutputBeforeAddingDisk -Path $HotAddLogFile -Encoding UTF8
+		    $disksBeforeAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $FdiskOutputBeforeAddingDisk
+
+    #Add datadisk to VM
+		    $lunCounter = 0
+		    $HotAddCommand = "Get-AzureVM -ServiceName $($VMObject.ServiceName)"
+		    foreach ( $disk in $DiskConfig )
+		    {
+			    $HotAddCommand += " | Add-AzureDataDisk -CreateNew -DiskSizeInGB $($disk.DiskSizeInGB) -DiskLabel `"$($VMObject.ServiceName)-DataDisk-Lun-$($disk.LUN)-HostCaching-$($disk.HostCaching)-$($disk.DiskSizeInGB)GB`" -LUN $($disk.LUN)"
+		    }
+		    $HotAddCommand += " | Update-AzureVM"
+		    $suppressedOut = RetryOperation -operation {Invoke-Expression $HotAddCommand } -maxRetryCount 5 -retryInterval 5 -description "Attaching $($DiskConfig.Count) disks parallely."
+		    if(($suppressedOut.OperationDescription -eq "Update-AzureVM") -and ( $suppressedOut.OperationStatus -eq "Succeeded"))
+		    {
+			    LogMsg "$($DiskConfig.Count) Disks Attached Successfully.."
+			    WaitFor -seconds 10
+			    $isVMAlive = RetryOperation -operation {Test-TCP -testIP $VMObject.VIP -testport $VMObject.SSHPort} -description "Checking VM status.."
+			    if ($isVMAlive -eq "True")
+			    {
+				    LogMsg "VM Status : RUNNING."
+				    $retryCount = 1
+				    $MaxRetryCount = 20
+				    $isAllDiskDetected = $false
+				    While (($retryCount -le $MaxRetryCount) -and (!$isAllDiskDetected) )
+				    {
+					    $out = ""
+					    LogMsg "Attempt : $retryCount : Checking for new disk."
+					    $FdiskOutputAfterAddingDisk = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "fdisk -l" -runAsSudo -ignoreLinuxExitCode
+					    $disksafterAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $FdiskOutputAfterAddingDisk
+					    if ( ($disksBeforeAddingNewDisk + $($DiskConfig.Count)) -eq $disksafterAddingNewDisk )
+					    {
+						    LogMsg "All $TotalLuns New Disks detected."
+                            $NewDiskNames = GetNewPhysicalDiskNames -FdiskOutputBeforeAddingDisk $FdiskOutputBeforeAddingDisk -FdiskOutputAfterAddingDisk $FdiskOutputAfterAddingDisk
+                            $isAllDiskDetected = $true
+                            $ExitCode = "PASS"
+					    }
+					    else
+					    {
+						    $NotDetectedDisks = ( ($disksBeforeAddingNewDisk + $($DiskConfig.Count)) - $disksafterAddingNewDisk )
+						    LogErr "Total undetected disks : $NotDetectedDisks"
+						    WaitFor -seconds 10
+						    $isAllDiskDetected = "FAIL"
+						    $retryCount += 1
+                            $ExitCode = "FAIL"
+					    }
+				    }
+				    Add-Content  -Value "After Adding New Disk : " -Path $HotAddLogFile -Encoding UTF8
+				    Add-Content  -Value $FdiskOutputAfterAddingDisk -Path $HotAddLogFile -Encoding UTF8
+			    }
+			    else
+			    {
+				    LogMsg "VM Status : OFF."
+				    LogErr "VM is not Alive after adding new disk."
+				    $retValue = "FAIL"
+			    }
+		    }
+		    else
+		    {
+			    LogErr "Failed to attach disks."
+			    $retValue = "FAIL"
+		    }
+	    }
+	    else
+	    {
+		    LogErr "VM is not Alive."
+		    LogErr "Aborting Test."
+		    $retValue = "Aborted"
+	    }
+	    Add-Content  -Value "--------------------ADD $TotalLuns DISKS : END----------------------" -Path $HotAddLogFile 
+    }
+    elseif ( $PrevTestStatus -eq "FAIL" )
+    {
+        $ExitCode = "ABORTED"
+        LogMsg "Skipping TEST : $metaData due to previous failed test"
+    }
+    elseif ( $PrevTestStatus -eq  "ABORTED" )
+    {
+        $ExitCode = "ABORTED"
+        LogMsg "Skipping TEST : $metaData due to previous Aborted test"
+    }
+return $ExitCode, $NewDiskNames
+}
+
 Function VerifyIO($VMObject, $NewAttachedDiskName, $PrevTestStatus, $metaData, $mountPoint="/mnt/datadisk", [switch]$SkipCreatePartition, [switch]$AlreadyMounted, [switch]$DoNotUnmount)
 {
     if ( $PrevTestStatus -eq "PASS" )
@@ -234,14 +332,14 @@ Function VerifyIO($VMObject, $NewAttachedDiskName, $PrevTestStatus, $metaData, $
             $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "mkdir -p $mountPoint" -runAsSudo 
             if ( $SkipCreatePartition )
             {
-                $FormatDiskOut = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "mkfs.ext4 $NewAttachedDiskName" -runAsSudo -runMaxAllowedTime 2400
+                $FormatDiskOut = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "time mkfs.ext4 $NewAttachedDiskName" -runAsSudo -runMaxAllowedTime 2400
                 $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "mount -o nobarrier $NewAttachedDiskName $mountPoint" -runAsSudo 
             }
             else
             {
                 $partitionNumber=1
                 $PartitionDiskOut = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "./ManagePartitionOnDisk.sh -diskName $NewAttachedDiskName -create yes -forRaid no" -runAsSudo 
-                $FormatDiskOut = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "mkfs.ext4 $NewAttachedDiskName$partitionNumber" -runAsSudo -runMaxAllowedTime 2400 
+                $FormatDiskOut = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "time mkfs.ext4 $NewAttachedDiskName$partitionNumber" -runAsSudo -runMaxAllowedTime 2400 
                 $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "mount -o nobarrier $NewAttachedDiskName$partitionNumber $mountPoint" -runAsSudo 
             }
         }
@@ -346,7 +444,7 @@ Function CreatePartitionOnDisk ($VMObject, $diskName, $isItForRaid, $LogFilePath
     $PartitionDetected = $false
     foreach ( $line in $lsblkBefore.Split("`n"))
     {
-        $line = $line.Trim().Replace("├","").Replace("─","").Replace("└","").Replace("Γ","").Replace("ö","").Replace("Ç","").Replace("  "," ").Replace("  "," ").Replace("  "," ")
+        $line = $line.Trim().Replace("├","").Replace("─","").Replace("└","").Replace("Γ","").Replace("ö","").Replace("Ç","").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ")
         if (($line -imatch $diskShortName) -and ($line -imatch "part"))
         {
             $partitionName = $line.Split()[0]
@@ -378,7 +476,7 @@ Function CreatePartitionOnDisk ($VMObject, $diskName, $isItForRaid, $LogFilePath
     $PartitionDetected = $false
     foreach ( $line in $lsblkAfter.Split("`n"))
     {
-        $line = $line.Trim().Replace("├","").Replace("─","").Replace("└","").Replace("Γ","").Replace("ö","").Replace("Ç","").Replace("  "," ").Replace("  "," ").Replace("  "," ")
+        $line = $line.Trim().Replace("├","").Replace("─","").Replace("└","").Replace("Γ","").Replace("ö","").Replace("Ç","").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ")
         if (($line -imatch $diskShortName) -and ($line -imatch "part"))
         {
             $partitionName = "/dev/$($line.Split()[0])"
@@ -401,7 +499,7 @@ return $PartitionDetected, $partitionName
 Function FormatPartition ($VMObject, $PartitionName, $FileSystem, $LogFilePath)
 {
     LogMsg "Formatting $PartitionName with $FileSystem file system"
-    $formatOut = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "mkfs -t $FileSystem $PartitionName" -runAsSudo
+    $formatOut = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "time mkfs -t $FileSystem $PartitionName" -runAsSudo -runMaxAllowedTime 10800
     Add-Content -Value $formatOut -Path $LogFilePath -Force
     return $true
 }
@@ -415,8 +513,8 @@ Function StopRaidArry($VMObject, $RaidName)
     {
         if ( $line -imatch $RaidName )
         {
-            $ActiveArray = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[0]
-            $MountDir = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[5]
+            $ActiveArray = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[0]
+            $MountDir = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[5]
             LogMsg "Found mounted array : $ActiveArray mounted to $MountDir"
             $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "umount $MountDir" -runAsSudo
         }
@@ -426,7 +524,7 @@ Function StopRaidArry($VMObject, $RaidName)
     {
         if ( $line -imatch "active" )
         {
-            $ActiveArray = $line.Trim().Replace(":","").Replace("  "," ").Split()[0]
+            $ActiveArray = $line.Trim().Replace(":","").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split()[0]
             LogMsg "Found active arry : $ActiveArray"
             $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "mdadm --stop $ActiveArray" -runAsSudo
         }
@@ -447,7 +545,7 @@ Function CreateRAIDOnDevices($VMObject, $NewAttachedDiskNames, $PrevTestStatus, 
         {
             if ( $line -imatch "active" )
             {
-                $ActiveArray = $line.Trim().Replace(":","").Replace("  "," ").Split()[0]
+                $ActiveArray = $line.Trim().Replace(":","").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split()[0]
                 LogMsg "Found active arry : $ActiveArray"
                 $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "mdadm --stop $ActiveArray" -runAsSudo
             }
@@ -517,12 +615,19 @@ Function CreateRAIDOnPartitionsAlreadyFormatted($VMObject, $NewAttachedDiskNames
                     {
                         if ( $line -imatch "active" )
                         {
-                            $ActiveArray = $line.Trim().Replace(":","").Replace("  "," ").Split()[0]
+                            $ActiveArray = $line.Trim().Replace(":","").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split()[0]
                             LogMsg "Found active arry : $ActiveArray"
                             $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "mdadm --stop $ActiveArray" -runAsSudo
                         }
                     }
-                    $RaidPartitions = ""
+                    Set-Content -Value "#!/bin/bash" -Path "$($VMObject.LogDir)\partprobe.sh" -Force
+                    Add-Content -Value "partprobe -s" -Path "$($VMObject.LogDir)\partprobe.sh" -Force
+                    Add-Content -Value "exit 0" -Path "$($VMObject.LogDir)\partprobe.sh" -Force
+                    RemoteCopy -uploadTo $VMObject.VIP -port $VMObject.SSHPort -files "$($VMObject.LogDir)\partprobe.sh" -username $VMObject.username -password $VMObject.password -upload
+                    Remove-Item -Path  "$($VMObject.LogDir)\partprobe.sh"
+                    $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "chmod +x *.sh" -runAsSudo
+                    $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "./partprobe.sh" -runAsSudo
+                    $mdStat = (RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "cat /proc/mdstat").Split("`n")
                     foreach ($partitionName in $newPartitions )
                     {
                         #format all partitions..
@@ -612,11 +717,18 @@ Function CreateRAIDOnPartitionsNotFormatted($VMObject, $NewAttachedDiskNames, $P
                     {
                         if ( $line -imatch "active" )
                         {
-                            $ActiveArray = $line.Trim().Replace(":","").Replace("  "," ").Split()[0]
+                            $ActiveArray = $line.Trim().Replace(":","").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split()[0]
                             LogMsg "Found active arry : $ActiveArray"
                             $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "mdadm --stop $ActiveArray" -runAsSudo
                         }
                     }
+                    Set-Content -Value "#!/bin/bash" -Path "$($VMObject.LogDir)\partprobe.sh" -Force
+                    Add-Content -Value "partprobe -s" -Path "$($VMObject.LogDir)\partprobe.sh" -Force
+                    Add-Content -Value "exit 0" -Path "$($VMObject.LogDir)\partprobe.sh" -Force
+                    RemoteCopy -uploadTo $VMObject.VIP -port $VMObject.SSHPort -files "$($VMObject.LogDir)\partprobe.sh" -username $VMObject.username -password $VMObject.password -upload
+                    Remove-Item -Path  "$($VMObject.LogDir)\partprobe.sh"
+                    $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "chmod +x *.sh" -runAsSudo
+                    $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "./partprobe.sh" -runAsSudo
                     $dmesgBefore = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "dmesg" -runAsSudo 
                     $totalDisks = $NewAttachedDiskNames.Split("^").Count
                     LogMsg "Creating raid of $totalDisks disks."
@@ -668,14 +780,14 @@ Function isLinuxProcessRunning ($VMObject, $ProcessName)
         if (( $line -imatch $ProcessName) -and !( $line -imatch "--color=auto"))
         {
             $foundProcesses += 1
-            $linuxUID = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[0]
-            $linuxPID = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[1]
-            $linuxPPID = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[2]
-            $linuxC = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[3]
-            $linuxSTIME = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[4]
-            $linuxTTY = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[5]
-            $linuxTIME = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[6]
-            $linuxCMD = $line.Trim().Replace("$linuxUID","").Replace("$linuxPID","").Replace("$linuxPPID","").Replace("$linuxC","").Replace("$linuxSTIME","").Replace("$linuxTTY","").Replace("$linuxTIME","").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ")
+            $linuxUID = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[0]
+            $linuxPID = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[1]
+            $linuxPPID = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[2]
+            $linuxC = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[3]
+            $linuxSTIME = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[4]
+            $linuxTTY = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[5]
+            $linuxTIME = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[6]
+            $linuxCMD = $line.Trim().Replace("$linuxUID","").Replace("$linuxPID","").Replace("$linuxPPID","").Replace("$linuxC","").Replace("$linuxSTIME","").Replace("$linuxTTY","").Replace("$linuxTIME","").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ")
             LogMsg "FOUND PROCESS : UID=$linuxUID, PID=$linuxPID, RUNNING TIME=$linuxTIME, COMMAND=$linuxCMD"
         }
     }
@@ -750,6 +862,7 @@ Function RunSysBench($VMObject, $PrevTestStatus, $TestDirectory, $SysbenchConfig
                             {
                                 LogMsg "Test finished for mode : $mode, IO size : $($io)K, Total Threads : $thread, Run Time : $($SysbenchConfigObject.ioRuntime) seconds."
                                 RemoteCopy -downloadFrom $VMObject.VIP -port $VMObject.SSHPort -username $VMObject.username -password $VMObject.password -files "$SysbenchLogDir/iostat-sysbench-$mode-$($io)K-$thread.txt" -downloadTo $VMObject.LogDir -download
+                                RemoteCopy -downloadFrom $VMObject.VIP -port $VMObject.SSHPort -username $VMObject.username -password $VMObject.password -files "$SysbenchLogDir/sysbench.log.txt" -downloadTo $VMObject.LogDir -download
                             }
                             else
                             {
@@ -978,7 +1091,7 @@ Function ReinstallLIS($VMObject, $PrevTestStatus, $metaData)
 return $ExitCode
 }
 
-Function PreareVMForLIS4Test ($VMObject, $DetectedDistro)
+Function PrepareVMForLIS4Test ($VMObject, $DetectedDistro)
 {
     #This test needs sysbench, sysstat and mdadm packages to work correctly.
     if ( $DetectedDistro -imatch "CENTOS" )
@@ -988,10 +1101,16 @@ Function PreareVMForLIS4Test ($VMObject, $DetectedDistro)
         $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "yum install --nogpgcheck -y mdadm" -runAsSudo
         $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "yum install --nogpgcheck -y sysbench" -runAsSudo
     }
+    if ( $DetectedDistro -imatch "REDHAT" )
+    {
+        $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "yum install --nogpgcheck -y sysstat" -runAsSudo
+        $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "yum install --nogpgcheck -y mdadm" -runAsSudo
+        $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "yum install --nogpgcheck -y sysbench" -runAsSudo
+    }
     if ( $DetectedDistro -imatch "UBUNTU" )
     {
         $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "apt-get install --force-yes -y sysstat" -runAsSudo
-        $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "apt-get install --force-yes -y mdadm" -runAsSudo
+        $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "apt-get install --force-yes -y mdadm" -runAsSudo 
         $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "apt-get install --force-yes -y sysbench" -runAsSudo
     }
 }
@@ -1002,6 +1121,7 @@ $result = ""
 $testResult = ""
 $resultArr = @()
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
+#$isDeployed = "ICA-DS2DISK2-U1410-6-30-18-39-55"
 if($isDeployed)
 {
 	$hs1Name = $isDeployed
@@ -1022,9 +1142,7 @@ if($isDeployed)
     $DetectedDistro = DetectLinuxDistro -VIP $hs1VIP -SSHport $hs1vm1sshport -testVMUser $user -testVMPassword $password
     RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
     $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "chmod +x *.sh" -runAsSudo
-    
-    PreareVMForLIS4Test -VMObject $VMObject -DetectedDistro $DetectedDistro
-    
+        
     $testResult = "PASS"
 	foreach ($TestID in $SubtestValues) 
 	{
@@ -1137,9 +1255,8 @@ if($isDeployed)
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $RaidName = "/dev/md3"
-                    $VerifyPreAttachedDisksResult = VerifyAttachedDisks -VMObject $VMObject -PrevTestStatus "PASS" -metaData $metaData
-                    $PreAttachedDisks = $VerifyPreAttachedDisksResult[1]
-                    $testResult = CreateRAIDOnDevices -VMObject $VMObject -NewAttachedDiskNames $PreAttachedDisks -PrevTestStatus $VerifyPreAttachedDisksResult[0] -RaidName $RaidName -metaData $metaData
+                    #$VerifyPreAttachedDisksResult = VerifyAttachedDisks -VMObject $VMObject -PrevTestStatus "PASS" -metaData $metaData
+                    $testResult = CreateRAIDOnDevices -VMObject $VMObject -NewAttachedDiskNames $PreAttachedDisks -PrevTestStatus $PrevTestResult -RaidName $RaidName -metaData $metaData
                 }
             "TestID7" #Create RAID on partitions already formatted 
                 {
@@ -1165,10 +1282,6 @@ if($isDeployed)
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = RunSysBench -VMObject $VMObject -PrevTestStatus $PrevTestResult -TestDirectory $RaidMountPoint -SysbenchConfigObject $currentTestData.sysbenchConfig -metaData $metaData
-                    if ( $PrevTestResult -ne "ABORTED" )
-                    {
-                        $out = StopRaidArry -VMObject $VMObject -RaidName $RaidName
-                    }
                 }
             "TestID10" # Upgrade kernel
                 {
@@ -1177,14 +1290,25 @@ if($isDeployed)
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = UpgradeKernel -VMObject $VMObject -PrevTestStatus $PrevTestResult -metaData $metaData
                 }
+            "TestID28" # Attach Max Data disks
+                {
+                    $totalRaidDisks = $currentTestData.sysbenchConfig.RaidDisks.DataDisk.Count
+                    $DiskConfig = $currentTestData.sysbenchConfig.RaidDisks.DataDisk
+                    $metaData = "Pass1 - Attach Maximium disks"
+                    mkdir "$LogDir\$metaData" -Force | Out-Null
+                    $VMObject.LogDir = "$LogDir\$metaData"
+                    $MultipleDiskResult = AttachMultipleDataDisks -VMObject $VMObject -DiskConfig $DiskConfig -PrevTestStatus $PrevTestResult -metaData $metaData
+                    $testResult = $MultipleDiskResult[0]
+                    $PreAttachedDisks = $MultipleDiskResult[1]
+                }
             "TestID11" # Verify RAID/disks functional
                 {
-                    $RaidName = "/dev/md1"
                     $RaidMountPoint = "/mnt/RaidVolume"
                     $metaData = "Pass1 - Verify Raid After Kernel Upgrade"
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $testResult = VerifyRaidDiskFunctional -VMObject $VMObject -PrevTestStatus $PrevTestResult -RaidName $RaidName -RaidMountPoint $RaidMountPoint -metaData $metaData
+                    $out = StopRaidArry -VMObject $VMObject -RaidName $RaidName
                 }
             "TestID12" # Re-install LIS4
                 {
@@ -1231,9 +1355,8 @@ if($isDeployed)
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $RaidName = "/dev/md3"
-                    $VerifyPreAttachedDisksResult = VerifyAttachedDisks -VMObject $VMObject -PrevTestStatus "PASS" -metaData $metaData
-                    $PreAttachedDisks = $VerifyPreAttachedDisksResult[1]
-                    $testResult = CreateRAIDOnDevices -VMObject $VMObject -NewAttachedDiskNames $PreAttachedDisks -PrevTestStatus $VerifyPreAttachedDisksResult[0] -RaidName $RaidName -metaData $metaData
+                    #$VerifyPreAttachedDisksResult = VerifyAttachedDisks -VMObject $VMObject -PrevTestStatus "PASS" -metaData $metaData
+                    $testResult = CreateRAIDOnDevices -VMObject $VMObject -NewAttachedDiskNames $PreAttachedDisks -PrevTestStatus $PrevTestResult -RaidName $RaidName -metaData $metaData
                 }
             "TestID17" #Create RAID on partitions already formatted 
                 {
@@ -1309,9 +1432,8 @@ if($isDeployed)
                     mkdir "$LogDir\$metaData" -Force | Out-Null
                     $VMObject.LogDir = "$LogDir\$metaData"
                     $RaidName = "/dev/md3"
-                    $VerifyPreAttachedDisksResult = VerifyAttachedDisks -VMObject $VMObject -PrevTestStatus "PASS" -metaData $metaData
-                    $PreAttachedDisks = $VerifyPreAttachedDisksResult[1]
-                    $testResult = CreateRAIDOnDevices -VMObject $VMObject -NewAttachedDiskNames $PreAttachedDisks -PrevTestStatus $VerifyPreAttachedDisksResult[0] -RaidName $RaidName -metaData $metaData
+                    #$VerifyPreAttachedDisksResult = VerifyAttachedDisks -VMObject $VMObject -PrevTestStatus "PASS" -metaData $metaData
+                    $testResult = CreateRAIDOnDevices -VMObject $VMObject -NewAttachedDiskNames $PreAttachedDisks -PrevTestStatus $PrevTestResult -RaidName $RaidName -metaData $metaData
                 }
             "TestID25" #Create RAID on partitions already formatted 
                 {

@@ -3538,13 +3538,13 @@
 			<setupType>DS2DISK2</setupType>
 			<files>.\remote-scripts\ManagePartitionOnDisk.sh,.\remote-scripts\ManageRaid.sh,.\remote-scripts\sys-custom.sh,.\remote-scripts\packageInstaller.sh,.\tools\LinuxPackages\epel-release-7-5.noarch.rpm</files>
 			<!-- <SubtestValues>TestID1,TestID2,TestID3,TestID4,TestID5,TestID6,TestID7,TestID8,TestID9,TestID10,TestID12</SubtestValues> -->
-			<SubtestValues>TestID1,TestID2,TestID3,TestID4,TestID5,TestID6,TestID7,TestID8,TestID9,TestID10,TestID12</SubtestValues>
+			<SubtestValues>TestID1,TestID3,TestID4,TestID5,TestID6,TestID7,TestID8,TestID9,TestID10</SubtestValues>
 			<sysbenchConfig>
 				<IOs>8</IOs>
 				<Threads>16,32</Threads>
 				<ioRuntime>60</ioRuntime>
 				<!-- <testModes>rndrd,rndwr,rndrw,seqrd,seqrewr</testModes> -->
-				<testModes>rndrd,rndwr,rndrw,seqrd,seqrewr</testModes>
+				<testModes>rndrd,rndwr</testModes>
 				<fileSize>10G</fileSize>
 			</sysbenchConfig>		
 			<dataDiskConfig>
