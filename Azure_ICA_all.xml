@@ -1347,6 +1347,121 @@
 					</VirtualMachine>
 				</HostedService>
 			</BVTDeployment>
+			<MeshVM>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>122</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>222</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>322</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>422</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>522</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>622</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>722</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>822</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>922</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</MeshVM>
 			<VMImage>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -3075,6 +3190,18 @@
 			<TestID>Perf_002</TestID>
 			<Priority>P0</Priority>
 		</test>
+		<test>
+			<testName>NETWORK-PERF-MESH-TEST</testName>
+			<testScript>meshnetwork-perf-main.sh,meshnetwork-perf-server.sh,meshnetwork-perf-client.sh</testScript>
+			<testScriptps1>NETWORK-PERF-MESH-TEST.ps1</testScriptps1>
+			<SubtestValues>32,64,512,1000,2000,4000,6000</SubtestValues>
+			<files>remote-scripts\meshnetwork-perf-main.sh,remote-scripts\meshnetwork-perf-server.sh,remote-scripts\meshnetwork-perf-client.sh,remote-scripts\sar-top.sh</files>
+			<setupType>MeshVM</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<TestID>Perf_003</TestID>
+			<Priority>P0</Priority>
+		</test>
 		
 		<test>
 			<testName>ICA-FIO-TEST</testName>
@@ -3452,9 +3579,6 @@
 				<Name>BVT-VERIFY-NO-ERROR-IN-LOGS</Name>
 			</test>
 			<test>
-				<Name>BVT-VERIFY-VERBOSE-ENABLED-LOGS</Name>
-			</test>
-			<test>
 				<Name>BVT-VERIFY-VHD-PREREQUISITES</Name>
 			</test>
 			<test>
@@ -3516,6 +3640,9 @@
 			</test>
 			<test>
 				<Name>BVT-VERIFY-SSHD-CONFIG</Name>
+			</test>
+			<test>
+				<Name>BVT-VERIFY-VERBOSE-ENABLED-LOGS</Name>
 			</test>
 			<test>
 				<Name>BVT-VERIFY-SHUTDOWN</Name>
@@ -3901,6 +4028,9 @@
 			</test>
 			<test>
 				<Name>NETWORK-PERF-THROUGHPUT-6K-CONNETCTIONS-TEST</Name>
+			</test>
+			<test>
+				<Name>NETWORK-PERF-MESH-TEST</Name>
 			</test>
 		</Cycle>
 		<!-- E2E tests -->

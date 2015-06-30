@@ -5,8 +5,11 @@ from azuremodules import *
 def RunTest(command):
     UpdateState("TestRunning")
     RunLog.info("Checking resource disc...")
+    osdisk = GetOSDisk()
     if (IsUbuntu()) :
         mntresource = "/dev/sdb1 on /mnt"
+    elif (osdisk == 'sdb') :
+        mntresource = "/dev/sda1 on /mnt/resource"
     else :
         mntresource = "/dev/sdb1 on /mnt/resource"
     temp = Run(command)
