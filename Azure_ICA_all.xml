@@ -3536,7 +3536,7 @@
 			<files></files>
 			<LISExtractCommand>tar -xzf lis4.0.10-beta1.tar.gz^cp -ar lis4.0.10/* .</LISExtractCommand>
 			<setupType>DS2DISK2</setupType>
-			<files>.\remote-scripts\ManagePartitionOnDisk.sh,.\remote-scripts\ManageRaid.sh,.\remote-scripts\sys-custom.sh,.\remote-scripts\packageInstaller.sh,LinuxPackages\epel-release-7-5.noarch.rpm</files>
+			<files>.\remote-scripts\ManagePartitionOnDisk.sh,.\remote-scripts\ManageRaid.sh,.\remote-scripts\sys-custom.sh,.\remote-scripts\packageInstaller.sh,.\tools\LinuxPackages\epel-release-7-5.noarch.rpm</files>
 			<!-- <SubtestValues>TestID1,TestID2,TestID3,TestID4,TestID5,TestID6,TestID7,TestID8,TestID9,TestID10,TestID12</SubtestValues> -->
 			<SubtestValues>TestID1,TestID2,TestID3,TestID4,TestID5,TestID6,TestID7,TestID8,TestID9,TestID10,TestID12</SubtestValues>
 			<sysbenchConfig>
