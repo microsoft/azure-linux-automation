@@ -7,6 +7,7 @@ import argparse
 import sys
 import time
 import platform
+import os
 
 def RunTest():
     UpdateState("TestRunning")
@@ -33,9 +34,9 @@ def Restartwaagent():
         Run("echo 'Redhat.Redhat.777' | sudo -S service walinuxagent restart")
     else :  
         if (result == "0") :
-            Run("echo 'Redhat.Redhat.777' | sudo -S service waagent restart")
+            os.system("echo 'Redhat.Redhat.777' | sudo -S service waagent restart")
         else :
-            Run("echo 'Redhat.Redhat.777' | sudo -S systemctl restart waagent")
+            os.system("echo 'Redhat.Redhat.777' | sudo -S systemctl restart waagent")
     time.sleep(60)
 
 Restartwaagent()
