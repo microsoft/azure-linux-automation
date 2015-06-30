@@ -1803,7 +1803,7 @@
 			<testName>SETUP-INSTALL-PACKAGES</testName>
 			<testScript>SETUP-INSTALL-PACKAGES.py</testScript>
 			<testScriptPs1>SETUP-INSTALL-PACKAGES.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\SETUP-INSTALL-PACKAGES.py,remote-scripts\packages.xml</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\SETUP-INSTALL-PACKAGES.py,.\remote-scripts\packages.xml</files>
 			<setupType>VMImage</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -1824,7 +1824,7 @@
 			<testName>BVT-VERIFY-HOSTNAME</testName>
 			<testScript>BVT-VERIFY-HOSTNAME.py</testScript>
 			<testScriptPs1>BVT-VERIFY-HOSTNAME.ps1</testScriptPs1>
-			<files>remote-scripts\BVT-VERIFY-HOSTNAME.py,remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\BVT-VERIFY-HOSTNAME.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -1834,7 +1834,7 @@
 			<testName>BVT-IS-ROOT-PASSWORD-DELETED</testName>
 			<testScript>BVT-IS-ROOT-PASSWORD-DELETED.py</testScript>
 			<testScriptPs1>BVT-IS-ROOT-PASSWORD-DELETED.ps1</testScriptPs1>
-			<files>remote-scripts\BVT-IS-ROOT-PASSWORD-DELETED.py,remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\BVT-IS-ROOT-PASSWORD-DELETED.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -1844,7 +1844,7 @@
 			<testName>BVT-WA-PROC-CHECK</testName>
 			<testScript>BVT-WA-PROC-CHECK.py</testScript>
 			<testScriptPs1>BVT-WA-PROC-CHECK.ps1</testScriptPs1>
-			<files>remote-scripts\BVT-WA-PROC-CHECK.py,remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\BVT-WA-PROC-CHECK.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -1855,7 +1855,7 @@
 			<testName>BVT-WA-VER-CHECK</testName>
 			<testScript>BVT-WA-VER-CHECK.py</testScript>
 			<testScriptPs1>BVT-WA-VER-CHECK.ps1</testScriptPs1>
-			<files>remote-scripts\BVT-WA-VER-CHECK.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\BVT-WA-VER-CHECK.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -1865,7 +1865,7 @@
 			<testName>BVT-ROOT-DEVICE-TIMEOUT-CHECK</testName>
 			<testScript>BVT-ROOT-DEVICE-TIMEOUT-CHECK.py</testScript>
 			<testScriptPs1>BVT-ROOT-DEVICE-TIMEOUT-CHECK.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\BVT-ROOT-DEVICE-TIMEOUT-CHECK.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\BVT-ROOT-DEVICE-TIMEOUT-CHECK.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -1875,7 +1875,7 @@
 			<testName>BVT-HVMODULES-CHECK</testName>
 			<testScript>BVT-HVMODULES-CHECK.py</testScript>
 			<testScriptPs1>BVT-HVMODULES-CHECK.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\BVT-HVMODULES-CHECK.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\BVT-HVMODULES-CHECK.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -1885,7 +1885,7 @@
 			<testName>BVT-RESOURCE-DISK-FILESYSTEM</testName>
 			<testScript>BVT-RESOURCE-DISK-FILESYSTEM.py</testScript>
 			<testScriptPs1>BVT-RESOURCE-DISK-FILESYSTEM.ps1</testScriptPs1>
-			<files>remote-scripts\BVT-RESOURCE-DISK-FILESYSTEM.py,remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\BVT-RESOURCE-DISK-FILESYSTEM.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -1895,7 +1895,7 @@
 			<testName>BVT-SWAP-CHECK</testName>
 			<testScript>BVT-SWAP-CHECK.py</testScript>
 			<testScriptPs1>BVT-SWAP-CHECK.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\BVT-SWAP-CHECK.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\BVT-SWAP-CHECK.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -1905,7 +1905,7 @@
 			<testName>BVT-MTAB-ENTRY-CHECK</testName>
 			<testScript>BVT-MTAB-ENTRY-CHECK.py</testScript>
 			<testScriptPs1>BVT-MTAB-ENTRY-CHECK.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\BVT-MTAB-ENTRY-CHECK.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\BVT-MTAB-ENTRY-CHECK.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -1915,7 +1915,7 @@
 			<testName>BVT-LAST-CONSOLE-CHECK</testName>
 			<testScript>BVT-LAST-CONSOLE-CHECK.py</testScript>
 			<testScriptPs1>BVT-LAST-CONSOLE-CHECK.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\BVT-LAST-CONSOLE-CHECK.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\BVT-LAST-CONSOLE-CHECK.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -1925,7 +1925,7 @@
 			<testName>BVT-VERIFY-DISKSIZE</testName>
 			<testScript>BVT-VERIFY-DISKSIZE.py</testScript>
 			<testScriptPs1>BVT-VERIFY-DISKSIZE.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\BVT-VERIFY-DISKSIZE.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\BVT-VERIFY-DISKSIZE.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -1935,7 +1935,7 @@
 			<testName>BVT-VERIFY-FIREWALL-STATUS</testName>
 			<testScript>BVT-VERIFY-FIREWALL-STATUS.py</testScript>
 			<testScriptPs1>BVT-VERIFY-FIREWALL-STATUS.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\BVT-VERIFY-FIREWALL-STATUS.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\BVT-VERIFY-FIREWALL-STATUS.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -1945,7 +1945,7 @@
 			<testName>BVT-VERIFY-BOOT-ERROR-WARNINGS</testName>
 			<testScript>BVT-VERIFY-BOOT-ERROR-WARNINGS.py</testScript>
 			<testScriptPs1>BVT-VERIFY-BOOT-ERROR-WARNINGS.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\BVT-VERIFY-BOOT-ERROR-WARNINGS.py,remote-scripts\ignorable-boot-errors.xml</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\BVT-VERIFY-BOOT-ERROR-WARNINGS.py,.\remote-scripts\ignorable-boot-errors.xml</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -1975,7 +1975,7 @@
 			<testName>BVT-VERIFY-MNT-RESOURCE-WRITABLE</testName>
 			<testScript>BVT-VERIFY-MNT-RESOURCE-WRITABLE.py</testScript>
 			<testScriptPs1>BVT-VERIFY-MNT-RESOURCE-WRITABLE.ps1</testScriptPs1>
-			<files>remote-scripts\BVT-VERIFY-MNT-RESOURCE-WRITABLE.py,remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\BVT-VERIFY-MNT-RESOURCE-WRITABLE.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -1985,7 +1985,7 @@
 			<testName>BVT-VERIFY-UUID-FSTAB</testName>
 			<testScript>BVT-VERIFY-UUID-FSTAB.py</testScript>
 			<testScriptPs1>BVT-VERIFY-UUID-FSTAB.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\BVT-VERIFY-UUID-FSTAB.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\BVT-VERIFY-UUID-FSTAB.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2006,7 +2006,7 @@
 			<testName>BVT-VERIFY-SSHD-CONFIG</testName>
 			<testScript>BVT-VERIFY-SSHD-CONFIG.py</testScript>
 			<testScriptPs1>BVT-VERIFY-SSHD-CONFIG.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\BVT-VERIFY-SSHD-CONFIG.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\BVT-VERIFY-SSHD-CONFIG.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2016,7 +2016,7 @@
 			<testName>BVT-VERIFY-VHD-PREREQUISITES</testName>
 			<testScript>BVT-VERIFY-VHD-PREREQUISITES.py</testScript>
 			<testScriptPs1>BVT-VERIFY-VHD-PREREQUISITES.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\BVT-VERIFY-VHD-PREREQUISITES.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\BVT-VERIFY-VHD-PREREQUISITES.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2026,7 +2026,7 @@
 			<testName>BVT-VERIFY-MNT-RESOURCE-README</testName>
 			<testScript>BVT-VERIFY-MNT-RESOURCE-README.py</testScript>
 			<testScriptPs1>BVT-VERIFY-MNT-RESOURCE-README.ps1</testScriptPs1>
-			<files>remote-scripts\BVT-VERIFY-MNT-RESOURCE-README.py,remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\BVT-VERIFY-MNT-RESOURCE-README.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2036,7 +2036,7 @@
 			<testName>BVT-VERIFY-NO-ERROR-IN-LOGS</testName>
 			<testScript>BVT-VERIFY-NO-ERROR-IN-LOGS.py</testScript>
 			<testScriptPs1>BVT-VERIFY-NO-ERROR-IN-LOGS.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\BVT-VERIFY-NO-ERROR-IN-LOGS.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\BVT-VERIFY-NO-ERROR-IN-LOGS.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2046,7 +2046,7 @@
 			<testName>BVT-VERIFY-VERBOSE-ENABLED-LOGS</testName>
 			<testScript>BVT-VERIFY-VERBOSE-ENABLED-LOGS.py</testScript>
 			<testScriptPs1>BVT-VERIFY-VERBOSE-ENABLED-LOGS.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\BVT-VERIFY-VERBOSE-ENABLED-LOGS.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\BVT-VERIFY-VERBOSE-ENABLED-LOGS.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2057,7 +2057,7 @@
 			<TestMode>IP</TestMode>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-OUTBOUND-ACCESS-IPERF-DTAP-UDP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2069,7 +2069,7 @@
 			<testName>NETWORK-OUTBOUND-ACCESS-IPERF-DTAP-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-OUTBOUND-ACCESS-IPERF-DTAP-TCP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2082,7 +2082,7 @@
 			<testScript></testScript>
 			<testScriptps1>NETWORK-OUTBOUND-ACCESS-IPERF-DTAP-PARALLEL-TCP.ps1</testScriptps1>
 			<SubtestValues>2,4</SubtestValues>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2096,7 +2096,7 @@
 			<testScript></testScript>
 			<testScriptps1>NETWORK-OUTBOUND-ACCESS-IPERF-DTAP-DIFF-DATAGRAM-UDP.ps1</testScriptps1>
 			<SubtestValues>100,300,500,700,900,1100,1300,1420</SubtestValues>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2109,7 +2109,7 @@
 			<testScript></testScript>
 			<testScriptps1>NETWORK-OUTBOUND-ACCESS-IPERF-DTAP-PARALLEL-UDP.ps1</testScriptps1>
 			<SubtestValues>2,4</SubtestValues>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2122,7 +2122,7 @@
 			<testScript></testScript>
 			<testScriptps1>NETWORK-OUTBOUND-ACCESS-IPERF-DTAP-MSS-TCP.ps1</testScriptps1>
 			<SubtestValues>100,300,500,700,900,1100,1300,1420</SubtestValues>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2134,7 +2134,7 @@
 			<testScript></testScript>
 			<testScriptps1>NETWORK-OUTBOUND-ACCESS-SSH-DTAP.ps1</testScriptps1>
 			<SubtestValues></SubtestValues>
-			<files>remote-scripts\azuremodules.py, remote-scripts\Packages\paramiko-1.7.6.tar.gz, remote-scripts\Packages\pycrypto-2.4.1.tar, remote-scripts\sshTest.py, remote-scripts\Packages\installParamiko.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\Packages\paramiko-1.7.6.tar.gz,.\remote-scripts\Packages\pycrypto-2.4.1.tar,.\remote-scripts\sshTest.py,.\remote-scripts\Packages\installParamiko.py</files>
 			<setupType>PublicEndPoint</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2146,7 +2146,7 @@
 			<testName>NETWORK-OUTBOUND-ACCESS-IPERF-VIP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-OUTBOUND-ACCESS-IPERF-VIP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2157,7 +2157,7 @@
 			<testName>NETWORK-IE-UDP-SINGLE-HS</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-IE-UDP-SINGLE-HS.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>IEndpointSingleHS</setupType>
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2170,7 +2170,7 @@
 			<testName>NETWORK-IE-TCP-SINGLE-HS</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-IE-TCP-SINGLE-HS.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>IEndpointSingleHS</setupType>
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2184,7 +2184,7 @@
 			<testScript></testScript>
 			<testScriptps1>NETWORK-IE-TCP-PARALLEL-SINGLE-HS.ps1</testScriptps1>
 			<SubtestValues>2,4</SubtestValues>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>IEndpointSingleHS</setupType>
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2198,7 +2198,7 @@
 			<testScript></testScript>
 			<testScriptps1>NETWORK-IE-UDP-PARALLEL-SINGLE-HS.ps1</testScriptps1>
 			<SubtestValues>2,4</SubtestValues>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>IEndpointSingleHS</setupType>
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2212,7 +2212,7 @@
 			<testScript></testScript>
 			<testScriptps1>NETWORK-IE-PING-DIFF-PACKET-SINGLE-HS.ps1</testScriptps1>
 			<SubtestValues>100,200</SubtestValues>
-			<files>remote-scripts\ping.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\ping.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>IEndpointSingleHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2225,7 +2225,7 @@
 			<testScript></testScript>
 			<testScriptps1>NETWORK-IE-PING-SINGLE-HS.ps1</testScriptps1>
 			<SubtestValues></SubtestValues>
-			<files>remote-scripts\ping.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\ping.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>IEndpointSingleHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2240,7 +2240,7 @@
 			<testScriptps1>NETWORK-IE-PING-NON-CONN-TWO-HS.ps1</testScriptps1>
 			<TestMode>VIP,URL</TestMode>
 			<SubtestValues></SubtestValues>
-			<files>remote-scripts\ping.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\ping.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>IEndpointTwoHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2252,7 +2252,7 @@
 			<testName>NETWORK-OUTBOUND-ACCESS-IPERF-VIP-UDP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-OUTBOUND-ACCESS-IPERF-VIP-UDP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2263,7 +2263,7 @@
 			<testName>NETWORK-INPUT-ENDPOINT-IPERF-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-INPUT-ENDPOINT-IPERF-TCP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2276,7 +2276,7 @@
 			<testName>NETWORK-INPUT-ENDPOINT-IPERF-NODE-STOPPED-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-INPUT-ENDPOINT-IPERF-NODE-STOPPED-TCP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py, remote-scripts\stop-server.py, remote-scripts\stop-client.py </files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py,.\remote-scripts\stop-server.py,.\remote-scripts\stop-client.py </files>
 			<setupType>PublicEndpoint</setupType>
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2289,7 +2289,7 @@
 			<testName>NETWORK-INPUT-ENDPOINT-IPERF-NODE-STOPPED-UDP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-INPUT-ENDPOINT-IPERF-NODE-STOPPED-UDP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py, remote-scripts\stop-server.py, remote-scripts\stop-client.py </files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py,.\remote-scripts\stop-server.py,.\remote-scripts\stop-client.py </files>
 			<setupType>PublicEndpoint</setupType>
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2303,7 +2303,7 @@
 			<testName>NETWORK-INPUT-ENDPOINT-IPERF-UDP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-INPUT-ENDPOINT-IPERF-UDP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2317,7 +2317,7 @@
 			<testScript></testScript>
 			<testScriptps1>NETWORK-INPUT-ENDPOINT-IPERF-PARALLEL-TCP.ps1</testScriptps1>
 			<SubtestValues>2,4</SubtestValues>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2331,7 +2331,7 @@
 			<testScript></testScript>
 			<testScriptps1>NETWORK-INPUT-ENDPOINT-IPERF-PARALLEL-UDP.ps1</testScriptps1>
 			<SubtestValues>2,4</SubtestValues>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2345,7 +2345,7 @@
 			<testScript></testScript>
 			<testScriptps1>NETWORK-INPUT-ENDPOINT-DIFF-DATAGRAM-UDP.ps1</testScriptps1>
 			<SubtestValues>100,300,500,700,900,1100,1300,1420</SubtestValues>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2360,7 +2360,7 @@
 			<testScriptps1>NETWORK-IE-UDP-SINGLE-HS-DIFF-DATAGRAM.ps1</testScriptps1>
 			<TestMode>VIP,URL</TestMode>
 			<SubtestValues>100,300,500,700,900,1100,1300,1420</SubtestValues>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>IEndpointSingleHS</setupType>
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2372,7 +2372,7 @@
 			<testName>NETWORK-LB-NO-PROBE-PORT-IPERF-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-LB-NO-PROBE-PORT-IPERF-TCP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>LoadBalancedNoCP</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2385,7 +2385,7 @@
 			<testName>NETWORK-LB-NO-PROBE-PORT-IPERF-TCP-PARALLEL</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-LB-NO-PROBE-PORT-IPERF-TCP-PARALLEL.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<SubtestValues>4,6,8,10</SubtestValues>
 			<setupType>LoadBalancedNoCP</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
@@ -2399,7 +2399,7 @@
 			<testName>NETWORK-LB-NO-PROBE-PORT-IPERF-NON-CONNETIVITY</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-LB-NO-PROBE-PORT-IPERF-NON-CONNETIVITY.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<SubtestValues></SubtestValues>
 			<setupType>LoadBalancedNoCP</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
@@ -2413,7 +2413,7 @@
 			<testName>NETWORK-LB-NO-PROBE-PORT-NO-PROBE-MESSAGES</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-LB-NO-PROBE-PORT-NO-PROBE-MESSAGES.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<SubtestValues></SubtestValues>
 			<setupType>LoadBalancedNoCP</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
@@ -2427,7 +2427,7 @@
 			<testName>NETWORK-LB-NO-PROBE-PORT-ONE-NODE-DOWN-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-LB-NO-PROBE-PORT-ONE-NODE-DOWN-TCP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py,remote-scripts\start-server-without-stopping.py, remote-scripts\stop-server.py, remote-scripts\stop-client.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py,.\remote-scripts\start-server-without-stopping.py,.\remote-scripts\stop-server.py,.\remote-scripts\stop-client.py</files>
 			<SubtestValues></SubtestValues>
 			<setupType>LoadBalancedNoCP</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
@@ -2442,7 +2442,7 @@
 			<testName>NETWORK-LB-NO-PROBE-PORT-TWO-NODE-DOWN-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-LB-NO-PROBE-PORT-TWO-NODE-DOWN-TCP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py,remote-scripts\stop-server.py, remote-scripts\azuremodules.py, remote-scripts\start-server-without-stopping.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\stop-server.py,.\remote-scripts\azuremodules.py,.\remote-scripts\start-server-without-stopping.py</files>
 			<setupType>LoadBalancedNoCP</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2456,7 +2456,7 @@
 			<testName>NETWORK-LB-CUSTOMPROBE-SAME-PORT-IPERF-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-SAME-PORT-IPERF-TCP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>CustomProbeSamePort</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2469,7 +2469,7 @@
 			<testName>NETWORK-LB-CUSTOMPROBE-SAME-PORT-IPERF-PARALLEL-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-SAME-PORT-IPERF-PARALLEL-TCP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>CustomProbeSamePort</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2483,7 +2483,7 @@
 			<testName>NETWORK-LB-CUSTOMPROBE-OTHER-PORT-IPERF-PARALLEL-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-OTHER-PORT-IPERF-PARALLEL-TCP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py, remote-scripts\start-server-without-stopping.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py,.\remote-scripts\start-server-without-stopping.py</files>
 			<setupType>CustomProbeOtherPort</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2500,7 +2500,7 @@
 			<testName>NETWORK-VERIFY-CUSTOMPROBE-SAME-PORT-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-VERIFY-CUSTOMPROBE-SAME-PORT-TCP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>CustomProbeSamePort</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2513,7 +2513,7 @@
 			<testName>NETWORK-LB-CUSTOMPROBE-SAME-PORT-IPERF-TCP-NONCONNECTIVITY</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-SAME-PORT-IPERF-TCP-NONCONNECTIVITY.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>CustomProbeSamePort</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2526,7 +2526,7 @@
 			<testName>NETWORK-LB-CUSTOMPROBE-OTHER-PORT-IPERF-TCP-NONCONNECTIVITY</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-OTHER-PORT-IPERF-TCP-NONCONNECTIVITY.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py, remote-scripts\start-server-without-stopping.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py,.\remote-scripts\start-server-without-stopping.py</files>
 			<setupType>CustomProbeOtherPort</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2539,7 +2539,7 @@
 			<testName>NETWORK-LB-CUSTOMPROBE-SAME-PORT-TWO-NODES-DOWN-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-SAME-PORT-TWO-NODES-DOWN-TCP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py,remote-scripts\stop-server.py, remote-scripts\azuremodules.py, remote-scripts\start-server-without-stopping.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\stop-server.py,.\remote-scripts\azuremodules.py,.\remote-scripts\start-server-without-stopping.py</files>
 			<setupType>CustomProbeSamePort</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2552,7 +2552,7 @@
 			<testName>NETWORK-LB-CUSTOMPROBE-OTHER-PORT-TWO-NODES-DOWN-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-OTHER-PORT-TWO-NODES-DOWN-TCP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\stop-server.py, remote-scripts\azuremodules.py, remote-scripts\start-server-without-stopping.py, remote-scripts\stop-client.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\stop-server.py,.\remote-scripts\azuremodules.py,.\remote-scripts\start-server-without-stopping.py,.\remote-scripts\stop-client.py</files>
 			<setupType>CustomProbeOtherPort</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2566,7 +2566,7 @@
 			<testName>NETWORK-LB-CUSTOMPROBE-OTHER-PORT-IPERF-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-OTHER-PORT-IPERF-TCP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py,remote-scripts\start-server-without-stopping.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py,.\remote-scripts\start-server-without-stopping.py</files>
 			<setupType>CustomProbeOtherPort</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2579,7 +2579,7 @@
 			<testName>NETWORK-LB-CUSTOMPROBE-SAME-PORT-ONE-NODE-DOWN-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-SAME-PORT-ONE-NODE-DOWN-TCP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py,remote-scripts\start-server-without-stopping.py, remote-scripts\stop-server.py, remote-scripts\stop-client.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py,.\remote-scripts\start-server-without-stopping.py,.\remote-scripts\stop-server.py,.\remote-scripts\stop-client.py</files>
 			<setupType>CustomProbeSamePort</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2591,7 +2591,7 @@
 			<testName>NETWORK-LB-CUSTOMPROBE-OTHER-PORT-ONE-NODE-DOWN-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-OTHER-PORT-ONE-NODE-DOWN-TCP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py,remote-scripts\start-server-without-stopping.py, remote-scripts\stop-server.py, remote-scripts\stop-client.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py,.\remote-scripts\start-server-without-stopping.py,.\remote-scripts\stop-server.py,.\remote-scripts\stop-client.py</files>
 			<setupType>CustomProbeOtherPort</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2604,7 +2604,7 @@
 			<testName>NETWORK-VERIFY-CUSTOMPROBE-OTHER-PORT-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-VERIFY-CUSTOMPROBE-OTHER-PORT-TCP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>CustomProbeOtherPort</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2615,7 +2615,7 @@
 			<testName>INT-ENDPOINT-SINGLE-HS-NON-CONN-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>INT-ENDPOINT-SINGLE-HS-NON-CONN-TCP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>IEndpointSingleHS</setupType>
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2626,7 +2626,7 @@
 			<testName>INP-ENDPOINT-NON-CONN-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>INP-ENDPOINT-NON-CONN-TCP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2638,7 +2638,7 @@
 			<testName>INP-ENDPOINT-NON-CONN-UDP</testName>
 			<testScript></testScript>
 			<testScriptps1>INP-ENDPOINT-NON-CONN-UDP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>PublicEndpoint</setupType>
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2650,7 +2650,7 @@
 			<testName>INT-ENDPOINT-NON-CONN-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>INT-ENDPOINT-NON-CONN-TCP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>IEndpointTwoHS</setupType>
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2662,7 +2662,7 @@
 			<testName>INT-ENDPOINT-NON-CONN-UDP</testName>
 			<testScript></testScript>
 			<testScriptps1>INT-ENDPOINT-NON-CONN-UDP.ps1</testScriptps1>
-			<files>remote-scripts\start-server.py, remote-scripts\start-client.py, remote-scripts\check-server.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>IEndpointTwoHS</setupType>
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2676,7 +2676,7 @@
 			<testScriptps1>NETWORK-IDNS-SINGLEHS-DEFAULT-HOSTNAME.ps1</testScriptps1>
 			<TestMode></TestMode>
 			<SubtestValues></SubtestValues>
-			<files>remote-scripts\dig.py, remote-scripts\azuremodules.py, remote-scripts\nslookup.py</files>
+			<files>.\remote-scripts\dig.py,.\remote-scripts\azuremodules.py,.\remote-scripts\nslookup.py</files>
 			<setupType>IEndpointSingleHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2690,7 +2690,7 @@
 			<testScriptps1>NETWORK-IDNS-SINGLEHS-CHANGED-HOSTNAME.ps1</testScriptps1>
 			<TestMode>VerifyDefaultHostname,VerifyChangedHostname,VerifyDefaultHostnameNotAccessible,ResetHostnameToDefaultAndVerify</TestMode>
 			<SubtestValues></SubtestValues>
-			<files>remote-scripts\dig.py, remote-scripts\azuremodules.py, remote-scripts\nslookup.py</files>
+			<files>.\remote-scripts\dig.py,.\remote-scripts\azuremodules.py,.\remote-scripts\nslookup.py</files>
 			<setupType>IEndpointSingleHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2702,7 +2702,7 @@
 			<testScriptps1>NETWORK-IDNS-TWOHS-RESOLVE-BY-FQDN.ps1</testScriptps1>
 			<TestMode></TestMode>
 			<SubtestValues></SubtestValues>
-			<files>remote-scripts\dig.py, remote-scripts\azuremodules.py, remote-scripts\nslookup.py</files>
+			<files>.\remote-scripts\dig.py,.\remote-scripts\azuremodules.py,.\remote-scripts\nslookup.py</files>
 			<setupType>IEndpointTwoHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2715,7 +2715,7 @@
 			<testName>VNET-PING-VNET-TO-LOCAL-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-PING-VNET-TO-LOCAL-ACCESS.ps1</testScriptps1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\ConfigureDnsServer.py,remote-scripts\CleanupDnsServer.py,remote-scripts\ConfigureResolvConf.py,remote-scripts\RunSSHCmd.py,remote-scripts\RemoteCopy.py,remote-scripts\ping.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\ConfigureDnsServer.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\ping.py</files>
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2727,7 +2727,7 @@
 			<testName>VNET-PING-LOCAL-TO-VNET-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-PING-LOCAL-TO-VNET-ACCESS.ps1</testScriptps1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\ConfigureDnsServer.py,remote-scripts\CleanupDnsServer.py,remote-scripts\ConfigureResolvConf.py,remote-scripts\RunSSHCmd.py,remote-scripts\RemoteCopy.py,remote-scripts\ping.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\ConfigureDnsServer.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\ping.py</files>
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2739,7 +2739,7 @@
 			<testName>VNET-PING-INTRAVNET-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-PING-INTRAVNET-ACCESS.ps1</testScriptps1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\ConfigureDnsServer.py,remote-scripts\CleanupDnsServer.py,remote-scripts\ConfigureResolvConf.py,remote-scripts\RunSSHCmd.py,remote-scripts\RemoteCopy.py,remote-scripts\ping.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\ConfigureDnsServer.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\ping.py</files>
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2751,7 +2751,7 @@
 			<testName>VNET-PING-OUTBOUND-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-PING-OUTBOUND-ACCESS.ps1</testScriptps1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\ConfigureDnsServer.py,remote-scripts\CleanupDnsServer.py,remote-scripts\ConfigureResolvConf.py,remote-scripts\RunSSHCmd.py,remote-scripts\RemoteCopy.py,remote-scripts\ping.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\ConfigureDnsServer.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\ping.py</files>
 			<setupType>VNETVM-EXT</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2811,7 +2811,7 @@
 			<testName>VNET-VERIFY-REMOTE-SSH-SCP-INTRAVNET-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-VERIFY-REMOTE-SSH-SCP-INTRAVNET-ACCESS.ps1</testScriptps1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\CleanupDnsServer.py,remote-scripts\ConfigureResolvConf.py,remote-scripts\RunSSHCmd.py,remote-scripts\RemoteCopy.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py</files>
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2823,7 +2823,7 @@
 			<testName>VNET-VERIFY-REMOTE-SSH-SCP-INTERVNET-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-VERIFY-REMOTE-SSH-SCP-INTERVNET-ACCESS.ps1</testScriptps1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\CleanupDnsServer.py,remote-scripts\ConfigureResolvConf.py,remote-scripts\RunSSHCmd.py,remote-scripts\RemoteCopy.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py</files>
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2835,7 +2835,7 @@
 			<testName>VNET-VERIFY-REMOTE-SSH-SCP-OUTBOUND-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-VERIFY-REMOTE-SSH-SCP-OUTBOUND-ACCESS.ps1</testScriptps1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\CleanupDnsServer.py,remote-scripts\ConfigureResolvConf.py,remote-scripts\RunSSHCmd.py,remote-scripts\RemoteCopy.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py</files>
 			<setupType>VNETVM-EXT</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2848,7 +2848,7 @@
 			<testName>VNET-IPERF-UDP-INTRAVNET-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-IPERF-UDP-INTRAVNET-ACCESS.ps1</testScriptps1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\CleanupDnsServer.py,remote-scripts\ConfigureResolvConf.py,remote-scripts\RunSSHCmd.py,remote-scripts\RemoteCopy.py,remote-scripts\start-server.py,remote-scripts\start-client.py,remote-scripts\check-server.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py</files>
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2860,7 +2860,7 @@
 			<testName>VNET-IPERF-UDP-VNET-TO-LOCAL-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-IPERF-UDP-VNET-TO-LOCAL-ACCESS.ps1</testScriptps1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\CleanupDnsServer.py,remote-scripts\ConfigureResolvConf.py,remote-scripts\RunSSHCmd.py,remote-scripts\RemoteCopy.py,remote-scripts\start-server.py,remote-scripts\start-client.py,remote-scripts\check-server.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py</files>
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2872,7 +2872,7 @@
 			<testName>VNET-IPERF-UDP-LOCAL-TO-VNET-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-IPERF-UDP-LOCAL-TO-VNET-ACCESS.ps1</testScriptps1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\CleanupDnsServer.py,remote-scripts\ConfigureResolvConf.py,remote-scripts\RunSSHCmd.py,remote-scripts\RemoteCopy.py,remote-scripts\start-server.py,remote-scripts\start-client.py,remote-scripts\check-server.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py</files>
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2886,7 +2886,7 @@
 			<testName>VNET-IPERF-UDP-OUTBOUND-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-IPERF-UDP-OUTBOUND-ACCESS.ps1</testScriptps1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\CleanupDnsServer.py,remote-scripts\ConfigureResolvConf.py,remote-scripts\RunSSHCmd.py,remote-scripts\RemoteCopy.py,remote-scripts\start-server.py,remote-scripts\start-client.py,remote-scripts\check-server.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py</files>
 			<setupType>VNETVM-EXT</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2948,7 +2948,7 @@
 			<testName>VNET-VERIFY-REMOTE-SSH-SCP-LOCAL-TO-VNET-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-VERIFY-REMOTE-SSH-SCP-LOCAL-TO-VNET-ACCESS.ps1</testScriptps1>
-			<files>remote-scripts\RunSSHCmd.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\RunSSHCmd.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2962,7 +2962,7 @@
 			<testName>E2E-WORDPRESS-SINGLE-VM-SETUP</testName>
 			<testScript>E2E-WORDPRESS-SETUP.py</testScript>
 			<testScriptps1>E2E-WORDPRESS-SETUP.ps1</testScriptps1>
-			<files>remote-scripts\Packages\wordpress.zip, remote-scripts\Packages\Wordpress.DDL, remote-scripts\E2E-WORDPRESS-SETUP.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\Packages\wordpress.zip,.\remote-scripts\Packages\Wordpress.DDL,.\remote-scripts\E2E-WORDPRESS-SETUP.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>E2ESingleVM</setupType>
 			<TestType></TestType>
 			<E2ESetupCmdLineArgument>singleVM_setup</E2ESetupCmdLineArgument>
@@ -2974,7 +2974,7 @@
 			<testName>E2E-DAYTRADER-SINGLE-VM-SETUP</testName>
 			<testScript>E2E-DAYTRADER-SETUP.py,E2E-SIEGE-TEST.py</testScript>
 			<testScriptPs1>E2E-DAYTRADER-SETUP.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\E2E-DAYTRADER-SETUP.py,remote-scripts\Packages\IBMWebSphere\daytrader.tar.gz,remote-scripts\Packages\IBMWebSphere\wasce_setup-2.1.1.6-unix.bin,remote-scripts\Packages\python-pexpect-3.1-1.1.noarch.rpm</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\E2E-DAYTRADER-SETUP.py,.\remote-scripts\Packages\IBMWebSphere\daytrader.tar.gz,.\remote-scripts\Packages\IBMWebSphere\wasce_setup-2.1.1.6-unix.bin,.\remote-scripts\Packages\python-pexpect-3.1-1.1.noarch.rpm</files>
 			<setupType>E2ESingleVM</setupType>
 			<newsetupType>PublicEndpoint</newsetupType>
 			<TestType></TestType>
@@ -2991,7 +2991,7 @@
 			<testName>E2E-WORDPRESS-FOUR-VM-SETUP</testName>
 			<testScript>E2E-WORDPRESS-SETUP.py</testScript>
 			<testScriptps1>E2E-WORDPRESS-SETUP.ps1</testScriptps1>
-			<files>remote-scripts\Packages\wordpress.zip, remote-scripts\Packages\Wordpress.DDL, remote-scripts\E2E-WORDPRESS-SETUP.py, remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\Packages\wordpress.zip,.\remote-scripts\Packages\Wordpress.DDL,.\remote-scripts\E2E-WORDPRESS-SETUP.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>E2EFourVM</setupType>
 			<TestType></TestType>
 			<E2ESetupCmdLineArgument>loadbalancer_setup</E2ESetupCmdLineArgument>
@@ -3003,7 +3003,7 @@
 			<testName>E2E-DAYTRADER-FOUR-VM-SETUP</testName>
 			<testScript>E2E-DAYTRADER-SETUP.py,E2E-SIEGE-TEST.py</testScript>
 			<testScriptPs1>E2E-DAYTRADER-SETUP.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\E2E-DAYTRADER-SETUP.py,remote-scripts\Packages\IBMWebSphere\daytrader.tar.gz,remote-scripts\Packages\IBMWebSphere\wasce_setup-2.1.1.6-unix.bin,remote-scripts\Packages\python-pexpect-3.1-1.1.noarch.rpm</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\E2E-DAYTRADER-SETUP.py,.\remote-scripts\Packages\IBMWebSphere\daytrader.tar.gz,.\remote-scripts\Packages\IBMWebSphere\wasce_setup-2.1.1.6-unix.bin,.\remote-scripts\Packages\python-pexpect-3.1-1.1.noarch.rpm</files>
 			<setupType>E2EFourVM</setupType>
 			<newsetupType>PublicEndpoint</newsetupType>
 			<TestType></TestType>
@@ -3021,7 +3021,7 @@
 			<testName>E2E-RAID0-DISK-TEST</testName>
 			<testScript>CreateDiskGroup.py</testScript>
 			<testScriptps1>E2E-DISK-RAID0-LVM-TEST.ps1</testScriptps1>
-			<files>remote-scripts\temp.txt,remote-scripts\azuremodules.py,remote-scripts\DoIOTest.py,remote-scripts\CreateDiskGroup.py</files>
+			<files>.\remote-scripts\temp.txt,.\remote-scripts\azuremodules.py,.\remote-scripts\DoIOTest.py,.\remote-scripts\CreateDiskGroup.py</files>
 			<setupType></setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3036,7 +3036,7 @@
 			<testName>E2E-LVM-DISK-TEST</testName>
 			<testScript>CreateDiskGroup.py</testScript>
 			<testScriptps1>E2E-DISK-RAID0-LVM-TEST.ps1</testScriptps1>
-			<files>remote-scripts\temp.txt, remote-scripts\azuremodules.py,remote-scripts\DoIOTest.py,remote-scripts\CreateDiskGroup.py</files>
+			<files>.\remote-scripts\temp.txt,.\remote-scripts\azuremodules.py,.\remote-scripts\DoIOTest.py,.\remote-scripts\CreateDiskGroup.py</files>
 			<setupType></setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3055,7 +3055,7 @@
 			<testScriptps1>NETWORK-PERF-CLOUDHARMONY-TEST.ps1</testScriptps1>
 			<SubtestValues></SubtestValues>
 			<files1>remote-scripts\network-perf-cloudharmony-server.sh</files1>
-			<files>remote-scripts\network-perf-cloudharmony-client.sh,remote-scripts\perf-cloudharmony-options.txt</files>
+			<files>.\remote-scripts\network-perf-cloudharmony-client.sh,.\remote-scripts\perf-cloudharmony-options.txt</files>
 			<setupType>IEndpointSingleHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3068,7 +3068,7 @@
 			<testScriptps1>NETWORK-PERF-THROUGHPUT-6K-CONNETCTIONS-TEST.ps1</testScriptps1>
 			<SubtestValues></SubtestValues>
 			<files1>remote-scripts\network-6k-connections-server.sh</files1>
-			<files>remote-scripts\network-6k-connections-client.sh,remote-scripts\perf-statistics.sh</files>
+			<files>.\remote-scripts\network-6k-connections-client.sh,.\remote-scripts\perf-statistics.sh</files>
 			<setupType>IEndpointSingleHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3080,7 +3080,7 @@
 			<testName>ICA-FIO-TEST</testName>
 			<testScript></testScript>
 			<testScriptps1>ICA-FIO-TEST.ps1</testScriptps1>
-			<files>remote-scripts\start-fio.py,remote-scripts\azuremodules.py,SetupScripts\packageInstall.sh</files>
+			<files>.\remote-scripts\start-fio.py,.\remote-scripts\azuremodules.py,SetupScripts\packageInstall.sh</files>
 			<setupType>ExtraLargeVM</setupType>
 			<!-- ioSizes in kiloBytes only 1,2,4,8,16,32,... ,1024. Don't add "k" after integer-->
 			<ioSizes>4,8,16,32,64,128,256</ioSizes>
@@ -3101,7 +3101,7 @@
 			<testName>XSMB-XFS-TEST</testName>
 			<testScript>XSMB-XFS-TEST.py</testScript>
 			<testScriptps1>XSMB-XFS-TEST.ps1</testScriptps1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\XSMB-XFS-TEST.py,remote-scripts\GetXsmbXfsTestStatus.sh,remote-scripts\Packages\xfstests.tar,remote-scripts\Packages\xfsprogs.tar</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\XSMB-XFS-TEST.py,.\remote-scripts\GetXsmbXfsTestStatus.sh,.\remote-scripts\Packages\xfstests.tar,.\remote-scripts\Packages\xfsprogs.tar</files>
 			<setupType>xSMBVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3118,7 +3118,7 @@
 			<testName>E2E-HOT-ADD-REMOVE-NEW-DATA-DISK-SERIAL</testName>
 			<testScript></testScript>
 			<testScriptps1>E2E-HOT-ADD-REMOVE-NEW-DATA-DISK-SERIAL.ps1</testScriptps1>
-			<files>remote-scripts\temp.txt, remote-scripts\azuremodules.py, remote-scripts\DoIOTest.py</files>
+			<files>.\remote-scripts\temp.txt,.\remote-scripts\azuremodules.py,.\remote-scripts\DoIOTest.py</files>
 			<setupType></setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3131,7 +3131,7 @@
 			<testName>E2E-HOT-ADD-REMOVE-NEW-DATA-DISK-PARALLEL</testName>
 			<testScript></testScript>
 			<testScriptps1>E2E-HOT-ADD-REMOVE-NEW-DATA-DISK-PARALLEL.ps1</testScriptps1>
-			<files>remote-scripts\temp.txt, remote-scripts\azuremodules.py, remote-scripts\DoIOTest.py</files>
+			<files>.\remote-scripts\temp.txt,.\remote-scripts\azuremodules.py,.\remote-scripts\DoIOTest.py</files>
 			<setupType></setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3144,7 +3144,7 @@
 			<testName>E2E-TIME-SYNC</testName>
 			<testScript></testScript>
 			<testScriptps1>E2E-TIME-SYNC.ps1</testScriptps1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\ConfigureNTP.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\ConfigureNTP.py</files>
 			<setupType>SmallVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3157,7 +3157,7 @@
 			<testName>E2E-TIME-SYNC-KERNBENCH</testName>
 			<testScript></testScript>
 			<testScriptps1>E2E-TIME-SYNC-KERNBENCH.ps1</testScriptps1>
-			<files>remote-scripts\ConfigureNTP.py,remote-scripts\azuremodules.py,remote-scripts\SetupKernbench.sh,remote-scripts\StartKernbench.sh,remote-scripts\InvokeKernbench.sh</files>
+			<files>.\remote-scripts\ConfigureNTP.py,.\remote-scripts\azuremodules.py,.\remote-scripts\SetupKernbench.sh,.\remote-scripts\StartKernbench.sh,.\remote-scripts\InvokeKernbench.sh</files>
 			<setupType>LargeVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3170,7 +3170,7 @@
 			<testName>E2E-HOT-ADD-REMOVE-EXISTING-DATA-DISK-SERIAL</testName>
 			<testScript></testScript>
 			<testScriptps1>E2E-HOT-ADD-REMOVE-EXISTING-DATA-DISK-SERIAL.ps1</testScriptps1>
-			<files>remote-scripts\temp.txt, remote-scripts\azuremodules.py, remote-scripts\DoIOTest.py</files>
+			<files>.\remote-scripts\temp.txt,.\remote-scripts\azuremodules.py,.\remote-scripts\DoIOTest.py</files>
 			<setupType></setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3201,7 +3201,7 @@
 			<testName>E2E-HOT-ADD-REMOVE-EXISTING-DATA-DISK-PARALLEL</testName>
 			<testScript></testScript>
 			<testScriptps1>E2E-HOT-ADD-REMOVE-EXISTING-DATA-DISK-PARALLEL.ps1</testScriptps1>
-			<files>remote-scripts\temp.txt, remote-scripts\azuremodules.py, remote-scripts\DoIOTest.py</files>
+			<files>.\remote-scripts\temp.txt,.\remote-scripts\azuremodules.py,.\remote-scripts\DoIOTest.py</files>
 			<setupType></setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3232,7 +3232,7 @@
 			<testName>E2E-CHANGE-USER-PASSWORD</testName>
 			<testScript>ChangeUserPassword.sh</testScript>
 			<testScriptps1>E2E-CHANGE-USER-PASSWORD</testScriptps1>
-			<files>remote-scripts\ChangeUserPassword.sh</files>
+			<files>.\remote-scripts\ChangeUserPassword.sh</files>
 			<setupType>SmallVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3244,7 +3244,7 @@
 			<testName>E2E-ADD-NEW-USER-CHANGE-PASSWORD</testName>
 			<testScript></testScript>
 			<testScriptps1>E2E-ADD-NEW-USER-CHANGE-PASSWORD</testScriptps1>
-			<files>remote-scripts\AddNewUser.sh,remote-scripts\ChangeUserPassword.sh</files>
+			<files>.\remote-scripts\AddNewUser.sh,.\remote-scripts\ChangeUserPassword.sh</files>
 			<setupType>SmallVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3256,7 +3256,7 @@
 			<testName>E2E-ADD-USER-DELETE-USER</testName>
 			<testScript></testScript>
 			<testScriptps1>E2E-ADD-USER-DELETE-USER</testScriptps1>
-			<files>remote-scripts\AddNewUser.sh,remote-scripts\DeleteUser.sh</files>
+			<files>.\remote-scripts\AddNewUser.sh,.\remote-scripts\DeleteUser.sh</files>
 			<setupType>SmallVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3268,7 +3268,7 @@
 			<testName>E2E-VM-CAPTURE-IMAGE-WITH-WAAGENT-DEPROVISION+USER</testName>
 			<testScript></testScript>
 			<testScriptps1>E2E-VM-CAPTURE-IMAGE-WITH-WAAGENT-DEPROVISION+USER.ps1</testScriptps1>
-			<files>remote-scripts\temp.txt</files>
+			<files>.\remote-scripts\temp.txt</files>
 			<setupType>SmallVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3281,7 +3281,7 @@
 			<testName>E2E-VM-CAPTURE-IMAGE-WITH-WAAGENT-DEPROVISION</testName>
 			<testScript></testScript>
 			<testScriptps1>E2E-VM-CAPTURE-IMAGE-WITH-WAAGENT-DEPROVISION.ps1</testScriptps1>
-			<files>remote-scripts\temp.txt</files>
+			<files>.\remote-scripts\temp.txt</files>
 			<setupType>SmallVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3294,7 +3294,7 @@
 			<testName>E2E-WA-UNINST</testName>
 			<testScript>E2E-WA-UNINST.py</testScript>
 			<testScriptPs1>E2E-WA-UNINST.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\E2E-WA-UNINST.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\E2E-WA-UNINST.py</files>
 			<setupType>SmallVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3307,7 +3307,7 @@
 			<testName>INJECTION-VERIFY-ENABLE</testName>
 			<testScript>INJECTION-VERIFY-ENABLE.py</testScript>
 			<testScriptPs1>INJECTION-VERIFY-ENABLE.ps1</testScriptPs1>
-			<files>remote-scripts\temp.txt</files>
+			<files>.\remote-scripts\temp.txt</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3318,7 +3318,7 @@
 			<testName>INJECTION-VERIFY-DISABLE</testName>
 			<testScript>INJECTION-VERIFY-DISABLE.py</testScript>
 			<testScriptPs1>INJECTION-VERIFY-DISABLE.ps1</testScriptPs1>
-			<files>remote-scripts\temp.txt</files>
+			<files>.\remote-scripts\temp.txt</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3328,7 +3328,7 @@
 			<testName>INJECTION-VERIFY-UNINSTALL</testName>
 			<testScript>INJECTION-VERIFY-UNINSTALL.py</testScript>
 			<testScriptPs1>INJECTION-VERIFY-UNINSTALL.ps1</testScriptPs1>
-			<files>remote-scripts\temp.txt</files>
+			<files>.\remote-scripts\temp.txt</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3338,7 +3338,7 @@
 			<testName>INJECTION-VERIFY-UPDATE</testName>
 			<testScript>INJECTION-VERIFY-UPDATE.py</testScript>
 			<testScriptPs1>INJECTION-VERIFY-UPDATE.ps1</testScriptPs1>
-			<files>remote-scripts\temp.txt</files>
+			<files>.\remote-scripts\temp.txt</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3349,7 +3349,7 @@
 			<testName>ICA-DEPLOYMENT-ALL-SIZES-LOOP-TEST</testName>
 			<testScript></testScript>
 			<testScriptPs1>ICA-DEPLOYMENT-ALL-SIZES-LOOP-TEST.ps1</testScriptPs1>
-			<files>remote-scripts\temp.txt</files>
+			<files>.\remote-scripts\temp.txt</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3364,7 +3364,7 @@
 			<testName>ICA-LINPACK-TEST</testName>
 			<testScript></testScript>
 			<testScriptPs1>ICA-LINPACK-TEST.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\start-linpack-test-in-background.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\start-linpack-test-in-background.py</files>
 			<setupType>A8</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3376,7 +3376,7 @@
 			<testName>ICA-STREAM-TEST</testName>
 			<testScript>ICA-STREAM-TEST.py</testScript>
 			<testScriptPs1>ICA-STREAM-TEST.ps1</testScriptPs1>
-			<files>remote-scripts\azuremodules.py,remote-scripts\ICA-STREAM-TEST.py,remote-scripts\stream.c</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\ICA-STREAM-TEST.py,.\remote-scripts\stream.c</files>
 			<setupType>A8</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3388,7 +3388,7 @@
 			<testName>ICA-BUILD-LINUX-KERNEL</testName>
 			<testScript>Perf_BuildKernel.sh</testScript>
 			<testScriptPs1>ICA-BUILD-LINUX-KERNEL.ps1</testScriptPs1>
-			<files>remote-scripts\Perf_BuildKernel.sh,remote-scripts\Packages\linux-3.18.1.tar.xz,SetupScripts\DetectLinuxDistro.sh</files>
+			<files>.\remote-scripts\Perf_BuildKernel.sh,.\remote-scripts\Packages\linux-3.18.1.tar.xz,SetupScripts\DetectLinuxDistro.sh</files>
 			<setupType>MediumVM</setupType>
 			<testParams>
 				<param>SOURCE_TYPE=ONLINE</param>
@@ -3409,7 +3409,7 @@
 			<files></files>
 			<LISExtractCommand>tar -xzf lis4.0.10-beta1.tar.gz^cp -ar lis4.0.10/* .</LISExtractCommand>
 			<setupType>DS2DISK2</setupType>
-			<files>remote-scripts\ManagePartitionOnDisk.sh,remote-scripts\ManageRaid.sh,remote-scripts\sys-custom.sh,remote-scripts\packageInstaller.sh,LinuxPackages\epel-release-7-5.noarch.rpm</files>
+			<files>.\remote-scripts\ManagePartitionOnDisk.sh,.\remote-scripts\ManageRaid.sh,.\remote-scripts\sys-custom.sh,.\remote-scripts\packageInstaller.sh,LinuxPackages\epel-release-7-5.noarch.rpm</files>
 			<!-- <SubtestValues>TestID1,TestID2,TestID3,TestID4,TestID5,TestID6,TestID7,TestID8,TestID9,TestID10,TestID12</SubtestValues> -->
 			<SubtestValues>TestID1,TestID2,TestID3,TestID4,TestID5,TestID6,TestID7,TestID8,TestID9,TestID10,TestID12</SubtestValues>
 			<sysbenchConfig>
