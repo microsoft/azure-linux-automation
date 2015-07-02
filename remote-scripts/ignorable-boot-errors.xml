@@ -72,4 +72,13 @@
 		</errors>
 		<warnings/>
 	</distro>
+	<distro name="redhat">
+		<failures>
+			<keywords>Fast TSC calibration</keywords>
+			<keywords>failed to get extended button data</keywords>
+			<keywords>ipmi_si: Interface detection failed</keywords>
+		</failures>
+		<errors/>
+		<warnings/>
+	</distro>
 </messages>
