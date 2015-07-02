@@ -3174,14 +3174,24 @@ Function IsIperfClientStarted($node, [string]$beginningText, [string]$endText)
 	Remove-Item "$($node.Logdir)\Summary.log" -Force
 	if ($beginningText -and $endText)
 	{
-	$connectStingCount = GetStringMatchCount -logFile "$($node.LogDir)\iperf-client.txt" -beg $beginningText -end $endText -str "connected with"
-	if ($connectStingCount -gt 0)
+		$connectStingCount = GetStringMatchCount -logFile "$($node.LogDir)\iperf-client.txt" -beg $beginningText -end $endText -str "connected with"
+		if ($connectStingCount -gt 0)
 		{
-		$retVal = $true
+			$connFailureCount = GetStringMatchCount -logFile "$($node.LogDir)\iperf-client.txt" -beg $beginningText -end $endText -str "Connection refused"
+			$connFailureCount += GetStringMatchCount -logFile "$($node.LogDir)\iperf-client.txt" -beg $beginningText -end $endText -str "connect failed"
+			Write-Host "connection failures found:" $connFailureCount
+			if($connFailureCount -gt 0)
+			{
+				$retVal = $false
+			}
+			else
+			{
+				$retVal = $true
+			}
 		}
-	 else
+		else
 		{
-		$retVal = $false
+			$retVal = $false
 		}
 	}
 	else
