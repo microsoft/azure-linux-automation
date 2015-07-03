@@ -94,7 +94,7 @@ def verify_network_manager(distro):
 	else:
 		# NetworkManager package no longer conflicts with the wwagent on CentOS 7.0+ and Oracle Linux 7.0+
 		if distro == "CENTOS" or distro == "ORACLELINUX" or distro == "REDHAT":
-			version_release = Run("cat /etc/system-release | grep -o [0-9].[0-9] | head -1 | tr -d '\n'")
+			version_release = Run("cat /etc/system-release | grep -Eo '[0-9].?[0-9]?' | head -1 | tr -d '\n'")
 			if float(version_release) < 7.0:
 				RunLog.error("Network Manager is installed")
 				print(distro+"_TEST_NETWORK_MANAGER_INSTALLED")
@@ -251,7 +251,7 @@ if distro == "CENTOS":
 	#Verify etc/yum.conf
 	y_out = Run("cat /etc/yum.conf")
 	# check http_caching=packages in yum.conf for CentOS 6.x
-	version_release = Run("cat /etc/system-release | grep -o [0-9].[0-9] | head -1 | tr -d '\n'")
+	version_release = Run("cat /etc/system-release | grep -Eo '[0-9].?[0-9]?' | head -1 | tr -d '\n'")
 	if float(version_release) < 7.0:
 		if "http_caching=packages" in y_out:
 			RunLog.info("http_caching=packages present in /etc/yum.conf")
