@@ -2557,7 +2557,7 @@
 			<testName>NETWORK-LB-NO-PROBE-PORT-TWO-NODE-DOWN-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-LB-NO-PROBE-PORT-TWO-NODE-DOWN-TCP.ps1</testScriptps1>
-			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\stop-server.py,.\remote-scripts\azuremodules.py,.\remote-scripts\start-server-without-stopping.py,remote-scripts\stop-client.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\stop-server.py,.\remote-scripts\azuremodules.py,.\remote-scripts\start-server-without-stopping.py,.\remote-scripts\stop-client.py</files>
 			<setupType>LoadBalancedNoCP</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -2654,7 +2654,7 @@
 			<testName>NETWORK-LB-CUSTOMPROBE-SAME-PORT-TWO-NODES-DOWN-TCP</testName>
 			<testScript></testScript>
 			<testScriptps1>NETWORK-LB-CUSTOMPROBE-SAME-PORT-TWO-NODES-DOWN-TCP.ps1</testScriptps1>
-			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\stop-server.py,.\remote-scripts\azuremodules.py,.\remote-scripts\start-server-without-stopping.py,remote-scripts\stop-client.py</files>
+			<files>.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py,.\remote-scripts\stop-server.py,.\remote-scripts\azuremodules.py,.\remote-scripts\start-server-without-stopping.py,.\remote-scripts\stop-client.py</files>
 			<setupType>CustomProbeSamePort</setupType>
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
@@ -3481,7 +3481,7 @@
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<!-- <SubtestValues>ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM</SubtestValues> -->
-			<SubtestValues>ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM,A5,A6,A7,A8,A9,A10,A11,D1,D2,D3,D4,D11,D12,D13,D14,G1,G2,G3,G4,G5</SubtestValues>
+			<SubtestValues>ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM,A5,A6,A7,D1,D2,D3,D4,D11,D12,D13,D14</SubtestValues>
 			<DeploymentCount>250</DeploymentCount>
 			<TestID>Reboot_01</TestID>
 		</test>
