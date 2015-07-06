@@ -3245,7 +3245,7 @@
 			<testName>E2E-HOT-ADD-REMOVE-NEW-DATA-DISK-SERIAL</testName>
 			<testScript></testScript>
 			<testScriptps1>E2E-HOT-ADD-REMOVE-NEW-DATA-DISK-SERIAL.ps1</testScriptps1>
-			<files>.\remote-scripts\temp.txt,.\remote-scripts\azuremodules.py,.\remote-scripts\DoIOTest.py</files>
+			<files>.\remote-scripts\ManagePartitionOnDisk.sh</files>
 			<setupType></setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3258,7 +3258,7 @@
 			<testName>E2E-HOT-ADD-REMOVE-NEW-DATA-DISK-PARALLEL</testName>
 			<testScript></testScript>
 			<testScriptps1>E2E-HOT-ADD-REMOVE-NEW-DATA-DISK-PARALLEL.ps1</testScriptps1>
-			<files>.\remote-scripts\temp.txt,.\remote-scripts\azuremodules.py,.\remote-scripts\DoIOTest.py</files>
+			<files>.\remote-scripts\ManagePartitionOnDisk.sh</files>
 			<setupType></setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3297,7 +3297,7 @@
 			<testName>E2E-HOT-ADD-REMOVE-EXISTING-DATA-DISK-SERIAL</testName>
 			<testScript></testScript>
 			<testScriptps1>E2E-HOT-ADD-REMOVE-EXISTING-DATA-DISK-SERIAL.ps1</testScriptps1>
-			<files>.\remote-scripts\temp.txt,.\remote-scripts\azuremodules.py,.\remote-scripts\DoIOTest.py</files>
+			<files>.\remote-scripts\ManagePartitionOnDisk.sh</files>
 			<setupType></setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3328,7 +3328,7 @@
 			<testName>E2E-HOT-ADD-REMOVE-EXISTING-DATA-DISK-PARALLEL</testName>
 			<testScript></testScript>
 			<testScriptps1>E2E-HOT-ADD-REMOVE-EXISTING-DATA-DISK-PARALLEL.ps1</testScriptps1>
-			<files>.\remote-scripts\temp.txt,.\remote-scripts\azuremodules.py,.\remote-scripts\DoIOTest.py</files>
+			<files>.\remote-scripts\ManagePartitionOnDisk.sh</files>
 			<setupType></setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>

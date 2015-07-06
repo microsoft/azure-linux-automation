@@ -9,6 +9,11 @@ $SmallVMLUNs = 2
 $MediumVMLUNs = 4
 $LargeVMLUNs = 8
 $ExtraLargeVMLUNs= 16
+$DS1LUNs = 2
+$DS2LUNs = 4
+$DS3LUNs = 8
+$DS4LUNs= 16
+
 $diskResult = New-Object -TypeName System.Object
 foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
 {
@@ -36,7 +41,7 @@ foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
 
         mkdir "$LogDir\$newSetupType"
         RemoteCopy -uploadTo $testVMObject.ip -port $testVMObject.sshPort -files $currentTestData.files -username $testVMObject.user -password $testVMObject.password -upload
-
+        $out = RunLinuxCmd -username $testVMObject.user -password $testVMObject.password  -ip $testVMObject.ip -port $testVMObject.sshPort -command "chmod +x *.sh"
         switch ($hs1vm1.InstanceSize)
         {
             "ExtraSmall"
@@ -58,6 +63,22 @@ foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
             "ExtraLarge"
             {
                 $testLUNs = $ExtraLargeVMLUNs
+            }
+            "Standard_DS1"
+            {
+                $testLUNs = $DS1LUNs
+            }
+            "Standard_DS2"
+            {
+                $testLUNs = $DS2LUNs
+            }
+            "Standard_DS3"
+            {
+                $testLUNs = $DS3LUNs
+            }
+            "Standard_DS4"
+            {
+                $testLUNs = $DS4LUNs
             }
         }
         

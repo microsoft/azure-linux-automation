@@ -30,12 +30,13 @@ if ($isDeployed)
         try
         {
     		$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "./$($currentTestData.testScript) -user $user -newPassword $newPassword -oldPassword $password"
-            if ($out -imatch "updated successfully")
+            if ($out -imatch "PASSWORD_CHANGED_SUCCESSFULLY")
             {
                 LogMsg "Password Changed for user : $user"
                 try
                 {
                     $out2 = RunLinuxCmd -username $user -password $newPassword -ip $hs1VIP -port $hs1vm1sshport -command "echo Hello"
+                    $out = RunLinuxCmd -username $user -password $newPassword -ip $hs1VIP -port $hs1vm1sshport -command "./$($currentTestData.testScript) -user $user -newPassword $password -oldPassword $newPassword"
                     if ($out2 -imatch "Hello")
                     {
                         LogMsg "Password Change Verified."
