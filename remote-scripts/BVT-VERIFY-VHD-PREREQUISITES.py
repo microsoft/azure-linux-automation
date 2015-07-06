@@ -60,7 +60,7 @@ def verify_grub(distro):
 	if "console=ttyS0" in grub_out and "rootdelay=300" in grub_out and "libata.atapi_enabled=0" not in grub_out and "reserve=0x1f0,0x8" not in grub_out:
 		if distro == "CENTOS" or distro == "ORACLELINUX" or distro == "REDHAT":
 			# check numa=off in grub for CentOS 6.x and Oracle Linux 6.x
-			version_release = Run("cat /etc/system-release | grep -o [0-9].[0-9] | head -1 | tr -d '\n'")
+			version_release = Run("cat /etc/system-release | grep -Eo '[0-9].?[0-9]?' | head -1 | tr -d '\n'")
 			if float(version_release) < 7.0:
 				if "numa=off" in grub_out:
 					print(distro+"_TEST_GRUB_VERIFICATION_SUCCESS")
@@ -93,8 +93,8 @@ def verify_network_manager(distro):
 		return True
 	else:
 		# NetworkManager package no longer conflicts with the wwagent on CentOS 7.0+ and Oracle Linux 7.0+
-		if distro == "CENTOS" or distro == "ORACLELINUX":
-			version_release = Run("cat /etc/system-release | grep -o [0-9].[0-9] | head -1 | tr -d '\n'")
+		if distro == "CENTOS" or distro == "ORACLELINUX" or distro == "REDHAT":
+			version_release = Run("cat /etc/system-release | grep -Eo '[0-9].?[0-9]?' | head -1 | tr -d '\n'")
 			if float(version_release) < 7.0:
 				RunLog.error("Network Manager is installed")
 				print(distro+"_TEST_NETWORK_MANAGER_INSTALLED")
@@ -132,6 +132,7 @@ def verify_ifcfg_eth0(distro):
 	RunLog.info("Verifying contents of ifcfg-eth0 file")
 	if distro == "CENTOS" or distro == "ORACLELINUX" or distro == "REDHAT" or distro == "FEDORA":
 		i_out = Run("cat /etc/sysconfig/network-scripts/ifcfg-eth0")
+		i_out = i_out.replace('"','')
 		#if "DEVICE=eth0" in i_out and "ONBOOT=yes" in i_out and "BOOTPROTO=dhcp" in i_out and "DHCP=yes" in i_out:
 		if "DEVICE=eth0" in i_out and "ONBOOT=yes" in i_out and "BOOTPROTO=dhcp" in i_out  :
 			RunLog.info("all required parameters exists.")
@@ -250,7 +251,7 @@ if distro == "CENTOS":
 	#Verify etc/yum.conf
 	y_out = Run("cat /etc/yum.conf")
 	# check http_caching=packages in yum.conf for CentOS 6.x
-	version_release = Run("cat /etc/system-release | grep -o [0-9].[0-9] | head -1 | tr -d '\n'")
+	version_release = Run("cat /etc/system-release | grep -Eo '[0-9].?[0-9]?' | head -1 | tr -d '\n'")
 	if float(version_release) < 7.0:
 		if "http_caching=packages" in y_out:
 			RunLog.info("http_caching=packages present in /etc/yum.conf")
