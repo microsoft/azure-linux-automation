@@ -1005,7 +1005,7 @@ Function SetDistroSpecificVariables($detectedDistro)
 	LogMsg "Set `$python_cmd > python"	
 	Set-Variable -Name python_cmd -Value $python_cmd -Scope Global
 	Set-Variable -Name ifconfig_cmd -Value "ifconfig" -Scope Global
-	if(($detectedDistro -eq "SLES") -or $(detectedDistro -eq "SUSE"))
+	if(($detectedDistro -eq "SLES") -or ($detectedDistro -eq "SUSE"))
 	{
 		Set-Variable -Name ifconfig_cmd -Value "/sbin/ifconfig" -Scope Global
 		Set-Variable -Name fdisk -Value "/sbin/fdisk" -Scope Global
