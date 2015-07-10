@@ -10,6 +10,11 @@ $SmallVMLUNs = 0..1
 $MediumVMLUNs = 0..3
 $LargeVMLUNs = 0..7
 $ExtraLargeVMLUNs= 0..15
+$DS1LUNs = 0..1
+$DS2LUNs = 0..3
+$DS3LUNs = 0..7
+$DS4LUNs= 0..15
+
 $diskResult = New-Object -TypeName System.Object
 foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
 {
@@ -19,7 +24,7 @@ foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
     <#
     Use following deployment for debuggging purpose. You need to comment out upper line in this case.
     #>
-    #$isDeployed = "ICA-ExtraSmallVM-Suse12PL-8-7-0-18-33" #Debug Code                
+    #$isDeployed = "ICA-DS1NODISK-S11SP3BPXSA-6-29-6-19-55" #Debug Code                
 
     #Start Test if Deployment is successfull.
     if ($isDeployed)
@@ -29,7 +34,6 @@ foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
         Add-Member -InputObject $diskResult -MemberType MemberSet -Name $newSetupType
         #Get VMs deployed in the service..
         $testVMsinService = $testServiceData | Get-AzureVM
-
         $hs1vm1 = $testVMsinService
         $hs1vm1Endpoints = $hs1vm1 | Get-AzureEndpoint
         $hs1vm1sshport = GetPort -Endpoints $hs1vm1Endpoints -usage ssh
@@ -42,8 +46,7 @@ foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
         mkdir "$LogDir\$newSetupType"
         $testVMObject = CreateHotAddRemoveDataDiskNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -user $user -password $password -ServiceName $isDeployed -logDir "$LogDir\$newSetupType"
         RemoteCopy -uploadTo $testVMObject.ip -port $testVMObject.sshPort -files $currentTestData.files -username $testVMObject.user -password $testVMObject.password -upload
-        $suppressedout = RunLinuxCmd -ip $testVMObject.ip  -port $testVMObject.sshPort  -username $testVMObject.user  -password $testVMObject.password  -command "chmod +x *.py" -runAsSudo
-        
+        $suppressedout = RunLinuxCmd -ip $testVMObject.ip  -port $testVMObject.sshPort  -username $testVMObject.user  -password $testVMObject.password  -command "chmod +x *.sh" -runAsSudo
         switch ($hs1vm1.InstanceSize)
         {
             "ExtraSmall"
@@ -65,6 +68,22 @@ foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
             "ExtraLarge"
             {
                 $testLUNs = $ExtraLargeVMLUNs
+            }
+            "Standard_DS1"
+            {
+                $testLUNs = $DS1LUNs
+            }
+            "Standard_DS2"
+            {
+                $testLUNs = $DS2LUNs
+            }
+            "Standard_DS3"
+            {
+                $testLUNs = $DS3LUNs
+            }
+            "Standard_DS4"
+            {
+                $testLUNs = $DS4LUNs
             }
         }
 

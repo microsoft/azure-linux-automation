@@ -162,6 +162,10 @@ if ($isDeployed)
 				$ErrorMessage =  $_.Exception.Message
 				LogMsg "EXCEPTION : $ErrorMessage"   
 			}
+            finally
+            {
+                $out = GetAndCheckKernelLogs -DeployedServices $isNewDeployed -status "Final" -vmUser $newuser -vmPassword $password
+            }
 		#endregion
 			if ($NewUserTestResult -eq "PASS" -and $OldUserTestResult -eq "PASS")
 			{
@@ -203,7 +207,7 @@ else
 $result = GetFinalResultHeader -resultarr $resultArr
 
 #Clean up the setup
-DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isNewDeployed
+DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isNewDeployed -SkipVerifyKernelLogs
 
 #Return the result and summery to the test suite script..
 return $result, $resultSummary

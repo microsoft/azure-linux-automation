@@ -10,6 +10,11 @@ $SmallVMLUNs = 2
 $MediumVMLUNs = 4
 $LargeVMLUNs = 8
 $ExtraLargeVMLUNs= 16
+$DS1LUNs = 2
+$DS2LUNs = 4
+$DS3LUNs = 8
+$DS4LUNs= 16
+
 $diskResult = New-Object -TypeName System.Object
 #Get Medial Links of existing disks from XML file.
 $ExistingDisks = @()
@@ -71,6 +76,22 @@ foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
                 "ExtraLarge"
                 {
                     $testLUNs = $ExtraLargeVMLUNs
+                }
+                "Standard_DS1"
+                {
+                    $testLUNs = $DS1LUNs
+                }
+                "Standard_DS2"
+                {
+                    $testLUNs = $DS2LUNs
+                }
+                "Standard_DS3"
+                {
+                    $testLUNs = $DS3LUNs
+                }
+                "Standard_DS4"
+                {
+                    $testLUNs = $DS4LUNs
                 }
             }
 

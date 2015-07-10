@@ -907,8 +907,16 @@ Function RemoveICAUnusedDataDisks()
 }
 
 #function to collect and compare kernel logs
-Function GetAndCheckKernelLogs($DeployedServices, $status)
+Function GetAndCheckKernelLogs($DeployedServices, $status, $vmUser, $vmPassword)
 {
+	if ( !$vmUser )
+	{
+		$vmUser = $user
+	}
+	if ( !$vmPassword )
+	{
+		$vmPassword = $password
+	}
 	$retValue = $false
 	$hsNames = $DeployedServices.Split('^')
 	foreach ($hsName in $hsNames)
@@ -931,19 +939,19 @@ Function GetAndCheckKernelLogs($DeployedServices, $status)
 			{
 				$randomFileName = [System.IO.Path]::GetRandomFileName()
 				Set-Content -Value "A Random file." -Path "$Logdir\$randomFileName"
-				$out = RemoteCopy -uploadTo $VMEndpoints[0].Vip -port $VMSSHPort  -files "$Logdir\$randomFileName" -username $user -password $password -upload
+				$out = RemoteCopy -uploadTo $VMEndpoints[0].Vip -port $VMSSHPort  -files "$Logdir\$randomFileName" -username $vmUser -password $vmPassword -upload
 				Remove-Item -Path "$Logdir\$randomFileName" -Force
-				$out = RunLinuxCmd -ip $VMEndpoints[0].Vip -port $VMSSHPort -username $user -password $password -command "dmesg > /home/$user/InitialBootLogs.txt" -runAsSudo
-				$out = RemoteCopy -download -downloadFrom $VMEndpoints[0].Vip -port $VMSSHPort -files "/home/$user/InitialBootLogs.txt" -downloadTo $BootLogDir -username $user -password $password
+				$out = RunLinuxCmd -ip $VMEndpoints[0].Vip -port $VMSSHPort -username $vmUser -password $vmPassword -command "dmesg > /home/$vmUser/InitialBootLogs.txt" -runAsSudo
+				$out = RemoteCopy -download -downloadFrom $VMEndpoints[0].Vip -port $VMSSHPort -files "/home/$vmUser/InitialBootLogs.txt" -downloadTo $BootLogDir -username $vmUser -password $vmPassword
 				LogMsg "$($VM.Name): $status Kernel logs collected ..SUCCESSFULLY"
-				$detectedDistro = DetectLinuxDistro -VIP $VMEndpoints[0].Vip -SSHport $VMSSHPort -testVMUser $user -testVMPassword $password
+				$detectedDistro = DetectLinuxDistro -VIP $VMEndpoints[0].Vip -SSHport $VMSSHPort -testVMUser $vmUser -testVMPassword $vmPassword
 				SetDistroSpecificVariables -detectedDistro $detectedDistro
 				$retValue = $true
 			}
 			elseif($status -imatch "Final")
 			{
-				$out = RunLinuxCmd -ip $VMEndpoints[0].Vip -port $VMSSHPort -username $user -password $password -command "dmesg > /home/$user/FinalBootLogs.txt" -runAsSudo
-				$out = RemoteCopy -download -downloadFrom $VMEndpoints[0].Vip -port $VMSSHPort -files "/home/$user/FinalBootLogs.txt" -downloadTo $BootLogDir -username $user -password $password
+				$out = RunLinuxCmd -ip $VMEndpoints[0].Vip -port $VMSSHPort -username $vmUser -password $vmPassword -command "dmesg > /home/$vmUser/FinalBootLogs.txt" -runAsSudo
+				$out = RemoteCopy -download -downloadFrom $VMEndpoints[0].Vip -port $VMSSHPort -files "/home/$vmUser/FinalBootLogs.txt" -downloadTo $BootLogDir -username $vmUser -password $vmPassword
 				$KernelDiff = Compare-Object -ReferenceObject (Get-Content $FinalBootLog) -DifferenceObject (Get-Content $InitailBootLog)
 				#Removing final dmesg file from logs to reduce the size of logs. We can alwayas see complete Final Logs as : Initial Kernel Logs + Difference in Kernel Logs
 				Remove-Item -Path $FinalBootLog -Force | Out-Null
@@ -997,19 +1005,26 @@ Function SetDistroSpecificVariables($detectedDistro)
 	LogMsg "Set `$python_cmd > python"	
 	Set-Variable -Name python_cmd -Value $python_cmd -Scope Global
 	Set-Variable -Name ifconfig_cmd -Value "ifconfig" -Scope Global
-	if($detectedDistro -eq "SLES" -or $detectedDistro -eq "SUSE" )
+	if(($detectedDistro -eq "SLES") -or ($detectedDistro -eq "SUSE"))
 	{
 		Set-Variable -Name ifconfig_cmd -Value "/sbin/ifconfig" -Scope Global
+		Set-Variable -Name fdisk -Value "/sbin/fdisk" -Scope Global
 		LogMsg "Set `$ifconfig_cmd > $ifconfig_cmd for $detectedDistro"
-	}	
+		LogMsg "Set `$fdisk > /sbin/fdisk for $detectedDistro"
+	}
+	else
+	{
+		Set-Variable -Name fdisk -Value "fdisk" -Scope Global
+		LogMsg "Set `$fdisk > fdisk for $detectedDistro"
+	}
 }
 
 Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false)
 {
-   if( (!$EconomyMode) -or ( $EconomyMode -and ($xmlConfig.config.Azure.Deployment.$setupType.isDeployed -eq "NO")))
-   {
-	   try
-	   {
+	if( (!$EconomyMode) -or ( $EconomyMode -and ($xmlConfig.config.Azure.Deployment.$setupType.isDeployed -eq "NO")))
+	{
+		try
+		{
 			$position = 0
 			$VerifiedServices =  $NULL
 			$retValue = $NULL
@@ -1793,7 +1808,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 				}
 				if($timeOut)
 				{
-					$retValue = $null
+					$retValue = ""
 					Throw "Tmeout while executing command : $command"
 				}
 				LogErr "Linux machine returned exit code : $($LinuxExitCode.Split("-")[4])"
@@ -1912,7 +1927,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 				{
 					if($timeOut)
 					{
-						$retValue = $null
+						$retValue = ""
 						Throw "Tmeout while executing command : $command"
 					}
 					LogErr "Linux machine returned exit code : $($LinuxExitCode.Split("-")[4])"
@@ -1942,7 +1957,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 #endregion
 
 #region Test Case Logging
-Function DoTestCleanUp($result, $testName, $DeployedServices, [switch]$keepUserDirectory)
+Function DoTestCleanUp($result, $testName, $DeployedServices, [switch]$keepUserDirectory, [switch]$SkipVerifyKernelLogs)
 {
 	try
 	{
@@ -1960,16 +1975,18 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, [switch]$keepUserD
 				Remove-Job -Id $taskID -Force
 			}
 			$user=$xmlConfig.config.Azure.Deployment.Data.UserName
-			try
+			if ( !$SkipVerifyKernelLogs )
 			{
-				$KernelLogOutput=GetAndCheckKernelLogs -DeployedServices $deployedServices -status "Final" #Collecting kernel logs after execution of test case : v-sirebb
-			}
-			catch 
-			{
-				$ErrorMessage =  $_.Exception.Message
-				LogMsg "EXCEPTION in GetAndCheckKernelLogs(): $ErrorMessage"	
-			}
-			
+				try
+				{
+					$KernelLogOutput=GetAndCheckKernelLogs -DeployedServices $deployedServices -status "Final" #Collecting kernel logs after execution of test case : v-sirebb
+				}
+				catch 
+				{
+					$ErrorMessage =  $_.Exception.Message
+					LogMsg "EXCEPTION in GetAndCheckKernelLogs(): $ErrorMessage"	
+				}
+			}			
 			$isClened = @()
 			$hsNames = $DeployedServices
 			$hsNames = $hsNames.Split("^")
@@ -4927,58 +4944,41 @@ Function PerformIOTestOnDisk($testVMObject, [string]$attachedDisk, [string]$disk
 	$testVMVIP = $testVMObject.ip
 	$testVMUsername = $testVMObject.user 
 	$testVMPassword = $testVMObject.password
+	if ( $diskFileSystem -imatch "xfs" )
+	{
+		 $diskFileSystem = "xfs -f"
+	}
 	$isVMAlive = Test-TCP -testIP $testVMVIP -testport $testVMSSHport
 	if ($isVMAlive -eq "True")
 	{
 		$retValue = "FAIL"
-		$suppressedOut = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "rm -rf *.txt *.log" -runAsSudo
+		$mountPoint = "/mnt/datadisk"
 		LogMsg "Performing I/O operations on $attachedDisk.."
-		$ioOutout = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "python /home/$testVMUsername/DoIOTest.py -d $attachedDisk -f $diskFileSystem" -runAsSudo
-		if ( $ioOutout -imatch ( "$attachedDisk" + "_AVAILABLE" ))
+		$LogPath = "$LogDir\VerifyIO$($attachedDisk.Replace('/','-')).txt"
+		$dmesgBefore = RunLinuxCmd -username $testVMUsername -password $testVMPassword -ip $testVMVIP -port $testVMSSHport -command "dmesg" -runAsSudo 
+		#CREATE A MOUNT DIRECTORY
+		$out = RunLinuxCmd -username $testVMUsername -password $testVMPassword -ip $testVMVIP -port $testVMSSHport -command "mkdir -p $mountPoint" -runAsSudo 
+		$partitionNumber=1
+		$PartitionDiskOut = RunLinuxCmd -username $testVMUsername -password $testVMPassword -ip $testVMVIP -port $testVMSSHport -command "./ManagePartitionOnDisk.sh -diskName $attachedDisk -create yes -forRaid no" -runAsSudo 
+		$FormatDiskOut = RunLinuxCmd -username $testVMUsername -password $testVMPassword -ip $testVMVIP -port $testVMSSHport -command "time mkfs.$diskFileSystem $attachedDisk$partitionNumber" -runAsSudo -runMaxAllowedTime 2400 
+		$out = RunLinuxCmd -username $testVMUsername -password $testVMPassword -ip $testVMVIP -port $testVMSSHport -command "mount -o nobarrier $attachedDisk$partitionNumber $mountPoint" -runAsSudo 
+		Add-Content -Value $formatDiskOut -Path $LogPath -Force
+		$ddOut = RunLinuxCmd -username $testVMUsername -password $testVMPassword -ip $testVMVIP -port $testVMSSHport -command "dd if=/dev/zero bs=1024 count=1000000 of=$mountPoint/file_1GB" -runAsSudo -runMaxAllowedTime 1200
+		WaitFor -seconds 10
+		Add-Content -Value $ddOut -Path $LogPath
+		try
 		{
-			if ( $ioOutout -imatch ( "$attachedDisk" + "_PARTITION_CREATED_SUCCESSFULLY" ))
-			{
-				if ( $ioOutout -imatch ( "$attachedDisk" + "_PARTITION_FORMATTED_SUCCESSFULLY" ))
-				{
-					if ( $ioOutout -imatch ( "$attachedDisk" + "_FILE_CREATED_SUCCESSFULLY" ))
-					{
-						if ( $ioOutout -imatch "FINAL_TEST_RESULT_PASS")
-						{
-							LogMsg "All I/O operations completed successfully on $attachedDisk"
-							$retValue = "PASS"
-						}
-						else
-						{
-							LogErr "All tests done but unable to confirm final result. Please check logs for more information."
-							$retValue = "FAIL"
-						}
-					}
-					else
-					{
-						LogErr "Failed to create file on $attachedDisk`1"
-						$retValue = "FAIL"
-					}
-				}
-				else
-				{
-					LogErr "Failed to Formant partition on $attachedDisk with file system $diskFileSystem."
-					$retValue = "FAIL"
-				}
-			}
-			else
-			{
-				LogErr "Failed to Create partition on $attachedDisk"
-				$retValue = "FAIL"
-			}
+			$out = RunLinuxCmd -username $testVMUsername -password $testVMPassword -ip $testVMVIP -port $testVMSSHport -command "umount $mountPoint" -runAsSudo 
 		}
-		else
+		catch
 		{
-			LogErr "$attachedDisk is not available in VM."
-			$retValue = "FAIL"
+			LogMsg "umount failed. Trying umount -l"
+			$out = RunLinuxCmd -username $testVMUsername -password $testVMPassword -ip $testVMVIP -port $testVMSSHport -command "umount -l $mountPoint" -runAsSudo 
 		}
-		$suppressedOut = RemoteCopy -downloadFrom $testVMVIP -port $testVMSSHport -files "/home/$testVMUsername/Runtime.log" -downloadTo $testVMObject.logDir -username $testVMUsername -password $testVMPassword -download
-		Rename-Item -Path "$($testVMObject.logdir)\Runtime.log" -NewName ( $attachedDisk.Replace("/dev/","dev-") + "-IO-Test-Logs-$diskFileSystem.txt")
-		LogMsg "I/O logs saved as $($attachedDisk.Replace("/dev/","dev-"))-IO-Test-Logs-$diskFileSystem.txt"
+		$dmesgAfter = RunLinuxCmd -username $testVMUsername -password $testVMPassword -ip $testVMVIP -port $testVMSSHport -command "dmesg" -runAsSudo
+		$addedLines = $dmesgAfter.Replace($dmesgBefore,$null)
+		LogMsg "Kernel Logs : $($addedLines.Replace('[32m','').Replace('[0m[33m','').Replace('[0m',''))" -LinuxConsoleOuput
+		$retValue = "PASS"	
 	}
 	else
 	{
@@ -5005,7 +5005,7 @@ Function DoHotAddNewDataDiskTest ($testVMObject, [int]$diskSizeInGB )
 		Add-Content  -Value "--------------------ADD DISK TO LUN $testLun : START----------------------" -Path $HotAddLogFile -Encoding UTF8
 #GetCurrentDiskInfo
 
-		$fdiskOutputBeforeAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo
+		$fdiskOutputBeforeAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "$fdisk -l" -runAsSudo
 		Add-Content  -Value "Before Adding New Disk : " -Path $HotAddLogFile -Encoding UTF8
 		Add-Content  -Value $fdiskOutputBeforeAddingDisk -Path $HotAddLogFile -Encoding UTF8
 		$disksBeforeAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $fdiskOutputBeforeAddingDisk
@@ -5028,14 +5028,21 @@ Function DoHotAddNewDataDiskTest ($testVMObject, [int]$diskSizeInGB )
 				While (($retryCount -le $MaxRetryCount) -and ($newDiskAdded -eq "FAIL"))
 				{
 					LogMsg "Attempt : $retryCount : Checking for new disk."
-					$fdiskOutputAfterAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo -ignoreLinuxExitCode
+					$fdiskOutputAfterAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "$fdisk -l" -runAsSudo -ignoreLinuxExitCode
 					$disksafterAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $fdiskOutputAfterAddingDisk
 					if ( ($disksBeforeAddingNewDisk + 1) -eq $disksafterAddingNewDisk )
 					{
 						$newDiskAdded = "PASS"
 						LogMsg "New Disk detected."
 						$newDisknames = GetNewPhysicalDiskNames -FdiskOutputBeforeAddingDisk $fdiskOutputBeforeAddingDisk -FdiskOutputAfterAddingDisk $fdiskOutputAfterAddingDisk
-						$extResult =  PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisknames -diskFileSystem "ext4"
+						if($detectedDistro -imatch "SLES" )
+						{
+							$extResult =  PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisknames -diskFileSystem "ext3"
+						}
+						else
+						{
+							$extResult =  PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisknames -diskFileSystem "ext4"
+						}
 						$xfsResult =  PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisknames -diskFileSystem "xfs"
 						if ( ($extResult  -eq "PASS") -and ($xfsResult  -eq "PASS") )
 						{
@@ -5096,7 +5103,7 @@ Function DoHotRemoveDataDiskTest ($testVMObject)
 		Add-Content  -Value "--------------------REMOVE DISK FROM LUN $testLun : START----------------------" -Path $HotRemoveLogFile -Encoding UTF8
 #GetCurrentDiskInfo
 
-		$out = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo
+		$out = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "$fdisk -l" -runAsSudo
 		$disksBeforeRemovingDisk = GetTotalPhysicalDisks -FdiskOutput $out
 		Add-Content  -Value "Before Removing Disk : " -Path $HotRemoveLogFile -Encoding UTF8
 		Add-Content  -Value $out -Path $HotRemoveLogFile  -Encoding UTF8
@@ -5117,7 +5124,7 @@ Function DoHotRemoveDataDiskTest ($testVMObject)
 				{
 					$out = ""
 					LogMsg "Attempt : $retryCount : Verifying removal of disk."
-					$out = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo -ignoreLinuxExitCode
+					$out = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "$fdisk -l" -runAsSudo -ignoreLinuxExitCode
 					$disksafterRemovingDisk = GetTotalPhysicalDisks -FdiskOutput $out
 					if ( ($disksBeforeRemovingDisk - 1) -eq $disksafterRemovingDisk )
 					{
@@ -5177,7 +5184,7 @@ Function DoHotAddNewDataDiskTestParallel ($testVMObject, $TotalLuns)
 		Add-Content  -Value "--------------------ADD $TotalLuns DISKS : START----------------------" -Path $HotAddLogFile -Encoding UTF8
 #GetCurrentDiskInfo
 
-		$FdiskOutputBeforeAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo
+		$FdiskOutputBeforeAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "$fdisk -l" -runAsSudo
 		Add-Content  -Value "Before Adding Disks : " -Path $HotAddLogFile -Encoding UTF8
 		Add-Content  -Value $FdiskOutputBeforeAddingDisk -Path $HotAddLogFile -Encoding UTF8
 		$disksBeforeAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $FdiskOutputBeforeAddingDisk
@@ -5210,7 +5217,7 @@ Function DoHotAddNewDataDiskTestParallel ($testVMObject, $TotalLuns)
 				{
 					$out = ""
 					LogMsg "Attempt : $retryCount : Checking for new disk."
-					$FdiskOutputAfterAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo -ignoreLinuxExitCode
+					$FdiskOutputAfterAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "$fdisk -l" -runAsSudo -ignoreLinuxExitCode
 					$disksafterAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $FdiskOutputAfterAddingDisk
 					if ( ($disksBeforeAddingNewDisk + $TotalLuns) -eq $disksafterAddingNewDisk )
 					{
@@ -5223,7 +5230,14 @@ Function DoHotAddNewDataDiskTestParallel ($testVMObject, $TotalLuns)
 						{
 							$extResult = $null
 							$xfsResult = $null
-							$extResult = PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisk -diskFileSystem "ext4"
+							if($detectedDistro -imatch "SLES" )
+							{
+								$extResult =  PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisk -diskFileSystem "ext3"
+							}
+							else
+							{
+								$extResult =  PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisk -diskFileSystem "ext4"
+							}
 							$xfsResult = PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisk -diskFileSystem "xfs"
 							if ( ($extResult  -eq "PASS") -and ($xfsResult  -eq "PASS") )
 							{
@@ -5299,7 +5313,7 @@ Function DoHotRemoveNewDataDiskTestParallel ($testVMObject, $TotalLuns)
 		Add-Content  -Value "--------------------REMOVE $TotalLuns DISKS : START----------------------" -Path $HotRemoveLogFile -Encoding UTF8
 #GetCurrentDiskInfo
 
-		$out = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo
+		$out = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "$fdisk -l" -runAsSudo
 		Add-Content  -Value "Before Adding Disks : " -Path $HotRemoveLogFile -Encoding UTF8
 		Add-Content  -Value $out -Path $HotRemoveLogFile -Encoding UTF8
 		$disksBeforeRemovingNewDisk = GetTotalPhysicalDisks -FdiskOutput $out
@@ -5334,7 +5348,7 @@ Function DoHotRemoveNewDataDiskTestParallel ($testVMObject, $TotalLuns)
 				{
 					$out = ""
 					LogMsg "Attempt : $retryCount : Checking for new disk."
-					$out = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo -ignoreLinuxExitCode
+					$out = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "$fdisk -l" -runAsSudo -ignoreLinuxExitCode
 					$disksafterRemovingNewDisk = GetTotalPhysicalDisks -FdiskOutput $out
 					if ( ($disksBeforeRemovingNewDisk - $TotalLuns) -eq $disksafterRemovingNewDisk )
 					{
@@ -5394,7 +5408,7 @@ Function DoHotAddExistingDataDiskTest($testVMObject)
 	{
 		Add-Content  -Value "--------------------ADD EXISTING DISK TO LUN $testLun : START----------------------" -Path $HotAddLogFile -Encoding UTF8
 #GetCurrentDiskInfo
-		$fdiskOutputBeforeAddingDisk =  RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo
+		$fdiskOutputBeforeAddingDisk =  RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "$fdisk -l" -runAsSudo
 		Add-Content  -Value "Before Adding Existing Disk : " -Path $HotAddLogFile -Encoding UTF8
 		Add-Content  -Value $fdiskOutputBeforeAddingDisk -Path $HotAddLogFile -Encoding UTF8
 		$disksBeforeAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $fdiskOutputBeforeAddingDisk
@@ -5416,14 +5430,21 @@ Function DoHotAddExistingDataDiskTest($testVMObject)
 				{
 					$fdiskOutputAfterAddingDisk = ""
 					LogMsg "Attempt : $retryCount : Checking for new disk."
-					$fdiskOutputAfterAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo -ignoreLinuxExitCode
+					$fdiskOutputAfterAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "$fdisk -l" -runAsSudo -ignoreLinuxExitCode
 					$disksafterAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $fdiskOutputAfterAddingDisk
 					if ( ($disksBeforeAddingNewDisk + 1) -eq $disksafterAddingNewDisk )
 					{
 						LogMsg "Existing Disk detected."
 						$newDiskAdded = "PASS"
 						$newDisknames = GetNewPhysicalDiskNames -FdiskOutputBeforeAddingDisk $fdiskOutputBeforeAddingDisk -FdiskOutputAfterAddingDisk $fdiskOutputAfterAddingDisk
-						$extResult =  PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisknames -diskFileSystem "ext4"
+						if($detectedDistro -imatch "SLES" )
+						{
+							$extResult =  PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisknames -diskFileSystem "ext3"
+						}
+						else
+						{
+							$extResult =  PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisknames -diskFileSystem "ext4"
+						}
 						$xfsResult =  PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisknames -diskFileSystem "xfs"
 						if ( ($extResult -eq "PASS") -and ($xfsResult -eq "PASS"))
 						{
@@ -5489,7 +5510,7 @@ Function DoHotAddExistingDataDiskTestParallel ($testVMObject, $TotalLuns)
 		Add-Content  -Value "--------------------ADD EXISTING $TotalLuns DISKS : START----------------------" -Path $HotAddLogFile -Encoding UTF8
 #GetCurrentDiskInfo
 
-		$FdiskOutputBeforeAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo
+		$FdiskOutputBeforeAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "$fdisk -l" -runAsSudo
 		Add-Content  -Value "Before Adding Disks : " -Path $HotAddLogFile -Encoding UTF8
 		Add-Content  -Value $FdiskOutputBeforeAddingDisk -Path $HotAddLogFile -Encoding UTF8
 		$disksBeforeAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $FdiskOutputBeforeAddingDisk
@@ -5520,7 +5541,7 @@ Function DoHotAddExistingDataDiskTestParallel ($testVMObject, $TotalLuns)
 				{
 					$FdiskOutputAfterAddingDisk = ""
 					LogMsg "Attempt : $retryCount : Checking for existing disk."
-					$FdiskOutputAfterAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "fdisk -l" -runAsSudo -ignoreLinuxExitCode
+					$FdiskOutputAfterAddingDisk = RunLinuxCmd -username $testVMUsername -password $testVMpassword -ip $testVMVIP -port $testVMSSHport -command "$fdisk -l" -runAsSudo -ignoreLinuxExitCode
 					$disksafterAddingNewDisk = GetTotalPhysicalDisks -FdiskOutput $FdiskOutputAfterAddingDisk
 					if ( ($disksBeforeAddingNewDisk + $TotalLuns) -eq $disksafterAddingNewDisk )
 					{
@@ -5534,7 +5555,14 @@ Function DoHotAddExistingDataDiskTestParallel ($testVMObject, $TotalLuns)
 						{
 							$extResult = $null
 							$xfsResult = $null
-							$extResult = PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisk -diskFileSystem "ext4"
+							if($detectedDistro -imatch "SLES" )
+							{
+								$extResult =  PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisk -diskFileSystem "ext3"
+							}
+							else
+							{
+								$extResult =  PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisk -diskFileSystem "ext4"
+							}
 							$xfsResult = PerformIOTestOnDisk -testVMObject $testVMObject -attachedDisk $newDisk -diskFileSystem "xfs"
 							if (($extResult -eq "PASS") -and ($xfsResult -eq "PASS"))
 							{
