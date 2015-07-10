@@ -25,7 +25,7 @@ do
 		bash $server_file >> $serverlog
 	else
 		echo "copying server file to ${hostnames[$count]} and start server" >> $mainlog
-		sshpass -p $passwd scp -o StrictHostKeyChecking=no $server_file $client_file hostnames.txt sar-top.sh $user@${hostnames[$count]}:/home/$user
+		sshpass -p $passwd scp -o StrictHostKeyChecking=no $server_file $client_file hostnames.txt collect-stats.sh $user@${hostnames[$count]}:/home/$user
 		sshpass -p $passwd ssh -o StrictHostKeyChecking=no $user@${hostnames[$count]} "bash $server_file" >> $serverlog
 	fi
 	count=$(( $count + 1 ))

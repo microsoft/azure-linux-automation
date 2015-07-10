@@ -12,7 +12,7 @@ hostnames=(`cat hostnames.txt`)
 #start sar with nc and time in its name
 echo "stating sar in client `hostname`"
 sarlog=$nc-`hostname`
-bash sar-top.sh $duration $sarlog &
+bash collect-stats.sh $duration $sarlog &
 for server_vm_number in `seq 0 $((${#hostnames[@]}-1))` 
 do
 	if [ ${hostnames[$server_vm_number]} != $my_hostname ]
