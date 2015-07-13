@@ -637,7 +637,8 @@ Function CheckVMsInService($serviceName)
 	return $allVMsReady
 }
 
-Function CreateAllDeployments($setupType, $xmlConfig, $Distro){
+Function CreateAllDeployments($setupType, $xmlConfig, $Distro)
+{
 
 	$hostedServiceCount = 0
 	$xml = $xmlConfig
@@ -703,8 +704,10 @@ Function CreateAllDeployments($setupType, $xmlConfig, $Distro){
 						LogMsg "Certificate added successfully."
 						$DeploymentCommand = GenerateCommand -Setup $Setup -serviceName $serviceName -osImage $osImage -HSData $HS
 						Set-AzureSubscription -SubscriptionName $xmlConfig.config.Azure.General.SubscriptionName  -CurrentStorageAccountName $xmlConfig.config.Azure.General.StorageAccount
+						$DeploymentStartTime = (Get-Date)
 						$isDeployed = CreateDeployment -DeploymentCommand $DeploymentCommand[0] -NewServiceName $DeploymentCommand[1] -vmCount $DeploymentCommand[2]
-#$isDeployed = "True"
+						$DeploymentEndTime = (Get-Date)
+						$DeploymentElapsedTime = $DeploymentEndTime - $DeploymentStartTime
 						if ( $isDeployed -eq "True" )
 						{
 							LogMsg "Deployment Created!"
@@ -756,19 +759,21 @@ Function CreateAllDeployments($setupType, $xmlConfig, $Distro){
 
 		}
 	}
-	return $retValue, $deployedServices
+	return $retValue, $deployedServices, $DeploymentElapsedTime
 }
 
-Function VerifyAllDeployments($servicesToVerify)
+Function VerifyAllDeployments($servicesToVerify, [Switch]$GetVMProvisionTime)
 {
-	LogMsg "Sleeping 10 seconds to VM to start.."
-	WaitFor -seconds 10
+	$VMProvisionElapsedTime = $null
+	$VMProvisionStarted = Get-Date
 	LogMsg "Waiting for VM(s) to become Ready."
 	foreach ($service in  $servicesToVerify)
 	{
 		$serviceName = $service
 		LogMsg "checking $serviceName.. "
 		$isDeploymentReady = CheckVMsInService ($serviceName)
+		$VMProvisionFinished = Get-Date
+		$VMProvisionElapsedTime = $VMProvisionFinished - $VMProvisionStarted
 		if ($isDeploymentReady -eq "True")
 		{
 			LogMsg ""
@@ -783,8 +788,14 @@ Function VerifyAllDeployments($servicesToVerify)
 			break
 		}
 	}
-
-	return $retValue
+	if($GetVMProvisionTime)
+	{
+		return $retValue, $VMProvisionElapsedTime
+	}
+	else
+	{
+		return $retValue
+	}
 }
 
 Function WaitFor($seconds,$minutes,$hours)
@@ -1019,7 +1030,7 @@ Function SetDistroSpecificVariables($detectedDistro)
 	}
 }
 
-Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false)
+Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, [Switch]$GetDeploymentStatistics)
 {
 	if( (!$EconomyMode) -or ( $EconomyMode -and ($xmlConfig.config.Azure.Deployment.$setupType.isDeployed -eq "NO")))
 	{
@@ -1039,8 +1050,19 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false)
 			if($isAllDeployed[0] -eq "True")
 			{
 				$deployedServices = $isAllDeployed[1]
+				$DeploymentElapsedTime = $isAllDeployed[2]
 				$servicesToVerify = $deployedServices.Split('^') ########
-				$isAllVerified = VerifyAllDeployments -servicesToVerify $servicesToVerify 
+				if ( $GetDeploymentStatistics )
+				{
+					$VMBooTime = GetVMBootTime -DeployedServices $deployedServices -TimeoutInSeconds 1800
+					$verifyAll = VerifyAllDeployments -servicesToVerify $servicesToVerify -GetVMProvisionTime $GetDeploymentStatistics
+					$isAllVerified = $verifyAll[0]
+					$VMProvisionTime = $verifyAll[1]
+				}
+				else
+				{
+					$isAllVerified = VerifyAllDeployments -servicesToVerify $servicesToVerify
+				}
 				if ($isAllVerified -eq "True")
 				{
 					$isAllConnected = isAllSSHPortsEnabled -DeployedServices $deployedServices
@@ -1109,7 +1131,14 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false)
 		$KernelLogOutput= GetAndCheckKernelLogs -DeployedServices $retValue -status "Initial"
 	}
 	Set-Variable -Name setupType -Value $setupType -Scope Global
-	return $retValue
+	if ( $GetDeploymentStatistics )
+	{
+		return $retValue, $DeploymentElapsedTime, $VMBooTime, $VMProvisionTime
+	}
+	else
+	{
+		return $retValue
+	}
 }
 
 function GetLogsFromProvisionFailedVM ($vmName, $serviceName, $xmlConfig)
@@ -1313,7 +1342,72 @@ Function isAllSSHPortsEnabled($DeployedServices)
 
 	return $retValue
 }
-
+Function GetVMBootTime($DeployedServices, $TimeoutInSeconds)
+{
+	$VMBootStarted = Get-Date
+	$TestIPPOrts = ""
+	$sleepTime = 3
+	$maxRetryCount = $TimeoutInSeconds / $sleepTime
+	foreach ($hostedservice in $DeployedServices.Split("^"))
+	{
+		$DeployedVMs = Get-AzureVM -ServiceName $hostedService
+		foreach ($testVM in $DeployedVMs)
+		{
+			$AllEndpoints = Get-AzureEndpoint -VM $testVM
+			$HSVIP = GetHsVmVip -servicename $hostedservice
+			$HSport = GetPort -Endpoints $AllEndpoints -usage SSH
+			if($TestIPPOrts)
+			{
+				$TestIPPOrts = $TestIPPOrts + "^$HSVIP" + ':' +"$HSport"
+			}
+			else
+			{
+				$TestIPPOrts = "$HSVIP" + ':' +"$HSport"
+			}
+		}
+	}
+	$timeout = 0
+	do
+	{
+		$WaitingForConnect = 0
+		foreach ($IPPORT in $TestIPPOrts.Split("^"))
+		{
+			$IPPORT = $IPPORT.Split(":")
+			$testIP = $IPPORT[0]
+			$testPort = $IPPORT[1]
+			Write-Host "Connecting to  $TestIP : $testPort" -NoNewline
+			$out = Test-TCP  -testIP $TestIP -testport $testPort
+			if ($out -ne "True")
+			{ 
+				Write-Host " : Failed"
+				$WaitingForConnect = $WaitingForConnect + 1
+			}
+			else
+			{
+				Write-Host " : Connected"
+			}
+			
+		}
+		
+		if($WaitingForConnect -gt 0)
+		{
+			$timeout = $timeout + 1
+			Write-Host "$WaitingForConnect VM(s) still awaiting to open SSH port.." -NoNewline
+			Write-Host "Retry $timeout/$maxRetryCount"
+			sleep $sleepTime
+			$retValue = "False"
+		}
+		else
+		{
+			LogMsg "ALL VM's SSH port is/are open now.."
+			$retValue = "True"
+		}
+	}
+	While (($timeout -lt $maxRetryCount) -and ($WaitingForConnect -gt 0))
+	$VMBootFinished =  Get-Date
+	$VMBootElapsedTime = $VMBootFinished - $VMBootStarted
+	return $VMBootElapsedTime
+}
 Function GetHsVmVip($servicename)
 {
 	$endpoints = Get-AzureVM  -ServiceName $servicename | Get-AzureEndpoint
