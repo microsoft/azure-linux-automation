@@ -436,9 +436,23 @@ Function GenerateCommand ($Setup, $serviceName, $osImage, $HSData)
 	$defaultPassword = $xml.config.Azure.Deployment.Data.Password
 	$totalVMs = 0
 	$totalHS = 0
-
+	$extensionCounter = 0
 	$vmCommands = @()
 	$vmCount = 0
+	$extensionString = [string](Get-Content .\XML\Extensions.xml)
+	foreach ($line in $extensionString.Split())
+	{
+		if ($line -imatch "EXECUTE-PS-")
+		{
+			$line = $line.Trim()
+			$line = $line.Replace("EXECUTE-PS-","")
+			$line = $line.Split(">")
+			$line = $line.Split("<")
+			$PSoutout = Invoke-Expression -Command $line[2]
+			$extensionString = $extensionString.Replace("EXECUTE-PS-$($line[2])",$PSoutout)
+		}
+	}
+	$extensionXML = [xml]$extensionString
 	foreach ( $newVM in $HS.VirtualMachine)
 	{
 		$vmCount = $vmCount + 1
@@ -499,6 +513,38 @@ Function GenerateCommand ($Setup, $serviceName, $osImage, $HSData)
 				}
 			}
 		}
+		$ExtensionCommand = ""
+		foreach ( $extn in $newVM.Extension)
+		{
+			foreach ( $newExtn in $extensionXML.Extensions.Extension )
+			{
+				if ($newExtn.Name -eq $newVM.Extension)
+				{
+					[hashtable]$extensionHashTable = @{};
+					$newExtn.Params.ChildNodes | foreach {$extensionHashTable[$_.Name] = $_.'#text'};
+					$PublicConfiguration += $extensionHashTable | ConvertTo-Json
+					[hashtable]$extensionHashTable = @{};
+					$PrivateConfiguration += $extensionHashTable | ConvertTo-Json
+					if ( $ExtensionCommand )
+					{
+						$ExtensionCommand = $ExtensionCommand + " | Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName)  -Publisher $($newExtn.Publisher) -Version $($newExtn.Version) -PublicConfiguration `$PublicConfiguration[$extensionCounter] -PrivateConfiguration `$PrivateConfiguration[$extensionCounter]"
+					}
+					else
+					{
+						$ExtensionCommand = "Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName)  -Publisher $($newExtn.Publisher) -Version $($newExtn.Version) -PublicConfiguration `$PublicConfiguration[$extensionCounter] -PrivateConfiguration `$PrivateConfiguration[$extensionCounter]"
+					}
+					$extensionCounter += 1
+				}
+			}
+		}
+		if ( $PublicConfiguration )
+		{
+			Set-Variable -Name PublicConfiguration -Value $PublicConfiguration -Scope Global
+		}
+		if ( $PrivateConfiguration )
+		{
+			Set-Variable -Name PrivateConfiguration -Value $PrivateConfiguration -Scope Global
+		}
 		$sshPath = '/home/' + $defaultuser + '/.ssh/authorized_keys'		 	
 		$vmRoleConfig = "New-AzureVMConfig -Name $vmName -InstanceSize $instanceSize -ImageName $osImage"
 		$vmProvConfig = "Add-AzureProvisioningConfig -Linux -LinuxUser $defaultuser -Password $defaultPassword -SSHPublicKeys (New-AzureSSHKey -PublicKey -Fingerprint 690076D4C41C1DE677CD464EA63B44AE94C2E621 -Path $sshPath)"
@@ -507,16 +553,27 @@ Function GenerateCommand ($Setup, $serviceName, $osImage, $HSData)
 			$vmProvConfig = $vmProvConfig + "| Set-AzureSubnet -SubnetNames $SubnetName"
 		}
 		$vmPortConfig =  $portCommand.Substring(0,$portCommand.Length-1)
+		
+		#Start building SingleVM Config command..
+
+		$singleVMCommand = "( " + $vmRoleConfig + " | " + $vmProvConfig + " | " + $vmPortConfig
+		
 		if ( $diskCommand )
 		{
-			$singleVMCommand = "( " + $vmRoleConfig + " | " + $vmProvConfig + " | " + $vmPortConfig + " | " + $diskCommand + " )"
+			$singleVMCommand = $singleVMCommand + " | " + $diskCommand
 		}
-		else
+		if ( $ExtensionCommand )
 		{
-			$singleVMCommand = "( " + $vmRoleConfig + " | " + $vmProvConfig + " | " + $vmPortConfig + " )"
+			$singleVMCommand = $singleVMCommand + " | " + $ExtensionCommand
 		}
+
+		$singleVMCommand = $singleVMCommand + " )"
+		
+		#Finished building SingleVM Config command..
+
 		$totalVMs = $totalVMs + 1
 		$role = $role + 1
+
 		if ($totalVMs -gt 1)
 		{
 			$finalVMcommand = $finalVMcommand + ', ' + $singleVMCommand

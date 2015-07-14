@@ -24,6 +24,8 @@ Set-Variable -Name user -Value $user -Scope Global
 Set-Variable -Name password -Value $password -Scope Global
 Set-Variable -Name sshKey -Value $sshKey -Scope Global
 Set-Variable -Name sshPublicKey -Value $sshPublicKey -Scope Global
+Set-Variable -Name PublicConfiguration -Value @() -Scope Global
+Set-Variable -Name PrivateConfiguration -Value @() -Scope Global
 
 try
 {
