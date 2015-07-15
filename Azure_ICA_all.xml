@@ -3195,7 +3195,7 @@
 			<testScript>meshnetwork-perf-main.sh,meshnetwork-perf-server.sh,meshnetwork-perf-client.sh</testScript>
 			<testScriptps1>NETWORK-PERF-MESH-TEST.ps1</testScriptps1>
 			<SubtestValues>32,64,512,1000,2000,4000,6000</SubtestValues>
-			<files>.\remote-scripts\meshnetwork-perf-main.sh,.\remote-scripts\meshnetwork-perf-server.sh,.\remote-scripts\meshnetwork-perf-client.sh,.\remote-scripts\sar-top.sh</files>
+			<files>.\remote-scripts\meshnetwork-perf-main.sh,.\remote-scripts\meshnetwork-perf-server.sh,.\remote-scripts\meshnetwork-perf-client.sh,.\remote-scripts\collect-stats.sh</files>
 			<setupType>MeshVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
