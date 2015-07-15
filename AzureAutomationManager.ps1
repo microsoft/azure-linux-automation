@@ -26,6 +26,7 @@ Set-Variable -Name sshKey -Value $sshKey -Scope Global
 Set-Variable -Name sshPublicKey -Value $sshPublicKey -Scope Global
 Set-Variable -Name PublicConfiguration -Value @() -Scope Global
 Set-Variable -Name PrivateConfiguration -Value @() -Scope Global
+Set-Variable -Name CurrentTestData -Value $CurrentTestData -Scope Global
 
 try
 {

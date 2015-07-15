@@ -1898,7 +1898,7 @@
 					</VirtualMachine>
 				</HostedService>
 			</DS14DISK12>
-			<A1EXTN>
+			<A1>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
 					<VirtualMachine>
@@ -1911,10 +1911,9 @@
 							<PublicPort>22</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
-						<Extension>CustomScriptForLinux</Extension>
 					</VirtualMachine>
 				</HostedService>
-			</A1EXTN>			
+			</A1>			
 		</Deployment>
 		
 
@@ -3573,7 +3572,9 @@
 			<testName>ICA-CUSTOM-SCRIPT-EXTENSION-TEST</testName>
 			<testScript></testScript>
 			<testScriptps1>ICA-CUSTOM-SCRIPT-EXTENSION-TEST.ps1</testScriptps1>
-			<setupType>A1EXTN</setupType>
+			<setupType>ExtraSmallVM</setupType>
+			<ProvisionTimeExtensions>CustomScriptTouchCommand</ProvisionTimeExtensions>
+			<PostProvisionExtensions>TO_BE_DONE</PostProvisionExtensions>
 			<Priority>P0</Priority>
 		</test>		
 	</testsDefinition>

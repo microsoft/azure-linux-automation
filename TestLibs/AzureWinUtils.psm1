@@ -634,8 +634,15 @@ Function RunAzureCmd ($AzureCmdlet, $maxWaitTimeSeconds = 600)
     $jobStartTime = Get-Date 
     $CertThumbprint = $xmlConfig.config.Azure.General.CertificateThumbprint
     $myCert = Get-Item cert:\CurrentUser\My\$CertThumbprint
-    #$myCert = $null
-    $AzureJob = Start-Job -ScriptBlock { $PublicConfiguration = $args[6];$PrivateConfiguration = $args[7];$suppressedOut = Set-AzureSubscription -SubscriptionName $args[1] -Certificate $args[2] -SubscriptionID $args[3] -ServiceEndpoint $args[4] -CurrentStorageAccountName $args[5];$suppressedOut = Select-AzureSubscription -Current $args[1];Invoke-Expression $args[0];} -ArgumentList $AzureCmdlet, $xmlConfig.config.Azure.General.SubscriptionName, $myCert, $xmlConfig.config.Azure.General.SubscriptionID, $xmlConfig.config.Azure.General.ManagementEndpoint, $xmlConfig.config.Azure.General.StorageAccount, $PublicConfiguration, $PrivateConfiguration
+    if (IsEnvironmentSupported)
+    {
+        $environment = "AzureCloud"
+        $AzureJob = Start-Job -ScriptBlock { $PublicConfiguration = $args[6];$PrivateConfiguration = $args[7];$suppressedOut = Set-AzureSubscription -SubscriptionName $args[1] -Certificate $args[2] -SubscriptionID $args[3] -ServiceEndpoint $args[4] -CurrentStorageAccountName $args[5] -Environment $args[8];$suppressedOut = Select-AzureSubscription -Current $args[1];Invoke-Expression $args[0];} -ArgumentList $AzureCmdlet, $xmlConfig.config.Azure.General.SubscriptionName, $myCert, $xmlConfig.config.Azure.General.SubscriptionID, $xmlConfig.config.Azure.General.ManagementEndpoint, $xmlConfig.config.Azure.General.StorageAccount, $PublicConfiguration, $PrivateConfiguration, $environment
+    }
+    else
+    {
+        $AzureJob = Start-Job -ScriptBlock { $PublicConfiguration = $args[6];$PrivateConfiguration = $args[7];$suppressedOut = Set-AzureSubscription -SubscriptionName $args[1] -Certificate $args[2] -SubscriptionID $args[3] -ServiceEndpoint $args[4] -CurrentStorageAccountName $args[5];$suppressedOut = Select-AzureSubscription -Current $args[1];Invoke-Expression $args[0];} -ArgumentList $AzureCmdlet, $xmlConfig.config.Azure.General.SubscriptionName, $myCert, $xmlConfig.config.Azure.General.SubscriptionID, $xmlConfig.config.Azure.General.ManagementEndpoint, $xmlConfig.config.Azure.General.StorageAccount, $PublicConfiguration, $PrivateConfiguration
+    }
     $currentTime = Get-Date
     while (($AzureJob.State -eq "Running") -and !$timeExceeded)
         {

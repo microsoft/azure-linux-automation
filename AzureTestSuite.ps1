@@ -39,6 +39,7 @@ Function GetCurrentTestData($xmlConfig, $testName)
 		if ($test.testName -eq $testName)
 		{
 		LogMsg "Loading the test data for $($test.testName)"
+		Set-Variable -Name CurrentTestData -Value $test -Scope Global -Force
 		return $test
 		break
 		}

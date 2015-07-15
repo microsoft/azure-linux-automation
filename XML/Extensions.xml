@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 	<Extensions>
 		<Extension>
-			<Name>CustomScriptForLinux</Name>
+			<Name>CustomScriptTouchCommand</Name>
 			<OfficialName>CustomScriptForLinux</OfficialName>
 			<Publisher>"Microsoft.OSTCExtensions"</Publisher>
 			<Params>

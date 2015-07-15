@@ -450,6 +450,7 @@ Function GenerateCommand ($Setup, $serviceName, $osImage, $HSData)
 			$line = $line.Split("<")
 			$PSoutout = Invoke-Expression -Command $line[2]
 			$extensionString = $extensionString.Replace("EXECUTE-PS-$($line[2])",$PSoutout)
+			Sleep -Milliseconds 500
 		}
 	}
 	$extensionXML = [xml]$extensionString
@@ -514,11 +515,12 @@ Function GenerateCommand ($Setup, $serviceName, $osImage, $HSData)
 			}
 		}
 		$ExtensionCommand = ""
-		foreach ( $extn in $newVM.Extension)
+		foreach ( $extn in $CurrentTestData.ProvisionTimeExtensions.Split(","))
 		{
+			$extn = $extn.Trim()
 			foreach ( $newExtn in $extensionXML.Extensions.Extension )
 			{
-				if ($newExtn.Name -eq $newVM.Extension)
+				if ($newExtn.Name -eq $extn)
 				{
 					[hashtable]$extensionHashTable = @{};
 					$newExtn.Params.ChildNodes | foreach {$extensionHashTable[$_.Name] = $_.'#text'};
@@ -527,12 +529,13 @@ Function GenerateCommand ($Setup, $serviceName, $osImage, $HSData)
 					$PrivateConfiguration += $extensionHashTable | ConvertTo-Json
 					if ( $ExtensionCommand )
 					{
-						$ExtensionCommand = $ExtensionCommand + " | Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName)  -Publisher $($newExtn.Publisher) -Version $($newExtn.Version) -PublicConfiguration `$PublicConfiguration[$extensionCounter] -PrivateConfiguration `$PrivateConfiguration[$extensionCounter]"
+						$ExtensionCommand = $ExtensionCommand + " | Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName) -ReferenceName $extn -Publisher $($newExtn.Publisher) -Version $($newExtn.Version) -PublicConfiguration `$PublicConfiguration[$extensionCounter] -PrivateConfiguration `$PrivateConfiguration[$extensionCounter]"
 					}
 					else
 					{
-						$ExtensionCommand = "Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName)  -Publisher $($newExtn.Publisher) -Version $($newExtn.Version) -PublicConfiguration `$PublicConfiguration[$extensionCounter] -PrivateConfiguration `$PrivateConfiguration[$extensionCounter]"
+						$ExtensionCommand = "Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName) -ReferenceName $extn -Publisher $($newExtn.Publisher) -Version $($newExtn.Version) -PublicConfiguration `$PublicConfiguration[$extensionCounter] -PrivateConfiguration `$PrivateConfiguration[$extensionCounter]"
 					}
+					LogMsg "Extension $extn (OfficialName : $($newExtn.OfficialName)) added to deployment command."
 					$extensionCounter += 1
 				}
 			}
@@ -747,7 +750,7 @@ Function CreateAllDeployments($setupType, $xmlConfig, $Distro)
 			LogMsg "Creating Hosted Service : $serviceName."
 			LogMsg "Verifying that service name is not in use."
 			$isServiceDeleted = DeleteService -serviceName $serviceName
-#isServiceDeleted = "True"
+#$isServiceDeleted = "True"
 			if ($isServiceDeleted -eq "True")
 			{	 
 				$isServiceCreated = CreateService -serviceName $serviceName -location $location -AffinityGroup $AffinityGroup
