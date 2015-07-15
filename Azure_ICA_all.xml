@@ -1898,7 +1898,7 @@
 					</VirtualMachine>
 				</HostedService>
 			</DS14DISK12>
-			<A1>
+			<ExtensionTest>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
 					<VirtualMachine>
@@ -1913,7 +1913,7 @@
 						<DataDisk></DataDisk>
 					</VirtualMachine>
 				</HostedService>
-			</A1>			
+			</ExtensionTest>			
 		</Deployment>
 		
 
@@ -3572,7 +3572,7 @@
 			<testName>ICA-CUSTOM-SCRIPT-EXTENSION-TEST</testName>
 			<testScript></testScript>
 			<testScriptps1>ICA-CUSTOM-SCRIPT-EXTENSION-TEST.ps1</testScriptps1>
-			<setupType>ExtraSmallVM</setupType>
+			<setupType>ExtensionTest</setupType>
 			<ProvisionTimeExtensions>CustomScriptTouchCommand</ProvisionTimeExtensions>
 			<PostProvisionExtensions>TO_BE_DONE</PostProvisionExtensions>
 			<Priority>P0</Priority>
