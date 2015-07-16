@@ -9,7 +9,7 @@
 				<fileUris></fileUris>
 				<commandToExecute>touch /var/log/CustomExtensionSuccessful</commandToExecute>
 			</Params>
-			<Version>1.2</Version>
+			<Version>1.*</Version>
 		</Extension>
 		<Extension>
 			<Name>LinuxDiagnostic</Name>
