@@ -439,21 +439,24 @@ Function GenerateCommand ($Setup, $serviceName, $osImage, $HSData)
 	$extensionCounter = 0
 	$vmCommands = @()
 	$vmCount = 0
-	$extensionString = [string](Get-Content .\XML\Extensions.xml)
-	foreach ($line in $extensionString.Split())
-	{
-		if ($line -imatch "EXECUTE-PS-")
-		{
-			$line = $line.Trim()
-			$line = $line.Replace("EXECUTE-PS-","")
-			$line = $line.Split(">")
-			$line = $line.Split("<")
-			$PSoutout = Invoke-Expression -Command $line[2]
-			$extensionString = $extensionString.Replace("EXECUTE-PS-$($line[2])",$PSoutout)
-			Sleep -Milliseconds 500
-		}
-	}
-	$extensionXML = [xml]$extensionString
+    if ( $CurrentTestData.ProvisionTimeExtensions )
+    {
+	    $extensionString = [string](Get-Content .\XML\Extensions.xml)
+	    foreach ($line in $extensionString.Split())
+	    {
+		    if ($line -imatch "EXECUTE-PS-")
+		    {
+			    $line = $line.Trim()
+			    $line = $line.Replace("EXECUTE-PS-","")
+			    $line = $line.Split(">")
+			    $line = $line.Split("<")
+			    $PSoutout = Invoke-Expression -Command $line[2]
+			    $extensionString = $extensionString.Replace("EXECUTE-PS-$($line[2])",$PSoutout)
+			    Sleep -Milliseconds 500
+		    }
+	    }
+	    $extensionXML = [xml]$extensionString
+    }
 	foreach ( $newVM in $HS.VirtualMachine)
 	{
 		$vmCount = $vmCount + 1
@@ -514,40 +517,43 @@ Function GenerateCommand ($Setup, $serviceName, $osImage, $HSData)
 				}
 			}
 		}
-		$ExtensionCommand = ""
-		foreach ( $extn in $CurrentTestData.ProvisionTimeExtensions.Split(","))
-		{
-			$extn = $extn.Trim()
-			foreach ( $newExtn in $extensionXML.Extensions.Extension )
-			{
-				if ($newExtn.Name -eq $extn)
-				{
-					[hashtable]$extensionHashTable = @{};
-					$newExtn.Params.ChildNodes | foreach {$extensionHashTable[$_.Name] = $_.'#text'};
-					$PublicConfiguration += $extensionHashTable | ConvertTo-Json
-					[hashtable]$extensionHashTable = @{};
-					$PrivateConfiguration += $extensionHashTable | ConvertTo-Json
-					if ( $ExtensionCommand )
-					{
-						$ExtensionCommand = $ExtensionCommand + " | Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName) -ReferenceName $extn -Publisher $($newExtn.Publisher) -Version $($newExtn.Version) -PublicConfiguration `$PublicConfiguration[$extensionCounter] -PrivateConfiguration `$PrivateConfiguration[$extensionCounter]"
-					}
-					else
-					{
-						$ExtensionCommand = "Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName) -ReferenceName $extn -Publisher $($newExtn.Publisher) -Version $($newExtn.Version) -PublicConfiguration `$PublicConfiguration[$extensionCounter] -PrivateConfiguration `$PrivateConfiguration[$extensionCounter]"
-					}
-					LogMsg "Extension $extn (OfficialName : $($newExtn.OfficialName)) added to deployment command."
-					$extensionCounter += 1
-				}
-			}
-		}
-		if ( $PublicConfiguration )
-		{
-			Set-Variable -Name PublicConfiguration -Value $PublicConfiguration -Scope Global
-		}
-		if ( $PrivateConfiguration )
-		{
-			Set-Variable -Name PrivateConfiguration -Value $PrivateConfiguration -Scope Global
-		}
+        if ( $CurrentTestData.ProvisionTimeExtensions )
+        {
+		    $ExtensionCommand = ""
+		    foreach ( $extn in $CurrentTestData.ProvisionTimeExtensions.Split(","))
+		    {
+			    $extn = $extn.Trim()
+			    foreach ( $newExtn in $extensionXML.Extensions.Extension )
+			    {
+				    if ($newExtn.Name -eq $extn)
+				    {
+					    [hashtable]$extensionHashTable = @{};
+					    $newExtn.Params.ChildNodes | foreach {$extensionHashTable[$_.Name] = $_.'#text'};
+					    $PublicConfiguration += $extensionHashTable | ConvertTo-Json
+					    [hashtable]$extensionHashTable = @{};
+					    $PrivateConfiguration += $extensionHashTable | ConvertTo-Json
+					    if ( $ExtensionCommand )
+					    {
+						    $ExtensionCommand = $ExtensionCommand + " | Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName) -ReferenceName $extn -Publisher $($newExtn.Publisher) -Version $($newExtn.Version) -PublicConfiguration `$PublicConfiguration[$extensionCounter] -PrivateConfiguration `$PrivateConfiguration[$extensionCounter]"
+					    }
+					    else
+					    {
+						    $ExtensionCommand = "Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName) -ReferenceName $extn -Publisher $($newExtn.Publisher) -Version $($newExtn.Version) -PublicConfiguration `$PublicConfiguration[$extensionCounter] -PrivateConfiguration `$PrivateConfiguration[$extensionCounter]"
+					    }
+					    LogMsg "Extension $extn (OfficialName : $($newExtn.OfficialName)) added to deployment command."
+					    $extensionCounter += 1
+				    }
+			    }
+		    }
+		    if ( $PublicConfiguration )
+		    {
+			    Set-Variable -Name PublicConfiguration -Value $PublicConfiguration -Scope Global
+		    }
+		    if ( $PrivateConfiguration )
+		    {
+			    Set-Variable -Name PrivateConfiguration -Value $PrivateConfiguration -Scope Global
+		    }
+        }
 		$sshPath = '/home/' + $defaultuser + '/.ssh/authorized_keys'		 	
 		$vmRoleConfig = "New-AzureVMConfig -Name $vmName -InstanceSize $instanceSize -ImageName $osImage"
 		$vmProvConfig = "Add-AzureProvisioningConfig -Linux -LinuxUser $defaultuser -Password $defaultPassword -SSHPublicKeys (New-AzureSSHKey -PublicKey -Fingerprint 690076D4C41C1DE677CD464EA63B44AE94C2E621 -Path $sshPath)"
