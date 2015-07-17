@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+	<Extensions>
+		<Extension>
+			<Name>CustomScriptTouchCommand</Name>
+			<OfficialName>CustomScriptForLinux</OfficialName>
+			<Publisher>"Microsoft.OSTCExtensions"</Publisher>
+			<Params>
+				<timestamp>EXECUTE-PS-(Get-Date).ticks</timestamp>
+				<fileUris></fileUris>
+				<commandToExecute>touch /var/log/CustomExtensionSuccessful</commandToExecute>
+			</Params>
+			<Version>1.*</Version>
+		</Extension>
+		<Extension>
+			<Name>LinuxDiagnostic</Name>
+			<!-- To be done... -->
+		</Extension>
+	</Extensions>

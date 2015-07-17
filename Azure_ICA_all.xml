@@ -1898,7 +1898,22 @@
 					</VirtualMachine>
 				</HostedService>
 			</DS14DISK12>
-			
+			<ExtensionTest>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Basic_A1</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</ExtensionTest>			
 		</Deployment>
 		
 
@@ -3553,6 +3568,15 @@
 			</dataDiskConfig>			
 			<Priority>P0</Priority>
 		</test>		
+		<test>
+			<testName>ICA-CUSTOM-SCRIPT-EXTENSION-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-CUSTOM-SCRIPT-EXTENSION-TEST.ps1</testScriptps1>
+			<setupType>ExtensionTest</setupType>
+			<ProvisionTimeExtensions>CustomScriptTouchCommand</ProvisionTimeExtensions>
+			<PostProvisionExtensions>TO_BE_DONE</PostProvisionExtensions>
+			<Priority>P0</Priority>
+		</test>		
 	</testsDefinition>
 
 
@@ -4132,7 +4156,13 @@
 			<test>
 				<Name>ICA-LIS4-TEST</Name>
 			</test>
-		</Cycle>		
+		</Cycle>
+		<Cycle>
+			<cycleName>EXTENSION</cycleName>
+			<test>
+				<Name>ICA-CUSTOM-SCRIPT-EXTENSION-TEST</Name>
+			</test>
+		</Cycle>
 		<Cycle>
 			<cycleName>DEBUG</cycleName>
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
