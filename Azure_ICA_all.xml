@@ -1336,7 +1336,7 @@
 				<HostedService>
 					<VirtualMachine>
 						<state></state>
-						<InstanceSize>Small</InstanceSize>
+						<InstanceSize>Basic_A1</InstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1937,6 +1937,7 @@
 			<setupType>VMImage</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureSetup_001</TestID>
 		</test>
 	
@@ -1948,6 +1949,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_001</TestID>
 		</test>
 		<test>
@@ -1958,6 +1960,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_003</TestID>
 		</test>
 		<test>
@@ -1968,6 +1971,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_004</TestID>
 		</test>
 		<test>
@@ -1978,6 +1982,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_005</TestID>
 		</test>
 
@@ -1989,6 +1994,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_006</TestID>
 		</test>
 		<test>
@@ -1999,6 +2005,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_007</TestID>
 		</test>
 		<test>
@@ -2009,6 +2016,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_009</TestID>
 		</test>
 		<test>
@@ -2019,6 +2027,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_010</TestID>
 		</test>
 		<test>
@@ -2029,6 +2038,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_011</TestID>
 		</test>
 		<test>
@@ -2039,6 +2049,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_012</TestID>
 		</test>
 		<test>
@@ -2049,6 +2060,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_020</TestID>
 		</test>
 		<test>
@@ -2059,6 +2071,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureBVT_013</TestID>
 		</test>
 		<test>
@@ -2069,6 +2082,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_014</TestID>
 		</test>
 		<test>
@@ -2079,6 +2093,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_015</TestID>
 		</test>
 		<test>
@@ -2089,6 +2104,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_016</TestID>
 		</test>
 		<test>
@@ -2099,6 +2115,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_017</TestID>
 		</test>
 		<test>
@@ -2109,6 +2126,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_018</TestID>
 		</test>
 		<test>
@@ -2119,6 +2137,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_019</TestID>
 		</test>
 	
@@ -2130,6 +2149,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureBVT_020</TestID>
 		</test>
 		<test>
@@ -2140,6 +2160,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_021</TestID>
 		</test>
 		<test>
@@ -2150,6 +2171,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_022</TestID>
 		</test>
 		<test>
@@ -2160,6 +2182,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_023</TestID>
 		</test>
 		<test>
@@ -2170,6 +2193,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_024</TestID>
 		</test>
 		<test>
@@ -2180,6 +2204,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_025</TestID>
 		</test>
 		<test>
@@ -2192,6 +2217,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_OA_004</TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -2204,6 +2230,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_OA_001</TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -2217,6 +2244,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_OA_003</TestID>
 			<TestMode>IP</TestMode>
 			<Priority>P0</Priority>
@@ -2231,6 +2259,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_OA_005</TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -2244,6 +2273,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_OA_006</TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -2256,6 +2286,7 @@
 			<setupType>PublicEndpoint</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -2268,6 +2299,7 @@
 			<setupType>PublicEndPoint</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_OA_007</TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -2280,6 +2312,7 @@
 			<setupType>PublicEndpoint</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -2292,6 +2325,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_INT_003</TestID>
 			<TestMode>IP,Hostname</TestMode>
 			<Priority>P0</Priority>
@@ -2305,6 +2339,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_INT_001</TestID>
 			<TestMode>IP,Hostname</TestMode>
 			<Priority>P0</Priority>
@@ -2319,6 +2354,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_INT_002</TestID>
 			<TestMode>DIP,Hostname</TestMode>
 			<Priority>P0</Priority>
@@ -2333,6 +2369,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_INT_005</TestID>
 			<TestMode>DIP,Hostname</TestMode>
 			<Priority>P0</Priority>
@@ -2346,6 +2383,7 @@
 			<setupType>IEndpointSingleHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_INT_007</TestID>
 			<TestMode>DIP,Hostname</TestMode>
 			<Priority>P0</Priority>
@@ -2359,6 +2397,7 @@
 			<setupType>IEndpointSingleHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_INT_006</TestID>
 			<TestMode>DIP,Hostname</TestMode>
 			<Priority>P0</Priority>
@@ -2374,6 +2413,7 @@
 			<setupType>IEndpointTwoHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_INT_010</TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -2386,6 +2426,7 @@
 			<setupType>PublicEndpoint</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -2398,6 +2439,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_INP_001</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2411,6 +2453,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_INP_003</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2424,6 +2467,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_INP_008</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2438,6 +2482,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_INP_005</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2452,6 +2497,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_INP_002</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2466,6 +2512,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_INP_007</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2480,6 +2527,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_INP_006</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2495,6 +2543,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_INT_004</TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -2507,6 +2556,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_LB_001</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2521,6 +2571,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_LB_002</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2535,6 +2586,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_LB_003</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2549,6 +2601,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_LB_004</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2563,6 +2616,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_LB_005</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2577,6 +2631,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_LB_006</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2591,6 +2646,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_CPSP_001</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2604,6 +2660,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_CPSP_002</TestID>
 			<SubtestValues>2,4</SubtestValues>
 			<TestMode>VIP,URL</TestMode>
@@ -2618,6 +2675,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_CPSP_007</TestID>
 			<SubtestValues>2,4</SubtestValues>
 			<TestMode>VIP,URL</TestMode>
@@ -2635,6 +2693,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2648,6 +2707,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_CPSP_003</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2661,6 +2721,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_CPOP_002</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2674,6 +2735,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_CPSP_006</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2687,6 +2749,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_CPOP_005</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2701,6 +2764,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_CPOP_001</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2714,6 +2778,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_CPSP_005</TestID>
 			<TestMode>VIP,URL</TestMode>
 		</test>
@@ -2726,6 +2791,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_CPOP_004</TestID>
 			<TestMode>VIP,URL</TestMode>
 		</test>
@@ -2739,6 +2805,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 		</test>
 		<test>
@@ -2750,6 +2817,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 		</test>
 		<test>
@@ -2761,6 +2829,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_INP_004</TestID>
 			<TestMode>VIP,URL</TestMode>
 		</test>
@@ -2773,6 +2842,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_INP_009</TestID>
 			<TestMode>VIP,URL</TestMode>
 		</test>
@@ -2785,6 +2855,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_INT_008</TestID>
 			<TestMode>IP,Hostname</TestMode>
 		</test>
@@ -2797,6 +2868,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_INT_009</TestID>
 			<TestMode>IP,Hostname</TestMode>
 		</test>
@@ -2810,6 +2882,7 @@
 			<setupType>IEndpointSingleHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_IDNS_001</TestID>
 		</test>
 
@@ -2824,6 +2897,7 @@
 			<setupType>IEndpointSingleHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_IDNS_002</TestID>
 		</test>
 		<test>
@@ -2836,6 +2910,7 @@
 			<setupType>IEndpointTwoHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureNetwork_IDNS_006</TestID>
 		</test>
 
@@ -2849,6 +2924,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureVNET_INTER_001</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>DIP,Hostname</TestMode>
@@ -2861,6 +2937,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureVNET_INTER_008</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>DIP,Hostname</TestMode>
@@ -2873,6 +2950,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureVNET_INTRA_001</TestID>
 			<SubtestValues>SameHS-DiffSubnet,DiffHS-SameSubnet,DiffHS-DiffSubnet</SubtestValues>
 			<TestMode>DIP,Hostname</TestMode>
@@ -2885,6 +2963,7 @@
 			<setupType>VNETVM-EXT</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureVNET_OA_001</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>IP</TestMode>
@@ -2897,6 +2976,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureVNET_SANITY_001</TestID>
 			<SubtestValues></SubtestValues>
 			<TestMode></TestMode>
@@ -2909,6 +2989,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureVNET_SANITY_002</TestID>
 			<SubtestValues></SubtestValues>
 			<TestMode></TestMode>
@@ -2921,6 +3002,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureVNET_SANITY_006</TestID>
 			<SubtestValues></SubtestValues>
 			<TestMode></TestMode>
@@ -2933,6 +3015,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureVNET_SANITY_005</TestID>
 			<SubtestValues></SubtestValues>
 			<TestMode></TestMode>
@@ -2945,6 +3028,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureVNET_INTRA_002</TestID>
 			<SubtestValues>SameHS-DiffSubnet,DiffHS-SameSubnet,DiffHS-DiffSubnet</SubtestValues>
 			<TestMode>DIP,Hostname</TestMode>
@@ -2957,6 +3041,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureVNET_INTER_002</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>DIP,Hostname</TestMode>
@@ -2969,6 +3054,7 @@
 			<setupType>VNETVM-EXT</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureVNET_OA_002</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>IP</TestMode>
@@ -2982,6 +3068,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureVNET_INTRA_003</TestID>
 			<SubtestValues>SameHS-DiffSubnet,DiffHS-SameSubnet,DiffHS-DiffSubnet</SubtestValues>
 			<TestMode>DIP,Hostname</TestMode>
@@ -2994,6 +3081,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureVNET_INTER_007</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>IP,Hostname</TestMode>
@@ -3006,6 +3094,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureVNET_INTER_010</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>DIP,Hostname</TestMode>
@@ -3020,6 +3109,7 @@
 			<setupType>VNETVM-EXT</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureVNET_OA_003</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>IP,URL</TestMode>
@@ -3033,6 +3123,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureVNET_INTER_003</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>DIP,Hostname</TestMode>
@@ -3046,6 +3137,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureVNET_INTER_004</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>DIP,Hostname</TestMode>
@@ -3058,6 +3150,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureVNET_INTER_005</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>DIP,Hostname</TestMode>
@@ -3070,6 +3163,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureVNET_INTER_006</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>DIP,Hostname</TestMode>
@@ -3082,6 +3176,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>AzureVNET_INTER_009</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>DIP,Hostname</TestMode>
@@ -3097,6 +3192,7 @@
 			<TestType></TestType>
 			<E2ESetupCmdLineArgument>singleVM_setup</E2ESetupCmdLineArgument>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -3109,6 +3205,7 @@
 			<newsetupType>PublicEndpoint</newsetupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<SubtestValues>siege</SubtestValues>
 			<!--You must provide siege time with time format 's' for seconds, 'm' for minutes and 'h' for hours-->
@@ -3126,6 +3223,7 @@
 			<TestType></TestType>
 			<E2ESetupCmdLineArgument>loadbalancer_setup</E2ESetupCmdLineArgument>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -3138,6 +3236,7 @@
 			<newsetupType>PublicEndpoint</newsetupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<SubtestValues>siege</SubtestValues>
 			<!--You must provide siege time with time format 's' for seconds, 'm' for minutes and 'h' for hours-->
@@ -3155,6 +3254,7 @@
 			<setupType></setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<!--ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM -->
 			<SubtestValues>MediumVM</SubtestValues>
@@ -3170,6 +3270,7 @@
 			<setupType></setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<!--ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM -->
 			<SubtestValues>MediumVM</SubtestValues>
@@ -3189,6 +3290,7 @@
 			<setupType>IEndpointSingleHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>Perf_001</TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -3202,6 +3304,7 @@
 			<setupType>IEndpointSingleHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>Perf_002</TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -3214,6 +3317,7 @@
 			<setupType>MeshVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>Perf_003</TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -3235,6 +3339,7 @@
 			<SubtestValues>Here_some_text_is_required_due_to_automation_structure</SubtestValues>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -3247,6 +3352,7 @@
 			<setupType>xSMBVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<SubtestValues></SubtestValues>
 			<MountPoint>'/azureshare'</MountPoint>
@@ -3264,6 +3370,7 @@
 			<setupType></setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<!--ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM -->
 			<SubtestValues>ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM</SubtestValues>
@@ -3277,6 +3384,7 @@
 			<setupType></setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<!--ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM -->
 			<SubtestValues>SmallVM,MediumVM,LargeVM,ExtraLargeVM</SubtestValues>
@@ -3290,6 +3398,7 @@
 			<setupType>SmallVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<!--ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM -->
 			<SubtestValues></SubtestValues>
@@ -3303,6 +3412,7 @@
 			<setupType>LargeVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<!--ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM -->
 			<SubtestValues></SubtestValues>
@@ -3316,6 +3426,7 @@
 			<setupType></setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<!--ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM -->
 			<SubtestValues>ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM</SubtestValues>
@@ -3347,6 +3458,7 @@
 			<setupType></setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<!--ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM -->
 			<SubtestValues>SmallVM,MediumVM,LargeVM,ExtraLargeVM</SubtestValues>
@@ -3378,6 +3490,7 @@
 			<setupType>SmallVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<SubtestValues></SubtestValues>
 			<Priority>P0</Priority>
@@ -3390,6 +3503,7 @@
 			<setupType>SmallVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<SubtestValues></SubtestValues>
 			<Priority>P0</Priority>
@@ -3402,6 +3516,7 @@
 			<setupType>SmallVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<SubtestValues></SubtestValues>
 			<Priority>P0</Priority>
@@ -3414,6 +3529,7 @@
 			<setupType>SmallVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<!--ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM -->
 			<SubtestValues>Two</SubtestValues>
@@ -3427,6 +3543,7 @@
 			<setupType>SmallVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<!--ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM -->
 			<SubtestValues>Two</SubtestValues>
@@ -3440,6 +3557,7 @@
 			<setupType>SmallVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 			<SubtestValues></SubtestValues>
 			<Priority>P0</Priority>
@@ -3453,6 +3571,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>Injection_01</TestID>
 		</test>
 		
@@ -3464,6 +3583,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>Injection_02</TestID>
 		</test>
 		<test>
@@ -3474,6 +3594,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>Injection_03</TestID>
 		</test>
 		<test>
@@ -3484,6 +3605,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID>Injection_04</TestID>
 		</test>
 	
@@ -3495,6 +3617,7 @@
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<!-- <SubtestValues>ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM</SubtestValues> -->
 			<SubtestValues>ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM,A5,A6,A7,A8,A9,A10,A11,D1,D2,D3,D4,D11,D12,D13,D14,G1,G2,G3,G4,G5</SubtestValues>
 			<DeploymentCount>250</DeploymentCount>
@@ -3510,6 +3633,7 @@
 			<setupType>A8</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<!-- <SubtestValues>ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM,D1,D2,D3,D4</SubtestValues> -->
 			<SubtestValues></SubtestValues>
 			<TestID></TestID>
@@ -3522,6 +3646,7 @@
 			<setupType>A8</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<!-- <SubtestValues>ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM,D1,D2,D3,D4</SubtestValues> -->
 			<SubtestValues></SubtestValues>
 			<TestID></TestID>
@@ -3542,6 +3667,7 @@
 			</testParams>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 		</test>
 		<test>

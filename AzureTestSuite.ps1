@@ -154,6 +154,16 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
         }
 		if ($currentTestData)
 		{
+			if ( $UseAzureResourceManager -and !($currentTestData.SupportedExecutionModes -imatch "AzureResourceManager"))
+			{
+				LogMsg "$($currentTestData.testName) does not support AzureResourceManager execution mode."
+				continue;
+			}
+			if (!$UseAzureResourceManager -and !($currentTestData.SupportedExecutionModes -imatch "AzureServiceManagement"))
+			{
+				LogMsg "$($currentTestData.testName) does not support AzureServiceManagement execution mode."
+				continue;
+			}
 			$testcase = StartLogTestCase $testsuite "$($test.Name)" "CloudTesting.$($testCycle.cycleName)"
 			$testSuiteResultDetails.totalTc = $testSuiteResultDetails.totalTc +1
 			$stopWatch = SetStopWatch
