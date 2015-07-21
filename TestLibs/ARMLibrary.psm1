@@ -1,126 +1,126 @@
 ﻿Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro)
 {
 
-	$resourceGroupCount = 0
-	$xml = $xmlConfig
-	LogMsg $setupType
-	$setupTypeData = $xml.config.Azure.Deployment.$setupType
-	$allsetupGroups = $setupTypeData
-	if ($allsetupGroups.HostedService[0].Location -or $allsetupGroups.HostedService[0].AffinityGroup)
-	{
-		$isMultiple = 'True'
-		$resourceGroupCount = 0
-	}
-	else
-	{
-		$isMultiple = 'False'
-	}
+    $resourceGroupCount = 0
+    $xml = $xmlConfig
+    LogMsg $setupType
+    $setupTypeData = $xml.config.Azure.Deployment.$setupType
+    $allsetupGroups = $setupTypeData
+    if ($allsetupGroups.HostedService[0].Location -or $allsetupGroups.HostedService[0].AffinityGroup)
+    {
+        $isMultiple = 'True'
+        $resourceGroupCount = 0
+    }
+    else
+    {
+        $isMultiple = 'False'
+    }
 
-	foreach ($newDistro in $xml.config.Azure.Deployment.Data.Distro)
-	{
+    foreach ($newDistro in $xml.config.Azure.Deployment.Data.Distro)
+    {
 
-		if ($newDistro.Name -eq $Distro)
-		{
-			$osImage = $newDistro.OsImage
+        if ($newDistro.Name -eq $Distro)
+        {
+            $osImage = $newDistro.OsImage
             $osVHD = $newDistro.OsVHD
-		}
-	}
+        }
+    }
 
-	$location = $xml.config.Azure.General.Location
-	$AffinityGroup = $xml.config.Azure.General.AffinityGroup
+    $location = $xml.config.Azure.General.Location
+    $AffinityGroup = $xml.config.Azure.General.AffinityGroup
 
-	foreach ($RG in $setupTypeData.HostedService )
-	{
-		$curtime = Get-Date
-		$isServiceDeployed = "False"
-		$retryDeployment = 0
-		if ( $RG.Tag -ne $null )
-		{
-			$groupName = "ICA-RG-" + $RG.Tag + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
-		}
-		else
-		{
-			$groupName = "ICA-RG-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
-		}
-		if($isMultiple -eq "True")
-		{
-			$groupName = $groupName + "-" + $resourceGroupCount
-		}
+    foreach ($RG in $setupTypeData.HostedService )
+    {
+        $curtime = Get-Date
+        $isServiceDeployed = "False"
+        $retryDeployment = 0
+        if ( $RG.Tag -ne $null )
+        {
+            $groupName = "ICA-RG-" + $RG.Tag + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
+        }
+        else
+        {
+            $groupName = "ICA-RG-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
+        }
+        if($isMultiple -eq "True")
+        {
+            $groupName = $groupName + "-" + $resourceGroupCount
+        }
 
-		while (($isServiceDeployed -eq "False") -and ($retryDeployment -lt 5))
-		{
+        while (($isServiceDeployed -eq "False") -and ($retryDeployment -lt 5))
+        {
             #$groupName = "ICA-RG-D1-U1410-7-20-17-0-38"
-			LogMsg "Creating Resource Group : $groupName."
-			LogMsg "Verifying that Resource group name is not in use."
-			#$isServiceDeleted = DeleteResourceGroup -RGName $groupName
+            LogMsg "Creating Resource Group : $groupName."
+            LogMsg "Verifying that Resource group name is not in use."
+            #$isServiceDeleted = DeleteResourceGroup -RGName $groupName
 $isServiceDeleted = $true
-			if ($isServiceDeleted)
-			{	
-				$isServiceCreated = CreateResourceGroup -RGName $groupName -location $location
+            if ($isServiceDeleted)
+            {    
+                $isServiceCreated = CreateResourceGroup -RGName $groupName -location $location
 $isServiceCreated = $true
-				if ($isServiceCreated -eq "True")
-				{
-					#$isCertAdded = AddCertificate -serviceName $groupName
+                if ($isServiceCreated -eq "True")
+                {
+                    #$isCertAdded = AddCertificate -serviceName $groupName
 $isCertAdded = "True"
-					if ($isCertAdded -eq "True")
-					{
-						#LogMsg "Certificate added successfully."
+                    if ($isCertAdded -eq "True")
+                    {
+                        #LogMsg "Certificate added successfully."
                         $azureDeployJSONFilePath = "$LogDir\$groupName.json"
-						$DeploymentCommand = GenerateAzureDeployJSONFile -RGName $groupName -osImage $osImage -osVHD $osVHD -RGXMLData $RG -Location $location -azuredeployJSONFilePath $azureDeployJSONFilePath
-						$DeploymentStartTime = (Get-Date)
-						$CreateRGDeployments = CreateResourceGroupDeployment -RGName $groupName -location $location -setupType $setupType -TemplateFile $azureDeployJSONFilePath
-						$DeploymentEndTime = (Get-Date)
-						$DeploymentElapsedTime = $DeploymentEndTime - $DeploymentStartTime
-						if ( $CreateRGDeployments )
-						{
-							$retValue = "True"
-							$isServiceDeployed = "True"
-							$resourceGroupCount = $resourceGroupCount + 1
-							if ($resourceGroupCount -eq 1)
-							{
-								$deployedGroups = $groupName
-							}
-							else
-							{
-								$deployedGroups = $deployedGroups + "^" + $groupName
-							}
+                        $DeploymentCommand = GenerateAzureDeployJSONFile -RGName $groupName -osImage $osImage -osVHD $osVHD -RGXMLData $RG -Location $location -azuredeployJSONFilePath $azureDeployJSONFilePath
+                        $DeploymentStartTime = (Get-Date)
+                        $CreateRGDeployments = CreateResourceGroupDeployment -RGName $groupName -location $location -setupType $setupType -TemplateFile $azureDeployJSONFilePath
+                        $DeploymentEndTime = (Get-Date)
+                        $DeploymentElapsedTime = $DeploymentEndTime - $DeploymentStartTime
+                        if ( $CreateRGDeployments )
+                        {
+                            $retValue = "True"
+                            $isServiceDeployed = "True"
+                            $resourceGroupCount = $resourceGroupCount + 1
+                            if ($resourceGroupCount -eq 1)
+                            {
+                                $deployedGroups = $groupName
+                            }
+                            else
+                            {
+                                $deployedGroups = $deployedGroups + "^" + $groupName
+                            }
 
-						}
-						else
-						{
-							LogErr "Unable to Deploy one or more VM's"
-							$retryDeployment = $retryDeployment + 1
-							$retValue = "False"
-							$isServiceDeployed = "False"
-						}
-					}
-					else
-					{
-						LogErr "Unable to Add certificate to $groupName"
-						$retryDeployment = $retryDeployment + 1
-						$retValue = "False"
-						$isServiceDeployed = "False"
-					}
+                        }
+                        else
+                        {
+                            LogErr "Unable to Deploy one or more VM's"
+                            $retryDeployment = $retryDeployment + 1
+                            $retValue = "False"
+                            $isServiceDeployed = "False"
+                        }
+                    }
+                    else
+                    {
+                        LogErr "Unable to Add certificate to $groupName"
+                        $retryDeployment = $retryDeployment + 1
+                        $retValue = "False"
+                        $isServiceDeployed = "False"
+                    }
 
-				}
-				else
-				{
-					LogErr "Unable to create $groupName"
-					$retryDeployment = $retryDeployment + 1
-					$retValue = "False"
-					$isServiceDeployed = "False"
-				}
-			}	
-			else
-			{
-				LogErr "Unable to delete existing resource group - $groupName"
-				$retryDeployment = 3
-				$retValue = "False"
-				$isServiceDeployed = "False"
-			}
-		}
-	}
-	return $retValue, $deployedGroups, $resourceGroupCount, $DeploymentElapsedTime
+                }
+                else
+                {
+                    LogErr "Unable to create $groupName"
+                    $retryDeployment = $retryDeployment + 1
+                    $retValue = "False"
+                    $isServiceDeployed = "False"
+                }
+            }    
+            else
+            {
+                LogErr "Unable to delete existing resource group - $groupName"
+                $retryDeployment = 3
+                $retValue = "False"
+                $isServiceDeployed = "False"
+            }
+        }
+    }
+    return $retValue, $deployedGroups, $resourceGroupCount, $DeploymentElapsedTime
 }
 
 Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
@@ -135,81 +135,81 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
         LogMsg "$RGName does not exists."
         $retValue = $true
     }
-	return $retValue
+    return $retValue
 }
 
 Function CreateResourceGroup([string]$RGName, $location)
 {
-	$FailCounter = 0
-	$retValue = "False"
+    $FailCounter = 0
+    $retValue = "False"
     $ResourceGroupDeploymentName = $RGName + "-deployment"
     $azureDeployJSONFilePath = ".\temp\msjason\ssauto.json"
 
-	While(($retValue -eq $false) -and ($FailCounter -lt 5))
-	{
-	    try
+    While(($retValue -eq $false) -and ($FailCounter -lt 5))
+    {
+        try
         {
-		    $FailCounter++
-		    if($location)
+            $FailCounter++
+            if($location)
             {
-			    LogMsg "Using location : $location"
-			    $createRG = New-AzureResourceGroup -Name $RGName -Location $location.Replace('"','') -Force -Verbose
-		    }
-		    $operationStatus = $createRG.ProvisioningState
-		    if ($operationStatus  -eq "Succeeded")
+                LogMsg "Using location : $location"
+                $createRG = New-AzureResourceGroup -Name $RGName -Location $location.Replace('"','') -Force -Verbose
+            }
+            $operationStatus = $createRG.ProvisioningState
+            if ($operationStatus  -eq "Succeeded")
             {
-			    LogMsg "Resource Group $RGName Created."
-			    $retValue = $true
-		    }
-		    else 
+                LogMsg "Resource Group $RGName Created."
+                $retValue = $true
+            }
+            else 
             {
-			    LogErr "Failed to Resource Group $RGName."
-			    $retValue = $false
-		    }
-		}
-		catch
-		{
-		    $retValue = $false
-		}
-	}
-	return $retValue
+                LogErr "Failed to Resource Group $RGName."
+                $retValue = $false
+            }
+        }
+        catch
+        {
+            $retValue = $false
+        }
+    }
+    return $retValue
 }
 
 Function CreateResourceGroupDeployment([string]$RGName, $location, $setupType, $TemplateFile)
 {
-	$FailCounter = 0
-	$retValue = "False"
+    $FailCounter = 0
+    $retValue = "False"
     $ResourceGroupDeploymentName = $RGName + "-deployment"
     $azureDeployJSONFilePath = ".\temp\msjason\ssauto.json"
 
-	While(($retValue -eq $false) -and ($FailCounter -lt 5))
-	{
-	    try
+    While(($retValue -eq $false) -and ($FailCounter -lt 5))
+    {
+        try
         {
-		    $FailCounter++
-		    if($location)
+            $FailCounter++
+            if($location)
             {
-			    LogMsg "Creating Deployment using $TemplateFile ..."
-			    $createRGDeployment = New-AzureResourceGroupDeployment -Name $ResourceGroupDeploymentName -ResourceGroupName $RGName -TemplateFile $TemplateFile -Verbose
-		    }
-		    $operationStatus = $createRGDeployment.ProvisioningState
-		    if ($operationStatus  -eq "Succeeded")
+                LogMsg "Creating Deployment using $TemplateFile ..."
+                $createRGDeployment = New-AzureResourceGroupDeployment -Name $ResourceGroupDeploymentName -ResourceGroupName $RGName -TemplateFile $TemplateFile -Verbose
+            }
+            $operationStatus = $createRGDeployment.ProvisioningState
+            if ($operationStatus  -eq "Succeeded")
             {
-			    LogMsg "Resource Group Deployment Created."
-			    $retValue = $true
-		    }
-		    else 
+                LogMsg "Resource Group Deployment Created."
+                $retValue = $true
+            }
+            else 
             {
-			    LogErr "Failed to Resource Group."
-			    $retValue = $false
-		    }
-		}
-		catch
-		{
-		    $retValue = $false
-		}
-	}
-	return $retValue
+                LogErr "Failed to Resource Group."
+                $retValue = $false
+            }
+        }
+        catch
+        {
+            $retValue = $false
+        }
+    }
+    return $retValue
 }
 
 
@@ -404,19 +404,19 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
     $role = 0
 foreach ( $newVM in $RGXMLData.VirtualMachine)
 {
-	$vmCount = $vmCount + 1
-	$VnetName = $RGXMLData.VnetName
-	$instanceSize = $newVM.InstanceSize
-	$SubnetName = $newVM.SubnetName
-	$DnsServerIP = $RGXMLData.DnsServerIP
-	if($newVM.RoleName)
-	{
-		$vmName = $newVM.RoleName
-	}
-	else
-	{
-		$vmName = $RGName+"-role-"+$role
-	}
+    $vmCount = $vmCount + 1
+    $VnetName = $RGXMLData.VnetName
+    $instanceSize = $newVM.InstanceSize
+    $SubnetName = $newVM.SubnetName
+    $DnsServerIP = $RGXMLData.DnsServerIP
+    if($newVM.RoleName)
+    {
+        $vmName = $newVM.RoleName
+    }
+    else
+    {
+        $vmName = $RGName+"-role-"+$role
+    }
 
         
         #region virtualMachines
@@ -508,11 +508,11 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                     
                     #region Add Endpoints...
                     $EndPointAdded = $false
-		            foreach ( $openedPort in $newVM.EndPoints)
-		            {
+                    foreach ( $openedPort in $newVM.EndPoints)
+                    {
                         if ( $EndPointAdded )
                         {
-                            Add-Content -Value "$($indents[6])," -Path $jsonFile			
+                            Add-Content -Value "$($indents[6])," -Path $jsonFile            
                         }
                         Add-Content -Value "$($indents[6]){" -Path $jsonFile
                             Add-Content -Value "$($indents[7])^enableDirectServerReturn^: ^False^," -Path $jsonFile
@@ -520,9 +520,9 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                             Add-Content -Value "$($indents[7])^privatePort^: 22," -Path $jsonFile
                             Add-Content -Value "$($indents[7])^publicPort^: 22," -Path $jsonFile
                             Add-Content -Value "$($indents[7])^protocol^: ^tcp^" -Path $jsonFile
-                        Add-Content -Value "$($indents[6])}" -Path $jsonFile			
+                        Add-Content -Value "$($indents[6])}" -Path $jsonFile            
                         $EndPointAdded = $true
-		            }
+                    }
                     #endregion 
 
                     Add-Content -Value "$($indents[5])]" -Path $jsonFile
@@ -541,152 +541,152 @@ Add-Content -Value "$($indents[0])}" -Path $jsonFile
 Set-Content -Path $jsonFile -Value (Get-Content $jsonFile).Replace("^",'"') -Force
 #endregion
 LogMsg "Template generated successfully."
-	return $createSetupCommand,  $RGName, $vmCount
+    return $createSetupCommand,  $RGName, $vmCount
 } 
 
 
 Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, $GetDeploymentStatistics = $false)
 {
     if( (!$EconomyMode) -or ( $EconomyMode -and ($xmlConfig.config.Azure.Deployment.$setupType.isDeployed -eq "NO")))
-	{
-		try
-		{
-			$VerifiedGroups =  $NULL
-			$retValue = $NULL
-			$ExistingGroups = Get-AzureResourceGroup
-			$i = 0
-			$role = 1
-			$setupTypeData = $xmlConfig.config.Azure.Deployment.$setupType
-			$isAllDeployed = CreateAllResourceGroupDeployments -setupType $setupType -xmlConfig $xmlConfig -Distro $Distro
+    {
+        try
+        {
+            $VerifiedGroups =  $NULL
+            $retValue = $NULL
+            $ExistingGroups = Get-AzureResourceGroup
+            $i = 0
+            $role = 1
+            $setupTypeData = $xmlConfig.config.Azure.Deployment.$setupType
+            $isAllDeployed = CreateAllResourceGroupDeployments -setupType $setupType -xmlConfig $xmlConfig -Distro $Distro
             #$isAllDeployed = CreateAllDeployments -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro
             $isAllVerified = "False"
-			$isAllConnected = "False"
-			if($isAllDeployed[0] -eq "True")
-			{
-				$deployedGroups = $isAllDeployed[1]
+            $isAllConnected = "False"
+            if($isAllDeployed[0] -eq "True")
+            {
+                $deployedGroups = $isAllDeployed[1]
                 $resourceGroupCount = $isAllDeployed[2]
-				$DeploymentElapsedTime = $isAllDeployed[3]
-				$GroupsToVerify = $deployedGroups.Split('^') ########
-				#if ( $GetDeploymentStatistics )
-				#{
-				#	$VMBooTime = GetVMBootTime -DeployedGroups $deployedGroups -TimeoutInSeconds 1800
-				#	$verifyAll = VerifyAllDeployments -GroupsToVerify $GroupsToVerify -GetVMProvisionTime $GetDeploymentStatistics
-				#	$isAllVerified = $verifyAll[0]
-				#	$VMProvisionTime = $verifyAll[1]
-				#}
-				#else
-				#{
-				#	$isAllVerified = VerifyAllDeployments -GroupsToVerify $GroupsToVerify
-				#}
-				#if ($isAllVerified -eq "True")
-				#{
+                $DeploymentElapsedTime = $isAllDeployed[3]
+                $GroupsToVerify = $deployedGroups.Split('^') ########
+                #if ( $GetDeploymentStatistics )
+                #{
+                #    $VMBooTime = GetVMBootTime -DeployedGroups $deployedGroups -TimeoutInSeconds 1800
+                #    $verifyAll = VerifyAllDeployments -GroupsToVerify $GroupsToVerify -GetVMProvisionTime $GetDeploymentStatistics
+                #    $isAllVerified = $verifyAll[0]
+                #    $VMProvisionTime = $verifyAll[1]
+                #}
+                #else
+                #{
+                #    $isAllVerified = VerifyAllDeployments -GroupsToVerify $GroupsToVerify
+                #}
+                #if ($isAllVerified -eq "True")
+                #{
                     $allVMData = GetAllDeployementData -ResourceGroups $deployedGroups
-					$isAllConnected = isAllSSHPortsEnabledRG -AllVMDataObject $allVMData
-					if ($isAllConnected -eq "True")
-					{
-			#Set-Content .\temp\DeployedGroupsFile.txt "$deployedGroups"
-						$VerifiedGroups = $deployedGroups
-						$retValue = $VerifiedGroups
-					#	$vnetIsAllConfigured = $false
-						$xmlConfig.config.Azure.Deployment.$setupType.isDeployed = $retValue
-					#Collecting Initial Kernel
-					#	$user=$xmlConfig.config.Azure.Deployment.Data.UserName
-						$KernelLogOutput= GetAndCheckKernelLogs -DeployedGroups $deployedGroups -status "Initial"
-					}
-					else
-					{
-						LogErr "Unable to connect Some/All SSH ports.."
-						$retValue = $NULL  
-					}
-				#}
-				#else
-				#{
-				#	Write-Host "Provision Failed for one or more VMs"
-				#	$retValue = $NULL
-				#}
+                    $isAllConnected = isAllSSHPortsEnabledRG -AllVMDataObject $allVMData
+                    if ($isAllConnected -eq "True")
+                    {
+            #Set-Content .\temp\DeployedGroupsFile.txt "$deployedGroups"
+                        $VerifiedGroups = $deployedGroups
+                        $retValue = $VerifiedGroups
+                    #    $vnetIsAllConfigured = $false
+                        $xmlConfig.config.Azure.Deployment.$setupType.isDeployed = $retValue
+                    #Collecting Initial Kernel
+                    #    $user=$xmlConfig.config.Azure.Deployment.Data.UserName
+                        $KernelLogOutput= GetAndCheckKernelLogs -DeployedGroups $deployedGroups -status "Initial"
+                    }
+                    else
+                    {
+                        LogErr "Unable to connect Some/All SSH ports.."
+                        $retValue = $NULL  
+                    }
+                #}
+                #else
+                #{
+                #    Write-Host "Provision Failed for one or more VMs"
+                #    $retValue = $NULL
+                #}
                 
-			}
-			else
-			{
-				LogErr "One or More Deployments are Failed..!"
-				$retValue = $NULL
-			}
-			# get the logs of the first provision-failed VM
-			#if ($retValue -eq $NULL -and $getLogsIfFailed -and $DebugOsImage)
-			#{
-			#	foreach ($service in $GroupsToVerify)
-			#	{
-			#		$VMs = Get-AzureVM -ServiceName $service
-			#		foreach ($vm in $VMs)
-			#		{
-			#			if ($vm.InstanceStatus -ne "ReadyRole" )
-			#			{
-			#				$out = GetLogsFromProvisionFailedVM -vmName $vm.Name -serviceName $service -xmlConfig $xmlConfig
-			#				return $NULL
-			#			}
-			#		}
-			#	}
-			#}
-		}
-		catch
-		{
-			LogMsg "Exception detected. Source : DeployVMs()"
-			$retValue = $NULL
-		}
-	}
-	else
-	{
-		$retValue = $xmlConfig.config.Azure.Deployment.$setupType.isDeployed
-		$KernelLogOutput= GetAndCheckKernelLogs -DeployedGroups $retValue -status "Initial"
-	}
-	
-	if ( $GetDeploymentStatistics )
-	{
-		return $retValue, $DeploymentElapsedTime, $VMBooTime, $VMProvisionTime
-	}
-	else
-	{
-		return $retValue
-	}
+            }
+            else
+            {
+                LogErr "One or More Deployments are Failed..!"
+                $retValue = $NULL
+            }
+            # get the logs of the first provision-failed VM
+            #if ($retValue -eq $NULL -and $getLogsIfFailed -and $DebugOsImage)
+            #{
+            #    foreach ($service in $GroupsToVerify)
+            #    {
+            #        $VMs = Get-AzureVM -ServiceName $service
+            #        foreach ($vm in $VMs)
+            #        {
+            #            if ($vm.InstanceStatus -ne "ReadyRole" )
+            #            {
+            #                $out = GetLogsFromProvisionFailedVM -vmName $vm.Name -serviceName $service -xmlConfig $xmlConfig
+            #                return $NULL
+            #            }
+            #        }
+            #    }
+            #}
+        }
+        catch
+        {
+            LogMsg "Exception detected. Source : DeployVMs()"
+            $retValue = $NULL
+        }
+    }
+    else
+    {
+        $retValue = $xmlConfig.config.Azure.Deployment.$setupType.isDeployed
+        $KernelLogOutput= GetAndCheckKernelLogs -DeployedGroups $retValue -status "Initial"
+    }
+    
+    if ( $GetDeploymentStatistics )
+    {
+        return $retValue, $DeploymentElapsedTime, $VMBooTime, $VMProvisionTime
+    }
+    else
+    {
+        return $retValue
+    }
 }
 
 Function isAllSSHPortsEnabledRG($AllVMDataObject)
 {
-	LogMsg "Trying to Connect to deployed VM(s)"
-	$timeout = 0
-	do
-	{
-		$WaitingForConnect = 0
-		foreach ( $vm in $AllVMDataObject)
-		{
-			Write-Host "Connecting to  $($vm.PublicIP) : $($vm.SSHPort)" -NoNewline
-			$out = Test-TCP  -testIP $($vm.PublicIP) -testport $($vm.SSHPort)
-			if ($out -ne "True")
-			{ 
-				Write-Host " : Failed"
-				$WaitingForConnect = $WaitingForConnect + 1
-			}
-			else
-			{
-				Write-Host " : Connected"
-			}
-		}
-		if($WaitingForConnect -gt 0)
-		{
-			$timeout = $timeout + 1
-			Write-Host "$WaitingForConnect VM(s) still awaiting to open SSH port.." -NoNewline
-			Write-Host "Retry $timeout/100"
-			sleep 3
-			$retValue = "False"
-		}
-		else
-		{
-			LogMsg "ALL VM's SSH port is/are open now.."
-			$retValue = "True"
-		}
+    LogMsg "Trying to Connect to deployed VM(s)"
+    $timeout = 0
+    do
+    {
+        $WaitingForConnect = 0
+        foreach ( $vm in $AllVMDataObject)
+        {
+            Write-Host "Connecting to  $($vm.PublicIP) : $($vm.SSHPort)" -NoNewline
+            $out = Test-TCP  -testIP $($vm.PublicIP) -testport $($vm.SSHPort)
+            if ($out -ne "True")
+            { 
+                Write-Host " : Failed"
+                $WaitingForConnect = $WaitingForConnect + 1
+            }
+            else
+            {
+                Write-Host " : Connected"
+            }
+        }
+        if($WaitingForConnect -gt 0)
+        {
+            $timeout = $timeout + 1
+            Write-Host "$WaitingForConnect VM(s) still awaiting to open SSH port.." -NoNewline
+            Write-Host "Retry $timeout/100"
+            sleep 3
+            $retValue = "False"
+        }
+        else
+        {
+            LogMsg "ALL VM's SSH port is/are open now.."
+            $retValue = "True"
+        }
 
-	}
-	While (($timeout -lt 100) -and ($WaitingForConnect -gt 0))
+    }
+    While (($timeout -lt 100) -and ($WaitingForConnect -gt 0))
 
-	return $retValue
+    return $retValue
 }
