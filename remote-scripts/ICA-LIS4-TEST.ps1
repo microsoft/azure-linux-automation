@@ -321,7 +321,10 @@ Function VerifyIO($VMObject, $NewAttachedDiskName, $PrevTestStatus, $metaData, $
         LogMsg "STARTING TEST : $metaData"
         $LogPath = "$($VMObject.LogDir)\VerifyIO-$($NewAttachedDiskName.Replace('/','')).txt"
         $partitionNumber=$null
-        $dmesgBefore = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "dmesg" -runAsSudo 
+        $dmesgBefore = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "dmesg > dmesg.txt"		
+		RemoteCopy -downloadFrom $VMObject.VIP -port $VMObject.SSHPort -username $VMObject.username -password $VMObject.password -files "dmesg.txt" -downloadTo $VMObject.LogDir -download
+		$dmesgBefore = Get-Content "$($VMObject.LogDir)\dmesg.txt"
+		Remove-Item "$($VMObject.LogDir)\dmesg.txt" | Out-Null
         #Perform the steps ONLY IF $PrevTestStatus flag is set to "PASS"
         if ($AlreadyMounted )
         {
@@ -363,8 +366,11 @@ Function VerifyIO($VMObject, $NewAttachedDiskName, $PrevTestStatus, $metaData, $
                 $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "umount -l $mountPoint" -runAsSudo 
             }
         }
-        $dmesgAfter = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "dmesg" -runAsSudo
-        $addedLines = $dmesgAfter.Replace($dmesgBefore,$null)
+        $dmesgAfter = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "dmesg > dmesg.txt"
+		RemoteCopy -downloadFrom $VMObject.VIP -port $VMObject.SSHPort -username $VMObject.username -password $VMObject.password -files "dmesg.txt" -downloadTo $VMObject.LogDir -download
+		$dmesgAfter = Get-Content "$($VMObject.LogDir)\dmesg.txt"
+		Remove-Item "$($VMObject.LogDir)\dmesg.txt" | Out-Null				
+        $addedLines = $dmesgAfter.Replace($dmesgBefore,"")
         LogMsg "Kernel Logs : $($addedLines.Replace('[32m','').Replace('[0m[33m','').Replace('[0m',''))" -LinuxConsoleOuput
         $ExitCode = "PASS"    
     }
@@ -538,7 +544,11 @@ Function CreateRAIDOnDevices($VMObject, $NewAttachedDiskNames, $PrevTestStatus, 
         LogMsg "STARTING TEST : $metaData"
         $LogPath = "$($VMObject.LogDir)\CreateRaidOnDevices.txt"
         $mountPoint = "/mnt/RaidVolume"
-        $dmesgBefore = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "dmesg" -runAsSudo 
+        $dmesgBefore = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "dmesg > dmesg.txt" 
+		RemoteCopy -downloadFrom $VMObject.VIP -port $VMObject.SSHPort -username $VMObject.username -password $VMObject.password -files "dmesg.txt" -downloadTo $VMObject.LogDir -download
+		$dmesgBefore = Get-Content "$($VMObject.LogDir)\dmesg.txt"
+		Remove-Item "$($VMObject.LogDir)\dmesg.txt" | Out-Null		
+
         $totalDisks = $NewAttachedDiskNames.Split("^").Count
         $mdStat = (RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "cat /proc/mdstat").Split("`n")
         foreach ( $line in $mdStat )
@@ -643,7 +653,11 @@ Function CreateRAIDOnPartitionsAlreadyFormatted($VMObject, $NewAttachedDiskNames
                         }
                     }
                     $RaidPartitions = $RaidPartitions.Trim()
-                    $dmesgBefore = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "dmesg" -runAsSudo 
+                    $dmesgBefore = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "dmesg > dmesg.txt" 
+					RemoteCopy -downloadFrom $VMObject.VIP -port $VMObject.SSHPort -username $VMObject.username -password $VMObject.password -files "dmesg.txt" -downloadTo $VMObject.LogDir -download
+					$dmesgBefore = Get-Content "$($VMObject.LogDir)\dmesg.txt"
+					Remove-Item "$($VMObject.LogDir)\dmesg.txt" | Out-Null		
+					
                     $totalDisks = $NewAttachedDiskNames.Split("^").Count
                     LogMsg "Creating raid of $totalDisks disks."
                     LogMsg "Disks : $RaidPartitions"
@@ -729,7 +743,11 @@ Function CreateRAIDOnPartitionsNotFormatted($VMObject, $NewAttachedDiskNames, $P
                     Remove-Item -Path  "$($VMObject.LogDir)\partprobe.sh"
                     $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "chmod +x *.sh" -runAsSudo
                     $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "./partprobe.sh" -runAsSudo
-                    $dmesgBefore = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "dmesg" -runAsSudo 
+                    $dmesgBefore = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "dmesg > dmesg.txt" 					
+					RemoteCopy -downloadFrom $VMObject.VIP -port $VMObject.SSHPort -username $VMObject.username -password $VMObject.password -files "dmesg.txt" -downloadTo $VMObject.LogDir -download
+					$dmesgBefore = Get-Content "$($VMObject.LogDir)\dmesg.txt"
+					Remove-Item "$($VMObject.LogDir)\dmesg.txt" | Out-Null		
+					
                     $totalDisks = $NewAttachedDiskNames.Split("^").Count
                     LogMsg "Creating raid of $totalDisks disks."
                     LogMsg "Disks : $RaidPartitions"
@@ -932,13 +950,20 @@ Function UpgradeKernel($VMObject, $PrevTestStatus, $metaData)
     if ( $PrevTestStatus -eq "PASS" )
     {
         LogMsg "Starting Test : $metaData"
-        $dmesgBeforeUpgrade = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "dmesg"
         Set-Content -Value $dmesgBeforeUpgrade -Path "$($VMObject.LogDir)\dmesgBeforeKernelUpgrade.txt"
         $unameBeforeUpgrade = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "uname -r"
-        $dmesgBeforeUpgrade = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "dmesg"
+        $dmesgBeforeUpgrade = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "dmesg > dmesg.txt"
+		RemoteCopy -downloadFrom $VMObject.VIP -port $VMObject.SSHPort -username $VMObject.username -password $VMObject.password -files "dmesg.txt" -downloadTo $VMObject.LogDir -download
+		$dmesgBeforeUpgrade = Get-Content "$($VMObject.LogDir)\dmesg.txt"
+		Remove-Item "$($VMObject.LogDir)\dmesg.txt" | Out-Null		
+
         $UpdateConsole = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "./packageInstaller.sh -update yes" -runAsSudo
         Set-Content -Value $UpdateConsole -Path "$($VMObject.LogDir)\UpdateConsoleOutput.txt"
-        $dmesgafterUpgrade = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "dmesg"
+        $dmesgafterUpgrade = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "dmesg > dmesg.txt"
+		RemoteCopy -downloadFrom $VMObject.VIP -port $VMObject.SSHPort -username $VMObject.username -password $VMObject.password -files "dmesg.txt" -downloadTo $VMObject.LogDir -download
+		$dmesgafterUpgrade = Get-Content "$($VMObject.LogDir)\dmesg.txt"
+		Remove-Item "$($VMObject.LogDir)\dmesg.txt" | Out-Null		
+
         $unameAfterUpgrade = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "uname -r"
         Set-Content -Value $dmesgAfterUpgrade -Path "$($VMObject.LogDir)\dmesgAfterKernelUpgrade.txt"
         if ( $unameBeforeUpgrade -eq $unameAfterUpgrade )
