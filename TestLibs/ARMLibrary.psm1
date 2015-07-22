@@ -57,7 +57,7 @@ $isServiceDeleted = $true
             if ($isServiceDeleted)
             {    
                 $isServiceCreated = CreateResourceGroup -RGName $groupName -location $location
-$isServiceCreated = $true
+#$isServiceCreated = $true
                 if ($isServiceCreated -eq "True")
                 {
                     #$isCertAdded = AddCertificate -serviceName $groupName
@@ -467,19 +467,19 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                                 LogMsg "Overriding ImageName with user provided VHD."
                             }
                             LogMsg "Using VHD : $osVHD"
-                            Add-Content -Value "$($indents[5])^image^: " -Path $jsonFile
-                            Add-Content -Value "$($indents[5]){" -Path $jsonFile
-                                Add-Content -Value "$($indents[6])^uri^: ^[concat('http://',variables('StorageAccountName'),'.blob.core.windows.net/vhds/','$osVHD')]^" -Path $jsonFile
-                            Add-Content -Value "$($indents[5])}," -Path $jsonFile
-                            Add-Content -Value "$($indents[5])^osType^: ^Linux^," -Path $jsonFile
+                            Add-Content -Value "$($indents[6])^image^: " -Path $jsonFile
+                            Add-Content -Value "$($indents[6]){" -Path $jsonFile
+                                Add-Content -Value "$($indents[7])^uri^: ^[concat('http://',variables('StorageAccountName'),'.blob.core.windows.net/vhds/','$osVHD')]^" -Path $jsonFile
+                            Add-Content -Value "$($indents[6])}," -Path $jsonFile
+                            Add-Content -Value "$($indents[6])^osType^: ^Linux^," -Path $jsonFile
                         }
                         else
                         {
                             LogMsg "Using ImageName : $osImage"
-                            Add-Content -Value "$($indents[5])^sourceImage^: " -Path $jsonFile
-                            Add-Content -Value "$($indents[5]){" -Path $jsonFile
-                                Add-Content -Value "$($indents[6])^id^: ^[variables('CompliedSourceImageName')]^" -Path $jsonFile
-                            Add-Content -Value "$($indents[5])}," -Path $jsonFile
+                            Add-Content -Value "$($indents[6])^sourceImage^: " -Path $jsonFile
+                            Add-Content -Value "$($indents[6]){" -Path $jsonFile
+                                Add-Content -Value "$($indents[7])^id^: ^[variables('CompliedSourceImageName')]^" -Path $jsonFile
+                            Add-Content -Value "$($indents[6])}," -Path $jsonFile
                         }
                         Add-Content -Value "$($indents[6])^name^: ^$vmName-OSDisk^," -Path $jsonFile
                         #Add-Content -Value "$($indents[6])^osType^: ^Linux^," -Path $jsonFile
@@ -508,7 +508,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                     
                     #region Add Endpoints...
                     $EndPointAdded = $false
-                    foreach ( $openedPort in $newVM.EndPoints)
+                    foreach ( $endpoint in $newVM.EndPoints)
                     {
                         if ( $EndPointAdded )
                         {
@@ -516,11 +516,12 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                         }
                         Add-Content -Value "$($indents[6]){" -Path $jsonFile
                             Add-Content -Value "$($indents[7])^enableDirectServerReturn^: ^False^," -Path $jsonFile
-                            Add-Content -Value "$($indents[7])^endpointName^: ^SSH^," -Path $jsonFile
-                            Add-Content -Value "$($indents[7])^privatePort^: 22," -Path $jsonFile
-                            Add-Content -Value "$($indents[7])^publicPort^: 22," -Path $jsonFile
-                            Add-Content -Value "$($indents[7])^protocol^: ^tcp^" -Path $jsonFile
-                        Add-Content -Value "$($indents[6])}" -Path $jsonFile            
+                            Add-Content -Value "$($indents[7])^endpointName^: ^$($endpoint.Name)^," -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^privatePort^: $($endpoint.LocalPort)," -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^publicPort^: $($endpoint.PublicPort)," -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^protocol^: ^$($endpoint.Protocol)^" -Path $jsonFile
+                        Add-Content -Value "$($indents[6])}" -Path $jsonFile
+                        LogMsg "Added input endpoint Name:$($endpoint.Name) PublicPort:$($endpoint.PublicPort) PrivatePort:$($endpoint.LocalPort) Protocol:$($endpoint.Protocol)."
                         $EndPointAdded = $true
                     }
                     #endregion 

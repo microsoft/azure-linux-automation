@@ -2172,6 +2172,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 			if ( !$UseAzureResourceManager )
 			{
 				$hsNames = $DeployedServices
+				$allDeploymentData = GetAllDeployementData -DeployedServices $DeployedServices
 				$hsNames = $hsNames.Split("^")
 				foreach ($hs in $hsNames)
 				{
@@ -2190,6 +2191,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 							}
 							else
 							{
+								#GetVMLogs -allVMData $allDeploymentData
 								LogMsg "Cleaning up deployed test virtual machines."
 								$isClened = DeleteService -serviceName $hsDetails.ServiceName
 						
@@ -2212,7 +2214,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 								$suppressedOut = RetryOperation -operation { RunAzureCmd -AzureCmdlet "Set-AzureService -ServiceName $service -Description `"Preserving this setup for FAILED/ABORTED test : $testName`"" -maxWaitTimeSeconds 120 } -maxRetryCount 5 -retryInterval 5
 							}
 							LogMsg "Collecting VM logs.."
-							GetVMLogs -DeployedServices $hs
+							GetVMLogs -allVMData $allDeploymentData
 							if(!$keepUserDirectory -and !$keepReproInact -and $EconomyMode)
 								{
 									RemoveAllFilesFromHomeDirectory -DeployedServices $hs
@@ -2228,7 +2230,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 						if ($result -ne "PASS")
 						{
 							LogMsg "Collecting VM logs.."
-							GetVMLogs -DeployedServices $hs
+							GetVMLogs -allVMData $allDeploymentData
 							if($keepReproInact)
 							{
 								$xmlConfig.config.Azure.Deployment.$setupType.isDeployed = "NO"
@@ -2240,12 +2242,23 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 			}
 			else
 			{
+				$allDeploymentData = GetAllDeployementData -ResourceGroups $ResourceGroups
 				foreach ( $Group in $ResourceGroups.Split("^"))
 				{
+					
 					#In development stage. Deleting all resource groups to save cores.
 					#if($result -eq "PASS") 
 					#{
-						$out = DeleteResourceGroup -RGName $Group
+						LogMsg "Cleaning up deployed test virtual machines."
+						#GetVMLogs -allVMData $allDeploymentData
+						if ( DeleteResourceGroup -RGName $Group )
+						{
+							LogMsg "CleanUP Successful for $Group"
+						}
+					#}
+					#else
+					#{
+
 					#}
 				}
 			}
@@ -2339,39 +2352,32 @@ Function GetStopWatchElapasedTime([System.Diagnostics.Stopwatch]$sw, [string] $f
 
 }
 
-Function GetVMLogs($DeployedServices)
+Function GetVMLogs($allVMData)
 {
-	$TestIPPOrts = ""
-
-	foreach ($hostedservice in $DeployedServices.Split("^"))
+	foreach ($testVM in $allVMData)
 	{
-		$DeployedVMs = Get-AzureVM -ServiceName $hostedService
-		foreach ($testVM in $DeployedVMs)
+		$HSVIP = $testVM.PublicIP
+		$HSport = $testVM.SSHPort
+		$testIP = $testVM.PublicIP
+		$testPort = $testVM.SSHPort
+		#$LisLogFile = "LIS-Logs-" + $testVM.InstanceName + ".tgz"
+		$LisLogFile = "LIS-Logs" + ".tgz"
+		try
 		{
-			$AllEndpoints = Get-AzureEndpoint -VM $testVM
-			$HSVIP = GetHsVmVip -servicename $hostedservice
-			$HSport = GetPort -Endpoints $AllEndpoints -usage SSH
-			$testIP = $HSVIP
-			$testPort = $HSport
-			#$LisLogFile = "LIS-Logs-" + $testVM.InstanceName + ".tgz"
-			$LisLogFile = "LIS-Logs" + ".tgz"
-			try
-			{
-				LogMsg "Collecting logs from IP : $testIP PORT : $testPort"	
-				RemoteCopy -upload -uploadTo $testIP -username $user -port $testPort -password $password -files '.\remote-scripts\LIS-LogCollector.sh'
-				RunLinuxCmd -username $user -password $password -ip $testIP -port $testPort -command 'chmod +x LIS-LogCollector.sh'
-				$out = RunLinuxCmd -username $user -password $password -ip $testIP -port $testPort -command './LIS-LogCollector.sh -v' -runAsSudo
-				LogMsg $out
-				RemoteCopy -download -downloadFrom $testIP -username $user -password $password -port $testPort -downloadTo $LogDir -files $LisLogFile
-				LogMsg "Logs collected successfully from IP : $testIP PORT : $testPort"
-				Rename-Item -Path "$LogDir\$LisLogFile" -NewName ("LIS-Logs-" + $testVM.InstanceName + ".tgz") -Force
-			}
-			catch
-			{
-				$ErrorMessage =  $_.Exception.Message
-				LogErr "EXCEPTION : $ErrorMessage"
-				LogErr "Unable to collect logs from IP : $testIP PORT : $testPort"  		
-			}
+			LogMsg "Collecting logs from IP : $testIP PORT : $testPort"	
+			RemoteCopy -upload -uploadTo $testIP -username $user -port $testPort -password $password -files '.\remote-scripts\LIS-LogCollector.sh'
+			RunLinuxCmd -username $user -password $password -ip $testIP -port $testPort -command 'chmod +x LIS-LogCollector.sh'
+			$out = RunLinuxCmd -username $user -password $password -ip $testIP -port $testPort -command './LIS-LogCollector.sh -v' -runAsSudo
+			LogMsg $out
+			RemoteCopy -download -downloadFrom $testIP -username $user -password $password -port $testPort -downloadTo $LogDir -files $LisLogFile
+			LogMsg "Logs collected successfully from IP : $testIP PORT : $testPort"
+			Rename-Item -Path "$LogDir\$LisLogFile" -NewName ("LIS-Logs-" + $testVM.InstanceName + ".tgz") -Force
+		}
+		catch
+		{
+			$ErrorMessage =  $_.Exception.Message
+			LogErr "EXCEPTION : $ErrorMessage"
+			LogErr "Unable to collect logs from IP : $testIP PORT : $testPort"  		
 		}
 	}
 }
