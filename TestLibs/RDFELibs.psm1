@@ -3987,7 +3987,7 @@ Function Get-SSHDetailofVMs($DeployedServices, $ResourceGroups)
 
 Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 {
-
+    $allDeployedVMs = @()
 	function CreateQuickVMNode()
 	{
 		$objNode = New-Object -TypeName PSObject
@@ -3996,7 +3996,6 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name RoleName -Value $RoleName -Force 
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name PublicIP -Value $PublicIP -Force
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name InternalIP -Value $InternalIP -Force
-		Add-Member -InputObject $objNode -MemberType NoteProperty -Name SSHPort -Value $SSHPort -Force
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name URL -Value $URL -Force
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name Status -Value $Status -Force
 		return $objNode
@@ -4015,10 +4014,11 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 				$AllEndpoints = $testVM.Properties.NetworkProfile.InputEndpoints
 				foreach ($endPoint in $AllEndpoints)
 				{
-					if ($endPoint.EndpointName -eq "SSH")
-					{
-						$QuickVMNode.SSHPort = $endPoint.PublicPort
-					}
+                    Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endpoint.EndpointName)Port" -Value $endPoint.PublicPort -Force
+					#if ($endPoint.EndpointName -eq "SSH")
+					#{
+				#		$QuickVMNode.SSHPort = $endPoint.PublicPort
+					#}
 				}
 				$QuickVMNode.ResourceGroupName = $ResourceGroup
 				$QuickVMNode.PublicIP = $RGIPdata.Properties.IpAddress
@@ -4049,10 +4049,7 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 				$QuickVMNode.InternalIP = $testVM.IpAddress
 				foreach ($endpoint in $AllEndpoints)
 				{
-					if ($endpoint.Name -eq "SSH")
-					{
-						$QuickVMNode.SSHPort = $endpoint.Port
-					}
+                    Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endpoint.Name)Port" -Value $endpoint.Port -Force
 				}
 				$QuickVMNode.URL = ($testVM.DNSName).Replace("http://","").Replace("/","")
 				$QuickVMNode.Status = $testVM.InstanceStatus

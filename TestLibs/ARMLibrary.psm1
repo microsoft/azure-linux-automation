@@ -559,7 +559,6 @@ Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed
             $role = 1
             $setupTypeData = $xmlConfig.config.Azure.Deployment.$setupType
             $isAllDeployed = CreateAllResourceGroupDeployments -setupType $setupType -xmlConfig $xmlConfig -Distro $Distro
-            #$isAllDeployed = CreateAllDeployments -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro
             $isAllVerified = "False"
             $isAllConnected = "False"
             if($isAllDeployed[0] -eq "True")
