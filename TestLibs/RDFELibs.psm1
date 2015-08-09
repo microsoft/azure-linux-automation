@@ -670,7 +670,7 @@ Function CheckVMsInService($serviceName)
 			$VMStatuString = ""
 			foreach ( $VM in $DeployedVMs )
 			{
-				$VMStatuString += "$($VM.RoleName) : $($VM.InstanceStatus) "
+				$VMStatuString += "$($VM.InstanceName) : $($VM.InstanceStatus) "
 				if ( $VM.InstanceStatus -ne "ReadyRole" )
 				{
 					$VMStatus = $VM.InstanceStatus
@@ -747,11 +747,11 @@ Function CreateAllDeployments($setupType, $xmlConfig, $Distro)
 		$retryDeployment = 0
 		if ( $HS.Tag -ne $null )
 		{
-			$serviceName = "ICA-" + $HS.Tag + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
+			$serviceName = "ICA-HS-" + $HS.Tag + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
 		}
 		else
 		{
-			$serviceName = "ICA-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
+			$serviceName = "ICA-HS-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
 		}
 		if($isMultiple -eq "True")
 		{
@@ -991,7 +991,7 @@ Function RemoveICAUnusedDataDisks()
 }
 
 #function to collect and compare kernel logs
-Function GetAndCheckKernelLogs($DeployedServices, $DeployedGroups, $status, $vmUser, $vmPassword)
+Function GetAndCheckKernelLogs($allDeployedVMs, $status, $vmUser, $vmPassword)
 {
 	if ( !$vmUser )
 	{
@@ -1002,14 +1002,14 @@ Function GetAndCheckKernelLogs($DeployedServices, $DeployedGroups, $status, $vmU
 		$vmPassword = $password
 	}
 	$retValue = $false
-	if ( $UseAzureResourceManager ) 
-	{
-		$allDeployedVMs = GetAllDeployementData	-ResourceGroups $DeployedGroups
-	}
-	else
-	{
-		$allDeployedVMs = GetAllDeployementData	-DeployedServices $DeployedServices
-	}
+	#if ( $UseAzureResourceManager ) 
+	#{
+	#	$allDeployedVMs = GetAllDeployementData	-ResourceGroups $DeployedGroups
+	#}
+	#else
+	#{
+	#	$allDeployedVMs = GetAllDeployementData	-DeployedServices $DeployedServices
+	#}
 	foreach ($VM in $allDeployedVMs)
 	{
 		$BootLogDir="$Logdir\$($VM.RoleName)"
@@ -1139,7 +1139,9 @@ Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFa
 				}
 				if ($isAllVerified -eq "True")
 				{
-					$isAllConnected = isAllSSHPortsEnabled -DeployedServices $deployedServices
+                    $allVMData = GetAllDeployementData -DeployedServices $deployedServices
+                    Set-Variable -Name allVMData -Value $allVMData -Force -Scope Global
+					$isAllConnected = isAllSSHPortsEnabledRG -AllVMDataObject $allVMData
 					if ($isAllConnected -eq "True")
 					{
 			#Set-Content .\temp\DeployedServicesFile.txt "$deployedServices"
@@ -1149,7 +1151,7 @@ Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFa
 						$xmlConfig.config.Azure.Deployment.$setupType.isDeployed = $retValue
 					#Collecting Initial Kernel
 						$user=$xmlConfig.config.Azure.Deployment.Data.UserName
-						$KernelLogOutput= GetAndCheckKernelLogs -DeployedServices $deployedServices -status "Initial"
+						$KernelLogOutput= GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Initial"
 					}
 					else
 					{
@@ -1202,7 +1204,7 @@ Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFa
 	else
 	{
 		$retValue = $xmlConfig.config.Azure.Deployment.$setupType.isDeployed
-		$KernelLogOutput= GetAndCheckKernelLogs -DeployedServices $retValue -status "Initial"
+		$KernelLogOutput= GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Initial"
 	}
 	Set-Variable -Name setupType -Value $setupType -Scope Global
 	if ( $GetDeploymentStatistics )
@@ -2160,7 +2162,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 			{
 				try
 				{
-					$KernelLogOutput=GetAndCheckKernelLogs -DeployedServices $deployedServices -DeployedGroups $ResourceGroups -status "Final" #Collecting kernel logs after execution of test case : v-sirebb
+					$KernelLogOutput=GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Final" #Collecting kernel logs after execution of test case : v-sirebb
 				}
 				catch 
 				{
@@ -2172,7 +2174,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 			if ( !$UseAzureResourceManager )
 			{
 				$hsNames = $DeployedServices
-				$allDeploymentData = GetAllDeployementData -DeployedServices $DeployedServices
+				$allDeploymentData = $allVMData
 				$hsNames = $hsNames.Split("^")
 				foreach ($hs in $hsNames)
 				{
@@ -2242,7 +2244,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 			}
 			else
 			{
-				$allDeploymentData = GetAllDeployementData -ResourceGroups $ResourceGroups
+				$allDeploymentData = $allVMData
 				foreach ( $Group in $ResourceGroups.Split("^"))
 				{
 					

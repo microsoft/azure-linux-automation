@@ -634,7 +634,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
 foreach ( $newVM in $RGXMLData.VirtualMachine)
 {
     $VnetName = $RGXMLData.VnetName
-    $instanceSize = $newVM.InstanceSize
+    $instanceSize = $newVM.ARMInstanceSize
     $SubnetName = $newVM.SubnetName
     $DnsServerIP = $RGXMLData.DnsServerIP
     if($newVM.RoleName)
@@ -863,6 +863,7 @@ Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed
                 #if ($isAllVerified -eq "True")
                 #{
                     $allVMData = GetAllDeployementData -ResourceGroups $deployedGroups
+                    Set-Variable -Name allVMData -Value $allVMData -Force -Scope Global
                     $isAllConnected = isAllSSHPortsEnabledRG -AllVMDataObject $allVMData
                     if ($isAllConnected -eq "True")
                     {
@@ -873,7 +874,7 @@ Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed
                         $xmlConfig.config.Azure.Deployment.$setupType.isDeployed = $retValue
                     #Collecting Initial Kernel
                     #    $user=$xmlConfig.config.Azure.Deployment.Data.UserName
-                        $KernelLogOutput= GetAndCheckKernelLogs -DeployedGroups $deployedGroups -status "Initial"
+                        $KernelLogOutput= GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Initial"
                     }
                     else
                     {
