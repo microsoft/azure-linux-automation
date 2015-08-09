@@ -4008,21 +4008,38 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 			LogMsg "Collecting $ResourceGroup data.."
 			$RGIPdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/publicIPAddresses" -ExpandProperties -OutputObjectFormat New -Verbose
 			$RGVMs = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Compute/virtualMachines" -ExpandProperties -OutputObjectFormat New -Verbose
+            $LBdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/loadBalancers" -ExpandProperties -OutputObjectFormat New -Verbose
+            $NICdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/networkInterfaces" -ExpandProperties -OutputObjectFormat New -Verbose
 			foreach ($testVM in $RGVMs)
 			{
 				$QuickVMNode = CreateQuickVMNode
-				$AllEndpoints = $testVM.Properties.NetworkProfile.InputEndpoints
-				foreach ($endPoint in $AllEndpoints)
+				$InboundNatRules = $LBdata.Properties.InboundNatRules
+				foreach ($endPoint in $InboundNatRules)
 				{
-                    Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endpoint.EndpointName)Port" -Value $endPoint.PublicPort -Force
-					#if ($endPoint.EndpointName -eq "SSH")
-					#{
-				#		$QuickVMNode.SSHPort = $endPoint.PublicPort
-					#}
+                    if ( $endPoint.Name -imatch $testVM.ResourceName)
+                    {
+                        $endPointName = "$($endPoint.Name)".Replace("$($testVM.ResourceName)-","")
+                        Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endPointName)Port" -Value $endPoint.Properties.FrontendPort -Force
+                    }
 				}
+                $LoadBalancingRules = $LBdata.Properties.LoadBalancingRules
+                foreach ( $LBrule in $LoadBalancingRules )
+                {
+                    if ( $LBrule.Name -imatch "$ResourceGroup-LB-" )
+                    {
+                        $endPointName = "$($LBrule.Name)".Replace("$ResourceGroup-LB-","")
+                        Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endPointName)Port" -Value $LBrule.Properties.FrontendPort -Force
+                    }
+                }
+                foreach ( $nic in $NICdata )
+                {
+                    if ( $nic.Name -imatch $testVM.ResourceName)
+                    {
+                        $QuickVMNode.InternalIP = "$($nic.Properties.IpConfigurations[0].Properties.PrivateIPAddress)"
+                    }
+                }
 				$QuickVMNode.ResourceGroupName = $ResourceGroup
 				$QuickVMNode.PublicIP = $RGIPdata.Properties.IpAddress
-				$QuickVMNode.InternalIP = ""
 				$QuickVMNode.URL = $RGIPdata.Properties.DnsSettings.Fqdn
 				$QuickVMNode.RoleName = $testVM.ResourceName
 				$QuickVMNode.Status = $testVM.Properties.ProvisioningState
