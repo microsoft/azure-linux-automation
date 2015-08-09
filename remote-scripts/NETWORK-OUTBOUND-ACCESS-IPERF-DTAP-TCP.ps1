@@ -7,9 +7,7 @@ if ($isDeployed)
 {
 	try
 	{
-        #Extract VM data...
-        $DeployedVMs = GetAllDeployementData -DeployedServices $isDeployed -ResourceGroups $isDeployed
-        foreach ($VMdata in $DeployedVMs)
+        foreach ($VMdata in $allVMData)
         {
             if ($VMdata.RoleName -imatch "PublicEndpoint")
             {

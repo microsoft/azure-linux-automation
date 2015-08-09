@@ -8,9 +8,7 @@ $filesUploaded = $false
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
-        #Extract VM data...
-        $DeployedVMs = GetAllDeployementData -DeployedServices $isDeployed -ResourceGroups $isDeployed
-        foreach ($VMdata in $DeployedVMs)
+        foreach ($VMdata in $allVMData)
         {
             if ($VMdata.RoleName -imatch "PublicEndpoint")
             {
