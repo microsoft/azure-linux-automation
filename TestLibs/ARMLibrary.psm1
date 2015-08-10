@@ -216,7 +216,7 @@ Function CreateResourceGroupDeployment([string]$RGName, $location, $setupType, $
 Function GenerateAzureDeployJSONFile ($RGName, $osImage, $osVHD, $RGXMLData, $Location, $azuredeployJSONFilePath)
 {
 $jsonFile = $azuredeployJSONFilePath
-$StorageAccountName = $xml.config.Azure.General.StorageAccount
+$StorageAccountName = $xml.config.Azure.General.ARMStorageAccount
 #$StorageAccountName = "sswestus"
 $role = 0
 $HS = $RGXMLData
@@ -240,6 +240,7 @@ $nicName = "ICANIC"
 $availibilitySetName = "myAvSet"
 $LoadBalancerName =  "FrontEndIPAddress"
 $apiVersion = "2015-05-01-preview"
+LogMsg "ARM Storage Account : $StorageAccountName"
 LogMsg "Using API VERSION : $apiVersion "
 
 #Generate Single Indent
@@ -836,13 +837,14 @@ Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed
         {
             $VerifiedGroups =  $NULL
             $retValue = $NULL
-            $ExistingGroups = Get-AzureResourceGroup
+            #$ExistingGroups = RetryOperation -operation { Get-AzureResourceGroup } -description "Getting information of existing resource groups.." -retryInterval 5 -maxRetryCount 5
             $i = 0
             $role = 1
             $setupTypeData = $xmlConfig.config.Azure.Deployment.$setupType
             $isAllDeployed = CreateAllResourceGroupDeployments -setupType $setupType -xmlConfig $xmlConfig -Distro $Distro
             $isAllVerified = "False"
             $isAllConnected = "False"
+            #$isAllDeployed = @("True","ICA-RG-IEndpointSingleHS-U1510-8-10-12-34-9","30")
             if($isAllDeployed[0] -eq "True")
             {
                 $deployedGroups = $isAllDeployed[1]
