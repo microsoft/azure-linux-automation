@@ -84,9 +84,20 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 {
 	$StartTime = [Datetime]::Now.ToUniversalTime()
 	LogMsg "Starting the Cycle - $($CycleName.ToUpper())"
-	$OsImage = $xmlConfig.config.Azure.Deployment.Data.Distro | ? { $_.name -eq $Distro} | % {$_.OsImage.ToUpper()}
-	Set-Variable -Name BaseOsImage -Value $OsImage -Scope Global
-	LogMsg "Base image name - $BaseOsImage"
+	$xmlConfig.config.Azure.Deployment.Data.Distro | ? { $_.name -eq $Distro} | % { 
+        if ( $_.OsImage ) 
+        { 
+            $BaseOsImage = $_.OsImage.ToUpper() 
+            Set-Variable -Name BaseOsImage -Value $BaseOsImage -Scope Global
+            LogMsg "Base image name - $BaseOsImage"
+        }
+        if ( $_.OsVHD )
+        { 
+            $BaseOsVHD = $_.OsVHD.ToUpper() 
+            Set-Variable -Name BaseOsVHD -Value $BaseOsVHD -Scope Global
+            LogMsg "Base VHD name - $BaseOsVHD"
+        }
+    }
 	LogMsg "Loading the cycle Data..."
 	$currentCycleData = GetCurrentCycleData -xmlConfig $xmlConfig -cycleName $cycleName
 
