@@ -8,32 +8,20 @@ $resultArr = @()
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
-	$hs1Name = $isDeployed
-	$testServiceData = Get-AzureService -ServiceName $hs1Name
+	$hs1VIP = $allVMData[0].PublicIP
+	$hs1ServiceUrl = $allVMData[0].URL
+	$hs1vm1IP = $allVMData[0].InternalIP
+	$hs1vm1Hostname = $allVMData[0].RoleName
+    $hs1vm1sshport = $allVMData[0].SSHPort
+    $hs1vm1tcpport = $allVMData[0].TCPtestPort
+    $hs1vm1udpport = $allVMData[0].UDPtestPort
+	
+	$hs1vm2IP = $allVMData[1].InternalIP
+	$hs1vm2Hostname = $allVMData[1].RoleName
+    $hs1vm2sshport = $allVMData[1].SSHPort
+    $hs1vm2tcpport = $allVMData[1].TCPtestPort
+    $hs1vm2udpport = $allVMData[1].UDPtestPort
 
-    #Get VMs deployed in the service..
-	$testVMsinService = $testServiceData | Get-AzureVM
-
-	$hs1vm1 = $testVMsinService[0]
-	$hs1vm1Endpoints = $hs1vm1 | Get-AzureEndpoint
-	$hs1vm1IP = $hs1vm1.IpAddress
-	$hs1vm1Hostname = $hs1vm1.InstanceName
-	$hs1VIP = $hs1vm1Endpoints[0].Vip
-	$hs1ServiceUrl = $hs1vm1.DNSName
-	$hs1ServiceUrl = $hs1ServiceUrl.Replace("http://","")
-	$hs1ServiceUrl = $hs1ServiceUrl.Replace("/","")
-
-	$hs1vm2 = $testVMsinService[1]
-	$hs1vm2IP = $hs1vm2.IpAddress
-	$hs1vm2Hostname = $hs1vm2.InstanceName
-	$hs1vm2Endpoints = $hs1vm2 | Get-AzureEndpoint
-
-	$hs1vm1tcpport = GetPort -Endpoints $hs1vm1Endpoints -usage tcp
-	$hs1vm2tcpport = GetPort -Endpoints $hs1vm2Endpoints -usage tcp
-	$hs1vm1udpport = GetPort -Endpoints $hs1vm1Endpoints -usage udp
-	$hs1vm2udpport = GetPort -Endpoints $hs1vm2Endpoints -usage udp
-	$hs1vm1sshport = GetPort -Endpoints $hs1vm1Endpoints -usage ssh
-	$hs1vm2sshport = GetPort -Endpoints $hs1vm2Endpoints -usage ssh
 	$iperfTimeoutSeconds = $currentTestData.iperfTimeoutSeconds
 	$cmd1="python start-server.py -i1 -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log -f"
 	$cmd2="python start-client.py -c $($hs1vm1.IpAddress) -i1 -p $hs1vm1udpport -t$iperfTimeoutSeconds  -P 1 -u yes"
@@ -100,7 +88,7 @@ else
 $result = GetFinalResultHeader -resultarr $resultArr
 
 #Clean up the setup
-DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed
+DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed -ResourceGroups $isDeployed 
 
 #Return the result and summery to the test suite script..
 return $result,$resultSummary
