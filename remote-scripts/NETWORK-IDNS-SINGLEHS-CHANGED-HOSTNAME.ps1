@@ -23,8 +23,8 @@ if($isDeployed)
     $hs1vm2udpport = $allVMData[1].UDPtestPort
 
 
-	$hs1vm1NewHostname = $hs1vm1Hostname.Substring(0, $hs1vm1Hostname.Length-7) + ${Get-Random -Minimum 0 -Maximum 50}
-	$hs1vm2NewHostname = $hs1vm2Hostname.Substring(0, $hs1vm2Hostname.Length-7) + ${Get-Random -Minimum 51 -Maximum 100}
+	$hs1vm1NewHostname = $hs1vm1Hostname.Substring(0, $hs1vm1Hostname.Length-7) + "$(Get-Random -Minimum 0 -Maximum 50)"
+	$hs1vm2NewHostname = $hs1vm2Hostname.Substring(0, $hs1vm2Hostname.Length-7) + "$(Get-Random -Minimum 51 -Maximum 100)"
 	$vm1 = CreateIdnsNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -user $user -password $password -logDir $LogDir -nodeDip $hs1vm1IP -nodeUrl $hs1ServiceUrl -nodeDefaultHostname $hs1vm1Hostname -nodeNewHostname $hs1vm1NewHostname
 	$vm2 = CreateIdnsNode -nodeIp $hs1VIP -nodeSshPort $hs1vm2sshport -user $user -password $password -logDir $LogDir -nodeDip $hs1vm2IP -nodeUrl $hs1ServiceUrl -nodeDefaultHostname $hs1vm2Hostname -nodeNewHostname $hs1vm2NewHostname
     $retryInterval = 30
