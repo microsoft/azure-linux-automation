@@ -1118,7 +1118,7 @@ Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFa
 			$isAllDeployed = CreateAllDeployments -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro
 			#$isAllDeployed = @()
 			#$isAllDeployed += "True"
-			#$isAllDeployed += "ICA-BVTDeployment-U1410-7-20-20-2-21"
+			#$isAllDeployed += "ICA-HS-IEndpointSingleHS-SSOL-8-10-12-39-1"
 			$isAllVerified = "False"
 			$isAllConnected = "False"
 			if($isAllDeployed[0] -eq "True")
@@ -4033,6 +4033,15 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
                         Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endPointName)Port" -Value $LBrule.Properties.FrontendPort -Force
                     }
                 }
+                $Probes = $LBdata.Properties.Probes
+                foreach ( $Probe in $Probes )
+                {
+                    if ( $Probe.Name -imatch "$ResourceGroup-LB-" )
+                    {
+                        $probeName = "$($Probe.Name)".Replace("$ResourceGroup-LB-","").Replace("-probe","")
+                        Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($probeName)ProbePort" -Value $Probe.Properties.Port -Force
+                    }
+                }
                 foreach ( $nic in $NICdata )
                 {
                     if ( $nic.Name -imatch $testVM.ResourceName)
@@ -4047,8 +4056,8 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 				$QuickVMNode.Status = $testVM.Properties.ProvisioningState
 				$allDeployedVMs += $QuickVMNode
 			}
+            LogMsg "Collected $ResourceGroup data!"		
 		}
-		LogMsg "Collected $ResourceGroup data!"		
 	}
 	else
 	{
@@ -4069,6 +4078,10 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 				foreach ($endpoint in $AllEndpoints)
 				{
                     Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endpoint.Name)Port" -Value $endpoint.Port -Force
+                    if ( $endpoint.ProbePort )
+                    {
+                        Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endpoint.Name)ProbePort" -Value $endpoint.ProbePort -Force
+                    }
 				}
 				$QuickVMNode.URL = ($testVM.DNSName).Replace("http://","").Replace("/","")
 				$QuickVMNode.Status = $testVM.InstanceStatus
@@ -4077,6 +4090,7 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 			LogMsg "Collected $hostedservice data!"
 		}
 	}
+    Set-Variable -Name allVMData -Value $allDeployedVMs -Force -Scope Global
 	return $allDeployedVMs
 }
 
