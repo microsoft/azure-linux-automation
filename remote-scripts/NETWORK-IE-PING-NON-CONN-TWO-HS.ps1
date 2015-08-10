@@ -8,42 +8,21 @@ $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -x
 if($isDeployed)
 {
 
-	$hsNames = $isDeployed
-	$hsNames = $hsNames.Split("^")
-	$hs1Name = $hsNames[0]
-	$hs2Name = $hsNames[1]
+	$hs1VIP = $allVMData[0].PublicIP
+	$hs1ServiceUrl = $allVMData[0].URL
+	$hs1vm1IP = $allVMData[0].InternalIP
+	$hs1vm1Hostname = $allVMData[0].RoleName
+    $hs1vm1sshport = $allVMData[0].SSHPort
+    $hs1vm1tcpport = $allVMData[0].TCPtestPort
+    $hs1vm1udpport = $allVMData[0].UDPtestPort
 
-	$testService1Data = Get-AzureService -ServiceName $hs1Name
-	$testService2Data =  Get-AzureService -ServiceName $hs2Name
-    #Get VMs deployed in the service..
-	$hs1vm1 = $testService1Data | Get-AzureVM
-	$hs2vm1 = $testService2Data | Get-AzureVM
-	$hs1vm1IP = $hs1vm1.IPaddress
-	$hs2vm1IP = $hs2vm1.IPaddress
-	$hs1vm1Hostname = $hs1vm1.InstanceName
-	$hs2vm1Hostname = $hs2vm1.InstanceName
-	$hs1vm1Endpoints = $hs1vm1 | Get-AzureEndpoint
-	$hs2vm1Endpoints = $hs2vm1 | Get-AzureEndpoint
-
-	$hs1VIP = $hs1vm1Endpoints[0].Vip
-	$hs2VIP = $hs2vm1Endpoints[0].Vip
-
-	$hs1ServiceUrl = $hs1vm1.DNSName
-	$hs1ServiceUrl = $hs1ServiceUrl.Replace("http://","")
-	$hs1ServiceUrl = $hs1ServiceUrl.Replace("/","")
-
-	$hs2ServiceUrl = $hs2vm1.DNSName
-	$hs2ServiceUrl = $hs2ServiceUrl.Replace("http://","")
-	$hs2ServiceUrl = $hs2ServiceUrl.Replace("/","")
-
-	$hs1vm1tcpport = GetPort -Endpoints $hs1vm1Endpoints -usage tcp
-	$hs2vm1tcpport = GetPort -Endpoints $hs2vm1Endpoints -usage tcp
-
-	$hs1vm1udpport = GetPort -Endpoints $hs1vm1Endpoints -usage udp
-	$hs2vm1udpport = GetPort -Endpoints $hs2vm1Endpoints -usage udp
-
-	$hs1vm1sshport = GetPort -Endpoints $hs1vm1Endpoints -usage ssh	
-	$hs2vm1sshport = GetPort -Endpoints $hs2vm1Endpoints -usage ssh	
+	$hs2VIP = $allVMData[1].PublicIP
+	$hs2ServiceUrl = $allVMData[1].URL
+	$hs2vm1IP = $allVMData[1].InternalIP
+	$hs2vm1Hostname = $allVMData[1].RoleName
+    $hs2vm1sshport = $allVMData[1].SSHPort
+    $hs2vm1tcpport = $allVMData[1].TCPtestPort
+    $hs2vm1udpport = $allVMData[1].UDPtestPort		
 
 	$pingFrom = CreatePingNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -user $user -password $password -files $currentTestData.files -logDir $LogDir 
     LogMsg "ping will be done from $hs1VIP"
@@ -101,7 +80,7 @@ else
 $result = GetFinalResultHeader -resultarr $resultArr
 
 #Clean up the setup
-DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed
+DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed -ResourceGroups $isDeployed
 
 #Return the result and summery to the test suite script..
 return $result , $resultSummary
