@@ -11,15 +11,15 @@ if($isDeployed)
 	$hs1ServiceUrl = $allVMData[0].URL
 	$hs1vm1IP = $allVMData[0].InternalIP
 	$hs1vm1Hostname = $allVMData[0].RoleName
-    $hs1vm1sshport = $allVMData[0].SSHPort
-    $hs1vm1tcpport = $allVMData[0].TCPtestPort
-    $hs1vm1udpport = $allVMData[0].UDPtestPort
+	$hs1vm1sshport = $allVMData[0].SSHPort
+	$hs1vm1tcpport = $allVMData[0].TCPtestPort
+	$hs1vm1udpport = $allVMData[0].UDPtestPort
 	
 	$hs1vm2IP = $allVMData[1].InternalIP
 	$hs1vm2Hostname = $allVMData[1].RoleName
-    $hs1vm2sshport = $allVMData[1].SSHPort
-    $hs1vm2tcpport = $allVMData[1].TCPtestPort
-    $hs1vm2udpport = $allVMData[1].UDPtestPort
+	$hs1vm2sshport = $allVMData[1].SSHPort
+	$hs1vm2tcpport = $allVMData[1].TCPtestPort
+	$hs1vm2udpport = $allVMData[1].UDPtestPort
 
 
 	$server = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -nodeTcpPort $hs1vm1tcpport -nodeIperfCmd $cmd1 -user $user -password $password -files $currentTestData.files -logDir $LogDir
@@ -34,11 +34,11 @@ if($isDeployed)
 		{ 
 			try
 			{
-                $testResult = $null
-                RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
-			    RemoteCopy -uploadTo $hs1VIP -port $hs1vm2sshport -files $currentTestData.files -username $user -password $password -upload
-			    $suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *" -runAsSudo
-			    $suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "chmod +x *" -runAsSudo
+				$testResult = $null
+				RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
+				RemoteCopy -uploadTo $hs1VIP -port $hs1vm2sshport -files $currentTestData.files -username $user -password $password -upload
+				$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *" -runAsSudo
+				$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "chmod +x *" -runAsSudo
 				if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 				{
 					$client.cmd = "python start-client.py -c $hs1vm1IP -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P$Value"
@@ -55,7 +55,7 @@ if($isDeployed)
 				$client.logDir = $LogDir + "\$Value\$mode"
 
 				$testResult=IperfClientServerTestParallel $server $client
-                LogMsg "$($currentTestData.testName) : $Value : $mode : $testResult"
+				LogMsg "$($currentTestData.testName) : $Value : $mode : $testResult"
 			}
 			catch
 			{

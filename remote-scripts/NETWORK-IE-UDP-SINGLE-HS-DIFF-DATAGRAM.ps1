@@ -12,15 +12,15 @@ if ($isDeployed)
 	$hs1ServiceUrl = $allVMData[0].URL
 	$hs1vm1IP = $allVMData[0].InternalIP
 	$hs1vm1Hostname = $allVMData[0].RoleName
-    $hs1vm1sshport = $allVMData[0].SSHPort
-    $hs1vm1tcpport = $allVMData[0].TCPtestPort
-    $hs1vm1udpport = $allVMData[0].UDPtestPort
+	$hs1vm1sshport = $allVMData[0].SSHPort
+	$hs1vm1tcpport = $allVMData[0].TCPtestPort
+	$hs1vm1udpport = $allVMData[0].UDPtestPort
 	
 	$hs1vm2IP = $allVMData[1].InternalIP
 	$hs1vm2Hostname = $allVMData[1].RoleName
-    $hs1vm2sshport = $allVMData[1].SSHPort
-    $hs1vm2tcpport = $allVMData[1].TCPtestPort
-    $hs1vm2udpport = $allVMData[1].UDPtestPort
+	$hs1vm2sshport = $allVMData[1].SSHPort
+	$hs1vm2tcpport = $allVMData[1].TCPtestPort
+	$hs1vm2udpport = $allVMData[1].UDPtestPort
 
 	$iperfTimeoutSeconds = $currentTestData.iperfTimeoutSeconds
 
@@ -30,7 +30,7 @@ if ($isDeployed)
 		{   
 			try
 			{
-                $testResult = $null
+				$testResult = $null
 				$cmd1="python start-server.py -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log -f"
 				if ($mode -eq "VIP")
 				{
@@ -52,7 +52,7 @@ if ($isDeployed)
 				$server = $a
 				$client = $b
 				$testResult = IperfClientServerUDPDatagramTest -server $server -client $client
-                LogMsg "$($currentTestData.testName) : $Value : $mode : $testResult"
+				LogMsg "$($currentTestData.testName) : $Value : $mode : $testResult"
 			}
 			catch
 			{

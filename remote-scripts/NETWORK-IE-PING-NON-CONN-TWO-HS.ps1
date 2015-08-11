@@ -12,25 +12,25 @@ if($isDeployed)
 	$hs1ServiceUrl = $allVMData[0].URL
 	$hs1vm1IP = $allVMData[0].InternalIP
 	$hs1vm1Hostname = $allVMData[0].RoleName
-    $hs1vm1sshport = $allVMData[0].SSHPort
-    $hs1vm1tcpport = $allVMData[0].TCPtestPort
-    $hs1vm1udpport = $allVMData[0].UDPtestPort
+	$hs1vm1sshport = $allVMData[0].SSHPort
+	$hs1vm1tcpport = $allVMData[0].TCPtestPort
+	$hs1vm1udpport = $allVMData[0].UDPtestPort
 
 	$hs2VIP = $allVMData[1].PublicIP
 	$hs2ServiceUrl = $allVMData[1].URL
 	$hs2vm1IP = $allVMData[1].InternalIP
 	$hs2vm1Hostname = $allVMData[1].RoleName
-    $hs2vm1sshport = $allVMData[1].SSHPort
-    $hs2vm1tcpport = $allVMData[1].TCPtestPort
-    $hs2vm1udpport = $allVMData[1].UDPtestPort		
+	$hs2vm1sshport = $allVMData[1].SSHPort
+	$hs2vm1tcpport = $allVMData[1].TCPtestPort
+	$hs2vm1udpport = $allVMData[1].UDPtestPort		
 
 	$pingFrom = CreatePingNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -user $user -password $password -files $currentTestData.files -logDir $LogDir 
-    LogMsg "ping will be done from $hs1VIP"
+	LogMsg "ping will be done from $hs1VIP"
 	foreach ($mode in $currentTestData.TestMode.Split(","))
 	{ 
 		try
 		{
-            $testResult = $null
+			$testResult = $null
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 			{
 				$pingFrom.cmd = "python ping.py -x $hs2VIP -c 10"
@@ -52,7 +52,7 @@ if($isDeployed)
 			{
 				$testResult = "PASS"
 			}
-            LogMsg "$($currentTestData.testName) : $mode : $testResult"
+			LogMsg "$($currentTestData.testName) : $mode : $testResult"
 		}
 		catch
 		{

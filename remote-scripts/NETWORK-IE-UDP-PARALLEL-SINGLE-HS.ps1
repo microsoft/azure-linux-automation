@@ -12,15 +12,15 @@ if ($isDeployed)
 	$hs1ServiceUrl = $allVMData[0].URL
 	$hs1vm1IP = $allVMData[0].InternalIP
 	$hs1vm1Hostname = $allVMData[0].RoleName
-    $hs1vm1sshport = $allVMData[0].SSHPort
-    $hs1vm1tcpport = $allVMData[0].TCPtestPort
-    $hs1vm1udpport = $allVMData[0].UDPtestPort
+	$hs1vm1sshport = $allVMData[0].SSHPort
+	$hs1vm1tcpport = $allVMData[0].TCPtestPort
+	$hs1vm1udpport = $allVMData[0].UDPtestPort
 	
 	$hs1vm2IP = $allVMData[1].InternalIP
 	$hs1vm2Hostname = $allVMData[1].RoleName
-    $hs1vm2sshport = $allVMData[1].SSHPort
-    $hs1vm2tcpport = $allVMData[1].TCPtestPort
-    $hs1vm2udpport = $allVMData[1].UDPtestPort
+	$hs1vm2sshport = $allVMData[1].SSHPort
+	$hs1vm2tcpport = $allVMData[1].TCPtestPort
+	$hs1vm2udpport = $allVMData[1].UDPtestPort
 
 	$iperfTimeoutSeconds = $currentTestData.iperfTimeoutSeconds
 	$cmd1="python start-server.py -i1 -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log -f"
@@ -31,15 +31,15 @@ if ($isDeployed)
 
 	foreach ($Value in $SubtestValues) 
 	{
-        #Create New directory for each subtest value..
+		#Create New directory for each subtest value..
 		mkdir $LogDir\$Value -ErrorAction SilentlyContinue | out-null
 
-        #perform test for each test mode..
+		#perform test for each test mode..
 		foreach ($mode in $currentTestData.TestMode.Split(","))
-		{      
+		{	  
 			try
 			{
-                $testResult = $null
+				$testResult = $null
 				LogMsg "Starting test with $value parallel connections in $mode mode.."
 
 				if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
@@ -52,14 +52,14 @@ if ($isDeployed)
 					$client.cmd = "python start-client.py -c $hs1vm1Hostname  -p $hs1vm1udpport -t$iperfTimeoutSeconds -P$Value -u yes"
 				}
 
-                #Create Directory for each test mode to collect all results..
+				#Create Directory for each test mode to collect all results..
 				mkdir $LogDir\$Value\$mode -ErrorAction SilentlyContinue | out-null
 
 				$server.logDir = $LogDir + "\$Value\$mode"
 				$client.logDir = $LogDir + "\$Value\$mode"
-                
+				
 				$testResult=IperfClientServerUDPTestParallel $server $client
-                LogMsg "$($currentTestData.testName) : $Value : $mode : $testResult"
+				LogMsg "$($currentTestData.testName) : $Value : $mode : $testResult"
 			}
 			catch
 			{

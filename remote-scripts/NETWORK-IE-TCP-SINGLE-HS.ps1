@@ -9,15 +9,15 @@ if($isDeployed)
 	$hs1ServiceUrl = $allVMData[0].URL
 	$hs1vm1IP = $allVMData[0].InternalIP
 	$hs1vm1Hostname = $allVMData[0].RoleName
-    $hs1vm1sshport = $allVMData[0].SSHPort
-    $hs1vm1tcpport = $allVMData[0].TCPtestPort
-    $hs1vm1udpport = $allVMData[0].UDPtestPort
+	$hs1vm1sshport = $allVMData[0].SSHPort
+	$hs1vm1tcpport = $allVMData[0].TCPtestPort
+	$hs1vm1udpport = $allVMData[0].UDPtestPort
 	
 	$hs1vm2IP = $allVMData[1].InternalIP
 	$hs1vm2Hostname = $allVMData[1].RoleName
-    $hs1vm2sshport = $allVMData[1].SSHPort
-    $hs1vm2tcpport = $allVMData[1].TCPtestPort
-    $hs1vm2udpport = $allVMData[1].UDPtestPort
+	$hs1vm2sshport = $allVMData[1].SSHPort
+	$hs1vm2tcpport = $allVMData[1].TCPtestPort
+	$hs1vm2udpport = $allVMData[1].UDPtestPort
 
 	$server = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -nodeTcpPort $hs1vm1tcpport -nodeIperfCmd $cmd1 -user $user -password $password -files $currentTestData.files -logDir $LogDir
 	$client = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm2sshport -nodeTcpPort $hs1vm2tcpport -nodeIperfCmd $cmd2 -user $user -password $password -files $currentTestData.files -logDir $LogDir

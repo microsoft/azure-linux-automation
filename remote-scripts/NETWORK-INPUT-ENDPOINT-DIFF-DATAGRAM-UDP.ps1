@@ -7,24 +7,24 @@ $resultArr = @()
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
-    foreach ($VMdata in $allVMData)
-    {
-        if ($VMdata.RoleName -imatch $currentTestData.setupType)
-        {
-            $hs1VIP = $VMdata.PublicIP
-            $hs1vm1sshport = $VMdata.SSHPort
-            $hs1vm1tcpport = $VMdata.TCPtestPort
-            $hs1vm1udpport = $VMdata.UDPtestPort
-            $hs1ServiceUrl = $VMdata.URL
-        }
-        elseif ($VMdata.RoleName -imatch "DTAP")
-        {
-            $dtapServerIp = $VMdata.PublicIP
-            $dtapServerSshport = $VMdata.SSHPort
-            $dtapServerTcpport = $VMdata.TCPtestPort
-            $dtapServerUdpport = $VMdata.UDPtestPort
-        }
-    }
+	foreach ($VMdata in $allVMData)
+	{
+		if ($VMdata.RoleName -imatch $currentTestData.setupType)
+		{
+			$hs1VIP = $VMdata.PublicIP
+			$hs1vm1sshport = $VMdata.SSHPort
+			$hs1vm1tcpport = $VMdata.TCPtestPort
+			$hs1vm1udpport = $VMdata.UDPtestPort
+			$hs1ServiceUrl = $VMdata.URL
+		}
+		elseif ($VMdata.RoleName -imatch "DTAP")
+		{
+			$dtapServerIp = $VMdata.PublicIP
+			$dtapServerSshport = $VMdata.SSHPort
+			$dtapServerTcpport = $VMdata.TCPtestPort
+			$dtapServerUdpport = $VMdata.UDPtestPort
+		}
+	}
 	LogMsg "Test Machine : $hs1VIP : $hs1vm1sshport"
 	LogMsg "DTAP Machine : $dtapServerIp : $hs1vm1sshport"
 	$iperfTimeoutSeconds = $currentTestData.iperfTimeoutSeconds

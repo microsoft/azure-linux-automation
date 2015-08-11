@@ -11,18 +11,18 @@ if($isDeployed)
 	$hs1ServiceUrl = $allVMData[0].URL
 	$hs1vm1IP = $allVMData[0].InternalIP
 	$hs1vm1Hostname = $allVMData[0].RoleName
-    $hs1vm1sshport = $allVMData[0].SSHPort
-    $hs1vm1tcpport = $allVMData[0].TCPtestPort
-    $hs1vm1udpport = $allVMData[0].UDPtestPort
+	$hs1vm1sshport = $allVMData[0].SSHPort
+	$hs1vm1tcpport = $allVMData[0].TCPtestPort
+	$hs1vm1udpport = $allVMData[0].UDPtestPort
 	
 	$hs1vm2IP = $allVMData[1].InternalIP
 	$hs1vm2Hostname = $allVMData[1].RoleName
-    $hs1vm2sshport = $allVMData[1].SSHPort
-    $hs1vm2tcpport = $allVMData[1].TCPtestPort
-    $hs1vm2udpport = $allVMData[1].UDPtestPort
-        
+	$hs1vm2sshport = $allVMData[1].SSHPort
+	$hs1vm2tcpport = $allVMData[1].TCPtestPort
+	$hs1vm2udpport = $allVMData[1].UDPtestPort
+		
 	$pingFrom = CreatePingNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -user $user -password $password -files $currentTestData.files -logDir $LogDir 
-    LogMsg "ping will be done from $hs1VIP"
+	LogMsg "ping will be done from $hs1VIP"
 	foreach ($Value in $SubtestValues) 
 	{
 		mkdir $LogDir\$Value -ErrorAction SilentlyContinue | out-null
@@ -30,7 +30,7 @@ if($isDeployed)
 		{ 
 			try
 			{
-                $testResult = $null
+				$testResult = $null
 				if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 				{
 					$pingFrom.cmd = "python ping.py -x $hs1vm2IP -c 10 -s$Value "
@@ -46,7 +46,7 @@ if($isDeployed)
 				$pingFrom.logDir = $LogDir + "\$Value\$mode"
 
 				$testResult = DoPingTest -pingFrom $pingFrom
-                LogMsg "$($currentTestData.testName) : $Value : $mode : $testResult"				
+				LogMsg "$($currentTestData.testName) : $Value : $mode : $testResult"				
 			}
 			catch
 			{

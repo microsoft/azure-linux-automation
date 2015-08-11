@@ -7,36 +7,36 @@ $resultArr = @()
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if($isDeployed)
 {
-    $vm1added = $false
-    foreach ($VMdata in $allVMData)
-    {
-        if ($VMdata.RoleName -imatch $currentTestData.setupType )
-        {
-            if ( $vm1added )
-            {
-                $hs1VIP = $VMdata.PublicIP
-                $hs1vm2sshport = $VMdata.SSHPort
-                $hs1vm2tcpport = $VMdata.TCPtestPort
-                $hs1vm2ProbePort = $VMdata.TCPtestProbePort
-                $hs1ServiceUrl = $VMdata.URL
-            }
-            else
-            {
-                $hs1VIP = $VMdata.PublicIP
-                $hs1vm1sshport = $VMdata.SSHPort
-                $hs1vm1tcpport = $VMdata.TCPtestPort
-                $hs1vm1ProbePort = $VMdata.TCPtestProbePort
-                $hs1ServiceUrl = $VMdata.URL
-                $vm1added = $true
-            }
-        }
-        elseif ($VMdata.RoleName -imatch "DTAP")
-        {
-            $dtapServerIp = $VMdata.PublicIP
-            $dtapServerSshport = $VMdata.SSHPort
-            $dtapServerTcpport = $VMdata.TCPtestPort
-        }
-    }	
+	$vm1added = $false
+	foreach ($VMdata in $allVMData)
+	{
+		if ($VMdata.RoleName -imatch $currentTestData.setupType )
+		{
+			if ( $vm1added )
+			{
+				$hs1VIP = $VMdata.PublicIP
+				$hs1vm2sshport = $VMdata.SSHPort
+				$hs1vm2tcpport = $VMdata.TCPtestPort
+				$hs1vm2ProbePort = $VMdata.TCPtestProbePort
+				$hs1ServiceUrl = $VMdata.URL
+			}
+			else
+			{
+				$hs1VIP = $VMdata.PublicIP
+				$hs1vm1sshport = $VMdata.SSHPort
+				$hs1vm1tcpport = $VMdata.TCPtestPort
+				$hs1vm1ProbePort = $VMdata.TCPtestProbePort
+				$hs1ServiceUrl = $VMdata.URL
+				$vm1added = $true
+			}
+		}
+		elseif ($VMdata.RoleName -imatch "DTAP")
+		{
+			$dtapServerIp = $VMdata.PublicIP
+			$dtapServerSshport = $VMdata.SSHPort
+			$dtapServerTcpport = $VMdata.TCPtestPort
+		}
+	}	
 	LogMsg "Test Machine 1 : $hs1VIP : $hs1vm1sshport"
 	LogMsg "Test Machine 2 : $hs1VIP : $hs1vm2sshport"
 	LogMsg "DTAP Machine : $dtapServerIp : $hs1vm1sshport"

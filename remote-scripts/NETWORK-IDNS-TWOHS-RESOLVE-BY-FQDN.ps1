@@ -9,17 +9,17 @@ if($isDeployed)
 	$hs1ServiceUrl = $allVMData[0].URL
 	$hs1vm1IP = $allVMData[0].InternalIP
 	$hs1vm1Hostname = $allVMData[0].RoleName
-    $hs1vm1sshport = $allVMData[0].SSHPort
-    $hs1vm1tcpport = $allVMData[0].TCPtestPort
-    $hs1vm1udpport = $allVMData[0].UDPtestPort
+	$hs1vm1sshport = $allVMData[0].SSHPort
+	$hs1vm1tcpport = $allVMData[0].TCPtestPort
+	$hs1vm1udpport = $allVMData[0].UDPtestPort
 
 	$hs2VIP = $allVMData[1].PublicIP
 	$hs2ServiceUrl = $allVMData[1].URL
 	$hs2vm1IP = $allVMData[1].InternalIP
 	$hs2vm1Hostname = $allVMData[1].RoleName
-    $hs2vm1sshport = $allVMData[1].SSHPort
-    $hs2vm1tcpport = $allVMData[1].TCPtestPort
-    $hs2vm1udpport = $allVMData[1].UDPtestPort	
+	$hs2vm1sshport = $allVMData[1].SSHPort
+	$hs2vm1tcpport = $allVMData[1].TCPtestPort
+	$hs2vm1udpport = $allVMData[1].UDPtestPort	
 
 	$vm1 = CreateIdnsNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -user $user -password $password -logDir $LogDir -nodeDip $hs1vm1IP -nodeUrl $hs1ServiceUrl -nodeDefaultHostname $hs1vm1Hostname
 	$vm2 = CreateIdnsNode -nodeIp $hs2VIP -nodeSshPort $hs2vm1sshport -user $user -password $password -logDir $LogDir -nodeDip $hs2vm1IP -nodeUrl $hs2ServiceUrl -nodeDefaultHostname $hs2vm1Hostname
