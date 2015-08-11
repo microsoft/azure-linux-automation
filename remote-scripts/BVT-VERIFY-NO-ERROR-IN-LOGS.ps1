@@ -10,7 +10,6 @@ if ($isDeployed)
 
 	try
 	{
-		#$AllVMData = GetAllDeployementData -DeployedServices $isDeployed -ResourceGroups $isDeployed
 		$hs1VIP = $AllVMData.PublicIP
 		$hs1vm1sshport = $AllVMData.SSHPort
 		$hs1ServiceUrl = $AllVMData.URL
@@ -18,7 +17,6 @@ if ($isDeployed)
 
 		RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
 		RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *" -runAsSudo
-
 
 		LogMsg "Executing : $($currentTestData.testScript)"
 		RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "$python_cmd $($currentTestData.testScript)" -runAsSudo

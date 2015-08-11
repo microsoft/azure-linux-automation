@@ -8,19 +8,10 @@ if ($isDeployed)
 {
 	try
 	{
-		$testServiceData = Get-AzureService -ServiceName $isDeployed
-
-#Get VMs deployed in the service..
-		$testVMsinService = $testServiceData | Get-AzureVM
-
-		$hs1vm1 = $testVMsinService
-		$hs1vm1Endpoints = $hs1vm1 | Get-AzureEndpoint
-		$hs1vm1sshport = GetPort -Endpoints $hs1vm1Endpoints -usage ssh
-		$hs1VIP = $hs1vm1Endpoints[0].Vip
-		$hs1ServiceUrl = $hs1vm1.DNSName
-		$hs1ServiceUrl = $hs1ServiceUrl.Replace("http://","")
-		$hs1ServiceUrl = $hs1ServiceUrl.Replace("/","")
-		$hs1vm1Hostname =  $hs1vm1.Name
+		$hs1VIP = $AllVMData.PublicIP
+		$hs1vm1sshport = $AllVMData.SSHPort
+		$hs1ServiceUrl = $AllVMData.URL
+		$hs1vm1Dip = $AllVMData.InternalIP
 
 		$OsImageSize = Get-AzureVMImage | where {$_.ImageName -eq $BaseOsImage} | % {$_.LogicalSizeInGB}
 		$OsImageSizeKB = $OsImageSize*1024*1024*1024

@@ -9,7 +9,6 @@ if ($isDeployed)
 {
 	try
 	{
-		#$AllVMData = GetAllDeployementData -DeployedServices $isDeployed -ResourceGroups $isDeployed
 		$hs1VIP = $AllVMData.PublicIP
 		$hs1vm1sshport = $AllVMData.SSHPort
 		$hs1ServiceUrl = $AllVMData.URL
