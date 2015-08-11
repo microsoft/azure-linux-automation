@@ -35,6 +35,7 @@
 			<CertificateThumbprint>Certificate_Associated_with_your_Azure_Subscription</CertificateThumbprint>
 			<ManagementEndpoint>https://management.core.windows.net</ManagementEndpoint>
 			<StorageAccount>Preferred_Stoarage_Account</StorageAccount>
+			<ARMStorageAccount>Preferred_ARM_Stoarage_Account</ARMStorageAccount>
 			<!--<Location>"Preferred_Location"</Location>-->
 			<AffinityGroup>Your_Affinity_Group</AffinityGroup>
 		</General>
@@ -137,6 +138,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -165,6 +167,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -195,6 +198,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -220,6 +224,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -247,6 +252,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -272,6 +278,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -303,6 +310,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -328,6 +336,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -657,6 +666,7 @@
 						<state></state>
 						<SubnetName>Subnet1</SubnetName>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -683,6 +693,7 @@
 						<state></state>
 						<SubnetName>Subnet2</SubnetName>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -713,6 +724,7 @@
 						<state></state>
 						<SubnetName>Subnet2</SubnetName>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -739,6 +751,7 @@
 						<state></state>
 						<SubnetName>Subnet1</SubnetName>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -773,6 +786,7 @@
 						<state></state>
 						<SubnetName>Subnet1</SubnetName>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -799,6 +813,7 @@
 						<state></state>
 						<SubnetName>Subnet2</SubnetName>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -829,6 +844,7 @@
 						<state></state>
 						<SubnetName>Subnet2</SubnetName>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -855,6 +871,7 @@
 						<state></state>
 						<SubnetName>Subnet1</SubnetName>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -888,6 +905,7 @@
 						<state></state>
 						<SubnetName>Subnet1</SubnetName>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -914,6 +932,7 @@
 						<state></state>
 						<SubnetName>Subnet2</SubnetName>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -944,6 +963,7 @@
 						<state></state>
 						<SubnetName>Subnet2</SubnetName>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -970,6 +990,7 @@
 						<state></state>
 						<SubnetName>Subnet1</SubnetName>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -998,6 +1019,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1028,6 +1050,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1055,6 +1078,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1087,6 +1111,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1106,6 +1131,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1128,6 +1154,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1160,6 +1187,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1174,19 +1202,12 @@
 							<ProbePort>750</ProbePort>
 							<LoadBalanced>True</LoadBalanced>
 						</EndPoints>
-						<EndPoints>
-							<Name>UDPtest</Name>
-							<Protocol>udp</Protocol>
-							<LocalPort>990</LocalPort>
-							<PublicPort>990</PublicPort>
-							<ProbePort>990</ProbePort>
-							<LoadBalanced>True</LoadBalanced>
-						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1201,14 +1222,6 @@
 							<ProbePort>750</ProbePort>
 							<LoadBalanced>True</LoadBalanced>
 						</EndPoints>
-						<EndPoints>
-							<Name>UDPtest</Name>
-							<Protocol>udp</Protocol>
-							<LocalPort>990</LocalPort>
-							<PublicPort>990</PublicPort>
-							<ProbePort>990</ProbePort>
-							<LoadBalanced>True</LoadBalanced>
-						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
 				</HostedService>
@@ -1217,6 +1230,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1246,9 +1260,10 @@
 				<isDeployed>NO</isDeployed>
 				<HostedService>
 					<VnetName></VnetName>
-						<VirtualMachine>
+					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1263,19 +1278,12 @@
 							<ProbePort>500</ProbePort>
 							<LoadBalanced>True</LoadBalanced>
 						</EndPoints>
-						<EndPoints>
-							<Name>UDPtest</Name>
-							<Protocol>udp</Protocol>
-							<LocalPort>990</LocalPort>
-							<PublicPort>990</PublicPort>
-							<ProbePort>500</ProbePort>
-							<LoadBalanced>True</LoadBalanced>
-						</EndPoints>
 						<DataDisk></DataDisk>
-						</VirtualMachine>
-						<VirtualMachine>
+					</VirtualMachine>
+					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1290,14 +1298,6 @@
 							<ProbePort>500</ProbePort>
 							<LoadBalanced>True</LoadBalanced>
 						</EndPoints>
-						<EndPoints>
-							<Name>UDPtest</Name>
-							<Protocol>udp</Protocol>
-							<LocalPort>990</LocalPort>
-							<PublicPort>990</PublicPort>
-							<ProbePort>500</ProbePort>
-							<LoadBalanced>True</LoadBalanced>
-						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
 				</HostedService>
@@ -1306,6 +1306,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1319,16 +1320,9 @@
 							<PublicPort>750</PublicPort>
 							<LoadBalanced>False</LoadBalanced>
 						</EndPoints>
-						<EndPoints>
-							<Name>UDPtest</Name>
-							<Protocol>udp</Protocol>
-							<LocalPort>990</LocalPort>
-							<PublicPort>990</PublicPort>
-							<LoadBalanced>False</LoadBalanced>
-						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
-				</HostedService>								
+				</HostedService>
 			</CustomProbeOtherPort>
 
 			<BVTDeployment>
@@ -1337,6 +1331,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Basic_A1</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1913,7 +1908,7 @@
 						<DataDisk></DataDisk>
 					</VirtualMachine>
 				</HostedService>
-			</ExtensionTest>			
+			</ExtensionTest>
 		</Deployment>
 		
 
@@ -2217,7 +2212,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_OA_004</TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -2230,7 +2225,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_OA_001</TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -2244,7 +2239,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_OA_003</TestID>
 			<TestMode>IP</TestMode>
 			<Priority>P0</Priority>
@@ -2259,7 +2254,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_OA_005</TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -2273,7 +2268,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_OA_006</TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -2325,7 +2320,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_INT_003</TestID>
 			<TestMode>IP,Hostname</TestMode>
 			<Priority>P0</Priority>
@@ -2339,7 +2334,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_INT_001</TestID>
 			<TestMode>IP,Hostname</TestMode>
 			<Priority>P0</Priority>
@@ -2354,7 +2349,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_INT_002</TestID>
 			<TestMode>DIP,Hostname</TestMode>
 			<Priority>P0</Priority>
@@ -2369,7 +2364,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_INT_005</TestID>
 			<TestMode>DIP,Hostname</TestMode>
 			<Priority>P0</Priority>
@@ -2383,7 +2378,7 @@
 			<setupType>IEndpointSingleHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_INT_007</TestID>
 			<TestMode>DIP,Hostname</TestMode>
 			<Priority>P0</Priority>
@@ -2397,7 +2392,7 @@
 			<setupType>IEndpointSingleHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_INT_006</TestID>
 			<TestMode>DIP,Hostname</TestMode>
 			<Priority>P0</Priority>
@@ -2413,7 +2408,7 @@
 			<setupType>IEndpointTwoHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_INT_010</TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -2439,7 +2434,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_INP_001</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2453,7 +2448,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_INP_003</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2467,7 +2462,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_INP_008</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2482,7 +2477,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_INP_005</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2497,7 +2492,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_INP_002</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2512,7 +2507,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_INP_007</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2527,7 +2522,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_INP_006</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2543,7 +2538,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_INT_004</TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -2556,7 +2551,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_LB_001</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2571,7 +2566,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_LB_002</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2586,7 +2581,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_LB_003</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2601,7 +2596,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_LB_004</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2616,7 +2611,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_LB_005</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2631,7 +2626,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_LB_006</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2646,7 +2641,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_CPSP_001</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2660,7 +2655,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_CPSP_002</TestID>
 			<SubtestValues>2,4</SubtestValues>
 			<TestMode>VIP,URL</TestMode>
@@ -2675,7 +2670,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_CPSP_007</TestID>
 			<SubtestValues>2,4</SubtestValues>
 			<TestMode>VIP,URL</TestMode>
@@ -2707,7 +2702,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_CPSP_003</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2721,7 +2716,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_CPOP_002</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2735,7 +2730,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_CPSP_006</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2749,7 +2744,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_CPOP_005</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2764,7 +2759,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_CPOP_001</TestID>
 			<TestMode>VIP,URL</TestMode>
 			<Priority>P0</Priority>
@@ -2778,7 +2773,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_CPSP_005</TestID>
 			<TestMode>VIP,URL</TestMode>
 		</test>
@@ -2791,7 +2786,7 @@
 			<iperfTimeoutSeconds>20</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_CPOP_004</TestID>
 			<TestMode>VIP,URL</TestMode>
 		</test>
@@ -2829,7 +2824,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_INP_004</TestID>
 			<TestMode>VIP,URL</TestMode>
 		</test>
@@ -2842,7 +2837,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_INP_009</TestID>
 			<TestMode>VIP,URL</TestMode>
 		</test>
@@ -2855,7 +2850,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_INT_008</TestID>
 			<TestMode>IP,Hostname</TestMode>
 		</test>
@@ -2868,7 +2863,7 @@
 			<iperfTimeoutSeconds>10</iperfTimeoutSeconds>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_INT_009</TestID>
 			<TestMode>IP,Hostname</TestMode>
 		</test>
@@ -2897,7 +2892,7 @@
 			<setupType>IEndpointSingleHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_IDNS_002</TestID>
 		</test>
 		<test>
@@ -2910,7 +2905,7 @@
 			<setupType>IEndpointTwoHS</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureNetwork_IDNS_006</TestID>
 		</test>
 
