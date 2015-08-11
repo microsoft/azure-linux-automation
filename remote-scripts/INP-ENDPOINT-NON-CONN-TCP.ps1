@@ -7,7 +7,7 @@ if($isDeployed)
 {	
     foreach ($VMdata in $allVMData)
     {
-        if ($VMdata.RoleName -imatch "PublicEndpoint")
+        if ($VMdata.RoleName -imatch $currentTestData.setupType)
         {
             $hs1VIP = $VMdata.PublicIP
             $hs1vm1sshport = $VMdata.SSHPort
