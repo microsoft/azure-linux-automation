@@ -11,7 +11,6 @@
 ###############################################################################################
 param ([string] $xmlConfigFile, [switch] $eMail, [string] $logFilename="azure_ica.log", [switch] $runtests, [switch]$onCloud, [switch] $vhdprep, [switch]$upload, [switch] $help, [string] $Distro, [string] $cycleName, [string] $TestPriority, [string]$osImage, [switch]$EconomyMode, [switch]$keepReproInact, [string] $DebugDistro, [switch]$UseAzureResourceManager)
 
-#Import-Module .\TestLibs\RDFELibs.psm1 -Force
 Import-Module .\TestLibs\AzureWinUtils.psm1 -Force -Scope Global
 Import-Module .\TestLibs\RDFELibs.psm1 -Force -Scope Global
 Import-Module .\TestLibs\ARMLibrary.psm1 -Force -Scope Global
