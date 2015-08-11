@@ -17,7 +17,7 @@ if ($isDeployed)
 		if ( $UseAzureResourceManager )
 		{
 			$restartVM = Restart-AzureVM -ResourceGroupName $AllVMData.ResourceGroupName -Name $AllVMData.RoleName -Verbose
-			if ( $restart.Status -eq "Succeeded" )
+			if ( $restartVM.Status -eq "Succeeded" )
 			{
 				$isSSHOpened = isAllSSHPortsEnabledRG -AllVMDataObject $AllVMData
 				if ( $isSSHOpened -eq "True" )
