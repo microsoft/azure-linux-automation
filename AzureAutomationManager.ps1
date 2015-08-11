@@ -9,10 +9,11 @@
 #              - Invokes azure test suite
 ## Author : v-ampaw@microsoft.com
 ###############################################################################################
-param ([string] $xmlConfigFile, [switch] $eMail, [string] $logFilename="azure_ica.log", [switch] $runtests, [switch]$onCloud, [switch] $vhdprep, [switch]$upload, [switch] $help, [string] $Distro, [string] $cycleName, [string] $TestPriority, [string]$osImage, [switch]$EconomyMode, [switch]$keepReproInact, [string] $DebugDistro)
+param ([string] $xmlConfigFile, [switch] $eMail, [string] $logFilename="azure_ica.log", [switch] $runtests, [switch]$onCloud, [switch] $vhdprep, [switch]$upload, [switch] $help, [string] $Distro, [string] $cycleName, [string] $TestPriority, [string]$osImage, [switch]$EconomyMode, [switch]$keepReproInact, [string] $DebugDistro, [switch]$UseAzureResourceManager)
 
-#Import-Module .\TestLibs\RDFELibs.psm1 -Force
-Import-Module .\TestLibs\AzureWinUtils.psm1 -Force
+Import-Module .\TestLibs\AzureWinUtils.psm1 -Force -Scope Global
+Import-Module .\TestLibs\RDFELibs.psm1 -Force -Scope Global
+Import-Module .\TestLibs\ARMLibrary.psm1 -Force -Scope Global
 
 $xmlConfig = [xml](Get-Content $xmlConfigFile)
 $user = $xmlConfig.config.Azure.Deployment.Data.UserName
@@ -66,8 +67,6 @@ try
     $Platform=$xmlConfig.config.global.platform
     $global=$xmlConfig.config.global
 	
-	
-
     $testStartTime = [DateTime]::Now.ToUniversalTime()
     Set-Variable -Name testStartTime -Value $testStartTime -Scope Global
 
@@ -80,6 +79,7 @@ try
     {
     	$logfile = $logFilename
     }
+
     $logFile = $testDir + "\" + $logfile
     Set-Variable -Name logfile -Value $logFile -Scope Global
     Set-Variable -Name Distro -Value $Distro -Scope Global
@@ -99,26 +99,39 @@ try
         Set-Variable -Name EconomyMode -Value $false -Scope Global
         Set-Variable -Name keepReproInact -Value $false -Scope Global
     }
-    
+
     $AzureSetup = $xmlConfig.config.Azure.General
     LogMsg  ("Info : AzureAutomationManager.ps1 - LIS on Azure Automation")
     LogMsg  ("Info : Created test results directory:", $testDir)
     LogMsg  ("Info : Logfile = ", $logfile)
     LogMsg  ("Info : Using config file $xmlConfigFile")
-    LogMsg  ("Setting Subscription")
-    SetSubscription -subscriptionID $AzureSetup.SubscriptionID -subscriptionName $AzureSetup.SubscriptionName -certificateThumbprint $AzureSetup.CertificateThumbprint -managementEndpoint $AzureSetup.ManagementEndpoint -storageAccount $AzureSetup.StorageAccount
-    $AllSubscriptions = Get-AzureSubscription
-    foreach ($subscription in $AllSubscriptions)
+
+    if ($UseAzureResourceManager)
     {
-        if (($subscription.CurrentStorageAccountName -imatch $AzureSetup.StorageAccount) -and ( $subscription.SubscriptionName -imatch $AzureSetup.SubscriptionName))
-        {
-            $currentSubscription = $subscription
-        }
+        Switch-AzureMode -Name AzureResourceManager
+        Set-Variable -Name UseAzureResourceManager -Value $true -Scope Global
+        Select-AzureSubscription -SubscriptionName $AzureSetup.SubscriptionName
     }
-    LogMsg "SubscriptionName           : $($currentSubscription.SubscriptionName)"
-    LogMsg "SubscriptionId             : $($currentSubscription.SubscriptionID)"
-    LogMsg "ServiceEndpoint            : $($currentSubscription.ServiceEndpoint)"
-    LogMsg "CurrentStorageAccount      : $($currentSubscription.CurrentStorageAccountName)"
+    else
+    {
+        Switch-AzureMode -Name AzureServiceManagement
+        Set-Variable -Name UseAzureResourceManager -Value $false -Scope Global
+        LogMsg "Setting Subscription"
+        SetSubscription -subscriptionID $AzureSetup.SubscriptionID -subscriptionName $AzureSetup.SubscriptionName -certificateThumbprint $AzureSetup.CertificateThumbprint -managementEndpoint $AzureSetup.ManagementEndpoint -storageAccount $AzureSetup.StorageAccount
+        $AllSubscriptions = Get-AzureSubscription
+        foreach ($subscription in $AllSubscriptions)
+        {
+            if (($subscription.CurrentStorageAccountName -imatch $AzureSetup.StorageAccount) -and ( $subscription.SubscriptionName -imatch $AzureSetup.SubscriptionName))
+            {
+                $currentSubscription = $subscription
+            }
+        }
+        LogMsg "SubscriptionName           : $($currentSubscription.SubscriptionName)"
+        LogMsg "SubscriptionId             : $($currentSubscription.SubscriptionID)"
+        LogMsg "ServiceEndpoint            : $($currentSubscription.ServiceEndpoint)"
+        LogMsg "CurrentStorageAccount      : $($currentSubscription.CurrentStorageAccountName)"
+    }
+    
     #Check for the Azure platform
     if($Platform -eq "Azure")
     {
@@ -130,7 +143,14 @@ try
 	        exit 2
 	   
 	    }
-	    LogMsg "*************AZURE POWERSHELL****************"
+        if ( $UseAzureResourceManager )
+        {
+            LogMsg "*************AZURE RESOURCE GROUP MODE****************"
+        }
+        else
+        {
+	        LogMsg "*************AZURE SERVICE MANAGEMENT MODE****************"
+        }
     }
     if($upload)
     {

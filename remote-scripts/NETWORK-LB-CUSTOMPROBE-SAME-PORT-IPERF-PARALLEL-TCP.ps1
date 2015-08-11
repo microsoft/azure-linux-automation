@@ -7,41 +7,36 @@ $resultArr = @()
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
-	$hsNames = $isDeployed.Split("^")
-	$hs1Name = $hsNames[0]
-	$hs2Name = $hsNames[1]
-	$testServiceData = Get-AzureService -ServiceName $hs1Name
-	$dtapServiceData = Get-AzureService -ServiceName $hs2Name
-	#Extract Test VM Data
-	$testVMsinService = $testServiceData | Get-AzureVM
-	$hs1vm1 = $testVMsinService[0]
-	$hs1vm1Endpoints = $hs1vm1 | Get-AzureEndpoint
-	$hs1VIP = $hs1vm1Endpoints[0].Vip
-	$hs1ServiceUrl = $hs1vm1.DNSName
-	$hs1ServiceUrl = $hs1ServiceUrl.Replace("http://","")
-	$hs1ServiceUrl = $hs1ServiceUrl.Replace("/","")
-	$hs1vm1IP = $hs1vm1.IpAddress
-	$hs1vm1Hostname = $hs1vm1.InstanceName
-	$hs1vm2 = $testVMsinService[1]
-	$hs1vm2Endpoints = $hs1vm2 | Get-AzureEndpoint
-	$hs1vm2IP = $hs1vm2.IpAddress
-	$hs1vm2Hostname = $hs1vm2.InstanceName
-	$hs1vm1tcpport = GetPort -Endpoints $hs1vm1Endpoints -usage tcp
-	$hs1vm2tcpport = GetPort -Endpoints $hs1vm2Endpoints -usage tcp
-	$hs1vm1sshport = GetPort -Endpoints $hs1vm1Endpoints -usage ssh
-	$hs1vm2sshport = GetPort -Endpoints $hs1vm2Endpoints -usage ssh
-	$hs1vm1ProbePort = GetProbePort -Endpoints $hs1vm1Endpoints -usage TCPtest
-	$hs1vm2ProbePort = GetProbePort -Endpoints $hs1vm2Endpoints -usage TCPtest
-	#Extract DTAP VM data
-   	$dtapServer = $dtapServiceData | Get-AzureVM
-	$dtapServerEndpoints = $dtapServer | Get-AzureEndpoint
-	$dtapServerIp = $dtapServerEndpoints[0].Vip
-	$dtapServerUrl = $dtapServer.DNSName
-	$dtapServerUrl = $dtapServerUrl.Replace("http://","")
-	$dtapServerUrl = $dtapServerUrl.Replace("/","")
-	$dtapServerTcpport = GetPort -Endpoints $dtapServerEndpoints -usage tcp
-	$dtapServerUdpport = GetPort -Endpoints $dtapServerEndpoints -usage udp
-	$dtapServerSshport = GetPort -Endpoints $dtapServerEndpoints -usage ssh	
+	$vm1added = $false
+	foreach ($VMdata in $allVMData)
+	{
+		if ($VMdata.RoleName -imatch $currentTestData.setupType )
+		{
+			if ( $vm1added )
+			{
+				$hs1VIP = $VMdata.PublicIP
+				$hs1vm2sshport = $VMdata.SSHPort
+				$hs1vm2tcpport = $VMdata.TCPtestPort
+				$hs1vm2ProbePort = $VMdata.TCPtestProbePort
+				$hs1ServiceUrl = $VMdata.URL
+			}
+			else
+			{
+				$hs1VIP = $VMdata.PublicIP
+				$hs1vm1sshport = $VMdata.SSHPort
+				$hs1vm1tcpport = $VMdata.TCPtestPort
+				$hs1vm1ProbePort = $VMdata.TCPtestProbePort
+				$hs1ServiceUrl = $VMdata.URL
+				$vm1added = $true
+			}
+		}
+		elseif ($VMdata.RoleName -imatch "DTAP")
+		{
+			$dtapServerIp = $VMdata.PublicIP
+			$dtapServerSshport = $VMdata.SSHPort
+			$dtapServerTcpport = $VMdata.TCPtestPort
+		}
+	}	
 	LogMsg "Test Machine 1 : $hs1VIP : $hs1vm1sshport"
 	LogMsg "Test Machine 2 : $hs1VIP : $hs1vm2sshport"
 	LogMsg "DTAP Machine : $dtapServerIp : $hs1vm1sshport"
@@ -246,7 +241,7 @@ else
 $result = GetFinalResultHeader -resultarr $resultArr
 
 #Clean up the setup
-DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed
+DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed -ResourceGroups $isDeployed
 
 #Return the result and summery to the test suite script..
 return $result,$resultSummary

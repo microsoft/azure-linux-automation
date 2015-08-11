@@ -7,12 +7,39 @@ $resultArr = @()
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
-
 	try
 	{
-		LogMsg "Trying to restart $hs1vm1Hostname ..."
-		$out = RestartAllDeployments -DeployedServices $isDeployed
-		$isRestarted = $?
+		$hs1VIP = $AllVMData.PublicIP
+		$hs1vm1sshport = $AllVMData.SSHPort
+		$hs1ServiceUrl = $AllVMData.URL
+		$hs1vm1Dip = $AllVMData.InternalIP
+		LogMsg "Trying to restart $($AllVMData.RoleName)..."
+		if ( $UseAzureResourceManager )
+		{
+			$restartVM = Restart-AzureVM -ResourceGroupName $AllVMData.ResourceGroupName -Name $AllVMData.RoleName -Verbose
+			if ( $restartVM.Status -eq "Succeeded" )
+			{
+				$isSSHOpened = isAllSSHPortsEnabledRG -AllVMDataObject $AllVMData
+				if ( $isSSHOpened -eq "True" )
+				{
+					$isRestarted = $true
+				}
+				else
+				{
+					LogErr "VM is not available after restart"
+					$isRestarted = $false
+				}
+			}
+			else
+			{
+				$isRestarted = $false
+			}
+		}
+		else
+		{
+			$out = RestartAllDeployments -DeployedServices $isDeployed
+			$isRestarted = $?
+		}
 		if ($isRestarted)
 		{
 			LogMsg "Virtual machine restart successful."
@@ -52,7 +79,7 @@ else
 $result = GetFinalResultHeader -resultarr $resultArr
 
 #Clean up the setup
-DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed
+DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed -ResourceGroups $isDeployed
 
 #Return the result and summery to the test suite script..
 return $result
