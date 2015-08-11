@@ -1002,14 +1002,6 @@ Function GetAndCheckKernelLogs($allDeployedVMs, $status, $vmUser, $vmPassword)
 		$vmPassword = $password
 	}
 	$retValue = $false
-	#if ( $UseAzureResourceManager ) 
-	#{
-	#	$allDeployedVMs = GetAllDeployementData	-ResourceGroups $DeployedGroups
-	#}
-	#else
-	#{
-	#	$allDeployedVMs = GetAllDeployementData	-DeployedServices $DeployedServices
-	#}
 	foreach ($VM in $allDeployedVMs)
 	{
 		$BootLogDir="$Logdir\$($VM.RoleName)"
@@ -1110,22 +1102,18 @@ Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFa
 			$position = 0
 			$VerifiedServices =  $NULL
 			$retValue = $NULL
-			#$ExistingServices = Get-AzureService
 			$position = 1
 			$i = 0
 			$role = 1
 			$setupTypeData = $xmlConfig.config.Azure.Deployment.$setupType
 			$isAllDeployed = CreateAllDeployments -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro
-			#$isAllDeployed = @()
-			#$isAllDeployed += "True"
-			#$isAllDeployed += "ICA-HS-IEndpointSingleHS-SSOL-8-10-12-39-1"
 			$isAllVerified = "False"
 			$isAllConnected = "False"
 			if($isAllDeployed[0] -eq "True")
 			{
 				$deployedServices = $isAllDeployed[1]
 				$DeploymentElapsedTime = $isAllDeployed[2]
-				$servicesToVerify = $deployedServices.Split('^') ########
+				$servicesToVerify = $deployedServices.Split('^')
 				if ( $GetDeploymentStatistics )
 				{
 					$VMBooTime = GetVMBootTime -DeployedServices $deployedServices -TimeoutInSeconds 1800
@@ -1139,8 +1127,8 @@ Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFa
 				}
 				if ($isAllVerified -eq "True")
 				{
-                    $allVMData = GetAllDeployementData -DeployedServices $deployedServices
-                    Set-Variable -Name allVMData -Value $allVMData -Force -Scope Global
+					$allVMData = GetAllDeployementData -DeployedServices $deployedServices
+					Set-Variable -Name allVMData -Value $allVMData -Force -Scope Global
 					$isAllConnected = isAllSSHPortsEnabledRG -AllVMDataObject $allVMData
 					if ($isAllConnected -eq "True")
 					{
@@ -2249,25 +2237,26 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 				{
 					
 					#In development stage. Deleting all resource groups to save cores.
-					#if($result -eq "PASS") 
-					#{
+					if($result -eq "PASS") 
+					{
 						LogMsg "Cleaning up deployed test virtual machines."
 						#GetVMLogs -allVMData $allDeploymentData
 						if ( DeleteResourceGroup -RGName $Group )
 						{
 							LogMsg "CleanUP Successful for $Group"
 						}
-					#}
-					#else
-					#{
-
-					#}
+					}
+					else
+					{
+						LogMsg "Collecting VM logs.."
+						GetVMLogs -allVMData $allDeploymentData
+					}
 				}
 			}
 		}
 		else
 		{
-			LogMsg "Skipping cleanup, as No services deployed for cleanup!"
+			LogMsg "Skipping cleanup, as No services / resource groups deployed for cleanup!"
 		}
 	}
 	catch
@@ -3989,7 +3978,7 @@ Function Get-SSHDetailofVMs($DeployedServices, $ResourceGroups)
 
 Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 {
-    $allDeployedVMs = @()
+	$allDeployedVMs = @()
 	function CreateQuickVMNode()
 	{
 		$objNode = New-Object -TypeName PSObject
@@ -4010,45 +3999,45 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 			LogMsg "Collecting $ResourceGroup data.."
 			$RGIPdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/publicIPAddresses" -ExpandProperties -OutputObjectFormat New -Verbose
 			$RGVMs = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Compute/virtualMachines" -ExpandProperties -OutputObjectFormat New -Verbose
-            $LBdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/loadBalancers" -ExpandProperties -OutputObjectFormat New -Verbose
-            $NICdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/networkInterfaces" -ExpandProperties -OutputObjectFormat New -Verbose
+			$LBdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/loadBalancers" -ExpandProperties -OutputObjectFormat New -Verbose
+			$NICdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/networkInterfaces" -ExpandProperties -OutputObjectFormat New -Verbose
 			foreach ($testVM in $RGVMs)
 			{
 				$QuickVMNode = CreateQuickVMNode
 				$InboundNatRules = $LBdata.Properties.InboundNatRules
 				foreach ($endPoint in $InboundNatRules)
 				{
-                    if ( $endPoint.Name -imatch $testVM.ResourceName)
-                    {
-                        $endPointName = "$($endPoint.Name)".Replace("$($testVM.ResourceName)-","")
-                        Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endPointName)Port" -Value $endPoint.Properties.FrontendPort -Force
-                    }
+					if ( $endPoint.Name -imatch $testVM.ResourceName)
+					{
+						$endPointName = "$($endPoint.Name)".Replace("$($testVM.ResourceName)-","")
+						Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endPointName)Port" -Value $endPoint.Properties.FrontendPort -Force
+					}
 				}
-                $LoadBalancingRules = $LBdata.Properties.LoadBalancingRules
-                foreach ( $LBrule in $LoadBalancingRules )
-                {
-                    if ( $LBrule.Name -imatch "$ResourceGroup-LB-" )
-                    {
-                        $endPointName = "$($LBrule.Name)".Replace("$ResourceGroup-LB-","")
-                        Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endPointName)Port" -Value $LBrule.Properties.FrontendPort -Force
-                    }
-                }
-                $Probes = $LBdata.Properties.Probes
-                foreach ( $Probe in $Probes )
-                {
-                    if ( $Probe.Name -imatch "$ResourceGroup-LB-" )
-                    {
-                        $probeName = "$($Probe.Name)".Replace("$ResourceGroup-LB-","").Replace("-probe","")
-                        Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($probeName)ProbePort" -Value $Probe.Properties.Port -Force
-                    }
-                }
-                foreach ( $nic in $NICdata )
-                {
-                    if ( $nic.Name -imatch $testVM.ResourceName)
-                    {
-                        $QuickVMNode.InternalIP = "$($nic.Properties.IpConfigurations[0].Properties.PrivateIPAddress)"
-                    }
-                }
+				$LoadBalancingRules = $LBdata.Properties.LoadBalancingRules
+				foreach ( $LBrule in $LoadBalancingRules )
+				{
+					if ( $LBrule.Name -imatch "$ResourceGroup-LB-" )
+					{
+						$endPointName = "$($LBrule.Name)".Replace("$ResourceGroup-LB-","")
+						Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endPointName)Port" -Value $LBrule.Properties.FrontendPort -Force
+					}
+				}
+				$Probes = $LBdata.Properties.Probes
+				foreach ( $Probe in $Probes )
+				{
+					if ( $Probe.Name -imatch "$ResourceGroup-LB-" )
+					{
+						$probeName = "$($Probe.Name)".Replace("$ResourceGroup-LB-","").Replace("-probe","")
+						Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($probeName)ProbePort" -Value $Probe.Properties.Port -Force
+					}
+				}
+				foreach ( $nic in $NICdata )
+				{
+					if ( $nic.Name -imatch $testVM.ResourceName)
+					{
+						$QuickVMNode.InternalIP = "$($nic.Properties.IpConfigurations[0].Properties.PrivateIPAddress)"
+					}
+				}
 				$QuickVMNode.ResourceGroupName = $ResourceGroup
 				$QuickVMNode.PublicIP = $RGIPdata.Properties.IpAddress
 				$QuickVMNode.URL = $RGIPdata.Properties.DnsSettings.Fqdn
@@ -4056,7 +4045,7 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 				$QuickVMNode.Status = $testVM.Properties.ProvisioningState
 				$allDeployedVMs += $QuickVMNode
 			}
-            LogMsg "Collected $ResourceGroup data!"		
+			LogMsg "Collected $ResourceGroup data!"		
 		}
 	}
 	else
@@ -4077,11 +4066,11 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 				$QuickVMNode.InternalIP = $testVM.IpAddress
 				foreach ($endpoint in $AllEndpoints)
 				{
-                    Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endpoint.Name)Port" -Value $endpoint.Port -Force
-                    if ( $endpoint.ProbePort )
-                    {
-                        Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endpoint.Name)ProbePort" -Value $endpoint.ProbePort -Force
-                    }
+					Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endpoint.Name)Port" -Value $endpoint.Port -Force
+					if ( $endpoint.ProbePort )
+					{
+						Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endpoint.Name)ProbePort" -Value $endpoint.ProbePort -Force
+					}
 				}
 				$QuickVMNode.URL = ($testVM.DNSName).Replace("http://","").Replace("/","")
 				$QuickVMNode.Status = $testVM.InstanceStatus
@@ -4090,7 +4079,6 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 			LogMsg "Collected $hostedservice data!"
 		}
 	}
-    Set-Variable -Name allVMData -Value $allDeployedVMs -Force -Scope Global
 	return $allDeployedVMs
 }
 

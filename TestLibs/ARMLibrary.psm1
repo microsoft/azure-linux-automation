@@ -1,6 +1,5 @@
 ﻿Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro)
 {
-
     $resourceGroupCount = 0
     $xml = $xmlConfig
     LogMsg $setupType
@@ -49,19 +48,18 @@
 
         while (($isServiceDeployed -eq "False") -and ($retryDeployment -lt 5))
         {
-            #$groupName = "ICA-RG-D1-U1410-7-20-17-0-38"
             LogMsg "Creating Resource Group : $groupName."
             LogMsg "Verifying that Resource group name is not in use."
-            #$isServiceDeleted = DeleteResourceGroup -RGName $groupName
-$isServiceDeleted = $true
+            #$isServiceDeleted = DeleteResourceGroup -RGName $groupName 
+			$isServiceDeleted = $true
             if ($isServiceDeleted)
             {    
                 $isServiceCreated = CreateResourceGroup -RGName $groupName -location $location
-#$isServiceCreated = $true
+				#$isServiceCreated = $true
                 if ($isServiceCreated -eq "True")
                 {
                     #$isCertAdded = AddCertificate -serviceName $groupName
-$isCertAdded = "True"
+					$isCertAdded = "True"
                     if ($isCertAdded -eq "True")
                     {
                         #LogMsg "Certificate added successfully."
@@ -143,7 +141,6 @@ Function CreateResourceGroup([string]$RGName, $location)
     $FailCounter = 0
     $retValue = "False"
     $ResourceGroupDeploymentName = $RGName + "-deployment"
-    $azureDeployJSONFilePath = ".\temp\msjason\ssauto.json"
 
     While(($retValue -eq $false) -and ($FailCounter -lt 5))
     {
@@ -180,8 +177,6 @@ Function CreateResourceGroupDeployment([string]$RGName, $location, $setupType, $
     $FailCounter = 0
     $retValue = "False"
     $ResourceGroupDeploymentName = $RGName + "-deployment"
-    $azureDeployJSONFilePath = ".\temp\msjason\ssauto.json"
-
     While(($retValue -eq $false) -and ($FailCounter -lt 5))
     {
         try
@@ -217,17 +212,12 @@ Function GenerateAzureDeployJSONFile ($RGName, $osImage, $osVHD, $RGXMLData, $Lo
 {
 $jsonFile = $azuredeployJSONFilePath
 $StorageAccountName = $xml.config.Azure.General.ARMStorageAccount
-#$StorageAccountName = "sswestus"
-$role = 0
 $HS = $RGXMLData
 $setupType = $Setup
 $totalVMs = 0
 $totalHS = 0
 $extensionCounter = 0
-$vmCommands = @()
 $vmCount = 0
- 
-
 $indents = @()
 $indent = ""
 $singleIndent = ""
@@ -235,11 +225,11 @@ $indents += $indent
 $RGRandomNumber = $((Get-Random -Maximum 999999 -Minimum 100000))
 $RGrandomWord = ([System.IO.Path]::GetRandomFileName() -replace '[^a-z]')
 $dnsNameForPublicIP = $($RGName.ToLower() -replace '[^a-z0-9]') + "$RGrandomWord"
-$virtualNetworkName = "icavnet"
-$nicName = "ICANIC" 
-$availibilitySetName = "myAvSet"
+$virtualNetworkName = "ICAVNET"
+$availibilitySetName = "ICAAvailibilitySet"
 $LoadBalancerName =  "FrontEndIPAddress"
 $apiVersion = "2015-05-01-preview"
+$PublicIPName = $($RGName -replace '[^a-zA-Z]') + "PublicIP"
 LogMsg "ARM Storage Account : $StorageAccountName"
 LogMsg "Using API VERSION : $apiVersion "
 
@@ -256,6 +246,7 @@ for ($i =0; $i -lt 30; $i++)
     $indents += $indent
 }
 
+
 LogMsg "Generating Template : $azuredeployJSONFilePath"
 #region Generate JSON file
 Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
@@ -269,10 +260,7 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
         Add-Content -Value "$($indents[2])^adminUserName^: ^$user^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^adminPassword^: ^$($password.Replace('"',''))^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^location^: ^$($Location.Replace('"',''))^," -Path $jsonFile
-        #Add-Content -Value "$($indents[2])^vmSize^: ^Basic_A1^," -Path $jsonFile
-        $PublicIPName = $($RGName -replace '[^a-zA-Z]') + "PublicIP"
         Add-Content -Value "$($indents[2])^publicIPAddressName^: ^$PublicIPName^," -Path $jsonFile
-        #Add-Content -Value "$($indents[2])^vmName^: ^role0^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^virtualNetworkName^: ^$virtualNetworkName^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^nicName^: ^$nicName^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^addressPrefix^: ^10.0.0.0/16^," -Path $jsonFile
@@ -294,31 +282,18 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
         Add-Content -Value "$($indents[2])^frontEndIPConfigID^: ^[concat(variables('lbID'),'/frontendIPConfigurations/LoadBalancerFrontEnd')]^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^lbPoolID^: ^[concat(variables('lbID'),'/backendAddressPools/BackendPool1')]^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^lbProbeID^: ^[concat(variables('lbID'),'/probes/tcpProbe')]^" -Path $jsonFile
-
         #Add more variables here, if required..
         #Add more variables here, if required..
         #Add more variables here, if required..
         #Add more variables here, if required..
     Add-Content -Value "$($indents[1])}," -Path $jsonFile
     LogMsg "Added Variables.."
+
     #region Define Resources
-    
     Add-Content -Value "$($indents[1])^resources^:" -Path $jsonFile
     Add-Content -Value "$($indents[1])[" -Path $jsonFile
 
     #region Common Resources for all deployments..
-        <##region StorageAccount
-        Add-Content -Value "$($indents[2]){" -Path $jsonFile
-            Add-Content -Value "$($indents[3])^type^: ^Microsoft.Storage/storageAccounts^," -Path $jsonFile
-            Add-Content -Value "$($indents[3])^name^: ^[variables('newStorageAccountName')]^," -Path $jsonFile
-            Add-Content -Value "$($indents[3])^apiVersion^: ^$apiVersion^," -Path $jsonFile
-            Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
-            Add-Content -Value "$($indents[3])^properties^:" -Path $jsonFile
-            Add-Content -Value "$($indents[3]){" -Path $jsonFile
-                Add-Content -Value "$($indents[4])^accountType^: ^[variables('storageAccountType')]^" -Path $jsonFile
-            Add-Content -Value "$($indents[3])}" -Path $jsonFile
-        Add-Content -Value "$($indents[2])}," -Path $jsonFile
-        #endregion#>
 
         #region publicIPAddresses
         Add-Content -Value "$($indents[2]){" -Path $jsonFile
@@ -346,11 +321,6 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
             Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^properties^:" -Path $jsonFile
             Add-Content -Value "$($indents[3]){" -Path $jsonFile
-                #Add-Content -Value "$($indents[4])^publicIPAllocationMethod^: ^[variables('publicIPAddressType')]^," -Path $jsonFile
-                #Add-Content -Value "$($indents[4])^dnsSettings^: " -Path $jsonFile
-                #Add-Content -Value "$($indents[4]){" -Path $jsonFile
-                #    Add-Content -Value "$($indents[5])^domainNameLabel^: ^[variables('dnsNameForPublicIP')]^" -Path $jsonFile
-                #Add-Content -Value "$($indents[4])}" -Path $jsonFile
             Add-Content -Value "$($indents[3])}" -Path $jsonFile
         Add-Content -Value "$($indents[2])}," -Path $jsonFile
         LogMsg "Added availabilitySet $availibilitySetName.."
@@ -392,11 +362,10 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
                 Add-Content -Value "$($indents[4])]" -Path $jsonFile
             Add-Content -Value "$($indents[3])}" -Path $jsonFile
         Add-Content -Value "$($indents[2])}," -Path $jsonFile
-        LogMsg "Added Virtual Network $VnetName.."
+        LogMsg "Added Virtual Network $virtualNetworkName.."
         #endregion
         
         #region LoadBalancer
-        
         Add-Content -Value "$($indents[2]){" -Path $jsonFile
             Add-Content -Value "$($indents[3])^apiVersion^: ^$apiVersion^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^type^: ^Microsoft.Network/loadBalancers^," -Path $jsonFile
@@ -406,12 +375,8 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
             Add-Content -Value "$($indents[3])[" -Path $jsonFile
                 Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]^" -Path $jsonFile
             Add-Content -Value "$($indents[3])]," -Path $jsonFile
-
-            
             Add-Content -Value "$($indents[3])^properties^:" -Path $jsonFile
             Add-Content -Value "$($indents[3]){" -Path $jsonFile
-                
-                
                 Add-Content -Value "$($indents[4])^frontendIPConfigurations^: " -Path $jsonFile
                 Add-Content -Value "$($indents[4])[" -Path $jsonFile
                     Add-Content -Value "$($indents[5]){" -Path $jsonFile
@@ -425,19 +390,17 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
                         Add-Content -Value "$($indents[6])}" -Path $jsonFile
                     Add-Content -Value "$($indents[5])}" -Path $jsonFile
                 Add-Content -Value "$($indents[4])]," -Path $jsonFile
-                
                 Add-Content -Value "$($indents[4])^backendAddressPools^:" -Path $jsonFile
                 Add-Content -Value "$($indents[4])[" -Path $jsonFile
                     Add-Content -Value "$($indents[5]){" -Path $jsonFile
                         Add-Content -Value "$($indents[6])^name^:^BackendPool1^" -Path $jsonFile
                     Add-Content -Value "$($indents[5])}" -Path $jsonFile
                 Add-Content -Value "$($indents[4])]," -Path $jsonFile
-                
                 #region Normal Endpoints
 
                 Add-Content -Value "$($indents[4])^inboundNatRules^:" -Path $jsonFile
                 Add-Content -Value "$($indents[4])[" -Path $jsonFile
-                $LBPorts = 0
+$LBPorts = 0
 $EndPointAdded = $false
 $role = 0
 foreach ( $newVM in $RGXMLData.VirtualMachine)
@@ -718,9 +681,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
         LogMsg "Added NIC $NIC.."
         #endregion
 
-        
         #region virtualMachines
-        
         Add-Content -Value "$($indents[2]){" -Path $jsonFile
             Add-Content -Value "$($indents[3])^apiVersion^: ^$apiVersion^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^type^: ^Microsoft.Compute/virtualMachines^," -Path $jsonFile
@@ -824,10 +785,10 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
 Add-Content -Value "$($indents[0])}" -Path $jsonFile
 Set-Content -Path $jsonFile -Value (Get-Content $jsonFile).Replace("^",'"') -Force
 #endregion
-LogMsg "Template generated successfully."
+
+    LogMsg "Template generated successfully."
     return $createSetupCommand,  $RGName, $vmCount
 } 
-
 
 Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, $GetDeploymentStatistics = $false)
 {
@@ -850,7 +811,7 @@ Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed
                 $deployedGroups = $isAllDeployed[1]
                 $resourceGroupCount = $isAllDeployed[2]
                 $DeploymentElapsedTime = $isAllDeployed[3]
-                $GroupsToVerify = $deployedGroups.Split('^') ########
+                $GroupsToVerify = $deployedGroups.Split('^')
                 #if ( $GetDeploymentStatistics )
                 #{
                 #    $VMBooTime = GetVMBootTime -DeployedGroups $deployedGroups -TimeoutInSeconds 1800
@@ -869,13 +830,11 @@ Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed
                     $isAllConnected = isAllSSHPortsEnabledRG -AllVMDataObject $allVMData
                     if ($isAllConnected -eq "True")
                     {
-            #Set-Content .\temp\DeployedGroupsFile.txt "$deployedGroups"
                         $VerifiedGroups = $deployedGroups
                         $retValue = $VerifiedGroups
-                    #    $vnetIsAllConfigured = $false
+                        #$vnetIsAllConfigured = $false
                         $xmlConfig.config.Azure.Deployment.$setupType.isDeployed = $retValue
-                    #Collecting Initial Kernel
-                    #    $user=$xmlConfig.config.Azure.Deployment.Data.UserName
+                        #Collecting Initial Kernel
                         $KernelLogOutput= GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Initial"
                     }
                     else
