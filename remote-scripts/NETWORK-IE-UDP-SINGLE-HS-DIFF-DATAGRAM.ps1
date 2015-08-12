@@ -34,7 +34,7 @@ if ($isDeployed)
 				$cmd1="python start-server.py -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log -f"
 				if ($mode -eq "VIP")
 				{
-					$cmd2="python start-client.py -c $($hs1vm1.IpAddress)  -p $hs1vm1udpport -t$iperfTimeoutSeconds -u yes -l $Value" 
+					$cmd2="python start-client.py -c $hs1vm1IP  -p $hs1vm1udpport -t$iperfTimeoutSeconds -u yes -l $Value" 
 				}
 				elseif($mode -eq "URL")
 				{
