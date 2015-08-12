@@ -881,9 +881,8 @@ Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed
     else
     {
         $retValue = $xmlConfig.config.Azure.Deployment.$setupType.isDeployed
-        $KernelLogOutput= GetAndCheckKernelLogs -DeployedGroups $retValue -status "Initial"
+        $KernelLogOutput= GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Initial"
     }
-    
     if ( $GetDeploymentStatistics )
     {
         return $retValue, $DeploymentElapsedTime, $VMBooTime, $VMProvisionTime
