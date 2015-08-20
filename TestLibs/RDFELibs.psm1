@@ -2375,11 +2375,8 @@ Function GetVMLogs($allVMData)
 {
 	foreach ($testVM in $allVMData)
 	{
-		$HSVIP = $testVM.PublicIP
-		$HSport = $testVM.SSHPort
 		$testIP = $testVM.PublicIP
 		$testPort = $testVM.SSHPort
-		#$LisLogFile = "LIS-Logs-" + $testVM.InstanceName + ".tgz"
 		$LisLogFile = "LIS-Logs" + ".tgz"
 		try
 		{
@@ -2390,7 +2387,7 @@ Function GetVMLogs($allVMData)
 			LogMsg $out
 			RemoteCopy -download -downloadFrom $testIP -username $user -password $password -port $testPort -downloadTo $LogDir -files $LisLogFile
 			LogMsg "Logs collected successfully from IP : $testIP PORT : $testPort"
-			Rename-Item -Path "$LogDir\$LisLogFile" -NewName ("LIS-Logs-" + $testVM.InstanceName + ".tgz") -Force
+			Rename-Item -Path "$LogDir\$LisLogFile" -NewName ("LIS-Logs-" + $testVM.RoleName + ".tgz") -Force
 		}
 		catch
 		{

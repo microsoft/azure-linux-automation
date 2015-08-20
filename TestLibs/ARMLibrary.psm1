@@ -50,56 +50,40 @@
         {
             LogMsg "Creating Resource Group : $groupName."
             LogMsg "Verifying that Resource group name is not in use."
-            #$isServiceDeleted = DeleteResourceGroup -RGName $groupName 
-			$isServiceDeleted = $true
-            if ($isServiceDeleted)
+            $isRGDeleted = DeleteResourceGroup -RGName $groupName 
+            if ($isRGDeleted)
             {    
                 $isServiceCreated = CreateResourceGroup -RGName $groupName -location $location
-				#$isServiceCreated = $true
                 if ($isServiceCreated -eq "True")
                 {
-                    #$isCertAdded = AddCertificate -serviceName $groupName
-					$isCertAdded = "True"
-                    if ($isCertAdded -eq "True")
+                    $azureDeployJSONFilePath = "$LogDir\$groupName.json"
+                    $DeploymentCommand = GenerateAzureDeployJSONFile -RGName $groupName -osImage $osImage -osVHD $osVHD -RGXMLData $RG -Location $location -azuredeployJSONFilePath $azureDeployJSONFilePath
+                    $DeploymentStartTime = (Get-Date)
+                    $CreateRGDeployments = CreateResourceGroupDeployment -RGName $groupName -location $location -setupType $setupType -TemplateFile $azureDeployJSONFilePath
+                    $DeploymentEndTime = (Get-Date)
+                    $DeploymentElapsedTime = $DeploymentEndTime - $DeploymentStartTime
+                    if ( $CreateRGDeployments )
                     {
-                        #LogMsg "Certificate added successfully."
-                        $azureDeployJSONFilePath = "$LogDir\$groupName.json"
-                        $DeploymentCommand = GenerateAzureDeployJSONFile -RGName $groupName -osImage $osImage -osVHD $osVHD -RGXMLData $RG -Location $location -azuredeployJSONFilePath $azureDeployJSONFilePath
-                        $DeploymentStartTime = (Get-Date)
-                        $CreateRGDeployments = CreateResourceGroupDeployment -RGName $groupName -location $location -setupType $setupType -TemplateFile $azureDeployJSONFilePath
-                        $DeploymentEndTime = (Get-Date)
-                        $DeploymentElapsedTime = $DeploymentEndTime - $DeploymentStartTime
-                        if ( $CreateRGDeployments )
+                        $retValue = "True"
+                        $isServiceDeployed = "True"
+                        $resourceGroupCount = $resourceGroupCount + 1
+                        if ($resourceGroupCount -eq 1)
                         {
-                            $retValue = "True"
-                            $isServiceDeployed = "True"
-                            $resourceGroupCount = $resourceGroupCount + 1
-                            if ($resourceGroupCount -eq 1)
-                            {
-                                $deployedGroups = $groupName
-                            }
-                            else
-                            {
-                                $deployedGroups = $deployedGroups + "^" + $groupName
-                            }
-
+                            $deployedGroups = $groupName
                         }
                         else
                         {
-                            LogErr "Unable to Deploy one or more VM's"
-                            $retryDeployment = $retryDeployment + 1
-                            $retValue = "False"
-                            $isServiceDeployed = "False"
+                            $deployedGroups = $deployedGroups + "^" + $groupName
                         }
+
                     }
                     else
                     {
-                        LogErr "Unable to Add certificate to $groupName"
+                        LogErr "Unable to Deploy one or more VM's"
                         $retryDeployment = $retryDeployment + 1
                         $retValue = "False"
                         $isServiceDeployed = "False"
                     }
-
                 }
                 else
                 {
@@ -230,6 +214,8 @@ $availibilitySetName = "ICAAvailibilitySet"
 $LoadBalancerName =  "FrontEndIPAddress"
 $apiVersion = "2015-05-01-preview"
 $PublicIPName = $($RGName -replace '[^a-zA-Z]') + "PublicIP"
+$sshPath = '/home/' + $user + '/.ssh/authorized_keys'
+$sshKeyData = ""
 LogMsg "ARM Storage Account : $StorageAccountName"
 LogMsg "Using API VERSION : $apiVersion "
 
@@ -259,6 +245,9 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
         Add-Content -Value "$($indents[2])^dnsNameForPublicIP^: ^$dnsNameForPublicIP^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^adminUserName^: ^$user^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^adminPassword^: ^$($password.Replace('"',''))^," -Path $jsonFile
+        Add-Content -Value "$($indents[2])^sshKeyPublicThumbPrint^: ^$sshPublicKeyThumbprint^," -Path $jsonFile
+        Add-Content -Value "$($indents[2])^sshKeyPath^: ^$sshPath^," -Path $jsonFile
+        Add-Content -Value "$($indents[2])^sshKeyData^: ^$sshKeyData^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^location^: ^$($Location.Replace('"',''))^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^publicIPAddressName^: ^$PublicIPName^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^virtualNetworkName^: ^$virtualNetworkName^," -Path $jsonFile
@@ -716,6 +705,21 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                     Add-Content -Value "$($indents[5])^computername^: ^$vmName^," -Path $jsonFile
                     Add-Content -Value "$($indents[5])^adminUsername^: ^[variables('adminUserName')]^," -Path $jsonFile
                     Add-Content -Value "$($indents[5])^adminPassword^: ^[variables('adminPassword')]^" -Path $jsonFile
+                    #Add-Content -Value "$($indents[5])^linuxConfiguration^:" -Path $jsonFile
+                    #Add-Content -Value "$($indents[5]){" -Path $jsonFile
+                    #    Add-Content -Value "$($indents[6])^ssh^:" -Path $jsonFile
+                    #    Add-Content -Value "$($indents[6]){" -Path $jsonFile
+                    #        Add-Content -Value "$($indents[7])^publicKeys^:" -Path $jsonFile
+                    #        Add-Content -Value "$($indents[7])[" -Path $jsonFile
+                    #            Add-Content -Value "$($indents[8])[" -Path $jsonFile
+                    #                Add-Content -Value "$($indents[9]){" -Path $jsonFile
+                    #                    Add-Content -Value "$($indents[10])^path^:^$sshPath^," -Path $jsonFile
+                    #                    Add-Content -Value "$($indents[10])^keyData^:^$sshKeyData^" -Path $jsonFile
+                    #                Add-Content -Value "$($indents[9])}" -Path $jsonFile
+                    #            Add-Content -Value "$($indents[8])]" -Path $jsonFile
+                    #        Add-Content -Value "$($indents[7])]" -Path $jsonFile
+                    #    Add-Content -Value "$($indents[6])}" -Path $jsonFile
+                    #Add-Content -Value "$($indents[5])}" -Path $jsonFile
                 Add-Content -Value "$($indents[4])}," -Path $jsonFile
                 #endregion
 
