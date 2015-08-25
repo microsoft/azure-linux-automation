@@ -12,6 +12,24 @@
 			<Version>1.*</Version>
 		</Extension>
 		<Extension>
+			<Name>OsPatching</Name>
+			<OfficialName>OSPatchingForLinux</OfficialName>
+			<Publisher>"Microsoft.OSTCExtensions"</Publisher>
+			<Params>
+				<timestamp>EXECUTE-PS-(Get-Date).ticks</timestamp>
+				<rebootAfterPatch>Auto</rebootAfterPatch>
+				<category>Important</category>
+				<installDuration>12:00</installDuration>
+				<oneoff>$true</oneoff>
+				<intervalOfWeeks>1</intervalOfWeeks>
+				<dayOfWeek>Sunday</dayOfWeek>
+				<startTime>12:00</startTime>
+				<disabled>$false</disabled>
+				<stop>$false</stop>
+			</Params>
+			<Version>2.*</Version>
+		</Extension>
+		<Extension>
 			<Name>LinuxDiagnostic</Name>
 			<!-- To be done... -->
 		</Extension>
