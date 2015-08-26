@@ -4,7 +4,7 @@
 		
 	    <packages distro="ubuntu">iperf,mysql-server,gcc,bind9,python-crypto,python-paramiko,nfs-common,psmisc,tcpdump,ntp,libaio1,xfsprogs</packages>
 	    <packages distro="SUSE">iperf,mysql,gcc,bind,python,python-argparse,python-paramiko,nfs-kernel-server,psmisc,tcpdump,ntp,libaio,xfsprogs</packages>
-		<packages distro="sles">iperf,mariadb,gcc,bind,python,python-argparse,python-paramiko,nfs-kernel-server,psmisc,tcpdump,ntp,libaio1,xfsprogs</packages>
+		<packages distro="sles">iperf,mysql,gcc,bind,python,python-argparse,python-paramiko,nfs-kernel-server,psmisc,tcpdump,ntp,libaio,xfsprogs</packages>
 	    <packages distro="opensuse">wget,iperf,mysql-community-server,gcc,bind,python,python-argparse,python-crypto,python-paramiko,nfs-kernel-server,psmisc,tcpdump,ntp,libaio1,xfsprogs</packages>
 	    <packages distro="centos">wget,mysql,iperf,gcc,bind,python,python-argparse,python-crypto,python-paramiko,nfs-utils,psmisc,tcpdump,ntp,libaio,xfsprogs,tar</packages>
 	    <packages distro="Oracle">wget,iperf,mysql,gcc,bind,python,python-argparse,python-crypto,python-paramiko,nfs-utils,psmisc,tcpdump,ntp,libaio,xfsprogs,tar</packages>
