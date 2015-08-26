@@ -33,7 +33,7 @@ $DeploymentCount = $currentTestData.DeploymentCount
             $DeploymentStatistics = CreateDeploymentResultObject
             #Create A VM here and Wait for the VM to come up.
             LogMsg "ATTEMPT : $count/$DeploymentCount : Deploying $($VMSizes[$VMSizeNumber]) VM.."
-            $isDeployed = DeployVMS -setupType $($VMSizes[$VMSizeNumber]) -Distro $Distro -xmlConfig $xmlConfig -GetDeploymentStatistics
+            $isDeployed = DeployVMS -setupType $($VMSizes[$VMSizeNumber]) -Distro $Distro -xmlConfig $xmlConfig -GetDeploymentStatistics $true
             $DeploymentStatistics.VMSize = $($VMSizes[$VMSizeNumber])
             $DeploymentStatistics.attempt = $count
             $DeploymentStatistics.DeploymentTime = $isDeployed[1].TotalSeconds

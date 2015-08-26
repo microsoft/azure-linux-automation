@@ -84,9 +84,20 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 {
 	$StartTime = [Datetime]::Now.ToUniversalTime()
 	LogMsg "Starting the Cycle - $($CycleName.ToUpper())"
-	$OsImage = $xmlConfig.config.Azure.Deployment.Data.Distro | ? { $_.name -eq $Distro} | % {$_.OsImage.ToUpper()}
-	Set-Variable -Name BaseOsImage -Value $OsImage -Scope Global
-	LogMsg "Base image name - $BaseOsImage"
+	$xmlConfig.config.Azure.Deployment.Data.Distro | ? { $_.name -eq $Distro} | % { 
+		if ( $_.OsImage ) 
+		{ 
+			$BaseOsImage = $_.OsImage.ToUpper() 
+			Set-Variable -Name BaseOsImage -Value $BaseOsImage -Scope Global
+			LogMsg "Base image name - $BaseOsImage"
+		}
+		if ( $_.OsVHD )
+		{ 
+			$BaseOsVHD = $_.OsVHD.ToUpper() 
+			Set-Variable -Name BaseOsVHD -Value $BaseOsVHD -Scope Global
+			LogMsg "Base VHD name - $BaseOsVHD"
+		}
+	}
 	LogMsg "Loading the cycle Data..."
 	$currentCycleData = GetCurrentCycleData -xmlConfig $xmlConfig -cycleName $cycleName
 
@@ -143,17 +154,27 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 		$VMImageDetails = $xmlConfig.config.global.VMEnv.VMImageDetails
 		$waagentBuild=$xmlConfig.config.global.VMEnv.waagentBuild
 
-        # For the last test running in economy mode, set the IsLastCaseInCycle flag so that the deployments could be cleaned up
-        if ($EconomyMode -and $counter -eq ($testCount - 1))
-        {
-            Set-Variable -Name IsLastCaseInCycle -Value $true -Scope Global
-        }
-        else
-        {
-            Set-Variable -Name IsLastCaseInCycle -Value $false -Scope Global
-        }
+		# For the last test running in economy mode, set the IsLastCaseInCycle flag so that the deployments could be cleaned up
+		if ($EconomyMode -and $counter -eq ($testCount - 1))
+		{
+			Set-Variable -Name IsLastCaseInCycle -Value $true -Scope Global
+		}
+		else
+		{
+			Set-Variable -Name IsLastCaseInCycle -Value $false -Scope Global
+		}
 		if ($currentTestData)
 		{
+			if ( $UseAzureResourceManager -and !($currentTestData.SupportedExecutionModes -imatch "AzureResourceManager"))
+			{
+				LogMsg "$($currentTestData.testName) does not support AzureResourceManager execution mode."
+				continue;
+			}
+			if (!$UseAzureResourceManager -and !($currentTestData.SupportedExecutionModes -imatch "AzureServiceManagement"))
+			{
+				LogMsg "$($currentTestData.testName) does not support AzureServiceManagement execution mode."
+				continue;
+			}
 			$testcase = StartLogTestCase $testsuite "$($test.Name)" "CloudTesting.$($testCycle.cycleName)"
 			$testSuiteResultDetails.totalTc = $testSuiteResultDetails.totalTc +1
 			$stopWatch = SetStopWatch

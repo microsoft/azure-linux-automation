@@ -8,19 +8,10 @@ if ($isDeployed)
 {
 	try
 	{
-		$testServiceData = Get-AzureService -ServiceName $isDeployed
-
-#Get VMs deployed in the service..
-		$testVMsinService = $testServiceData | Get-AzureVM
-
-		$hs1vm1 = $testVMsinService
-		$hs1vm1Endpoints = $hs1vm1 | Get-AzureEndpoint
-		$hs1vm1sshport = GetPort -Endpoints $hs1vm1Endpoints -usage ssh
-		$hs1VIP = $hs1vm1Endpoints[0].Vip
-		$hs1ServiceUrl = $hs1vm1.DNSName
-		$hs1ServiceUrl = $hs1ServiceUrl.Replace("http://","")
-		$hs1ServiceUrl = $hs1ServiceUrl.Replace("/","")
-
+		$hs1VIP = $AllVMData.PublicIP
+		$hs1vm1sshport = $AllVMData.SSHPort
+		$hs1ServiceUrl = $AllVMData.URL
+		$hs1vm1Dip = $AllVMData.InternalIP
 
 		RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
 		RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *" -runAsSudo
@@ -33,23 +24,23 @@ if ($isDeployed)
 		$testResult = Get-Content $LogDir\Summary.log
 		$testStatus = Get-Content $LogDir\state.txt
 		LogMsg "Test result : $testResult"
-        if ($output -imatch "CLIENT_ALIVE_INTERVAL_SUCCESS")
+		if ($output -imatch "CLIENT_ALIVE_INTERVAL_SUCCESS")
 		{
 			LogMsg "SSHD-CONFIG INFO :Client_Alive_Interval time is 180 Second"
 		}
-        else
-        {
-            if($output -imatch "CLIENT_ALIVE_INTERVAL_FAIL")
-            {
-                LogMsg "SSHD-CONFIG INFO :There is no Client_Alive_Interval time is 180 Second"
-            }
-            if($output -imatch "CLIENT_ALIVE_INTERVAL_COMMENTED")
-            {
-                LogMsg "SSHD-CONFIG INFO :There is a commented line in CLIENT_INTERVAL_COMMENTED "
-            }
-        }
-        
-        if ($testStatus -eq "TestCompleted")
+		else
+		{
+			if($output -imatch "CLIENT_ALIVE_INTERVAL_FAIL")
+			{
+				LogMsg "SSHD-CONFIG INFO :There is no Client_Alive_Interval time is 180 Second"
+			}
+			if($output -imatch "CLIENT_ALIVE_INTERVAL_COMMENTED")
+			{
+				LogMsg "SSHD-CONFIG INFO :There is a commented line in CLIENT_INTERVAL_COMMENTED "
+			}
+		}
+		
+		if ($testStatus -eq "TestCompleted")
 		{
 			LogMsg "Test Completed"
 		}
@@ -81,7 +72,7 @@ else
 $result = GetFinalResultHeader -resultarr $resultArr
 
 #Clean up the setup
-DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed
+DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed -ResourceGroups $isDeployed
 
 #Return the result and summery to the test suite script..
 return $result

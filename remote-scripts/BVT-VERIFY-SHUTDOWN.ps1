@@ -7,26 +7,30 @@ $resultArr = @()
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
-
 	try
 	{
-		$testServiceData = Get-AzureService -ServiceName $isDeployed
-
-#Get VMs deployed in the service..
-		$testVMsinService = $testServiceData | Get-AzureVM
-
-		$hs1vm1 = $testVMsinService
-		$hs1vm1Endpoints = $hs1vm1 | Get-AzureEndpoint
-		$hs1vm1sshport = GetPort -Endpoints $hs1vm1Endpoints -usage ssh
-		$hs1VIP = $hs1vm1Endpoints[0].Vip
-		$hs1ServiceUrl = $hs1vm1.DNSName
-		$hs1ServiceUrl = $hs1ServiceUrl.Replace("http://","")
-		$hs1ServiceUrl = $hs1ServiceUrl.Replace("/","")
-		$hs1vm1Hostname =  $hs1vm1.Name
-
-		LogMsg "Trying to shut down $hs1vm1Hostname ..."
-		$out = StopAllDeployments -DeployedServices $isDeployed
-		$isStopped = $?
+		$hs1VIP = $AllVMData.PublicIP
+		$hs1vm1sshport = $AllVMData.SSHPort
+		$hs1ServiceUrl = $AllVMData.URL
+		$hs1vm1Dip = $AllVMData.InternalIP
+		LogMsg "Trying to shut down $($AllVMData.RoleName)..."
+		if ( $UseAzureResourceManager )
+		{
+			$stopVM = Stop-AzureVM -ResourceGroupName $AllVMData.ResourceGroupName -Name $AllVMData.RoleName -Force -StayProvisioned -Verbose
+			if ( $stopVM.Status -eq "Succeeded" )
+			{
+				$isStopped = $true
+			}
+			else
+			{
+				$isStopped = $false
+			}
+		}
+		else
+		{
+			$out = StopAllDeployments -DeployedServices $isDeployed
+			$isStopped = $?
+		}
 		if ($isStopped)
 		{
 			LogMsg "Virtual machine shut down successful."
@@ -65,7 +69,7 @@ else
 $result = GetFinalResultHeader -resultarr $resultArr
 
 #Clean up the setup
-DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed -SkipVerifyKernelLogs
+DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed -ResourceGroups $isDeployed -SkipVerifyKernelLogs
 
 #Return the result and summery to the test suite script..
 return $result

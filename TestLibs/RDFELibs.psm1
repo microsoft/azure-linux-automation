@@ -257,20 +257,27 @@ Function IsEnvironmentSupported()
 
 Function SetSubscription ($subscriptionID, $subscriptionName, $certificateThumbprint, $managementEndpoint, $storageAccount, $environment = "AzureCloud")
 {
-	$myCert = Get-Item cert:\CurrentUser\My\$certificateThumbprint
+	if ( $UseAzureResourceManager )
+	{
+		#Add-AzureAccount
+	}
+	else
+	{
+		$myCert = Get-Item cert:\CurrentUser\My\$certificateThumbprint
 
-	# For Azure Powershell Version >= 0.8.8, Environment is used in Set-AzureSubscription for replacing ManagementEndpoint
-	if (IsEnvironmentSupported)
-	{
-		Set-AzureSubscription -SubscriptionName $subscriptionName -Certificate $myCert -SubscriptionID $subscriptionID `
-							  -CurrentStorageAccountName $storageAccount -Environment $environment
+		# For Azure Powershell Version >= 0.8.8, Environment is used in Set-AzureSubscription for replacing ManagementEndpoint
+		if (IsEnvironmentSupported)
+		{
+			Set-AzureSubscription -SubscriptionName $subscriptionName -Certificate $myCert -SubscriptionID $subscriptionID `
+								  -CurrentStorageAccountName $storageAccount -Environment $environment
+		}
+		Else
+		{
+			Set-AzureSubscription -SubscriptionName $subscriptionName -Certificate $myCert -SubscriptionID $subscriptionID `
+								  -CurrentStorageAccountName $storageAccount -ServiceEndpoint $managementEndpoint
+		}
+		Select-AzureSubscription -Current $subscriptionName
 	}
-	Else
-	{
-		Set-AzureSubscription -SubscriptionName $subscriptionName -Certificate $myCert -SubscriptionID $subscriptionID `
-							  -CurrentStorageAccountName $storageAccount -ServiceEndpoint $managementEndpoint
-	}
-	Select-AzureSubscription -Current $subscriptionName
 }
 
 <#
@@ -663,7 +670,7 @@ Function CheckVMsInService($serviceName)
 			$VMStatuString = ""
 			foreach ( $VM in $DeployedVMs )
 			{
-				$VMStatuString += "$($VM.Name) : $($VM.InstanceStatus) "
+				$VMStatuString += "$($VM.InstanceName) : $($VM.InstanceStatus) "
 				if ( $VM.InstanceStatus -ne "ReadyRole" )
 				{
 					$VMStatus = $VM.InstanceStatus
@@ -740,11 +747,11 @@ Function CreateAllDeployments($setupType, $xmlConfig, $Distro)
 		$retryDeployment = 0
 		if ( $HS.Tag -ne $null )
 		{
-			$serviceName = "ICA-" + $HS.Tag + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
+			$serviceName = "ICA-HS-" + $HS.Tag + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
 		}
 		else
 		{
-			$serviceName = "ICA-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
+			$serviceName = "ICA-HS-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
 		}
 		if($isMultiple -eq "True")
 		{
@@ -984,7 +991,7 @@ Function RemoveICAUnusedDataDisks()
 }
 
 #function to collect and compare kernel logs
-Function GetAndCheckKernelLogs($DeployedServices, $status, $vmUser, $vmPassword)
+Function GetAndCheckKernelLogs($allDeployedVMs, $status, $vmUser, $vmPassword)
 {
 	if ( !$vmUser )
 	{
@@ -995,82 +1002,72 @@ Function GetAndCheckKernelLogs($DeployedServices, $status, $vmUser, $vmPassword)
 		$vmPassword = $password
 	}
 	$retValue = $false
-	$hsNames = $DeployedServices.Split('^')
-	foreach ($hsName in $hsNames)
+	foreach ($VM in $allDeployedVMs)
 	{
-		#$ErrCount = 0
-		$hsDetails =  RunAzureCmd -AzureCmdlet "Get-AzureService -ServiceName $hsName"
-		$VMs =  Get-AzureVM -ServiceName $hsName
-		
-		foreach ($VM in $VMs)
+		$BootLogDir="$Logdir\$($VM.RoleName)"
+		mkdir $BootLogDir -Force | Out-Null			
+		LogMsg "Collecting $($VM.RoleName) VM Kernel $status Logs.."
+		$InitailBootLog="$BootLogDir\InitialBootLogs.txt"
+		$FinalBootLog="$BootLogDir\FinalBootLogs.txt"
+		$KernelLogStatus="$BootLogDir\KernelLogStatus.txt"
+		if($status -imatch "Initial")
 		{
-			$BootLogDir="$Logdir\$($VM.Name)"
-			mkdir $BootLogDir -Force | Out-Null			
-			LogMsg "Collecting $($VM.Name) VM Kernel $status Logs.."
-			$InitailBootLog="$BootLogDir\InitialBootLogs.txt"
-			$FinalBootLog="$BootLogDir\FinalBootLogs.txt"
-			$KernelLogStatus="$BootLogDir\KernelLogStatus.txt"
-			$VMEndpoints = Get-AzureEndpoint -VM $VM
-			$VMSSHPort = GetPort -Endpoints $VMEndpoints -usage "SSH"
-			if($status -imatch "Initial")
+			$randomFileName = [System.IO.Path]::GetRandomFileName()
+			Set-Content -Value "A Random file." -Path "$Logdir\$randomFileName"
+			$out = RemoteCopy -uploadTo $VM.PublicIP -port $VM.SSHPort  -files "$Logdir\$randomFileName" -username $vmUser -password $vmPassword -upload
+			Remove-Item -Path "$Logdir\$randomFileName" -Force
+			$out = RunLinuxCmd -ip $VM.PublicIP -port $VM.SSHPort -username $vmUser -password $vmPassword -command "dmesg > /home/$vmUser/InitialBootLogs.txt" -runAsSudo
+			$out = RemoteCopy -download -downloadFrom $VM.PublicIP -port $VM.SSHPort -files "/home/$vmUser/InitialBootLogs.txt" -downloadTo $BootLogDir -username $vmUser -password $vmPassword
+			LogMsg "$($VM.RoleName): $status Kernel logs collected ..SUCCESSFULLY"
+			$detectedDistro = DetectLinuxDistro -VIP $VM.PublicIP -SSHport $VM.SSHPort -testVMUser $vmUser -testVMPassword $vmPassword
+			SetDistroSpecificVariables -detectedDistro $detectedDistro
+			$retValue = $true
+		}
+		elseif($status -imatch "Final")
+		{
+			$out = RunLinuxCmd -ip $VM.PublicIP -port $VM.SSHPort -username $vmUser -password $vmPassword -command "dmesg > /home/$vmUser/FinalBootLogs.txt" -runAsSudo
+			$out = RemoteCopy -download -downloadFrom $VM.PublicIP -port $VM.SSHPort -files "/home/$vmUser/FinalBootLogs.txt" -downloadTo $BootLogDir -username $vmUser -password $vmPassword
+			$KernelDiff = Compare-Object -ReferenceObject (Get-Content $FinalBootLog) -DifferenceObject (Get-Content $InitailBootLog)
+			#Removing final dmesg file from logs to reduce the size of logs. We can alwayas see complete Final Logs as : Initial Kernel Logs + Difference in Kernel Logs
+			Remove-Item -Path $FinalBootLog -Force | Out-Null
+			if($KernelDiff -eq $null)
 			{
-				$randomFileName = [System.IO.Path]::GetRandomFileName()
-				Set-Content -Value "A Random file." -Path "$Logdir\$randomFileName"
-				$out = RemoteCopy -uploadTo $VMEndpoints[0].Vip -port $VMSSHPort  -files "$Logdir\$randomFileName" -username $vmUser -password $vmPassword -upload
-				Remove-Item -Path "$Logdir\$randomFileName" -Force
-				$out = RunLinuxCmd -ip $VMEndpoints[0].Vip -port $VMSSHPort -username $vmUser -password $vmPassword -command "dmesg > /home/$vmUser/InitialBootLogs.txt" -runAsSudo
-				$out = RemoteCopy -download -downloadFrom $VMEndpoints[0].Vip -port $VMSSHPort -files "/home/$vmUser/InitialBootLogs.txt" -downloadTo $BootLogDir -username $vmUser -password $vmPassword
-				LogMsg "$($VM.Name): $status Kernel logs collected ..SUCCESSFULLY"
-				$detectedDistro = DetectLinuxDistro -VIP $VMEndpoints[0].Vip -SSHport $VMSSHPort -testVMUser $vmUser -testVMPassword $vmPassword
-				SetDistroSpecificVariables -detectedDistro $detectedDistro
+				LogMsg "** Initial and Final Kernel Logs has same content **"  
+				Set-Content -Value "*** Initial and Final Kernel Logs has same content ***" -Path $KernelLogStatus
 				$retValue = $true
-			}
-			elseif($status -imatch "Final")
-			{
-				$out = RunLinuxCmd -ip $VMEndpoints[0].Vip -port $VMSSHPort -username $vmUser -password $vmPassword -command "dmesg > /home/$vmUser/FinalBootLogs.txt" -runAsSudo
-				$out = RemoteCopy -download -downloadFrom $VMEndpoints[0].Vip -port $VMSSHPort -files "/home/$vmUser/FinalBootLogs.txt" -downloadTo $BootLogDir -username $vmUser -password $vmPassword
-				$KernelDiff = Compare-Object -ReferenceObject (Get-Content $FinalBootLog) -DifferenceObject (Get-Content $InitailBootLog)
-				#Removing final dmesg file from logs to reduce the size of logs. We can alwayas see complete Final Logs as : Initial Kernel Logs + Difference in Kernel Logs
-				Remove-Item -Path $FinalBootLog -Force | Out-Null
-				if($KernelDiff -eq $null)
-				{
-					LogMsg "** Initial and Final Kernel Logs has same content **"  
-					Set-Content -Value "*** Initial and Final Kernel Logs has same content ***" -Path $KernelLogStatus
-					$retValue = $true
-				}
-				else
-				{
-					$errorCount = 0
-					Set-Content -Value "Following lines were added in the kernel log during execution of test." -Path $KernelLogStatus
-					LogMsg "Following lines were added in the kernel log during execution of test." 
-					Add-Content -Value "-------------------------------START----------------------------------" -Path $KernelLogStatus
-					foreach ($line in $KernelDiff)
-					{
-						Add-Content -Value $line.InputObject -Path $KernelLogStatus
-						if ( ($line.InputObject -imatch "fail") -or ($line.InputObject -imatch "error") -or ($line.InputObject -imatch "warning"))
-						{
-							$errorCount += 1
-							LogErr $line.InputObject
-						}
-						else
-						{
-							LogMsg $line.InputObject
-						}
-					}
-					Add-Content -Value "--------------------------------EOF-----------------------------------" -Path $KernelLogStatus
-				}
-				LogMsg "$($VM.Name): $status Kernel logs collected and Compared ..SUCCESSFULLY"
-				if ($errorCount -gt 0)
-				{
-					LogErr "Found $errorCount fail/error/warning messages in kernel logs during execution."
-					$retValue = $false
-				}
 			}
 			else
 			{
-				LogMsg "pass value for status variable either final or initial"
+				$errorCount = 0
+				Set-Content -Value "Following lines were added in the kernel log during execution of test." -Path $KernelLogStatus
+				LogMsg "Following lines were added in the kernel log during execution of test." 
+				Add-Content -Value "-------------------------------START----------------------------------" -Path $KernelLogStatus
+				foreach ($line in $KernelDiff)
+				{
+					Add-Content -Value $line.InputObject -Path $KernelLogStatus
+					if ( ($line.InputObject -imatch "fail") -or ($line.InputObject -imatch "error") -or ($line.InputObject -imatch "warning"))
+					{
+						$errorCount += 1
+						LogErr $line.InputObject
+					}
+					else
+					{
+						LogMsg $line.InputObject
+					}
+				}
+				Add-Content -Value "--------------------------------EOF-----------------------------------" -Path $KernelLogStatus
+			}
+			LogMsg "$($VM.RoleName): $status Kernel logs collected and Compared ..SUCCESSFULLY"
+			if ($errorCount -gt 0)
+			{
+				LogErr "Found $errorCount fail/error/warning messages in kernel logs during execution."
 				$retValue = $false
 			}
+		}
+		else
+		{
+			LogMsg "pass value for status variable either final or initial"
+			$retValue = $false
 		}
 	}
 	return $retValue
@@ -1096,7 +1093,7 @@ Function SetDistroSpecificVariables($detectedDistro)
 	}
 }
 
-Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, [Switch]$GetDeploymentStatistics)
+Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, $GetDeploymentStatistics = $false)
 {
 	if( (!$EconomyMode) -or ( $EconomyMode -and ($xmlConfig.config.Azure.Deployment.$setupType.isDeployed -eq "NO")))
 	{
@@ -1105,7 +1102,6 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, 
 			$position = 0
 			$VerifiedServices =  $NULL
 			$retValue = $NULL
-			$ExistingServices = Get-AzureService
 			$position = 1
 			$i = 0
 			$role = 1
@@ -1117,7 +1113,7 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, 
 			{
 				$deployedServices = $isAllDeployed[1]
 				$DeploymentElapsedTime = $isAllDeployed[2]
-				$servicesToVerify = $deployedServices.Split('^') ########
+				$servicesToVerify = $deployedServices.Split('^')
 				if ( $GetDeploymentStatistics )
 				{
 					$VMBooTime = GetVMBootTime -DeployedServices $deployedServices -TimeoutInSeconds 1800
@@ -1131,7 +1127,9 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, 
 				}
 				if ($isAllVerified -eq "True")
 				{
-					$isAllConnected = isAllSSHPortsEnabled -DeployedServices $deployedServices
+					$allVMData = GetAllDeployementData -DeployedServices $deployedServices
+					Set-Variable -Name allVMData -Value $allVMData -Force -Scope Global
+					$isAllConnected = isAllSSHPortsEnabledRG -AllVMDataObject $allVMData
 					if ($isAllConnected -eq "True")
 					{
 			#Set-Content .\temp\DeployedServicesFile.txt "$deployedServices"
@@ -1141,7 +1139,7 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, 
 						$xmlConfig.config.Azure.Deployment.$setupType.isDeployed = $retValue
 					#Collecting Initial Kernel
 						$user=$xmlConfig.config.Azure.Deployment.Data.UserName
-						$KernelLogOutput= GetAndCheckKernelLogs -DeployedServices $deployedServices -status "Initial"
+						$KernelLogOutput= GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Initial"
 					}
 					else
 					{
@@ -1194,7 +1192,7 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, 
 	else
 	{
 		$retValue = $xmlConfig.config.Azure.Deployment.$setupType.isDeployed
-		$KernelLogOutput= GetAndCheckKernelLogs -DeployedServices $retValue -status "Initial"
+		$KernelLogOutput= GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Initial"
 	}
 	Set-Variable -Name setupType -Value $setupType -Scope Global
 	if ( $GetDeploymentStatistics )
@@ -1205,6 +1203,19 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, 
 	{
 		return $retValue
 	}
+}
+
+Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, $GetDeploymentStatistics = $false)
+{
+	if ($UseAzureResourceManager)
+	{
+		$retValue = DeployResourceGroups  -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro -getLogsIfFailed $getLogsIfFailed -GetDeploymentStatistics $GetDeploymentStatistics
+	}
+	else
+	{
+		$retValue = DeployManagementServices -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro -getLogsIfFailed $getLogsIfFailed -GetDeploymentStatistics $GetDeploymentStatistics
+	}
+	return $retValue
 }
 
 function GetLogsFromProvisionFailedVM ($vmName, $serviceName, $xmlConfig)
@@ -2117,11 +2128,11 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 #endregion
 
 #region Test Case Logging
-Function DoTestCleanUp($result, $testName, $DeployedServices, [switch]$keepUserDirectory, [switch]$SkipVerifyKernelLogs)
+Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [switch]$keepUserDirectory, [switch]$SkipVerifyKernelLogs)
 {
 	try
 	{
-		if($DeployedServices)
+		if($DeployedServices -or $ResourceGroups)
 		{
 			$currentTestBackgroundJobs = Get-Content $LogDir\CurrentTestBackgroundJobs.txt -ErrorAction SilentlyContinue
 			if ( $currentTestBackgroundJobs )
@@ -2139,7 +2150,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, [switch]$keepUserD
 			{
 				try
 				{
-					$KernelLogOutput=GetAndCheckKernelLogs -DeployedServices $deployedServices -status "Final" #Collecting kernel logs after execution of test case : v-sirebb
+					$KernelLogOutput=GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Final" #Collecting kernel logs after execution of test case : v-sirebb
 				}
 				catch 
 				{
@@ -2148,51 +2159,120 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, [switch]$keepUserD
 				}
 			}			
 			$isClened = @()
-			$hsNames = $DeployedServices
-			$hsNames = $hsNames.Split("^")
-			foreach ($hs in $hsNames)
+			if ( !$UseAzureResourceManager )
 			{
-				$hsDetails = Get-AzureService -ServiceName $hs
-				if (!($hsDetails.Description -imatch "DONOTDISTURB"))
+				$hsNames = $DeployedServices
+				$allDeploymentData = $allVMData
+				$hsNames = $hsNames.Split("^")
+				foreach ($hs in $hsNames)
 				{
-					if($result -eq "PASS")
+					$hsDetails = Get-AzureService -ServiceName $hs
+					if (!($hsDetails.Description -imatch "DONOTDISTURB"))
 					{
-						if($EconomyMode -and (-not $IsLastCaseInCycle))
+						if($result -eq "PASS")
 						{
-							LogMsg "Skipping cleanup of $hs."
-							if(!$keepUserDirectory)
+							if($EconomyMode -and (-not $IsLastCaseInCycle))
 							{
-								RemoveAllFilesFromHomeDirectory -DeployedServices $hs
+								LogMsg "Skipping cleanup of $hs."
+								if(!$keepUserDirectory)
+								{
+									RemoveAllFilesFromHomeDirectory -allDeployedVMs $allVMData
+								}
+							}
+							else
+							{
+								#GetVMLogs -allVMData $allDeploymentData
+								LogMsg "Cleaning up deployed test virtual machines."
+								$isClened = DeleteService -serviceName $hsDetails.ServiceName
+						
+								if ($isClened -contains "False")
+								{
+									LogMsg "CleanUP unsuccessful for $($hsDetails.ServiceName).. Please delete the services manually."
+								}
+								else
+								{
+									LogMsg "CleanUP Successful for $($hsDetails.ServiceName).."
+								}
 							}
 						}
 						else
 						{
-							LogMsg "Cleaning up deployed test virtual machines."
-							$isClened = DeleteService -serviceName $hsDetails.ServiceName
-						
-							if ($isClened -contains "False")
+							LogMsg "Preserving the hosted service(s) $hsNames"
+							LogMsg "Integrating Test Case Name in the `"Description`" of preserved setups.."
+							foreach ($service in $hsNames)
 							{
-								LogMsg "CleanUP unsuccessful for $($hsDetails.ServiceName).. Please delete the services manually."
+								$suppressedOut = RetryOperation -operation { RunAzureCmd -AzureCmdlet "Set-AzureService -ServiceName $service -Description `"Preserving this setup for FAILED/ABORTED test : $testName`"" -maxWaitTimeSeconds 120 } -maxRetryCount 5 -retryInterval 5
 							}
-							else
+							LogMsg "Collecting VM logs.."
+							GetVMLogs -allVMData $allDeploymentData
+							if(!$keepUserDirectory -and !$keepReproInact -and $EconomyMode)
+								{
+									RemoveAllFilesFromHomeDirectory -allDeployedVMs $allVMData
+								}
+							if($keepReproInact)
 							{
-								LogMsg "CleanUP Successful for $($hsDetails.ServiceName).."
+								$xmlConfig.config.Azure.Deployment.$setupType.isDeployed = "NO"
 							}
 						}
 					}
 					else
 					{
-						LogMsg "Preserving the hosted service(s) $hsNames"
-						LogMsg "Integrating Test Case Name in the `"Description`" of preserved setups.."
-						foreach ($service in $hsNames)
+						if ($result -ne "PASS")
 						{
-							$suppressedOut = RetryOperation -operation { RunAzureCmd -AzureCmdlet "Set-AzureService -ServiceName $service -Description `"Preserving this setup for FAILED/ABORTED test : $testName`"" -maxWaitTimeSeconds 120 } -maxRetryCount 5 -retryInterval 5
+							LogMsg "Collecting VM logs.."
+							GetVMLogs -allVMData $allDeploymentData
+							if($keepReproInact)
+							{
+								$xmlConfig.config.Azure.Deployment.$setupType.isDeployed = "NO"
+							}
+						}
+						LogMsg "Skipping cleanup, as service is marked as DO NOT DISTURB.."
+					}
+				}
+			}
+			else
+			{
+				$ResourceGroups = $ResourceGroups.Split("^")
+				foreach ($group in $ResourceGroups)
+				{
+					if($result -eq "PASS")
+					{
+						if($EconomyMode -and (-not $IsLastCaseInCycle))
+						{
+							LogMsg "Skipping cleanup of Resource Group : $group."
+							if(!$keepUserDirectory)
+							{
+								RemoveAllFilesFromHomeDirectory -allDeployedVMs $allVMData
+							}
+						}
+						else
+						{
+							#GetVMLogs -allVMData $allDeploymentData
+							LogMsg "Cleaning up deployed test virtual machines."
+							$isClened = DeleteResourceGroup -RGName $group
+						
+							if ($isClened)
+							{
+								LogMsg "CleanUP unsuccessful for $group.. Please delete the services manually."
+							}
+							else
+							{
+								LogMsg "CleanUP Successful for $group.."
+							}
+						}
+					}
+					else
+					{
+						LogMsg "Preserving the Resource Group(s) $group"
+						foreach ($group in $ResourceGroups)
+						{
+							#TBD : Adding description is not supported for Resource Group yet. Need to figure out another way.
 						}
 						LogMsg "Collecting VM logs.."
-						GetVMLogs -DeployedServices $hs
+						GetVMLogs -allVMData $allVMData
 						if(!$keepUserDirectory -and !$keepReproInact -and $EconomyMode)
 							{
-								RemoveAllFilesFromHomeDirectory -DeployedServices $hs
+								RemoveAllFilesFromHomeDirectory -allDeployedVMs $allVMData
 							}
 						if($keepReproInact)
 						{
@@ -2200,24 +2280,11 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, [switch]$keepUserD
 						}
 					}
 				}
-				else
-				{
-					if ($result -ne "PASS")
-					{
-						LogMsg "Collecting VM logs.."
-						GetVMLogs -DeployedServices $hs
-						if($keepReproInact)
-						{
-							$xmlConfig.config.Azure.Deployment.$setupType.isDeployed = "NO"
-						}
-					}
-					LogMsg "Skipping cleanup, as service is marked as DO NOT DISTURB.."
-				}
 			}
 		}
 		else
 		{
-			LogMsg "Skipping cleanup, as No services deployed for cleanup!"
+			LogMsg "Skipping cleanup, as No services / resource groups deployed for cleanup!"
 		}
 	}
 	catch
@@ -2304,69 +2371,50 @@ Function GetStopWatchElapasedTime([System.Diagnostics.Stopwatch]$sw, [string] $f
 
 }
 
-Function GetVMLogs($DeployedServices)
+Function GetVMLogs($allVMData)
 {
-	$TestIPPOrts = ""
-
-	foreach ($hostedservice in $DeployedServices.Split("^"))
+	foreach ($testVM in $allVMData)
 	{
-		$DeployedVMs = Get-AzureVM -ServiceName $hostedService
-		foreach ($testVM in $DeployedVMs)
+		$testIP = $testVM.PublicIP
+		$testPort = $testVM.SSHPort
+		$LisLogFile = "LIS-Logs" + ".tgz"
+		try
 		{
-			$AllEndpoints = Get-AzureEndpoint -VM $testVM
-			$HSVIP = GetHsVmVip -servicename $hostedservice
-			$HSport = GetPort -Endpoints $AllEndpoints -usage SSH
-			$testIP = $HSVIP
-			$testPort = $HSport
-			#$LisLogFile = "LIS-Logs-" + $testVM.InstanceName + ".tgz"
-			$LisLogFile = "LIS-Logs" + ".tgz"
-			try
-			{
-				LogMsg "Collecting logs from IP : $testIP PORT : $testPort"	
-				RemoteCopy -upload -uploadTo $testIP -username $user -port $testPort -password $password -files '.\remote-scripts\LIS-LogCollector.sh'
-				RunLinuxCmd -username $user -password $password -ip $testIP -port $testPort -command 'chmod +x LIS-LogCollector.sh'
-				$out = RunLinuxCmd -username $user -password $password -ip $testIP -port $testPort -command './LIS-LogCollector.sh -v' -runAsSudo
-				LogMsg $out
-				RemoteCopy -download -downloadFrom $testIP -username $user -password $password -port $testPort -downloadTo $LogDir -files $LisLogFile
-				LogMsg "Logs collected successfully from IP : $testIP PORT : $testPort"
-				Rename-Item -Path "$LogDir\$LisLogFile" -NewName ("LIS-Logs-" + $testVM.InstanceName + ".tgz") -Force
-			}
-			catch
-			{
-				$ErrorMessage =  $_.Exception.Message
-				LogErr "EXCEPTION : $ErrorMessage"
-				LogErr "Unable to collect logs from IP : $testIP PORT : $testPort"  		
-			}
+			LogMsg "Collecting logs from IP : $testIP PORT : $testPort"	
+			RemoteCopy -upload -uploadTo $testIP -username $user -port $testPort -password $password -files '.\remote-scripts\LIS-LogCollector.sh'
+			RunLinuxCmd -username $user -password $password -ip $testIP -port $testPort -command 'chmod +x LIS-LogCollector.sh'
+			$out = RunLinuxCmd -username $user -password $password -ip $testIP -port $testPort -command './LIS-LogCollector.sh -v' -runAsSudo
+			LogMsg $out
+			RemoteCopy -download -downloadFrom $testIP -username $user -password $password -port $testPort -downloadTo $LogDir -files $LisLogFile
+			LogMsg "Logs collected successfully from IP : $testIP PORT : $testPort"
+			Rename-Item -Path "$LogDir\$LisLogFile" -NewName ("LIS-Logs-" + $testVM.RoleName + ".tgz") -Force
+		}
+		catch
+		{
+			$ErrorMessage =  $_.Exception.Message
+			LogErr "EXCEPTION : $ErrorMessage"
+			LogErr "Unable to collect logs from IP : $testIP PORT : $testPort"  		
 		}
 	}
 }
 
-Function RemoveAllFilesFromHomeDirectory($DeployedServices)
+Function RemoveAllFilesFromHomeDirectory($allDeployedVMs)
 {
-	$TestIPPOrts = ""
-
-	foreach ($hostedservice in $DeployedServices.Split("^"))
+	foreach ($DeployedVM in $allDeployedVMs)
 	{
-		$DeployedVMs = Get-AzureVM -ServiceName $hostedService
-		foreach ($testVM in $DeployedVMs)
+		$testIP = $DeployedVM.PublicIP
+		$testPort = $DeployedVM.SSHPort
+		try
 		{
-			$AllEndpoints = Get-AzureEndpoint -VM $testVM
-			$HSVIP = GetHsVmVip -servicename $hostedservice
-			$HSport = GetPort -Endpoints $AllEndpoints -usage SSH
-			$testIP = $HSVIP
-			$testPort = $HSport
-			try
-			{
-				LogMsg "Removing all files logs from IP : $testIP PORT : $testPort"	
-				$out = RunLinuxCmd -username $user -password $password -ip $testIP -port $testPort -command 'rm -rf *' -runAsSudo
-				LogMsg "All files removed from /home/$user successfully. VM IP : $testIP PORT : $testPort"  
-			}
-			catch
-			{
-				$ErrorMessage =  $_.Exception.Message
-				Write-Host "EXCEPTION : $ErrorMessage"
-				Write-Host "Unable to remove files from IP : $testIP PORT : $testPort"  		
-			}
+			LogMsg "Removing all files logs from IP : $testIP PORT : $testPort"	
+			$out = RunLinuxCmd -username $user -password $password -ip $testIP -port $testPort -command 'rm -rf *' -runAsSudo
+			LogMsg "All files removed from /home/$user successfully. VM IP : $testIP PORT : $testPort"  
+		}
+		catch
+		{
+			$ErrorMessage =  $_.Exception.Message
+			Write-Host "EXCEPTION : $ErrorMessage"
+			Write-Host "Unable to remove files from IP : $testIP PORT : $testPort"  		
 		}
 	}
 }
@@ -3890,30 +3938,164 @@ Function Get-AllVMHostnameAndDIP($DeployedServices)
 	return $HostnameDIP
 }
 
-Function Get-SSHDetailofVMs($DeployedServices)
+Function Get-SSHDetailofVMs($DeployedServices, $ResourceGroups)
 {
-	foreach ($hostedservice in $DeployedServices.Split("^"))
+	if ( $DeployedServices )
 	{
-		$DeployedVMs = Get-AzureVM -ServiceName $hostedService
-		foreach ($testVM in $DeployedVMs)
+		foreach ($hostedservice in $DeployedServices.Split("^"))
 		{
-			$AllEndpoints = Get-AzureEndpoint -VM $testVM
-			$HSVIP = GetHsVmVip -servicename $hostedservice
-			$HSport = GetPort -Endpoints $AllEndpoints -usage SSH
-			if($TestIPPOrts)
+			$DeployedVMs = Get-AzureVM -ServiceName $hostedService
+			foreach ($testVM in $DeployedVMs)
 			{
-				$TestIPPOrts = $TestIPPOrts + "^$HSVIP" + ':' +"$HSport"
-			}
-			else
-			{
-				$TestIPPOrts = "$HSVIP" + ':' +"$HSport"
-			}
+				$AllEndpoints = Get-AzureEndpoint -VM $testVM
+				$HSVIP = GetHsVmVip -servicename $hostedservice
+				$HSport = GetPort -Endpoints $AllEndpoints -usage SSH
+				if($TestIPPOrts)
+				{
+					$TestIPPOrts = $TestIPPOrts + "^$HSVIP" + ':' +"$HSport"
+				}
+				else
+				{
+					$TestIPPOrts = "$HSVIP" + ':' +"$HSport"
+				}
 
 
+			}
 		}
 	}
-
+	elseif ($ResourceGroups)
+	{
+		foreach ($ResourceGroup in $ResourceGroups.Split("^"))
+		{
+			$RGIPdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/publicIPAddresses" -ExpandProperties -OutputObjectFormat New -Verbose
+			$RGVMs = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Compute/virtualMachines" -ExpandProperties -OutputObjectFormat New -Verbose
+			foreach ($testVM in $RGVMs)
+			{
+				$AllEndpoints = $testVM.Properties.NetworkProfile.InputEndpoints
+				foreach ($endPoint in $AllEndpoints)
+				{
+					if ($endPoint.EndpointName -eq "SSH")
+					{
+						if($TestIPPOrts)
+						{
+							$TestIPPOrts = $TestIPPOrts + "^$($RGIPdata.Properties.IpAddress)" + ':' +"$($endPoint.PublicPort)"
+						}
+						else
+						{
+							$TestIPPOrts = "$($RGIPdata.Properties.IpAddress)" + ':' +"$($endPoint.PublicPort)"
+						}
+					}
+				}
+			}
+		}		
+	}
 	return $TestIPPOrts
+}
+
+Function GetAllDeployementData($DeployedServices, $ResourceGroups)
+{
+	$allDeployedVMs = @()
+	function CreateQuickVMNode()
+	{
+		$objNode = New-Object -TypeName PSObject
+		Add-Member -InputObject $objNode -MemberType NoteProperty -Name ServiceName -Value $ServiceName -Force
+		Add-Member -InputObject $objNode -MemberType NoteProperty -Name ResourceGroupName -Value $ResourceGroupName -Force
+		Add-Member -InputObject $objNode -MemberType NoteProperty -Name RoleName -Value $RoleName -Force 
+		Add-Member -InputObject $objNode -MemberType NoteProperty -Name PublicIP -Value $PublicIP -Force
+		Add-Member -InputObject $objNode -MemberType NoteProperty -Name InternalIP -Value $InternalIP -Force
+		Add-Member -InputObject $objNode -MemberType NoteProperty -Name URL -Value $URL -Force
+		Add-Member -InputObject $objNode -MemberType NoteProperty -Name Status -Value $Status -Force
+		return $objNode
+	}
+
+	if ( $UseAzureResourceManager )
+	{
+		foreach ($ResourceGroup in $ResourceGroups.Split("^"))
+		{
+			LogMsg "Collecting $ResourceGroup data.."
+			$RGIPdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/publicIPAddresses" -ExpandProperties -OutputObjectFormat New -Verbose
+			$RGVMs = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Compute/virtualMachines" -ExpandProperties -OutputObjectFormat New -Verbose
+			$LBdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/loadBalancers" -ExpandProperties -OutputObjectFormat New -Verbose
+			$NICdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/networkInterfaces" -ExpandProperties -OutputObjectFormat New -Verbose
+			foreach ($testVM in $RGVMs)
+			{
+				$QuickVMNode = CreateQuickVMNode
+				$InboundNatRules = $LBdata.Properties.InboundNatRules
+				foreach ($endPoint in $InboundNatRules)
+				{
+					if ( $endPoint.Name -imatch $testVM.ResourceName)
+					{
+						$endPointName = "$($endPoint.Name)".Replace("$($testVM.ResourceName)-","")
+						Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endPointName)Port" -Value $endPoint.Properties.FrontendPort -Force
+					}
+				}
+				$LoadBalancingRules = $LBdata.Properties.LoadBalancingRules
+				foreach ( $LBrule in $LoadBalancingRules )
+				{
+					if ( $LBrule.Name -imatch "$ResourceGroup-LB-" )
+					{
+						$endPointName = "$($LBrule.Name)".Replace("$ResourceGroup-LB-","")
+						Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endPointName)Port" -Value $LBrule.Properties.FrontendPort -Force
+					}
+				}
+				$Probes = $LBdata.Properties.Probes
+				foreach ( $Probe in $Probes )
+				{
+					if ( $Probe.Name -imatch "$ResourceGroup-LB-" )
+					{
+						$probeName = "$($Probe.Name)".Replace("$ResourceGroup-LB-","").Replace("-probe","")
+						Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($probeName)ProbePort" -Value $Probe.Properties.Port -Force
+					}
+				}
+				foreach ( $nic in $NICdata )
+				{
+					if ( $nic.Name -imatch $testVM.ResourceName)
+					{
+						$QuickVMNode.InternalIP = "$($nic.Properties.IpConfigurations[0].Properties.PrivateIPAddress)"
+					}
+				}
+				$QuickVMNode.ResourceGroupName = $ResourceGroup
+				$QuickVMNode.PublicIP = $RGIPdata.Properties.IpAddress
+				$QuickVMNode.URL = $RGIPdata.Properties.DnsSettings.Fqdn
+				$QuickVMNode.RoleName = $testVM.ResourceName
+				$QuickVMNode.Status = $testVM.Properties.ProvisioningState
+				$allDeployedVMs += $QuickVMNode
+			}
+			LogMsg "Collected $ResourceGroup data!"		
+		}
+	}
+	else
+	{
+		$allDeployedVMs = @()
+		foreach ($hostedservice in $DeployedServices.Split("^"))
+		{
+			LogMsg "Collecting $hostedservice data..."
+			$testServiceData = Get-AzureService -ServiceName $hostedservice
+			$DeployedVMs = Get-AzureVM -ServiceName $hostedService
+			foreach ($testVM in $DeployedVMs)
+			{
+				$QuickVMNode = CreateQuickVMNode
+				$AllEndpoints = Get-AzureEndpoint -VM $testVM
+				$QuickVMNode.ServiceName = $hostedservice
+				$QuickVMNode.RoleName = $testVM.InstanceName
+				$QuickVMNode.PublicIP = $AllEndpoints[0].Vip
+				$QuickVMNode.InternalIP = $testVM.IpAddress
+				foreach ($endpoint in $AllEndpoints)
+				{
+					Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endpoint.Name)Port" -Value $endpoint.Port -Force
+					if ( $endpoint.ProbePort )
+					{
+						Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endpoint.Name)ProbePort" -Value $endpoint.ProbePort -Force
+					}
+				}
+				$QuickVMNode.URL = ($testVM.DNSName).Replace("http://","").Replace("/","")
+				$QuickVMNode.Status = $testVM.InstanceStatus
+				$allDeployedVMs += $QuickVMNode
+			}
+			LogMsg "Collected $hostedservice data!"
+		}
+	}
+	return $allDeployedVMs
 }
 
 Function CreateVMNode
