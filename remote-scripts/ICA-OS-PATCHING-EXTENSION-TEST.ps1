@@ -3,13 +3,11 @@ Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""
 $resultArr = @()
-#$isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
-$isDeployed = "ICA-HS-ExtensionTest-U1510-9-1-0-0-35"
+$isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
 	try
 	{
-		$AllVMData = GetAllDeployementData -DeployedServices $isDeployed
 		$hs1VIP = $AllVMData.PublicIP
 		$hs1vm1sshport = $AllVMData.SSHPort
 		$hs1ServiceUrl = $AllVMData.URL
