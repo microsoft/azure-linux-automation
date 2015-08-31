@@ -13,18 +13,7 @@ if ($isDeployed)
 		$hs1ServiceUrl = $AllVMData.URL
 		$hs1vm1Dip = $AllVMData.InternalIP
 		$hs1vm1Hostname = $AllVMData.RoleName
-		$vmDetails = Get-AzureVM -ServiceName $isDeployed
 		$ExtensionVerfiedWithPowershell = $false
- 		if ( ( $vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Status -eq "Success" ) -and ($vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Name -imatch "OSPatchingForLinux" ))
-		{
-			$ExtensionVerfiedWithPowershell = $true
-			LogMsg "OSPatchingForLinux extension status is SUCCESS in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
-		}
-		else
-		{
-			$ExtensionVerfiedWithPowershell = $true
-			LogErr "OSPatchingForLinux extension status is FAILED in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
-		}
 		$lsOutput = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "ls /var/log/" -runAsSudo
 		LogMsg -msg $lsOutput -LinuxConsoleOuput
 		$varLogFolder = "/var/log"
@@ -133,6 +122,17 @@ if ($isDeployed)
 		{
 			LogErr "No Extension logs are available."
 			$extensionVerified = $false
+		}
+		$vmDetails = Get-AzureVM -ServiceName $isDeployed
+ 		if ( ( $vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Status -eq "Success" ) -and ($vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Name -imatch "OSPatchingForLinux" ))
+		{
+			$ExtensionVerfiedWithPowershell = $true
+			LogMsg "OSPatchingForLinux extension status is SUCCESS in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
+		}
+		else
+		{
+			$ExtensionVerfiedWithPowershell = $false
+			LogErr "OSPatchingForLinux extension status is FAILED in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
 		}
 		if ( $ExtensionVerfiedWithPowershell -and $extensionVerified )
 		{
