@@ -31,14 +31,14 @@ if ($isDeployed)
 		$folderToSearch = "/var/log/azure"
 		foreach ($line in $lsOut.Split("`n") )
 		{
-            $line = $line.Trim()
+			$line = $line.Trim()
 			if ($line -imatch $varLogFolder)
 			{
 				$currentFolder = $line.Replace(":","")
 			}
 			if ( ( ($line.Split(" ")[0][0])  -eq "-" ) -and ($currentFolder -imatch $folderToSearch) )
 			{
-                $currentLogFile = $line.Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[8]
+				$currentLogFile = $line.Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[8]
 				if ($LogFilesPaths)
 				{
 					$LogFilesPaths += "," + $currentFolder + "/" + $currentLogFile
@@ -51,18 +51,18 @@ if ($isDeployed)
 				}
 			}
 		}
-        foreach ($file in $LogFilesPaths.Split(","))
-        {
-            foreach ($fileName in $LogFiles.Split(","))
-            {
-                if ( $file -imatch $fileName )
-                {
-                    $out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat $file > $fileName" -runAsSudo
-                    RemoteCopy -download -downloadFrom $hs1VIP -files $fileName -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
-                }
-            }
-        }
-        if ($lsOutput -imatch "CustomExtensionSuccessful")
+		foreach ($file in $LogFilesPaths.Split(","))
+		{
+			foreach ($fileName in $LogFiles.Split(","))
+			{
+				if ( $file -imatch $fileName )
+				{
+					$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat $file > $fileName" -runAsSudo
+					RemoteCopy -download -downloadFrom $hs1VIP -files $fileName -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
+				}
+			}
+		}
+		if ($lsOutput -imatch "CustomExtensionSuccessful")
 		{
 			$testResult = "PASS"
 		}
