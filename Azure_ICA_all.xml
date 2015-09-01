@@ -4311,7 +4311,7 @@
 			<cycleName>DEBUG</cycleName>
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
 			<test>
-				<Name>VNET-VERIFY-REMOTE-SSH-SCP-OUTBOUND-ACCESS</Name>
+				<Name>BVT-VERIFY-VERBOSE-ENABLED-LOGS</Name>
 			</test>
 		</Cycle>
 	</testCycles>
