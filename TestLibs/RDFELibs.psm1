@@ -83,6 +83,10 @@ Function DetectLinuxDistro($VIP, $SSHport, $testVMUser, $testVMPassword)
 		{
 			$CleanedDistroName = "UBUNTU" 
 		}
+		elseif ($DistroName -imatch "Ubuntu15.10")
+		{
+			$CleanedDistroName = "Ubuntu15.10" 
+		}
 		elseif ($DistroName -imatch "CENTOS")
 		{
 			$CleanedDistroName = "CENTOS"
