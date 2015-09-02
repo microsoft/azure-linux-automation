@@ -16,7 +16,8 @@ while echo $1 | grep ^- > /dev/null; do
     shift
 done
         if [ -e /etc/debian_version ]; then
-                echo "UBUNTU"
+                #echo "UBUNTU"
+				echo `python -c 'import platform;print platform.dist()[0]+ platform.dist()[1]'`
                 exitVal=0
         elif [ -e /etc/redhat-release ]; then
                 tmp=`cat /etc/redhat-release`

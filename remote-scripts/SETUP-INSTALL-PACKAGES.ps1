@@ -69,7 +69,11 @@ if ($isDeployed)
                     if ($DistroName -eq "COREOS")   
                     {  
                         $output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "/usr/share/oem/python/bin/python /usr/share/oem/bin/waagent -force -deprovision+user 2>&1" -runAsSudo  
-                    }  
+                    }
+                    elseif ($DistroName -eq "Ubuntu15.10"){  
+                        GetVMLogs -DeployedServices $isDeployed 
+                        $output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "/usr/bin/python3 /usr/sbin/waagent -force -deprovision+user 2>&1" -runAsSudo  
+                    }					
                     else {  
                         GetVMLogs -DeployedServices $isDeployed 
                         $output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "/usr/sbin/waagent -force -deprovision+user 2>&1" -runAsSudo  
