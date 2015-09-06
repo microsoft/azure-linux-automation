@@ -160,8 +160,7 @@ def install_waagent_from_github():
                 #For 2.1, use setup.py to install/uninstall package
                 setup_py = os.path.join(unzipPath, 'setup.py')
                 ExecMultiCmdsLocalSudo([
-                        "{0} {1} -uninstall".format(python_cmd, setup_py),
-                        "{0} {1} -install".format(python_cmd, setup_py),
+                        "{0} {1} install --register-service --force".format(python_cmd, setup_py),
                         "rm -rf {0}".format(unzipPath)])
                 return True                
         else:
