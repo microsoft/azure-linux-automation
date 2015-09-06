@@ -1,6 +1,7 @@
 #!/usr/bin/python
 from azuremodules import *
 import sys
+import shutil
 import time
 import re
 import os
@@ -134,6 +135,8 @@ def install_waagent_from_github():
         
         pkgPath = os.path.join("/tmp", filename)        
         unzipPath = os.path.join("/tmp", "agent")
+        if os.path.isdir(unzipPath):
+            shutil.rmtree(unzipPath)
         if not os.path.isfile(pkgPath):
                 RunLog.error("Installing waagent from github...[failed]")
                 RunLog.error("File not found: {0}".format(pkgPath))
@@ -145,23 +148,23 @@ def install_waagent_from_github():
                 RunLog.error("Installing waagent from github...[failed]")
                 RunLog.error("{0}".format(e))
                 return False
-            
-        binPath20 = os.path.join(unzipPath, "waagent")
-        binPath21 = os.path.join(unzipPath, "bin/waagent")
+        
+        waagentSrc = os.listdir(unzipPath)[0]
+        waagentSrc = os.path.join(unzipPath, waagentSrc)
+        binPath20 = os.path.join(waagentSrc, "waagent")
+        binPath21 = os.path.join(waagentSrc, "bin/waagent")
         if os.path.isfile(binPath20):
                 #For 2.0, only one file(waagent) needs to be replaced.
-                waagent_bin=os.path.join(unzipPath, 'waagent')
+                os.chmod(binPath20, 0o755)
                 ExecMultiCmdsLocalSudo([
-                        "chmod +x {0}".format(waagent_bin),
-                        "cp {0} {1}".format(waagent_bin, waagent_bin_path),
-                        "rm -rf {0}".format(unzipPath)])
+                        "cp {0} {1}".format(binPath20, waagent_bin_path)])
                 return True                
         elif os.path.isfile(binPath21):
                 #For 2.1, use setup.py to install/uninstall package
-                setup_py = os.path.join(unzipPath, 'setup.py')
+                os.chmod(binPath21, 0o755)
+                setup_py = os.path.join(waagentSrc, 'setup.py')
                 ExecMultiCmdsLocalSudo([
-                        "{0} {1} install --register-service --force".format(python_cmd, setup_py),
-                        "rm -rf {0}".format(unzipPath)])
+                        "{0} {1} install --register-service --force".format(python_cmd, setup_py)])
                 return True                
         else:
                 RunLog.error("Installing waagent from github...[failed]")
@@ -291,7 +294,7 @@ def RunTest():
                                 if(current_distro == node.attrib["distro"]):
                                         packages_list = node.text.split(",")
                         elif node.tag == "waLinuxAgent_link":
-                                pass
+                                tar_link[node.attrib["name"]] = node.text
                         elif node.tag == "rpm_link":
                                 rpm_links[node.attrib["name"]] = node.text
                         elif node.tag == "tar_link":
