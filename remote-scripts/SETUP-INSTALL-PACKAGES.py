@@ -128,27 +128,32 @@ def coreos_package_install():
 
 def install_ez_setup():
         RunLog.info ("Installing ez_setup.py...")
-        DownloadUrl(tar_link.get("ez_setup.py"), "/tmp/")
 
         ez_setup = os.path.join("/tmp", "ez_setup.py")
+        DownloadUrl(tar_link.get("ez_setup.py"), "/tmp/", output_file=ez_setup)
+        if not os.path.isfile(ez_setup):
+                RunLog.error("Installing ez_setup.py...[failed]")
+                RunLog.error("File not found: {0}".format(ez_setup))
+                return False
+
+
         Run("{0} {1}".format(python_cmd, ez_setup))
 
 
 def install_waagent_from_github():
         RunLog.info ("Installing waagent from github...")
-        DownloadUrl(tar_link.get("waagent"), "/tmp/")
-        filename = tar_link.get("waagent").split('/')[-1]
-        RunLog.info ("Waagent tar file name is: "+ filename+"|")
-        
-        pkgPath = os.path.join("/tmp", filename)        
-        unzipPath = os.path.join("/tmp", "agent")
-        if os.path.isdir(unzipPath):
-            shutil.rmtree(unzipPath)
+
+        pkgPath = os.path.join("/tmp", "agent.zip")
+        DownloadUrl(tar_link.get("waagent"), "/tmp/", output_file=pkgPath)
         if not os.path.isfile(pkgPath):
                 RunLog.error("Installing waagent from github...[failed]")
                 RunLog.error("File not found: {0}".format(pkgPath))
                 return False
         
+        unzipPath = os.path.join("/tmp", "agent")
+        if os.path.isdir(unzipPath):
+            shutil.rmtree(unzipPath)
+
         try:
                 zipfile.ZipFile(pkgPath).extractall(unzipPath)
         except IOError as e:
