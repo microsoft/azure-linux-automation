@@ -126,9 +126,16 @@ def coreos_package_install():
         Run("echo '** pexpect, paramiko and dnspython packages installed successfully **' >> PackageStatus.txt")
         return True
 
+def install_ez_setup():
+        RunLog.info ("Installing ez_setup.py...")
+        DownloadUrl(tar_link.get("ez_setup.py"), "/tmp/")
+
+        ez_setup = os.path.join("/tmp", "ez_setup.py")
+        Run("{0} {1}".format(python_cmd, ez_setup))
+
+
 def install_waagent_from_github():
         RunLog.info ("Installing waagent from github...")
-
         DownloadUrl(tar_link.get("waagent"), "/tmp/")
         filename = tar_link.get("waagent").split('/')[-1]
         RunLog.info ("Waagent tar file name is: "+ filename+"|")
@@ -175,6 +182,8 @@ def install_package(package):
         RunLog.info ("\nInstall_package: "+package)
         if (package == "waagent"):
                 return install_waagent_from_github()
+        if (package == "ez_setup"):
+                return install_ez_setup()
         else:
                 if ((current_distro == "ubuntu") or (current_distro == "Debian")):
                         return AptgetPackageInstall(package)
@@ -294,6 +303,8 @@ def RunTest():
                                 if(current_distro == node.attrib["distro"]):
                                         packages_list = node.text.split(",")
                         elif node.tag == "waLinuxAgent_link":
+                                tar_link[node.attrib["name"]] = node.text
+                        elif node.tag == "ez_setup_link":
                                 tar_link[node.attrib["name"]] = node.text
                         elif node.tag == "rpm_link":
                                 rpm_links[node.attrib["name"]] = node.text
