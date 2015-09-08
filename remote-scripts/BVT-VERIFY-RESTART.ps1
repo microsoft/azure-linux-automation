@@ -33,6 +33,7 @@ if ($isDeployed)
 			else
 			{
 				$isRestarted = $false
+				LogErr "Restart Failed. Operation ID : $($restartVM.TrackingOperationId)"
 			}
 		}
 		else

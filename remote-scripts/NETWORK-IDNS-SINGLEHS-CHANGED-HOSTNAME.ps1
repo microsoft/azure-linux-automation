@@ -64,11 +64,9 @@ if($isDeployed)
 				$vm1Default = $vm1
 				$vm2Default = $vm2
 				$vm1DefaultHostname =  $hs1vm1Hostname
-				$vm1NewHostname = $vm1DefaultHostname.Substring(0, $vm1DefaultHostname.Length-7) + ${Get-Random -Minimum 0 -Maximum 50}
 				$vm2DefaultHostname = $hs1vm2Hostname
-				$vm2NewHostname = $vm2DefaultHostname.Substring(0, $vm2DefaultHostname.Length-7) + ${Get-Random -Minimum 51 -Maximum 100}
-				$vm1NewFqdn = $vm1DefaultFqdn.Replace($vm1DefaultHostname, $vm1NewHostname) 
-				$vm2NewFqdn = $vm2DefaultFqdn.Replace($vm2DefaultHostname, $vm2NewHostname) 
+				$vm1NewFqdn = $vm1DefaultFqdn.Replace($vm1DefaultHostname, $hs1vm1NewHostname) 
+				$vm2NewFqdn = $vm2DefaultFqdn.Replace($vm2DefaultHostname, $hs1vm2NewHostname) 
 			}
 			$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "rm -rf *.txt *.log" -runAsSudo 
 			$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "rm -rf *.txt *.log" -runAsSudo 
@@ -119,8 +117,8 @@ if($isDeployed)
 
 				"VerifyChangedHostname" {
 
-					$vm1.hostname = $vm1NewHostname
-					$vm2.hostname = $vm2NewHostname
+					$vm1.hostname = $hs1vm1NewHostname
+					$vm2.hostname = $hs1vm2NewHostname
 					$vm1.fqdn = $vm1NewFqdn
 					$vm2.fqdn = $vm2NewFqdn
 
