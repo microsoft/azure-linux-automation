@@ -3686,7 +3686,8 @@
 			<dataDiskConfig>
 				<DiskSizeInGB>10</DiskSizeInGB>
 				<HostCaching>ReadOnly</HostCaching>
-			</dataDiskConfig>			
+			</dataDiskConfig>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<Priority>P0</Priority>
 		</test>		
 		<test>
@@ -3696,6 +3697,7 @@
 			<setupType>ExtensionTest</setupType>
 			<ProvisionTimeExtensions>CustomScriptTouchCommand</ProvisionTimeExtensions>
 			<PostProvisionExtensions>TO_BE_DONE</PostProvisionExtensions>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<Priority>P0</Priority>
 		</test>		
 	</testsDefinition>

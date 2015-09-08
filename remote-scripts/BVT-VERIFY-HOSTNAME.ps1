@@ -13,6 +13,7 @@ if ($isDeployed)
 		$hs1vm1sshport = $AllVMData.SSHPort
 		$hs1ServiceUrl = $AllVMData.URL
 		$hs1vm1Dip = $AllVMData.InternalIP
+		$hs1vm1Hostname = $AllVMData.RoleName
 
 		RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
 		RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *" -runAsSudo

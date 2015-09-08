@@ -2176,7 +2176,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 								LogMsg "Skipping cleanup of $hs."
 								if(!$keepUserDirectory)
 								{
-									RemoveAllFilesFromHomeDirectory -DeployedServices $hs
+									RemoveAllFilesFromHomeDirectory -allDeployedVMs $allVMData
 								}
 							}
 							else
@@ -2207,7 +2207,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 							GetVMLogs -allVMData $allDeploymentData
 							if(!$keepUserDirectory -and !$keepReproInact -and $EconomyMode)
 								{
-									RemoveAllFilesFromHomeDirectory -DeployedServices $hs
+									RemoveAllFilesFromHomeDirectory -allDeployedVMs $allVMData
 								}
 							if($keepReproInact)
 							{
@@ -2232,24 +2232,52 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 			}
 			else
 			{
-				$allDeploymentData = $allVMData
-				foreach ( $Group in $ResourceGroups.Split("^"))
+				$ResourceGroups = $ResourceGroups.Split("^")
+				foreach ($group in $ResourceGroups)
 				{
-					
-					#In development stage. Deleting all resource groups to save cores.
-					if($result -eq "PASS") 
+					if($result -eq "PASS")
 					{
-						LogMsg "Cleaning up deployed test virtual machines."
-						#GetVMLogs -allVMData $allDeploymentData
-						if ( DeleteResourceGroup -RGName $Group )
+						if($EconomyMode -and (-not $IsLastCaseInCycle))
 						{
-							LogMsg "CleanUP Successful for $Group"
+							LogMsg "Skipping cleanup of Resource Group : $group."
+							if(!$keepUserDirectory)
+							{
+								RemoveAllFilesFromHomeDirectory -allDeployedVMs $allVMData
+							}
+						}
+						else
+						{
+							#GetVMLogs -allVMData $allDeploymentData
+							LogMsg "Cleaning up deployed test virtual machines."
+							$isClened = DeleteResourceGroup -RGName $group
+						
+							if ($isClened)
+							{
+								LogMsg "CleanUP unsuccessful for $group.. Please delete the services manually."
+							}
+							else
+							{
+								LogMsg "CleanUP Successful for $group.."
+							}
 						}
 					}
 					else
 					{
+						LogMsg "Preserving the Resource Group(s) $group"
+						foreach ($group in $ResourceGroups)
+						{
+							#TBD : Adding description is not supported for Resource Group yet. Need to figure out another way.
+						}
 						LogMsg "Collecting VM logs.."
-						GetVMLogs -allVMData $allDeploymentData
+						GetVMLogs -allVMData $allVMData
+						if(!$keepUserDirectory -and !$keepReproInact -and $EconomyMode)
+							{
+								RemoveAllFilesFromHomeDirectory -allDeployedVMs $allVMData
+							}
+						if($keepReproInact)
+						{
+							$xmlConfig.config.Azure.Deployment.$setupType.isDeployed = "NO"
+						}
 					}
 				}
 			}
@@ -2347,11 +2375,8 @@ Function GetVMLogs($allVMData)
 {
 	foreach ($testVM in $allVMData)
 	{
-		$HSVIP = $testVM.PublicIP
-		$HSport = $testVM.SSHPort
 		$testIP = $testVM.PublicIP
 		$testPort = $testVM.SSHPort
-		#$LisLogFile = "LIS-Logs-" + $testVM.InstanceName + ".tgz"
 		$LisLogFile = "LIS-Logs" + ".tgz"
 		try
 		{
@@ -2362,7 +2387,7 @@ Function GetVMLogs($allVMData)
 			LogMsg $out
 			RemoteCopy -download -downloadFrom $testIP -username $user -password $password -port $testPort -downloadTo $LogDir -files $LisLogFile
 			LogMsg "Logs collected successfully from IP : $testIP PORT : $testPort"
-			Rename-Item -Path "$LogDir\$LisLogFile" -NewName ("LIS-Logs-" + $testVM.InstanceName + ".tgz") -Force
+			Rename-Item -Path "$LogDir\$LisLogFile" -NewName ("LIS-Logs-" + $testVM.RoleName + ".tgz") -Force
 		}
 		catch
 		{
@@ -2373,32 +2398,23 @@ Function GetVMLogs($allVMData)
 	}
 }
 
-Function RemoveAllFilesFromHomeDirectory($DeployedServices)
+Function RemoveAllFilesFromHomeDirectory($allDeployedVMs)
 {
-	$TestIPPOrts = ""
-
-	foreach ($hostedservice in $DeployedServices.Split("^"))
+	foreach ($DeployedVM in $allDeployedVMs)
 	{
-		$DeployedVMs = Get-AzureVM -ServiceName $hostedService
-		foreach ($testVM in $DeployedVMs)
+		$testIP = $DeployedVM.PublicIP
+		$testPort = $DeployedVM.SSHPort
+		try
 		{
-			$AllEndpoints = Get-AzureEndpoint -VM $testVM
-			$HSVIP = GetHsVmVip -servicename $hostedservice
-			$HSport = GetPort -Endpoints $AllEndpoints -usage SSH
-			$testIP = $HSVIP
-			$testPort = $HSport
-			try
-			{
-				LogMsg "Removing all files logs from IP : $testIP PORT : $testPort"	
-				$out = RunLinuxCmd -username $user -password $password -ip $testIP -port $testPort -command 'rm -rf *' -runAsSudo
-				LogMsg "All files removed from /home/$user successfully. VM IP : $testIP PORT : $testPort"  
-			}
-			catch
-			{
-				$ErrorMessage =  $_.Exception.Message
-				Write-Host "EXCEPTION : $ErrorMessage"
-				Write-Host "Unable to remove files from IP : $testIP PORT : $testPort"  		
-			}
+			LogMsg "Removing all files logs from IP : $testIP PORT : $testPort"	
+			$out = RunLinuxCmd -username $user -password $password -ip $testIP -port $testPort -command 'rm -rf *' -runAsSudo
+			LogMsg "All files removed from /home/$user successfully. VM IP : $testIP PORT : $testPort"  
+		}
+		catch
+		{
+			$ErrorMessage =  $_.Exception.Message
+			Write-Host "EXCEPTION : $ErrorMessage"
+			Write-Host "Unable to remove files from IP : $testIP PORT : $testPort"  		
 		}
 	}
 }
