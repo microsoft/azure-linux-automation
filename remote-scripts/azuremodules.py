@@ -55,12 +55,16 @@ def UpdateRepos(current_distro):
 	RunLog.info ("Updating the repositoriy information... [done]")
 	return True
 
-def DownloadUrl(url, destination_folder):
-    rtrn = Run("wget -P "+destination_folder+" "+url+ " 2>&1")
+def DownloadUrl(url, destination_folder, output_file=None):
+    cmd = "wget -P "+destination_folder+" "+url+ " 2>&1"
+    if output_file is not None:
+        cmd = "wget {0} -O {1} 2>&1".format(url, output_file)
+        
+    rtrn = Run(cmd)
 
     if(rtrn.rfind("wget: command not found") != -1):
-        install_package("wget")
-        rtrn = Run("wget -P "+destination_folder+" "+url+ " 2>&1")
+        InstallPackage("wget")
+        rtrn = Run(cmd)
 
     if( rtrn.rfind("100%") != -1):
         return True
