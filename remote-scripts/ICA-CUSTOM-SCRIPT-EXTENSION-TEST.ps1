@@ -25,7 +25,7 @@ if ($isDeployed)
 		$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "tar -cvzf /home/$user/AzureExtensionLogs.tar.gz /var/log/azure/*" -runAsSudo
 		RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/AzureExtensionLogs.tar.gz" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
 		$varLogFolder = "/var/log"
-		$lsOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "ls -lR $varLogFolder"
+		$lsOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "ls -lR $varLogFolder" -runAsSudo
 		$LogFilesPaths = ""
 		$LogFiles = ""
 		$folderToSearch = "/var/log/azure"
