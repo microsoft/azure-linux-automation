@@ -4307,6 +4307,46 @@
 				<Name>ICA-VM-DIAGNOSTIC-EXTENSION-TEST</Name>
 			</test>			
 		</Cycle>
+
+		<!-- Waagent BVT tests -->
+		<Cycle>
+			<cycleName>WaagentBVT</cycleName>
+			<test>
+				<Name>BVT-VERIFY-NO-ERROR-IN-LOGS</Name>
+			</test>
+			<test>
+				<Name>BVT-WA-PROC-CHECK</Name>
+			</test>
+			<test>
+				<Name>BVT-WA-VER-CHECK</Name>
+			</test>
+			<test>
+				<Name>BVT-SWAP-CHECK</Name>
+			</test>
+			<test>
+				<Name>BVT-ROOT-DEVICE-TIMEOUT-CHECK</Name>
+			</test>
+			<test>
+				<Name>BVT-IS-ROOT-PASSWORD-DELETED</Name>
+			</test>
+			<test>
+				<Name>BVT-VERIFY-HOSTNAME</Name>
+			</test>
+			<test>
+				<Name>BVT-RESOURCE-DISK-FILESYSTEM</Name>
+			</test>
+			<test>
+				<Name>BVT-VERIFY-MNT-RESOURCE-WRITABLE</Name>
+			</test>
+			<test>
+				<Name>BVT-VERIFY-MNT-RESOURCE-README</Name>
+			</test>
+			<test>
+				<Name>BVT-VERIFY-VERBOSE-ENABLED-LOGS</Name>
+			</test>
+		</Cycle>
+		
+		
 		<Cycle>
 			<cycleName>DEBUG</cycleName>
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
