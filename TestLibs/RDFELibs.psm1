@@ -79,7 +79,7 @@ Function DetectLinuxDistro($VIP, $SSHport, $testVMUser, $testVMPassword)
 	}
 	else
 	{
-		elseif ($DistroName -imatch "UBUNTU")
+		if ($DistroName -imatch "UBUNTU")
 		{
 			$CleanedDistroName = "UBUNTU" 
 		}
