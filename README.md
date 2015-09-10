@@ -134,7 +134,7 @@ After creating Public Key (.cer) and putty compatible private key (.ppk), you mu
 `Required for executing Virtual Network Tests`
 
 #### Create a Virtual Network in Azure
-A virtual network should be created and connected to Customer Network before running VNET test cases. To learn about how to create a virtual network on Azure, please visit [here](https://msdn.microsoft.com/en-us/library/azure/dn133795.aspx).
+A virtual network should be created and connected to Customer Network before running VNET test cases. To learn about how to create a virtual network on Azure, please visit [here](https://azure.microsoft.com/documentation/articles/vpn-gateway-site-to-site-create/).
 
 #### Create A customer site using RRAS
 Apart from Virtual Network in Azure, you also need a network (composed of Subnets and DNS server) to work as Customer Network. If you don’t have separate network to run VNET, you can create a virtual customer network using RRAS. To learn more, please visit [here](https://msdn.microsoft.com/en-us/library/dn636917.aspx).
