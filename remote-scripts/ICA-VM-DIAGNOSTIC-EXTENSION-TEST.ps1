@@ -58,9 +58,9 @@ if ($isDeployed)
 					$extensionVerified = $false
 					LogErr "extension.log file does not present"
 					$waitForExtension = $true
-					$retryCount += 1
 					WaitFor -Seconds 30
 				}
+				$retryCount += 1
 			}
 			while (($retryCount -lt $maxRetryCount) -and $waitForExtension )
 		}
