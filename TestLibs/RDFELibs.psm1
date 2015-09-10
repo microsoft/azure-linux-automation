@@ -448,18 +448,28 @@ Function GenerateCommand ($Setup, $serviceName, $osImage, $HSData)
 	$vmCount = 0
 	if ( $CurrentTestData.ProvisionTimeExtensions )
 	{
-		$extensionString = [string](Get-Content .\XML\Extensions.xml)
-		foreach ($line in $extensionString.Split())
+		$extensionString = (Get-Content .\XML\Extensions.xml)
+		foreach ($line in $extensionString.Split("`n"))
 		{
-			if ($line -imatch "EXECUTE-PS-")
+			if ($line -imatch ">$($CurrentTestData.ProvisionTimeExtensions)<")
 			{
+				$ExecutePS = $true
+			}
+			if ($line -imatch '</Extension>')
+			{
+				$ExecutePS = $false
+			}
+			if ( ($line -imatch "EXECUTE-PS-" ) -and $ExecutePS)
+			{
+				$PSoutout = ""
 				$line = $line.Trim()
 				$line = $line.Replace("EXECUTE-PS-","")
 				$line = $line.Split(">")
 				$line = $line.Split("<")
+				LogMsg "Executing Powershell command from Extensions.XML file : $($line[2])..."
 				$PSoutout = Invoke-Expression -Command $line[2]
 				$extensionString = $extensionString.Replace("EXECUTE-PS-$($line[2])",$PSoutout)
-				Sleep -Milliseconds 500
+				sleep -Milliseconds 1
 			}
 		}
 		$extensionXML = [xml]$extensionString
@@ -534,18 +544,47 @@ Function GenerateCommand ($Setup, $serviceName, $osImage, $HSData)
 				{
 					if ($newExtn.Name -eq $extn)
 					{
-						[hashtable]$extensionHashTable = @{};
-						$newExtn.Params.ChildNodes | foreach {$extensionHashTable[$_.Name] = $_.'#text'};
-						$PublicConfiguration += $extensionHashTable | ConvertTo-Json
-						[hashtable]$extensionHashTable = @{};
-						$PrivateConfiguration += $extensionHashTable | ConvertTo-Json
+						if ($newExtn.PublicConfiguration)
+						{
+							[hashtable]$extensionHashTable = @{};
+							$newExtn.PublicConfiguration.ChildNodes | foreach {$extensionHashTable[$_.Name] = $_.'#text'};
+							$PublicConfiguration += $extensionHashTable | ConvertTo-Json
+						}
+						if ($newExtn.PrivateConfiguration)
+						{
+							[hashtable]$extensionHashTable = @{};
+							$newExtn.PrivateConfiguration.ChildNodes | foreach {$extensionHashTable[$_.Name] = $_.'#text'};
+							$PrivateConfiguration += $extensionHashTable | ConvertTo-Json
+						}
 						if ( $ExtensionCommand )
 						{
-							$ExtensionCommand = $ExtensionCommand + " | Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName) -ReferenceName $extn -Publisher $($newExtn.Publisher) -Version $($newExtn.Version) -PublicConfiguration `$PublicConfiguration[$extensionCounter] -PrivateConfiguration `$PrivateConfiguration[$extensionCounter]"
+							if ($PublicConfiguration -and $PrivateConfiguration)
+							{
+								$ExtensionCommand = $ExtensionCommand + " | Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName) -ReferenceName $extn -Publisher $($newExtn.Publisher) -Version $($newExtn.Version) -PublicConfiguration `$PublicConfiguration[$extensionCounter] -PrivateConfiguration `$PrivateConfiguration[$extensionCounter]"
+							}
+							elseif($PublicConfiguration)
+							{
+								$ExtensionCommand = $ExtensionCommand + " | Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName) -ReferenceName $extn -Publisher $($newExtn.Publisher) -Version $($newExtn.Version) -PublicConfiguration `$PublicConfiguration[$extensionCounter]"
+							}
+							elseif($PrivateConfiguration)
+							{
+								$ExtensionCommand = $ExtensionCommand + " | Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName) -ReferenceName $extn -Publisher $($newExtn.Publisher) -Version $($newExtn.Version) -PrivateConfiguration `$PrivateConfiguration[$extensionCounter]"
+							}
 						}
 						else
 						{
-							$ExtensionCommand = "Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName) -ReferenceName $extn -Publisher $($newExtn.Publisher) -Version $($newExtn.Version) -PublicConfiguration `$PublicConfiguration[$extensionCounter] -PrivateConfiguration `$PrivateConfiguration[$extensionCounter]"
+							if ( $PublicConfiguration -and $PrivateConfiguration )
+							{
+								$ExtensionCommand = "Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName) -ReferenceName $extn -Publisher $($newExtn.Publisher) -Version $($newExtn.Version) -PublicConfiguration `$PublicConfiguration[$extensionCounter] -PrivateConfiguration `$PrivateConfiguration[$extensionCounter]"
+							}
+							elseif($PublicConfiguration)
+							{
+								$ExtensionCommand = "Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName) -ReferenceName $extn -Publisher $($newExtn.Publisher) -Version $($newExtn.Version) -PublicConfiguration `$PublicConfiguration[$extensionCounter]"
+							}
+							elseif($PrivateConfiguration)
+							{
+								$ExtensionCommand = "Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName) -ReferenceName $extn -Publisher $($newExtn.Publisher) -Version $($newExtn.Version) -PrivateConfiguration `$PrivateConfiguration[$extensionCounter]"
+							}
 						}
 						LogMsg "Extension $extn (OfficialName : $($newExtn.OfficialName)) added to deployment command."
 						$extensionCounter += 1
@@ -4015,36 +4054,55 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 			LogMsg "Collecting $ResourceGroup data.."
 			$RGIPdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/publicIPAddresses" -ExpandProperties -OutputObjectFormat New -Verbose
 			$RGVMs = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Compute/virtualMachines" -ExpandProperties -OutputObjectFormat New -Verbose
-			$LBdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/loadBalancers" -ExpandProperties -OutputObjectFormat New -Verbose
 			$NICdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/networkInterfaces" -ExpandProperties -OutputObjectFormat New -Verbose
+			$numberOfVMs = 0
+			foreach ($testVM in $RGVMs)
+			{
+				$numberOfVMs += 1
+			}
+			if ( $numberOfVMs -gt 1 )
+			{
+				$LBdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/loadBalancers" -ExpandProperties -OutputObjectFormat New -Verbose
+			}
 			foreach ($testVM in $RGVMs)
 			{
 				$QuickVMNode = CreateQuickVMNode
-				$InboundNatRules = $LBdata.Properties.InboundNatRules
-				foreach ($endPoint in $InboundNatRules)
+				if ( $numberOfVMs -gt 1 )
 				{
-					if ( $endPoint.Name -imatch $testVM.ResourceName)
+					$InboundNatRules = $LBdata.Properties.InboundNatRules
+					foreach ($endPoint in $InboundNatRules)
 					{
-						$endPointName = "$($endPoint.Name)".Replace("$($testVM.ResourceName)-","")
-						Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endPointName)Port" -Value $endPoint.Properties.FrontendPort -Force
+						if ( $endPoint.Name -imatch $testVM.ResourceName)
+						{
+							$endPointName = "$($endPoint.Name)".Replace("$($testVM.ResourceName)-","")
+							Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endPointName)Port" -Value $endPoint.Properties.FrontendPort -Force
+						}
+					}
+					$LoadBalancingRules = $LBdata.Properties.LoadBalancingRules
+					foreach ( $LBrule in $LoadBalancingRules )
+					{
+						if ( $LBrule.Name -imatch "$ResourceGroup-LB-" )
+						{
+							$endPointName = "$($LBrule.Name)".Replace("$ResourceGroup-LB-","")
+							Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endPointName)Port" -Value $LBrule.Properties.FrontendPort -Force
+						}
+					}
+					$Probes = $LBdata.Properties.Probes
+					foreach ( $Probe in $Probes )
+					{
+						if ( $Probe.Name -imatch "$ResourceGroup-LB-" )
+						{
+							$probeName = "$($Probe.Name)".Replace("$ResourceGroup-LB-","").Replace("-probe","")
+							Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($probeName)ProbePort" -Value $Probe.Properties.Port -Force
+						}
 					}
 				}
-				$LoadBalancingRules = $LBdata.Properties.LoadBalancingRules
-				foreach ( $LBrule in $LoadBalancingRules )
+				else
 				{
-					if ( $LBrule.Name -imatch "$ResourceGroup-LB-" )
+					$AllEndpoints = $testVM.Properties.NetworkProfile.InputEndpoints
+					foreach ($endPoint in $AllEndpoints)
 					{
-						$endPointName = "$($LBrule.Name)".Replace("$ResourceGroup-LB-","")
-						Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endPointName)Port" -Value $LBrule.Properties.FrontendPort -Force
-					}
-				}
-				$Probes = $LBdata.Properties.Probes
-				foreach ( $Probe in $Probes )
-				{
-					if ( $Probe.Name -imatch "$ResourceGroup-LB-" )
-					{
-						$probeName = "$($Probe.Name)".Replace("$ResourceGroup-LB-","").Replace("-probe","")
-						Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($probeName)ProbePort" -Value $Probe.Properties.Port -Force
+						Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endPoint.EndpointName)Port" -Value $endPoint.PublicPort -Force
 					}
 				}
 				foreach ( $nic in $NICdata )
@@ -6147,6 +6205,8 @@ Function RetryOperation($operation, $description, $expectResult=$null, $maxRetry
 				else
 				{
 					$ErrorActionPreference = $oldErrorActionValue
+					$retryCount ++
+					WaitFor -seconds $retryInterval
 				}
 			}
 			else
@@ -6176,3 +6236,52 @@ Function RetryOperation($operation, $description, $expectResult=$null, $maxRetry
 	
 	return $null
 }#endregion  
+
+#region LinuxUtilities
+Function GetFilePathsFromLinuxFolder ([string]$folderToSearch, $IpAddress, $SSHPort, $username, $password, $maxRetryCount=20)
+{
+	$parentFolder = $folderToSearch.Replace("/" + $folderToSearch.Split("/")[($folderToSearch.Trim().Split("/").Count)-1],"")
+	$LogFilesPaths = ""
+	$LogFiles = ""
+	$retryCount = 1
+	while (($LogFilesPaths -eq "") -and ($retryCount -le $maxRetryCount ))
+	{
+		WaitFor -seconds 10
+		LogMsg "Attempt $retryCount/$maxRetryCount : Getting all file paths inside $folderToSearch"
+		$lsOut = RunLinuxCmd -username $username -password $password -ip $IpAddress -port $SSHPort -command "ls -lR $parentFolder" -runAsSudo
+		foreach ($line in $lsOut.Split("`n") )
+		{
+			$line = $line.Trim()
+			if ($line -imatch $parentFolder)
+			{
+				$currentFolder = $line.Replace(":","")
+			}
+			if ( ( ($line.Split(" ")[0][0])  -eq "-" ) -and ($currentFolder -imatch $folderToSearch) )
+			{
+				while ($line -imatch "  ")
+				{
+					$line = $line.Replace("  "," ")
+				}
+				$currentLogFile = $line.Split(" ")[8]
+				if ($LogFilesPaths)
+				{
+					$LogFilesPaths += "," + $currentFolder + "/" + $currentLogFile
+					$LogFiles += "," + $currentLogFile
+				}
+				else
+				{
+					$LogFilesPaths = $currentFolder + "/" + $currentLogFile
+					$LogFiles += $currentLogFile
+				}
+				LogMsg "Found $currentFolder/$currentLogFile"
+			}
+		}
+		$retryCount += 1
+	}
+	if ( !$LogFilesPaths )
+	{
+		LogMsg "No files found in $folderToSearch"
+	}
+	return $LogFilesPaths, $LogFiles
+}
+#endregion

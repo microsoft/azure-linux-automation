@@ -4,18 +4,18 @@
 			<Name>CustomScriptTouchCommand</Name>
 			<OfficialName>CustomScriptForLinux</OfficialName>
 			<Publisher>"Microsoft.OSTCExtensions"</Publisher>
-			<Params>
+			<PublicConfiguration>
 				<timestamp>EXECUTE-PS-(Get-Date).ticks</timestamp>
 				<fileUris></fileUris>
 				<commandToExecute>touch /var/log/CustomExtensionSuccessful</commandToExecute>
-			</Params>
+			</PublicConfiguration>
 			<Version>1.*</Version>
 		</Extension>
 		<Extension>
 			<Name>OsPatching</Name>
 			<OfficialName>OSPatchingForLinux</OfficialName>
 			<Publisher>"Microsoft.OSTCExtensions"</Publisher>
-			<Params>
+			<PublicConfiguration>
 				<timestamp>EXECUTE-PS-(Get-Date).ticks</timestamp>
 				<rebootAfterPatch>Auto</rebootAfterPatch>
 				<category>Important</category>
@@ -26,11 +26,19 @@
 				<startTime>12:00</startTime>
 				<disabled>$false</disabled>
 				<stop>$false</stop>
-			</Params>
+			</PublicConfiguration>
+			<Version>2.*</Version>
+		</Extension>		
+		<Extension>
+			<Name>LinuxDiagnosticDefaultDataSet</Name>
+			<OfficialName>LinuxDiagnostic</OfficialName>
+			<Publisher>"Microsoft.OSTCExtensions"</Publisher>
+			<PrivateConfiguration>
+				<storageAccountName>EXECUTE-PS-$xmlConfig.config.Azure.General.StorageAccount</storageAccountName>
+				<storageAccountKey>EXECUTE-PS-(Get-AzureStorageKey -StorageAccountName $xmlConfig.config.Azure.General.StorageAccount).Primary</storageAccountKey>
+			</PrivateConfiguration>			
 			<Version>2.*</Version>
 		</Extension>
-		<Extension>
-			<Name>LinuxDiagnostic</Name>
-			<!-- To be done... -->
-		</Extension>
 	</Extensions>
+	
+	

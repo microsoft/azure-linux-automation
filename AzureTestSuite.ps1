@@ -98,6 +98,10 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 			LogMsg "Base VHD name - $BaseOsVHD"
 		}
 	}
+    if (!$BaseOsImage -and !$BaseOSVHD)
+    {
+        Throw "Please give ImageName or OsVHD for deployment."
+    }
 	LogMsg "Loading the cycle Data..."
 	$currentCycleData = GetCurrentCycleData -xmlConfig $xmlConfig -cycleName $cycleName
 
