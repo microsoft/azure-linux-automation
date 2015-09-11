@@ -3,18 +3,18 @@
 		<Extension>
 			<Name>CustomScriptTouchCommand</Name>
 			<OfficialName>CustomScriptForLinux</OfficialName>
-			<Publisher>"Microsoft.OSTCExtensions"</Publisher>
+			<Publisher>Microsoft.OSTCExtensions</Publisher>
 			<PublicConfiguration>
 				<timestamp>EXECUTE-PS-(Get-Date).ticks</timestamp>
-				<fileUris></fileUris>
 				<commandToExecute>touch /var/log/CustomExtensionSuccessful</commandToExecute>
 			</PublicConfiguration>
 			<Version>1.*</Version>
+			<LatestVersion>1.3</LatestVersion>
 		</Extension>
 		<Extension>
 			<Name>OsPatching</Name>
 			<OfficialName>OSPatchingForLinux</OfficialName>
-			<Publisher>"Microsoft.OSTCExtensions"</Publisher>
+			<Publisher>Microsoft.OSTCExtensions</Publisher>
 			<PublicConfiguration>
 				<timestamp>EXECUTE-PS-(Get-Date).ticks</timestamp>
 				<rebootAfterPatch>Auto</rebootAfterPatch>
@@ -28,16 +28,18 @@
 				<stop>$false</stop>
 			</PublicConfiguration>
 			<Version>2.*</Version>
+			<LatestVersion>2.0</LatestVersion>
 		</Extension>		
 		<Extension>
 			<Name>LinuxDiagnosticDefaultDataSet</Name>
 			<OfficialName>LinuxDiagnostic</OfficialName>
-			<Publisher>"Microsoft.OSTCExtensions"</Publisher>
+			<Publisher>Microsoft.OSTCExtensions</Publisher>
 			<PrivateConfiguration>
-				<storageAccountName>EXECUTE-PS-$xmlConfig.config.Azure.General.StorageAccount</storageAccountName>
-				<storageAccountKey>EXECUTE-PS-(Get-AzureStorageKey -StorageAccountName $xmlConfig.config.Azure.General.StorageAccount).Primary</storageAccountKey>
+				<storageAccountName>EXECUTE-PS-if($UseAzureResourceManager){$xmlConfig.config.Azure.General.ARMStorageAccount}else{$xmlConfig.config.Azure.General.StorageAccount}</storageAccountName>
+				<storageAccountKey>EXECUTE-PS-.\remote-scripts\GetStorageAccountKey.ps1 -xmlConfig $xmlConfig</storageAccountKey>
 			</PrivateConfiguration>			
 			<Version>2.*</Version>
+			<LatestVersion>2.0</LatestVersion>
 		</Extension>
 	</Extensions>
 	

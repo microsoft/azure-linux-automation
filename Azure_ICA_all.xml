@@ -3696,7 +3696,7 @@
 			<testScriptps1>ICA-CUSTOM-SCRIPT-EXTENSION-TEST.ps1</testScriptps1>
 			<setupType>ExtensionTest</setupType>
 			<ProvisionTimeExtensions>CustomScriptTouchCommand</ProvisionTimeExtensions>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<Priority>P0</Priority>
 		</test>		
 		<test>
@@ -3705,7 +3705,7 @@
 			<testScriptps1>ICA-OS-PATCHING-EXTENSION-TEST.ps1</testScriptps1>
 			<ProvisionTimeExtensions>OsPatching</ProvisionTimeExtensions>
 			<setupType>ExtensionTest</setupType>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<Priority>P0</Priority>
 		</test>		
 		<test>
@@ -3714,7 +3714,7 @@
 			<testScriptps1>ICA-VM-DIAGNOSTIC-EXTENSION-TEST.ps1</testScriptps1>
 			<ProvisionTimeExtensions>LinuxDiagnosticDefaultDataSet</ProvisionTimeExtensions>
 			<setupType>ExtensionTest</setupType>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<Priority>P0</Priority>
 		</test>
 	</testsDefinition>

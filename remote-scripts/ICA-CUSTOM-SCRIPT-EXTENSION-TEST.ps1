@@ -42,24 +42,44 @@ if ($isDeployed)
 		{
 			$extensionVerified = $false
 		}
-
-		$ConfirmExtensionScriptBlock = {
+		$ExtensionName = "CustomScriptForLinux"
+		if ( $UseAzureResourceManager )
+		{
+			$ConfirmExtensionScriptBlock = {
+				$ExtensionStatus = Get-AzureResource -OutputObjectFormat New -ResourceGroupName $isDeployed  -ResourceType "Microsoft.Compute/virtualMachines/extensions" -ExpandProperties
+				if ( ($ExtensionStatus.Properties.ProvisioningState -eq "Succeeded") -and ( $ExtensionStatus.Properties.Type -eq $ExtensionName ) )
+				{
+					LogMsg "$ExtensionName extension status is Succeeded in Properties.ProvisioningState"
+					$ExtensionVerfiedWithPowershell = $true
+				}
+				else
+				{
+					LogErr "$ExtensionName extension status is Failed in Properties.ProvisioningState"
+					$ExtensionVerfiedWithPowershell = $false
+				}
+				return $ExtensionVerfiedWithPowershell
+			}
+		}
+		else
+		{
+			$ConfirmExtensionScriptBlock = {
 		
-		$vmDetails = Get-AzureVM -ServiceName $isDeployed
- 			if ( ( $vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Status -eq "Success" ) -and ($vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Name -imatch "CustomScriptForLinux" ))
-			{
-				$ExtensionVerfiedWithPowershell = $true
-				LogMsg "CustomScriptForLinux extension status is SUCCESS in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
+			$vmDetails = Get-AzureVM -ServiceName $isDeployed
+ 				if ( ( $vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Status -eq "Success" ) -and ($vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Name -imatch $ExtensionName ))
+				{
+					$ExtensionVerfiedWithPowershell = $true
+					LogMsg "$ExtensionName extension status is SUCCESS in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
+				}
+				else
+				{
+					$ExtensionVerfiedWithPowershell = $false
+					LogErr "$ExtensionName extension status is FAILED in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
+				}
+				return $ExtensionVerfiedWithPowershell
 			}
-			else
-			{
-				$ExtensionVerfiedWithPowershell = $false
-				LogErr "CustomScriptForLinux extension status is FAILED in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
-			}
-			return $ExtensionVerfiedWithPowershell
 		}
 
-		$ExtensionVerfiedWithPowershell = RetryOperation -operation $ConfirmExtensionScriptBlock -description "Confirming CustomScript extension from Azure side." -expectResult $true -maxRetryCount 10 -retryInterval 10
+		$ExtensionVerfiedWithPowershell = RetryOperation -operation $ConfirmExtensionScriptBlock -description "Confirming $ExtensionName extension from Azure side." -expectResult $true -maxRetryCount 10 -retryInterval 10
 		
 		if ( $ExtensionVerfiedWithPowershell -and $extensionVerified )
 		{
@@ -85,10 +105,8 @@ if ($isDeployed)
 			$testResult = "Aborted"
 		}
 		$resultArr += $testResult
-#$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
 	}   
 }
-
 else
 {
 	$testResult = "Aborted"
@@ -98,7 +116,7 @@ else
 $result = GetFinalResultHeader -resultarr $resultArr
 
 #Clean up the setup
-DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed
+DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed -ResourceGroups $isDeployed
 
 #Return the result and summery to the test suite script..
 return $result

@@ -216,6 +216,36 @@ $apiVersion = "2015-05-01-preview"
 $PublicIPName = $($RGName -replace '[^a-zA-Z]') + "PublicIP"
 $sshPath = '/home/' + $user + '/.ssh/authorized_keys'
 $sshKeyData = ""
+if ( $CurrentTestData.ProvisionTimeExtensions )
+{
+	$extensionString = (Get-Content .\XML\Extensions.xml)
+	foreach ($line in $extensionString.Split("`n"))
+	{
+		if ($line -imatch ">$($CurrentTestData.ProvisionTimeExtensions)<")
+		{
+			$ExecutePS = $true
+		}
+		if ($line -imatch '</Extension>')
+		{
+			$ExecutePS = $false
+		}
+		if ( ($line -imatch "EXECUTE-PS-" ) -and $ExecutePS)
+		{
+			$PSoutout = ""
+			$line = $line.Trim()
+			$line = $line.Replace("EXECUTE-PS-","")
+			$line = $line.Split(">")
+			$line = $line.Split("<")
+			LogMsg "Executing Powershell command from Extensions.XML file : $($line[2])..."
+			$PSoutout = Invoke-Expression -Command $line[2]
+			$extensionString = $extensionString.Replace("EXECUTE-PS-$($line[2])",$PSoutout)
+			sleep -Milliseconds 1
+		}
+	}
+	$extensionXML = [xml]$extensionString
+}
+
+
 LogMsg "ARM Storage Account : $StorageAccountName"
 LogMsg "Using API VERSION : $apiVersion "
 
@@ -940,6 +970,77 @@ if ( $numberOfVMs -eq 1)
         LogMsg "Added Virtual Machine $vmName"
         Add-Content -Value "$($indents[2])}" -Path $jsonFile
         #endregion
+
+        #region Extensions
+if ( $CurrentTestData.ProvisionTimeExtensions)
+{
+    foreach ( $extension in $CurrentTestData.ProvisionTimeExtensions.Split(",") )
+    {
+		$extension = $extension.Trim()
+		foreach ( $newExtn in $extensionXML.Extensions.Extension )
+		{
+			if ($newExtn.Name -eq $extension)
+			{
+        Add-Content -Value "$($indents[2])," -Path $jsonFile
+        Add-Content -Value "$($indents[2]){" -Path $jsonFile
+            Add-Content -Value "$($indents[3])^apiVersion^: ^$apiVersion^," -Path $jsonFile
+            Add-Content -Value "$($indents[3])^type^: ^Microsoft.Compute/virtualMachines/extensions^," -Path $jsonFile
+            Add-Content -Value "$($indents[3])^name^: ^$vmName/$extension^," -Path $jsonFile
+            Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
+            Add-Content -Value "$($indents[3])^dependsOn^: " -Path $jsonFile
+            Add-Content -Value "$($indents[3])[" -Path $jsonFile
+                Add-Content -Value "$($indents[4])^[concat('Microsoft.Compute/virtualMachines/', '$vmName')]^" -Path $jsonFile
+            Add-Content -Value "$($indents[3])]," -Path $jsonFile
+
+            Add-Content -Value "$($indents[3])^properties^:" -Path $jsonFile
+            Add-Content -Value "$($indents[3]){" -Path $jsonFile
+                Add-Content -Value "$($indents[4])^publisher^:^$($newExtn.Publisher)^," -Path $jsonFile
+                Add-Content -Value "$($indents[4])^type^:^$($newExtn.OfficialName)^," -Path $jsonFile
+                Add-Content -Value "$($indents[4])^typeHandlerVersion^:^$($newExtn.LatestVersion)^" -Path $jsonFile
+            if ($newExtn.PublicConfiguration)
+            {
+                Add-Content -Value "$($indents[4])," -Path $jsonFile
+                Add-Content -Value "$($indents[4])^settings^:" -Path $jsonFile
+                Add-Content -Value "$($indents[4]){" -Path $jsonFile
+                $isConfigAdded = $false
+                foreach ($extnConfig in $newExtn.PublicConfiguration.ChildNodes)
+                {
+                    if ( $isConfigAdded )
+                    {
+                    Add-Content -Value "$($indents[5])," -Path $jsonFile
+                    }
+                    Add-Content -Value "$($indents[5])^$($extnConfig.Name)^ : ^$($extnConfig.'#text')^" -Path $jsonFile
+                    LogMsg "Added $extension Extension : Public Configuration : $($extnConfig.Name) = $($extnConfig.'#text')"
+                    $isConfigAdded = $true
+                } 
+                Add-Content -Value "$($indents[4])}" -Path $jsonFile
+
+            }
+                if ( $newExtn.PrivateConfiguration )
+                {
+                Add-Content -Value "$($indents[4])," -Path $jsonFile
+                Add-Content -Value "$($indents[4])^protectedSettings^:" -Path $jsonFile
+                Add-Content -Value "$($indents[4]){" -Path $jsonFile
+                $isConfigAdded = $false
+                foreach ($extnConfig in $newExtn.PrivateConfiguration.ChildNodes)
+                {
+                    if ( $isConfigAdded )
+                    {
+                    Add-Content -Value "$($indents[5])," -Path $jsonFile
+                    }
+                    Add-Content -Value "$($indents[5])^$($extnConfig.Name)^ : ^$($extnConfig.'#text')^" -Path $jsonFile
+                    LogMsg "Added $extension Extension : Private Configuration : $($extnConfig.Name) = $( ( ( $extnConfig.'#text' -replace "\w","*") -replace "\W","*" ) )"
+                    $isConfigAdded = $true
+                } 
+                Add-Content -Value "$($indents[4])}" -Path $jsonFile
+                }
+            Add-Content -Value "$($indents[3])}" -Path $jsonFile
+            }
+        }   
+    }
+}
+        #endregion extension
+        Add-Content -Value "$($indents[2])}" -Path $jsonFile
     Add-Content -Value "$($indents[1])]" -Path $jsonFile
     #endregion
 }
