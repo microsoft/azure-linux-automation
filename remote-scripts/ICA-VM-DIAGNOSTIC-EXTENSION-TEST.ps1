@@ -20,10 +20,10 @@ if ($isDeployed)
 		$FoundFiles = GetFilePathsFromLinuxFolder -folderToSearch $folderToSearch -IpAddress $hs1VIP -SSHPort $hs1vm1sshport -username $user -password $password
 		$LogFilesPaths = $FoundFiles[0]
 		$LogFiles = $FoundFiles[1]
-		$retryCount = 1
-		$maxRetryCount = 20
 		if ($LogFilesPaths)
 		{   
+			$retryCount = 1
+			$maxRetryCount = 10
 			do
 			{   LogMsg "Attempt : $retryCount/$maxRetryCount : Checking extension log files...."
 				foreach ($file in $LogFilesPaths.Split(","))
@@ -40,47 +40,18 @@ if ($isDeployed)
 				if ( Test-Path "$LogDir\extension.log" )
 				{
 					$extensionOutput = Get-Content -Path $LogDir\extension.log
-					$waitForExtension = $false
-					#Check for the patch list
-					foreach ($line in $extensionOutput.Split("`n"))
+					if ($extensionOutput -imatch "Start mdsd")
 					{
-						if ($patchListNotAvailable)
-						{ 
-							if ( $line -imatch "Patch list:" )
-							{
-								$patchList = $line.Trim()
-								$patchListNotAvailable = $false
-							}
-						}
-						else
-						{
-							$patchListNotAvailable = $true
-
-						}
-						if ($line -imatch "Start to install \d patches")
-						{
-							$totalPackages = $line.Trim().replace("[","").replace("]","").Split()[5]
-						}
-					}
-					if ( $patchListNotAvailable )
-					{
-						LogMsg "No packages scheduled to update."
+						LogMsg "Extension Agent in started in Linux VM."
+						$waitForExtension = $false
 						$extensionVerified = $true
-						
 					}
 					else
 					{
-						LogMsg "Total Update Packages : $totalPackages"
-						LogMsg "Packages to be udpated by extension : "
-						$patchList = $patchList.Split()
-						$patchListCount = $patchList.Count
-						for ( $i = 0; $i -le ($totalPackages) ; $i++ )
-						{
-						   LogMsg $patchList[($patchListCount-$i)]
-						}
-						$extensionVerified = $true
+						LogMsg "Extension Agent not started in Linux VM"
+						$waitForExtension = $true
+						$extensionVerified = $false
 					}
-					$waitForExtension = $false
 				}
 				else
 				{
@@ -100,23 +71,21 @@ if ($isDeployed)
 		}
 
 		$ConfirmExtensionScriptBlock = {
-		
 		$vmDetails = Get-AzureVM -ServiceName $isDeployed
- 			if ( ( $vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Status -eq "Success" ) -and ($vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Name -imatch "OSPatchingForLinux" ))
+ 			if ( ( $vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Status -eq "Success" ) -and ($vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Name -imatch "Microsoft.OSTCExtensions.LinuxDiagnostic" ))
 			{
 				$ExtensionVerfiedWithPowershell = $true
-				LogMsg "OSPatchingForLinux extension status is SUCCESS in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
+				LogMsg "LinuxDiagnostic extension status is SUCCESS in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
 			}
 			else
 			{
 				$ExtensionVerfiedWithPowershell = $false
-				LogErr "OSPatchingForLinux extension status is FAILED in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
+				LogErr "LinuxDiagnostic extension status is FAILED in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
 			}
 			return $ExtensionVerfiedWithPowershell
 		}
-
-		$ExtensionVerfiedWithPowershell = RetryOperation -operation $ConfirmExtensionScriptBlock -description "Confirming OS PATCHING extension from Azure side." -expectResult $true -maxRetryCount 10 -retryInterval 10
-		if ( $ExtensionVerfiedWithPowershell -and $extensionVerified )
+		$ExtensionVerfiedWithPowershell = RetryOperation -operation $ConfirmExtensionScriptBlock -description "Confirming VM DIAGNOSTICS extension from Azure side." -expectResult $true -maxRetryCount 10 -retryInterval 10
+		if ( $ExtensionVerfiedWithPowershell -and $extensionVerified)
 		{
 			$testResult = "PASS"
 		}
