@@ -196,7 +196,15 @@ Function GenerateAzureDeployJSONFile ($RGName, $osImage, $osVHD, $RGXMLData, $Lo
 {
 $jsonFile = $azuredeployJSONFilePath
 $StorageAccountName = $xml.config.Azure.General.ARMStorageAccount
-$StorageAccountType = $xml.config.Azure.General.AccountType
+$StorageAccountType = (Get-AzureStorageAccount | where {$_.Name -eq "$StorageAccountName"}).AccountType
+if($StorageAccountType -match 'Premium')
+{
+	$StorageAccountType = "Premium_LRS"
+}
+else
+{
+	$StorageAccountType = "Standard_LRS"
+}
 
 $HS = $RGXMLData
 $setupType = $Setup
