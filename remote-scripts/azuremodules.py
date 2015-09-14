@@ -45,7 +45,7 @@ def UpdateRepos(current_distro):
 	if ((current_distro == "ubuntu") or (current_distro == "Debian")):
 		Run("apt-get update")
 	elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos')):
-		Run("yum -y update")
+		RunYumUpdate("yum -y update")
 	elif (current_distro == "opensuse") or (current_distro == "SUSE") or (current_distro == "sles"):
 		Run("zypper --non-interactive --gpg-auto-import-keys update")
 	else:
@@ -153,6 +153,28 @@ def Run(cmd):
         op = proc.stdout.read()
         RunLog.debug(op)
         code=proc.returncode
+        int(code)
+        #print code
+        if code !=0:
+            #RunLog.error(op)
+            exception = 1
+            #updateState('TestFailed')
+        else:
+            #RunLog.info(op)
+            #print (op)
+            return op
+        if exception == 1:
+            str_code = str(code)
+            #RunLog.critical("Exception, return code is " + str_code + #" for command " + cmd)
+            #return commands.getoutput(cmd)
+            return op
+
+def RunYumUpdate(cmd):
+        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+        retval = proc.communicate()
+        op = retval[0]
+        RunLog.debug(op)
+        code = proc.returncode
         int(code)
         #print code
         if code !=0:
