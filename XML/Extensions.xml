@@ -36,7 +36,7 @@
 			<Publisher>Microsoft.OSTCExtensions</Publisher>
 			<PrivateConfiguration>
 				<storageAccountName>EXECUTE-PS-if($UseAzureResourceManager){$xmlConfig.config.Azure.General.ARMStorageAccount}else{$xmlConfig.config.Azure.General.StorageAccount}</storageAccountName>
-				<storageAccountKey>EXECUTE-PS-.\remote-scripts\GetStorageAccountKey.ps1 -xmlConfig $xmlConfig</storageAccountKey>
+				<storageAccountKey>EXECUTE-PS-GetStorageAccountKey -xmlConfig $xmlConfig</storageAccountKey>
 			</PrivateConfiguration>			
 			<Version>2.*</Version>
 			<LatestVersion>2.0</LatestVersion>
