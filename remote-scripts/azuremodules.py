@@ -41,20 +41,20 @@ ResultScreen.setFormatter(ResultFormatter)
 ResultLog.addHandler(WResultLog)
 
 def UpdateRepos(current_distro):
-	RunLog.info ("\nUpdating the repositoriy information...")
-	if ((current_distro == "ubuntu") or (current_distro == "Debian")):
+    RunLog.info ("\nUpdating the repositoriy information...")
+    if ((current_distro == "ubuntu") or (current_distro == "Debian")):
         #method 'RunUpdate': fix deadlock when using stdout=PIPE and/or stderr=PIPE and the child process generates enough output to a pipe
         RunUpdate("apt-get update")
-	elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos')):
-		RunUpdate("yum -y update")
-	elif (current_distro == "opensuse") or (current_distro == "SUSE") or (current_distro == "sles"):
-		RunUpdate("zypper --non-interactive --gpg-auto-import-keys update")
-	else:
-		RunLog.info("Repo upgradation failed on:"+current_distro)
-		return False
+    elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos')):
+        RunUpdate("yum -y update")
+    elif (current_distro == "opensuse") or (current_distro == "SUSE") or (current_distro == "sles"):
+        RunUpdate("zypper --non-interactive --gpg-auto-import-keys update")
+    else:
+        RunLog.info("Repo upgradation failed on:"+current_distro)
+        return False
 
-	RunLog.info ("Updating the repositoriy information... [done]")
-	return True
+    RunLog.info ("Updating the repositoriy information... [done]")
+    return True
 
 def DownloadUrl(url, destination_folder, output_file=None):
     cmd = "wget -P "+destination_folder+" "+url+ " 2>&1"
