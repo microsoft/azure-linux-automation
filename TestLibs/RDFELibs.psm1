@@ -2290,7 +2290,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 							LogMsg "Cleaning up deployed test virtual machines."
 							$isClened = DeleteResourceGroup -RGName $group
 						
-							if ($isClened)
+							if (!$isClened)
 							{
 								LogMsg "CleanUP unsuccessful for $group.. Please delete the services manually."
 							}

@@ -33,4 +33,8 @@ def RunTest(command):
 if(distro == "COREOS"):
     RunTest("waagent --version")
 else:
-    RunTest("/usr/sbin/waagent --version")
+    output = Run("ps aux | grep waagent | grep python | grep -v 'ps aux | grep waagent | grep python'")
+    if ("python3" in output) :
+        RunTest("/usr/bin/python3 /usr/sbin/waagent --version")
+    else :
+        RunTest("/usr/sbin/waagent --version")

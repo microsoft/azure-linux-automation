@@ -137,7 +137,9 @@ def install_ez_setup():
                 return False
 
 
-        Run("{0} {1}".format(python_cmd, ez_setup))
+        output = Run("{0} {1}".format(python_cmd, ez_setup))
+        return ("Finished" in output)
+
 
 
 def install_waagent_from_github():
