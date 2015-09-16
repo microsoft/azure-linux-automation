@@ -38,7 +38,7 @@ if ($isDeployed)
                 $output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "/usr/share/oem/python/bin/python ./$($currentTestData.testScript)" -runAsSudo
             }  
             else{  
-                $output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "python ./$($currentTestData.testScript)" -runAsSudo -runMaxAllowedTime 1800
+                $output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "python ./$($currentTestData.testScript)" -runAsSudo -runMaxAllowedTime 2700
             }  
 
 			$output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "ls /home/$user/SetupStatus.txt  2>&1" -runAsSudo
