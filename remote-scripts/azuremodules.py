@@ -43,11 +43,12 @@ ResultLog.addHandler(WResultLog)
 def UpdateRepos(current_distro):
 	RunLog.info ("\nUpdating the repositoriy information...")
 	if ((current_distro == "ubuntu") or (current_distro == "Debian")):
-		Run("apt-get update")
+        #method 'RunUpdate': fix deadlock when deadlock when using stdout=PIPE and/or stderr=PIPE and the child process generates enough output to a pipe
+        RunUpdate("apt-get update")
 	elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos')):
-		RunYumUpdate("yum -y update")
+		RunUpdate("yum -y update")
 	elif (current_distro == "opensuse") or (current_distro == "SUSE") or (current_distro == "sles"):
-		Run("zypper --non-interactive --gpg-auto-import-keys update")
+		RunUpdate("zypper --non-interactive --gpg-auto-import-keys update")
 	else:
 		RunLog.info("Repo upgradation failed on:"+current_distro)
 		return False
@@ -154,41 +155,29 @@ def Run(cmd):
         RunLog.debug(op)
         code=proc.returncode
         int(code)
-        #print code
         if code !=0:
-            #RunLog.error(op)
             exception = 1
-            #updateState('TestFailed')
         else:
-            #RunLog.info(op)
-            #print (op)
             return op
         if exception == 1:
             str_code = str(code)
-            #RunLog.critical("Exception, return code is " + str_code + #" for command " + cmd)
-            #return commands.getoutput(cmd)
             return op
-
-def RunYumUpdate(cmd):
+#use method communicate() instead of wait()
+#This will deadlock when using stdout=PIPE and/or stderr=PIPE and the child process generates enough output to a pipe 
+#such that it blocks waiting for the OS pipe buffer to accept more data. Use communicate() to avoid that.
+def RunUpdate(cmd):
         proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         retval = proc.communicate()
         op = retval[0]
         RunLog.debug(op)
         code = proc.returncode
         int(code)
-        #print code
         if code !=0:
-            #RunLog.error(op)
             exception = 1
-            #updateState('TestFailed')
         else:
-            #RunLog.info(op)
-            #print (op)
             return op
         if exception == 1:
             str_code = str(code)
-            #RunLog.critical("Exception, return code is " + str_code + #" for command " + cmd)
-            #return commands.getoutput(cmd)
             return op
 
 def JustRun(cmd):
