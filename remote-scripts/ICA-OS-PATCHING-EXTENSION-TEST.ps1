@@ -98,24 +98,43 @@ if ($isDeployed)
 			LogErr "No Extension logs are available."
 			$extensionVerified = $false
 		}
-
-		$ConfirmExtensionScriptBlock = {
-		
-		$vmDetails = Get-AzureVM -ServiceName $isDeployed
- 			if ( ( $vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Status -eq "Success" ) -and ($vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Name -imatch "OSPatchingForLinux" ))
-			{
-				$ExtensionVerfiedWithPowershell = $true
-				LogMsg "OSPatchingForLinux extension status is SUCCESS in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
-			}
-			else
-			{
-				$ExtensionVerfiedWithPowershell = $false
-				LogErr "OSPatchingForLinux extension status is FAILED in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
+		$ExtensionName = "OSPatchingForLinux"
+		if ( $UseAzureResourceManager )
+		{
+			$ConfirmExtensionScriptBlock = {
+				$ExtensionStatus = Get-AzureResource -OutputObjectFormat New -ResourceGroupName $isDeployed  -ResourceType "Microsoft.Compute/virtualMachines/extensions" -ExpandProperties
+				if ( ($ExtensionStatus.Properties.ProvisioningState -eq "Succeeded") -and ( $ExtensionStatus.Properties.Type -eq $ExtensionName ) )
+				{
+					LogMsg "$ExtensionName extension status is Succeeded in Properties.ProvisioningState"
+					$ExtensionVerfiedWithPowershell = $true
+				}
+				else
+				{
+					LogErr "$ExtensionName extension status is Failed in Properties.ProvisioningState"
+					$ExtensionVerfiedWithPowershell = $false
+				}
 			}
 			return $ExtensionVerfiedWithPowershell
 		}
-
-		$ExtensionVerfiedWithPowershell = RetryOperation -operation $ConfirmExtensionScriptBlock -description "Confirming OS PATCHING extension from Azure side." -expectResult $true -maxRetryCount 10 -retryInterval 10
+		else
+		{
+			$ConfirmExtensionScriptBlock = {
+		
+			$vmDetails = Get-AzureVM -ServiceName $isDeployed
+ 				if ( ( $vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Status -eq "Success" ) -and ($vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Name -imatch $ExtensionName ))
+				{
+					$ExtensionVerfiedWithPowershell = $true
+					LogMsg "$ExtensionName extension status is SUCCESS in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
+				}
+				else
+				{
+					$ExtensionVerfiedWithPowershell = $false
+					LogErr "$ExtensionName extension status is FAILED in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
+				}
+				return $ExtensionVerfiedWithPowershell
+			}
+		}
+		$ExtensionVerfiedWithPowershell = RetryOperation -operation $ConfirmExtensionScriptBlock -description "Confirming $ExtensionName extension from Azure side." -expectResult $true -maxRetryCount 10 -retryInterval 10
 		if ( $ExtensionVerfiedWithPowershell -and $extensionVerified )
 		{
 			$testResult = "PASS"
@@ -153,7 +172,7 @@ else
 $result = GetFinalResultHeader -resultarr $resultArr
 
 #Clean up the setup
-DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed
+DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed -ResourceGroups $isDeployed
 
 #Return the result and summery to the test suite script..
 return $result
