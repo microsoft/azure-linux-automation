@@ -1045,12 +1045,13 @@ if ( $CurrentTestData.ProvisionTimeExtensions)
                 Add-Content -Value "$($indents[4])}" -Path $jsonFile
                 }
             Add-Content -Value "$($indents[3])}" -Path $jsonFile
+        Add-Content -Value "$($indents[2])}" -Path $jsonFile
             }
         }   
     }
 }
         #endregion extension
-        Add-Content -Value "$($indents[2])}" -Path $jsonFile
+        
     Add-Content -Value "$($indents[1])]" -Path $jsonFile
     #endregion
 }
