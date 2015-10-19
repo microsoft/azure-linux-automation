@@ -68,56 +68,63 @@ Specifies the subsciption id
 
 Function DetectLinuxDistro($VIP, $SSHport, $testVMUser, $testVMPassword)
 {
-
-	$tempout = RemoteCopy  -upload -uploadTo $VIP -port $SSHport -files ".\SetupScripts\DetectLinuxDistro.sh" -username $testVMUser -password $testVMPassword 2>&1 | Out-Null
-	$tempout = RunLinuxCmd -username $testVMUser -password $testVMPassword -ip $VIP -port $SSHport -command "chmod +x *.sh" -runAsSudo 2>&1 | Out-Null
-	$DistroName = RunLinuxCmd -username $testVMUser -password $testVMPassword -ip $VIP -port $SSHport -command "/home/$user/DetectLinuxDistro.sh" -runAsSudo
-	if(($DistroName -imatch "Unknown") -or (!$DistroName))
+	if ( !$detectedDistro )
 	{
-		LogErr "Linux distro detected : $DistroName"
-		Throw "Unable to detect distro."
-	}
-	else
-	{
-		if ($DistroName -imatch "UBUNTU")
+		$tempout = RemoteCopy  -upload -uploadTo $VIP -port $SSHport -files ".\SetupScripts\DetectLinuxDistro.sh" -username $testVMUser -password $testVMPassword 2>&1 | Out-Null
+		$tempout = RunLinuxCmd -username $testVMUser -password $testVMPassword -ip $VIP -port $SSHport -command "chmod +x *.sh" -runAsSudo 2>&1 | Out-Null
+		$DistroName = RunLinuxCmd -username $testVMUser -password $testVMPassword -ip $VIP -port $SSHport -command "/home/$user/DetectLinuxDistro.sh" -runAsSudo
+		if(($DistroName -imatch "Unknown") -or (!$DistroName))
 		{
-			$CleanedDistroName = "UBUNTU" 
-		}
-		elseif ($DistroName -imatch "CENTOS")
-		{
-			$CleanedDistroName = "CENTOS"
-		}
-		elseif ($DistroName -imatch "SLES")
-		{
-			$CleanedDistroName = "SLES"
-		}
-		elseif ($DistroName -imatch "SUSE")
-		{
-			$CleanedDistroName = "SUSE"
-		}
-		elseif ($DistroName -imatch "ORACLELINUX")
-		{
-			$CleanedDistroName = "ORACLELINUX"
-		}
-		elseif ($DistroName -imatch "REDHAT")
-		{
-			$CleanedDistroName = "REDHAT"
-		}
-		elseif ($DistroName -imatch "FEDORA")
-		{
-			$CleanedDistroName = "FEDORA"
-		}
-		elseif ($DistroName -imatch "COREOS")
-		{
-			$CleanedDistroName = "COREOS"
+			LogErr "Linux distro detected : $DistroName"
+			Throw "Unable to detect distro."
 		}
 		else
 		{
-			$CleanedDistroName = "UNKNOWN"
+			if ($DistroName -imatch "UBUNTU")
+			{
+				$CleanedDistroName = "UBUNTU" 
+			}
+			elseif ($DistroName -imatch "CENTOS")
+			{
+				$CleanedDistroName = "CENTOS"
+			}
+			elseif ($DistroName -imatch "SLES")
+			{
+				$CleanedDistroName = "SLES"
+			}
+			elseif ($DistroName -imatch "SUSE")
+			{
+				$CleanedDistroName = "SUSE"
+			}
+			elseif ($DistroName -imatch "ORACLELINUX")
+			{
+				$CleanedDistroName = "ORACLELINUX"
+			}
+			elseif ($DistroName -imatch "REDHAT")
+			{
+				$CleanedDistroName = "REDHAT"
+			}
+			elseif ($DistroName -imatch "FEDORA")
+			{
+				$CleanedDistroName = "FEDORA"
+			}
+			elseif ($DistroName -imatch "COREOS")
+			{
+				$CleanedDistroName = "COREOS"
+			}
+			else
+			{
+				$CleanedDistroName = "UNKNOWN"
+			}
+			Set-Variable -Name detectedDistro -Value $CleanedDistroName -Scope Global
+			SetDistroSpecificVariables -detectedDistro $detectedDistro
+			LogMsg "Linux distro detected : $CleanedDistroName"	
 		}
-		Set-Variable -Name detectedDistro -Value $CleanedDistroName -Scope Global
-		SetDistroSpecificVariables -detectedDistro $detectedDistro
-		LogMsg "Linux distro detected : $CleanedDistroName"	
+	}
+	else
+	{
+		LogMsg "Distro Already Detected as : $detectedDistro"
+		$CleanedDistroName = $detectedDistro 
 	}
 	return $CleanedDistroName
 }
@@ -1750,51 +1757,133 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 #LogMsg "Uploading the files"
 		if ($files)
 		{
-			$files = $files.split(",")
-			foreach ($f in $files)
+			$fileCounter = 0
+			$tarFileName = ($uploadTo+"@"+$port).Replace(".","-")+".tar"
+			foreach ($f in $files.Split(","))
 			{
 				if ( !$f )
 				{
 					continue
 				}
-				$retry=1
-				$maxRetry=10
-				$testFile = $f.trim()
-				if ( ( $f -imatch ".sh" ) -or ( $f -imatch ".py" ))
+				else
 				{
-					$out = .\tools\dos2unix.exe $f 2>&1
-					LogMsg $out
-				}
-				$recurse = ""
-				while($retry -le $maxRetry)
-				{
-					if($usePrivateKey)
+					if ( ( $f -imatch ".sh" ) -or ( $f -imatch ".py" ))
 					{
-						LogMsg "Uploading $testFile to $username : $uploadTo, port $port using PrivateKey authentication"
-						echo y | .\tools\pscp -i .\ssh\$sshKey -q -P $port $testFile $username@${uploadTo}:
-						$returnCode = $LASTEXITCODE
+						$out = .\tools\dos2unix.exe $f 2>&1
+						LogMsg $out
+					}
+					$fileCounter ++
+				}
+			}
+			if ($fileCounter -gt 2)
+			{
+				$tarFileName = ($uploadTo+"@"+$port).Replace(".","-")+".tar"
+				foreach ($f in $files.Split(","))
+				{
+					if ( !$f )
+					{
+						continue
 					}
 					else
 					{
-						LogMsg "Uploading $testFile to $username : $uploadTo, port $port using Password authentication"
-						echo y | .\tools\pscp -pw $password -q -P $port $testFile $username@${uploadTo}:
-						$returnCode = $LASTEXITCODE
+						LogMsg "Compressing $f and adding to $tarFileName"
+						$CompressFile = .\tools\7za.exe a $tarFileName $f
+						if ( $CompressFile -imatch "Everything is Ok" )
+						{
+							$CompressCount += 1
+						}
 					}
-					if(($returnCode -ne 0) -and ($retry -ne $maxRetry))
+				}				
+				if ( $CompressCount -eq $fileCounter )
+				{
+					$retry=1
+					$maxRetry=10
+					while($retry -le $maxRetry)
 					{
-						LogWarn "Error in upload, Attempt $retry. Retrying for upload"
-						$retry=$retry+1
+						if($usePrivateKey)
+						{
+							LogMsg "Uploading $tarFileName to $username : $uploadTo, port $port using PrivateKey authentication"
+							echo y | .\tools\pscp -i .\ssh\$sshKey -q -P $port $tarFileName $username@${uploadTo}:
+							$returnCode = $LASTEXITCODE
+						}
+						else
+						{
+							LogMsg "Uploading $tarFileName to $username : $uploadTo, port $port using Password authentication"
+							echo y | .\tools\pscp -pw $password -q -P $port $tarFileName $username@${uploadTo}:
+							$returnCode = $LASTEXITCODE
+						}
+						if(($returnCode -ne 0) -and ($retry -ne $maxRetry))
+						{
+							LogWarn "Error in upload, Attempt $retry. Retrying for upload"
+							$retry=$retry+1
+						}
+						elseif(($returnCode -ne 0) -and ($retry -eq $maxRetry))
+						{
+							Write-Host "Error in upload after $retry Attempt,Hence giving up"
+							$retry=$retry+1
+							Throw "Error in upload after $retry Attempt,Hence giving up"
+						}
+						elseif($returnCode -eq 0)
+						{
+							LogMsg "Upload Success after $retry Attempt"
+							$retry=$maxRetry+1
+						}
 					}
-					elseif(($returnCode -ne 0) -and ($retry -eq $maxRetry))
+
+					LogMsg "Decompressing files in VM ..."
+					$out = RunLinuxCmd -username $username -password $password -ip $uploadTo -port $port -command "tar -xf $tarFileName" -runAsSudo
+					LogMsg "Removing compressed file : $tarFileName"
+					Remove-Item -Path $tarFileName -Force 2>&1 | Out-Null
+				}
+				else
+				{
+					Throw "Failed to compress $files"
+					Remove-Item -Path $tarFileName -Force 2>&1 | Out-Null
+				}
+			}
+			else
+			{
+				$files = $files.split(",")
+				foreach ($f in $files)
+				{
+					if ( !$f )
 					{
-						Write-Host "Error in upload after $retry Attempt,Hence giving up"
-						$retry=$retry+1
-						Throw "Error in upload after $retry Attempt,Hence giving up"
+						continue
 					}
-					elseif($returnCode -eq 0)
+					$retry=1
+					$maxRetry=10
+					$testFile = $f.trim()
+					$recurse = ""
+					while($retry -le $maxRetry)
 					{
-						LogMsg "Upload Success after $retry Attempt"
-						$retry=$maxRetry+1
+						if($usePrivateKey)
+						{
+							LogMsg "Uploading $testFile to $username : $uploadTo, port $port using PrivateKey authentication"
+							echo y | .\tools\pscp -i .\ssh\$sshKey -q -P $port $testFile $username@${uploadTo}:
+							$returnCode = $LASTEXITCODE
+						}
+						else
+						{
+							LogMsg "Uploading $testFile to $username : $uploadTo, port $port using Password authentication"
+							echo y | .\tools\pscp -pw $password -q -P $port $testFile $username@${uploadTo}:
+							$returnCode = $LASTEXITCODE
+						}
+						if(($returnCode -ne 0) -and ($retry -ne $maxRetry))
+						{
+							LogWarn "Error in upload, Attempt $retry. Retrying for upload"
+							$retry=$retry+1
+						}
+						elseif(($returnCode -ne 0) -and ($retry -eq $maxRetry))
+						{
+							Write-Host "Error in upload after $retry Attempt,Hence giving up"
+							$retry=$retry+1
+							Throw "Error in upload after $retry Attempt,Hence giving up"
+						}
+						elseif($returnCode -eq 0)
+						{
+							LogMsg "Upload Success after $retry Attempt"
+							$retry=$maxRetry+1
+						}
 					}
 				}
 			}
@@ -4184,13 +4273,13 @@ Function CreateVMNode
 	return $objNode
 }
 
-Function ConfigureDnsServer($intermediateVM, $DnsServer, $HostnameDIPDetails)
+Function ConfigureDnsServer($intermediateVM, $DnsServer, $HostnameDIPDetails, $vnetDomainDBFilePath, $vnetDomainREVFilePath)
 {
 #Get VNETVM details using - Get-AllVMHostnameAndDIP() function. This will generate the string of all VMs IP and hostname.
 	$HostnameDIP = $HostnameDIPDetails
-	$DnsConfigureCommand = "python /home/test/ConfigureDnsServer.py -v `"$HostnameDIP`""
+	$DnsConfigureCommand = "python /home/$user/ConfigureDnsServer.py -v `"$HostnameDIP`" -D $vnetDomainDBFilePath -r $vnetDomainREVFilePath" 
 	$out = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $DnsServer -remoteCommand $DnsConfigureCommand
-	if($out -imatch 'ExitCode : 0')
+	if($out -imatch 'CONFIGURATION_SUCCESSFUL')
 	{
 		LogMsg  "DNS server configured successfully."
 	}
@@ -4226,7 +4315,7 @@ Function RunLinuxCmdOnAllDeployedVMs($SSHDetails,$command)
 	}
 }
 
-Function RunLinuxCmdOnRemoteVM($intermediateVM,$remoteVM, [switch] $runAsSudo, $remoteCommand, [switch]$hostnameMode)
+Function RunLinuxCmdOnRemoteVM($intermediateVM,$remoteVM, [switch] $runAsSudo, $remoteCommand, [switch]$hostnameMode, [switch]$RunInBackGround, $RunMaxAllowedTime=300)
 {
 #Assuming that all py scripts  will be in the remoteVM
 	$newPass = ($remoteVM.password).Replace("`"","")
@@ -4244,11 +4333,11 @@ Function RunLinuxCmdOnRemoteVM($intermediateVM,$remoteVM, [switch] $runAsSudo, $
 #Generate the Full command that will be actually executed on intermediate VM.
 	if(!$hostnameMode)
 	{
-		$RunSSHremoteCommand = "python /home/test/RunSSHCmd.py -s `'$($remoteVM.ip)`' -u $($remoteVM.user) -p`'$newPass`' -P$($remoteVM.sshPort) -c `'$remoteCommand`'"
+		$RunSSHremoteCommand = "python /home/$user/RunSSHCmd.py -s `'$($remoteVM.ip)`' -u $($remoteVM.user) -p`'$newPass`' -P$($remoteVM.sshPort) -c `'$remoteCommand`'"
 	}
 	else
 	{
-		$RunSSHremoteCommand = "python /home/test/RunSSHCmd.py -s `'$($remoteVM.Hostname)`' -u $($remoteVM.user) -p`'$newPass`' -P$($remoteVM.sshPort) -c `'$remoteCommand`'"
+		$RunSSHremoteCommand = "python /home/$user/RunSSHCmd.py -s `'$($remoteVM.Hostname)`' -u $($remoteVM.user) -p`'$newPass`' -P$($remoteVM.sshPort) -c `'$remoteCommand`'"
 	}
 	if($runAsSudo)
 	{
@@ -4256,29 +4345,36 @@ Function RunLinuxCmdOnRemoteVM($intermediateVM,$remoteVM, [switch] $runAsSudo, $
 	}
 #Write-Host $RunSSHremoteCommand
 #Now Run this command..
-	$remoteOutput = RunLinuxCmd -ip $intermediateVM.ip -username $intermediateVM.user -password $intermediateVM.password -port $intermediateVM.SSHport -command $RunSSHremoteCommand -runAsSudo
-#Write-Host $remoteOutput
-	if($remoteOutput -imatch 'ExitCode : 0')
+	if ( $RunInBackGround )
 	{
-		LogMsg "$remoteCommand executed successfully on $($remoteVM.ip)."
+		$remoteOutput = RunLinuxCmd -ip $intermediateVM.ip -username $intermediateVM.user -password $intermediateVM.password -port $intermediateVM.SSHport -command $RunSSHremoteCommand -runAsSudo -RunInBackGround
 	}
 	else
 	{
-		Write-host $remoteOutput
-		Throw "$remoteCommand Failed to execute on $($remoteVM.ip)."
+		$remoteOutput = RunLinuxCmd -ip $intermediateVM.ip -username $intermediateVM.user -password $intermediateVM.password -port $intermediateVM.SSHport -command $RunSSHremoteCommand -runAsSudo -runMaxAllowedTime $RunMaxAllowedTime
+		#Write-Host $remoteOutput
+		if($remoteOutput -imatch 'ExitCode : 0')
+		{
+			LogMsg "$remoteCommand executed successfully on $($remoteVM.ip)."
+		}
+		else
+		{
+			Write-host $remoteOutput
+			Throw "$remoteCommand Failed to execute on $($remoteVM.ip)."
+		}
 	}
 	return $remoteOutput
 }
 
 Function RemoteCopyRemoteVM($intermediateVM,$remoteVM,$remoteFiles, [switch]$upload, [switch]$download, [switch]$hostnameMode )
 {
-	$remoteFiles = $remoteFiles.Replace(" ","")
+	$remoteFiles = $remoteFiles.Replace(" ","").Replace(" ","").Replace(" ","").Replace(" ","").Replace(" ","")
 	$tempFiles = $remoteFiles.Split(",")
 	$fileCount = $tempFiles.Length
 	($remoteVM.password) = ($remoteVM.password).Replace("`"","")
 	if($upload)
 	{
-#$allFiles = "/home/test/azuremodules.py,/home/test/ConfigureDnsServer.py,/home/test/CleanupDnsServer.py,/home/test/ConfigureResolvConf.py,/home/test/RunSSHCmd.py,/home/test/RemoteCopy.py"
+#$allFiles = "/home/$user/azuremodules.py,/home/$user/ConfigureDnsServer.py,/home/$user/CleanupDnsServer.py,/home/$user/ConfigureResolvConf.py,/home/$user/RunSSHCmd.py,/home/$user/RemoteCopy.py"
 		if($hostnameMode)
 		{
 			$uploadCommand = "python RemoteCopy.py  -m upload -c `'$($remoteVM.Hostname)`' -u $($remoteVM.user) -p `'$($remoteVM.password)`' -P$($remoteVM.sshPort) -r `'/home/$user`' -f `'$remoteFiles`'"
@@ -4289,9 +4385,10 @@ Function RemoteCopyRemoteVM($intermediateVM,$remoteVM,$remoteFiles, [switch]$upl
 		}
 		$remoteFiles = $remoteFiles.Replace(" ",'')
 		$uploadOutput = RunLinuxCmd -ip $intermediateVM.ip -port $intermediateVM.sshPort -username $intermediateVM.user -password $intermediateVM.password -command $uploadCommand -runAsSudo
-		$uploadCount = (Select-String -InputObject $uploadOutput -Pattern "...OK!").Length
+		$uploadCount = ($uploadOutput.Split("`n") -match "...OK!").Length
 		LogMsg "Uploaded $uploadCount files to $($remoteVM.ip)"
-		$uploadErrorCount = (Select-String -InputObject $uploadOutput -Pattern "...Error!").Length
+		$uploadErrorCount = ($uploadOutput.Split("`n") -match "...Error!").Length
+
 		if ($uploadErrorCount -gt 0)
 		{
 			LogErr $uploadOutput
@@ -4309,7 +4406,7 @@ Function RemoteCopyRemoteVM($intermediateVM,$remoteVM,$remoteFiles, [switch]$upl
 	}
 	if($download)
 	{
-#$allFiles = "/home/test/azuremodules.py,/home/test/ConfigureDnsServer.py,/home/test/CleanupDnsServer.py,/home/test/ConfigureResolvConf.py,/home/test/RunSSHCmd.py,/home/test/RemoteCopy.py"
+#$allFiles = "/home/$user/azuremodules.py,/home/$user/ConfigureDnsServer.py,/home/$user/CleanupDnsServer.py,/home/$user/ConfigureResolvConf.py,/home/$user/RunSSHCmd.py,/home/$user/RemoteCopy.py"
 		if($hostnameMode)
 		{
 			$downloadCommand = "python RemoteCopy.py  -m download -c `'$($remoteVM.Hostname)`' -u $($remoteVM.user) -p `'$($remoteVM.password)`' -P$($remoteVM.sshPort) -l `'/home/$user`' -f `'$remoteFiles`'"
@@ -4320,9 +4417,9 @@ Function RemoteCopyRemoteVM($intermediateVM,$remoteVM,$remoteFiles, [switch]$upl
 		}
 		$remoteFiles = $remoteFiles.Replace(" ",'')
 		$downloadOutput = RunLinuxCmd -ip $intermediateVM.ip -port $intermediateVM.sshPort -username $intermediateVM.user -password $intermediateVM.password -command $downloadCommand -runAsSudo
-		$downloadCount = (Select-String -InputObject $downloadOutput -Pattern "...OK!").Length
+		$downloadCount = ($downloadOutput.Split("`n") -match "...OK!").Length
 		LogMsg "downloaded $downloadCount files from $($remoteVM.ip)"
-		$downloadErrorCount = (Select-String -InputObject $downloadOutput -Pattern "...Error!").Length
+		$downloadErrorCount = ($downloadOutput.Split("`n") -match "...Error!").Length
 		if ($downloadErrorCount -gt 0)
 		{
 			LogErr $downloadOutput
@@ -4341,9 +4438,9 @@ Function RemoteCopyRemoteVM($intermediateVM,$remoteVM,$remoteFiles, [switch]$upl
 	return $retValue
 }
 
-Function ConfigureVNETVMs($SSHDetails)
+Function ConfigureVNETVMs($SSHDetails,$vnetDomainDBFilePath,$dnsServerIP)
 {
-	UploadFilesToAllDeployedVMs -SSHDetails $SSHDetails -files ".\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\azuremodules.py"
+	UploadFilesToAllDeployedVMs -SSHDetails $SSHDetails -files ".\remote-scripts\ConfigureVnetVM.py,.\remote-scripts\azuremodules.py"
 	$suppressedOut = RunLinuxCmdOnAllDeployedVMs -SSHDetails $SSHDetails -command "chmod +x /home/$user/*.py"
 	$TestIPPOrts = $SSHDetails
 	foreach ($IPPORT in $TestIPPOrts.Split("^"))
@@ -4352,10 +4449,14 @@ Function ConfigureVNETVMs($SSHDetails)
 		$testIP = $IPPORT[0]
 		$testPort = $IPPORT[1]
 		LogMsg "$testIP : $testPort configuration in progress.."
-
-		$out = RunLinuxCmd -ip $testIP -port $testPort -username $user -password $password -command "python /home/$user/ConfigureResolvConf.py" -runAsSudo
-		if (-not ($out -imatch 'ExitCode : 0'))
+		$out = RunLinuxCmd -ip $testIP -port $testPort -username $user -password $password -command "python /home/$user/ConfigureVnetVM.py -d $dnsServerIP -D $vnetDomainDBFilePath -R /etc/resolv.conf -H /etc/hosts" -runAsSudo
+		if ($out -imatch 'CONFIGURATION_SUCCESSFUL')
 		{
+			LogMsg $out -LinuxConsoleOuput
+		}
+		else
+		{
+			LogErr $out
 			Throw "$testIP : $testPort ConfigureResolvConf.py failed..."
 		}
 
@@ -4496,68 +4597,56 @@ Function VerifyDNSServerInResolvConf($DeployedServices, $dnsServerIP)
 	return $testRusult
 }
 
-Function RestartAllDeployments($DeployedServices)
+Function RestartAllDeployments($allVMData)
 {
-	$hsNames = $DeployedServices.Split('^')
-	
-	foreach ($hsName in $hsNames)
+	foreach ( $vmData in $AllVMData )
 	{
-		$ErrCount = 0
-		$hsDetails =  Get-AzureService -ServiceName $hsName
-		$VMs =  Get-AzureVM -ServiceName $hsName
-
-		foreach ($VM in $VMs)
+		if ( $UseAzureResourceManager)
 		{
-			$isRestarted = ""
-			$retryCount = 3
-			While(($retryCount -gt 0) -and !($isRestarted))
+			$restartVM = Restart-AzureVM -ResourceGroupName $vmData.ResourceGroupName -Name $vmData.RoleName -Verbose
+			if ( $restartVM.Status -eq "Succeeded" )
 			{
-				LogMsg "Restaring : $($VM.Name)"
-				$out = Restart-AzureVM -ServiceName $hsName -Name $VM.Name
-				$isRestarted = $?
-				if ($isRestarted)
+				LogMsg "Restarted : $($vmData.RoleName)"
+			}
+			else
+			{
+				LogErr "FAILED TO RESTART : $($vmData.RoleName)"
+				$retryCount = $retryCount + 1
+				if ($retryCount -gt 0)
 				{
-					LogMsg "Restarted : $($VM.Name)"
+					LogMsg "Retrying..."
 				}
-				else
+				if ($retryCount -eq 0)
 				{
-					LogErr "FAILED TO RESTART : $($VM.Name)"
-					$retryCount = $retryCount + 1
-					if ($retryCount -gt 0)
-					{
-						LogMsg "Retrying..."
-					}
-					if ($retryCount -eq 0)
-					{
-						Throw "Unable to Restart : $($VM.Name)"
-					}
+					Throw "Unable to Restart : $($vmData.RoleName)"
+				}
+			}
+		}
+		else
+		{
+			$restartVM = Restart-AzureVM -ServiceName $vmData.ServiceName -Name $vmData.RoleName -Verbose
+			$isRestarted = $?
+			if ($isRestarted)
+			{
+				LogMsg "Restarted : $($vmData.RoleName)"
+			}
+			else
+			{
+				LogErr "FAILED TO RESTART : $($vmData.RoleName)"
+				$retryCount = $retryCount + 1
+				if ($retryCount -gt 0)
+				{
+					LogMsg "Retrying..."
+				}
+				if ($retryCount -eq 0)
+				{
+					Throw "Unable to Restart : $($vmData.RoleName)"
 				}
 			}
 		}
 	}
-	
-	$isAllVerified = VerifyAllDeployments -servicesToVerify $hsNames
-	if ($isAllVerified -eq "True")
-	{
-		$isAllConnected = isAllSSHPortsEnabled -DeployedServices $deployedServices
-		if ($isAllConnected -eq "True")
-		{
-#Set-Content .\temp\DeployedServicesFile.txt "$deployedServices"
-			$retValue = "True"
-		}
-		else
-		{
-			LogErr "Unable to connect Some/All SSH ports.."
-			$retValue = "False"  
-		}
-	}
-	else
-	{
-		LogErr "Provision Failed for one or more VMs"
-		$retValue = "False"
-	}
-
-	return $retValue
+	$isSSHOpened = isAllSSHPortsEnabledRG -AllVMDataObject $AllVMData
+	return $isSSHOpened
 }
 
 Function StopAllDeployments($DeployedServices)
@@ -4736,13 +4825,11 @@ Function Get-IPV4NetworkRange($IpAddressCIDR)
 	return $ipStream
 }
 
-Function DetectSubnet($inputString)
+Function DetectSubnet($inputString,$subnet1CIDR,$subnet2CIDR)
 {
-	$subnet1 = '192.168.4.192/26'
-	$subnet2 = '192.168.4.128/26'
 
-	$subnet1Range = Get-IPV4NetworkRange -IpAddressCIDR $subnet1
-	$subnet2Range = Get-IPV4NetworkRange -IpAddressCIDR $subnet2
+	$subnet1Range = Get-IPV4NetworkRange -IpAddressCIDR $subnet1CIDR
+	$subnet2Range = Get-IPV4NetworkRange -IpAddressCIDR $subnet2CIDR
 
 	$subnet1Range = $subnet1Range.split('^')
 	$subnet2Range = $subnet2Range.split('^')
@@ -5039,13 +5126,13 @@ Function DoSSHTestFromLocalVM($intermediateVM, $LocalVM, $toVM,[switch]$hostname
 	if($hostnameMode)
 	{
 		LogMsg "Executing - date - command on $($toVM.Hostname) .."
-		$sshOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "python /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RunSSHCmd.py -s `"$($toVM.hostname)`" -u test -p `"$($toVM.password)`"`"  -P 22 -c `"date`" -o yes`'"
+		$sshOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "python /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RunSSHCmd.py -s `"$($toVM.hostname)`" -u $user -p $($toVM.password)  -P 22 -c `"date`" -o yes`'"
 
 	}
 	else
 	{
 		LogMsg "Executing - date - command on $($toVM.DIP) .."
-		$sshOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "python /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RunSSHCmd.py -s `"$($toVM.dip)`" -u test -p `"$($toVM.password)`"`"  -P 22 -c `"date`" -o yes`'"
+		$sshOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "python /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RunSSHCmd.py -s `"$($toVM.dip)`" -u $user -p $($toVM.password)  -P 22 -c `"date`" -o yes`'"
 	}
 	LogMsg "Verifying output.."
 	$logfilepath = $toVM.logDir + "\sshOutput.log"
@@ -5073,12 +5160,12 @@ Function DoSCPTestFromLocalVM( $intermediateVM, $LocalVM, $toVM, [switch]$hostna
 	if($hostnameMode)
 	{
 		LogMsg "File Created. Now copying it to $($toVM.Hostname) ..."
-		$scpOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "python /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RemoteCopy.py -c `"$($toVM.Hostname)`" -m upload -u `"$($toVM.user)`" -p `"$($toVM.password)`"`" -P 22 -r `"/home/$user`" -f `"/home/$user/testfile`"`'"
+		$scpOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "python /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RemoteCopy.py -c `"$($toVM.Hostname)`" -m upload -u `"$($toVM.user)`" -p $($toVM.password) -P 22 -r `"/home/$user`" -f `"/home/$user/testfile`"`'"
 	}
 	else
 	{
 		LogMsg "File Created. Now copying it to $($toVM.DIP) ..."
-		$scpOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "python /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RemoteCopy.py -c `"$($toVM.DIP)`" -m upload -u `"$($toVM.user)`" -p `"$($toVM.password)`"`" -P 22 -r `"/home/$user`" -f `"/home/$user/testfile`"`'"
+		$scpOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "python /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RemoteCopy.py -c `"$($toVM.DIP)`" -m upload -u `"$($toVM.user)`" -p $($toVM.password) -P 22 -r `"/home/$user`" -f `"/home/$user/testfile`"`'"
 	}
 	LogMsg "Writing output to $logfilepath ..."
 	Set-Content -Path $logFilepath -Value $scpOutput
@@ -5094,17 +5181,19 @@ Function DoSCPTestFromLocalVM( $intermediateVM, $LocalVM, $toVM, [switch]$hostna
 	}
 }
 
-Function StartIperfServerOnRemoteVM($remoteVM, $intermediateVM)
+Function StartIperfServerOnRemoteVM($remoteVM, $intermediateVM, $expectedServerInstances=1 )
 {
 	#$NewremoteVMcmd = ($remoteVM.cmd).Replace(" ","\ ")
 	$NewremoteVMcmd = $remoteVM.cmd
 	Write-Host $NewremoteVMcmd 
 	LogMsg "Deleting any previous server logs ..."
 	$DeletePreviousLogs = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "rm -rf /root/*.txt /root/*.log" -runAsSudo
-	$CommandOutput = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand $NewremoteVMcmd -runAsSudo
+	$CommandOutput = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand $NewremoteVMcmd -runAsSudo -RunInBackGround
 	LogMsg "Checking if server started successfully or not ..."
-	$isServerStarted = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cat  /root/isServerStarted.txt" -runAsSudo
-	if(($isServerStarted -imatch "yes") -and ($CommandOutput -imatch "ExitCode : 0"))
+	$isServerStarted = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "ps -ef | grep iperf -s | grep -v grep | wc -l" -runAsSudo
+	$isServerStarted = [int]$isServerStarted.Split("`n")[1]
+	LogMsg "Total iperf server running instances : $($isServerStarted)"
+	if($isServerStarted -ge $expectedServerInstances)
 	{
 		LogMsg "Server started successfully ..."
 		$retValue = "True"
@@ -5114,6 +5203,17 @@ Function StartIperfServerOnRemoteVM($remoteVM, $intermediateVM)
 		$retValue = "False"
 		LogErr "Server Failed to start ..."
 	}
+
+	<#if(($isServerStarted -imatch "yes") -and ($CommandOutput -imatch "ExitCode : 0"))
+	{
+		LogMsg "Server started successfully ..."
+		$retValue = "True"
+	}
+	else
+	{
+		$retValue = "False"
+		LogErr "Server Failed to start ..."
+	}#>
 	return $retValue
 }
 
@@ -5129,9 +5229,9 @@ Function StartIperfClientOnRemoteVM($remoteVM, $intermediateVM)
 
 	$DeletePreviousLogs = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cp /root/Runtime.log /root/start-client.py.log" -runAsSudo
 
-	Set-Content -Value (RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cat /root/start-client.py.log" -runAsSudo) -Path ("$($remoteVM.logDir)" + "\start-client.py.log")
-	Set-Content -Value (RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cat /root/state.txt" -runAsSudo) -Path ("$($remoteVM.logDir)" + "\state.txt")
-	Set-Content -Value (RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cat /root/Summary.log" -runAsSudo) -Path ("$($remoteVM.logDir)" + "\Summary.log")
+	Set-Content -Value (RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cat /root/start-client.py.log" -runAsSudo -RunMaxAllowedTime 60) -Path ("$($remoteVM.logDir)" + "\start-client.py.log")
+	Set-Content -Value (RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cat /root/state.txt" -runAsSudo -RunMaxAllowedTime 60 ) -Path ("$($remoteVM.logDir)" + "\state.txt")
+	Set-Content -Value (RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cat /root/Summary.log" -runAsSudo -RunMaxAllowedTime 60 ) -Path ("$($remoteVM.logDir)" + "\Summary.log")
 
 
 	$clientState = Get-Content "$($remoteVM.Logdir)\state.txt"
@@ -6259,6 +6359,29 @@ Function GetStorageAccountKey ($xmlConfig)
 		$storageAccountKey = (Get-AzureStorageKey -StorageAccountName $storageAccountName).Primary
 	}
 	return $storageAccountKey
+}
+
+Function GetVNETDetailsFromXMLDeploymentData([string]$deploymentType)
+{
+	$allVnetData = $xmlConfig.config.Azure.Deployment.$deploymentType.HostedService[0]
+	if ( $UseAzureResourceManager )
+	{
+		$vnetName = $allVnetData.ARMVnetName
+		$subnet1Range = $allVnetData.ARMSubnet1Range
+		$subnet2Range = $allVnetData.ARMSubnet2Range
+		$vnetDomainDBFilePath = $allVnetData.ARMVnetDomainDBFilePath
+		$vnetDomainRevFilePath = $allVnetData.ARMVnetDomainRevFilePath
+	}
+	else
+	{
+		$vnetName = $allVnetData.VnetName
+		$subnet1Range = $allVnetData.Subnet1Range
+		$subnet2Range = $allVnetData.Subnet2Range
+		$vnetDomainDBFilePath = $allVnetData.VnetDomainDBFilePath
+		$vnetDomainRevFilePath = $allVnetData.VnetDomainRevFilePath
+	}
+	$dnsServerIP = $allVnetData.DnsServerIP
+	return $vnetName,$subnet1Range,$subnet2Range,$vnetDomainDBFilePath,$vnetDomainRevFilePath,$dnsServerIP
 }
 #endregion  
 
