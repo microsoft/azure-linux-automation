@@ -5,30 +5,33 @@ $SubtestValues = $Subtests.Split(",")
 $result = ""
 $testResult = ""
 $resultArr = @()
-
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
-
 if($isDeployed)
 {
-
-#region EXTRACT ALL INFORMATION ABOUT DEPLOYED VMs
-
-	$SSHDetails = Get-SSHDetailofVMs -DeployedServices $isDeployed
-
-#endregion
-
-#region CONFIGURE VNET VMS AND MAKE THEM READY FOR VNET TEST EXECUTION...
-	try
+	#region EXTRACT ALL INFORMATION ABOUT DEPLOYED VMs
+	$allVnetData = GetVNETDetailsFromXMLDeploymentData -deploymentType $currentTestData.setupType
+	$vnetName = $allVnetData[0]
+	$subnet1Range = $allVnetData[1]
+	$subnet2Range = $allVnetData[2]
+	$vnetDomainDBFilePath = $allVnetData[3]
+	$vnetDomainRevFilePath = $allVnetData[4]
+	$dnsServerIP = $allVnetData[5]
+	$SSHDetails = ""
+	foreach ($vmData in $allVMData)
 	{
-# NO PRECONFIGURATION NEEDED FOR THIS TEST.
-		$isAllConfigured = "True"
+		if($SSHDetails)
+		{
+			$SSHDetails = $SSHDetails + "^$($vmData.PublicIP)" + ':' +"$($vmData.SSHPort)"
+		}
+		else
+		{
+			$SSHDetails = "$($vmData.PublicIP)" + ':' +"$($vmData.SSHPort)"
+		}
 	}
-	catch
-	{
-		$isAllConfigured = "False"
-		$ErrorMessage =  $_.Exception.Message
-		LogErr "EXCEPTION : $ErrorMessage"   
-	}
+	#endregion
+
+	#NO DNS SERVER CONFIGURATION NEEDED FOR THIS TEST.
+	$isAllConfigured = "True"
 #endregion
 
 #region TEST EXECUTION
@@ -36,18 +39,37 @@ if($isDeployed)
 	{
 		try
 		{
-			ConfigureVNETVMs -SSHDetails $SSHDetails
-			UploadFilesToAllDeployedVMs -SSHDetails $SSHDetails  -files ".\remote-scripts\temp.txt"
-			$testResult = VerifyGatewayVMsInHostedService -DeployedServices $isDeployed
-			if ($testResult -eq "True")
+			#ConfigureVNETVMs -SSHDetails $SSHDetails -vnetDomainDBFilePath $vnetDomainDBFilePath -dnsServerIP $dnsServerIP
+			$ErrCount = 0
+			foreach ($VM in $allVMData)
+			{
+				LogMsg "Checking Gateway : $($VM.RoleName)"
+				$currentVMGateway = RunLinuxCmd -ip $VM.PublicIP -port $VM.SSHPort -username $user -password $password -command "route" -runAsSudo
+				$currentVMDIP = $VM.InternalIP
+				$currentVMDIPSubnet = DetectSubnet -inputString $currentVMDIP -subnet1CIDR $subnet1Range -subnet2CIDR $subnet2Range
+				$currentVMGatewaySubnet = DetectSubnet -inputString $currentVMGateway -subnet1CIDR $subnet1Range -subnet2CIDR $subnet2Range
+				LogMsg "DIP subnet subnet detected : $currentVMDIPSubnet"
+				LogMsg "Gateway subnet detected	: $currentVMGatewaySubnet"
+				if ($currentVMDIPSubnet -eq $currentVMGatewaySubnet)
+				{
+					LogMsg "PASS"
+				}
+				else
+				{
+					LogErr "FAIL"
+					$ErrCount = $ErrCount + 1
+				}
+			}
+
+			if ($ErrCount -eq 0)
 			{
 				$testResult = "PASS"
 			}
-			else
+			else 
 			{
 				$testResult = "FAIL"
 			}
-
+			LogMsg "Test Result : $testResult"
 		}
 		catch
 		{
@@ -65,7 +87,6 @@ if($isDeployed)
 			$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
 		}   
 	}
-
 
 	else
 	{
@@ -91,7 +112,7 @@ $result = GetFinalResultHeader -resultarr $resultArr
 #endregion
 
 #Clean up the setup
-DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed
+DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed -ResourceGroups $isDeployed
 
 #Return the result and summery to the test suite script..
 return $result
