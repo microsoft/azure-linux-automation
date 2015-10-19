@@ -220,6 +220,7 @@ $RGRandomNumber = $((Get-Random -Maximum 999999 -Minimum 100000))
 $RGrandomWord = ([System.IO.Path]::GetRandomFileName() -replace '[^a-z]')
 $dnsNameForPublicIP = $($RGName.ToLower() -replace '[^a-z0-9]') + "$RGrandomWord"
 $virtualNetworkName = "ICAVNET"
+$defaultSubnetName = "Subnet1"
 $availibilitySetName = "ICAAvailibilitySet"
 $LoadBalancerName =  "FrontEndIPAddress"
 $apiVersion = "2015-05-01-preview"
@@ -257,7 +258,16 @@ if ( $CurrentTestData.ProvisionTimeExtensions )
 
 
 LogMsg "ARM Storage Account : $StorageAccountName"
-LogMsg "Using API VERSION : $apiVersion "
+LogMsg "Using API VERSION : $apiVersion"
+$ExistingVnet = $null
+if ($RGXMLData.ARMVnetName)
+{
+    $ExistingVnet = $RGXMLData.ARMVnetName
+    LogMsg "Getting $ExistingVnet Virtual Netowrk info ..."
+    $ExistingVnetResourceGroupName = ( Get-AzureResource -OutputObjectFormat New | Where {$_.Name -eq "DTAPWestUSvn"}).ResourceGroupName
+    LogMsg "ARM VNET : $ExistingVnet (ResourceGroup : $ExistingVnetResourceGroupName)"
+    $virtualNetworkName = $ExistingVnet
+}
 
 #Generate Single Indent
 for($i =0; $i -lt 4; $i++)
@@ -340,16 +350,22 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
         Add-Content -Value "$($indents[2])^addressPrefix^: ^10.0.0.0/16^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^vmSourceImageName^ : ^$osImage^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^CompliedSourceImageName^ : ^[concat('/',subscription().subscriptionId,'/services/images/',variables('vmSourceImageName'))]^," -Path $jsonFile
-        Add-Content -Value "$($indents[2])^subnet1Name^: ^Subnet-1^," -Path $jsonFile
-        Add-Content -Value "$($indents[2])^subnet2Name^: ^Subnet-2^," -Path $jsonFile
-        Add-Content -Value "$($indents[2])^subnet1Prefix^: ^10.0.0.0/24^," -Path $jsonFile
-        Add-Content -Value "$($indents[2])^subnet2Prefix^: ^10.0.1.0/24^," -Path $jsonFile
+        Add-Content -Value "$($indents[2])^defaultSubnetPrefix^: ^10.0.0.0/24^," -Path $jsonFile
+        #Add-Content -Value "$($indents[2])^subnet2Prefix^: ^10.0.1.0/24^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^vmStorageAccountContainerName^: ^vhds^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^publicIPAddressType^: ^Dynamic^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^storageAccountType^: ^$storageAccountType^," -Path $jsonFile
+    if ($ExistingVnet)
+    {
+        Add-Content -Value "$($indents[2])^virtualNetworkResourceGroup^: ^$ExistingVnetResourceGroupName^," -Path $jsonFile
+        Add-Content -Value "$($indents[2])^vnetID^: ^[resourceId(variables('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks', '$virtualNetworkName')]^," -Path $jsonFile
+    }
+    else
+    {
+        Add-Content -Value "$($indents[2])^defaultSubnet^: ^$defaultSubnetName^," -Path $jsonFile
+        Add-Content -Value "$($indents[2])^defaultSubnetID^: ^[concat(variables('vnetID'),'/subnets/', variables('defaultSubnet'))]^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^vnetID^: ^[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]^," -Path $jsonFile
-        Add-Content -Value "$($indents[2])^subnet1Ref^: ^[concat(variables('vnetID'),'/subnets/',variables('subnet1Name'))]^," -Path $jsonFile
-        Add-Content -Value "$($indents[2])^subnet2Ref^: ^[concat(variables('vnetID'),'/subnets/',variables('subnet2Name'))]^," -Path $jsonFile
+    }
         Add-Content -Value "$($indents[2])^availabilitySetName^: ^$availibilitySetName^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^lbName^: ^$LoadBalancerName^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^lbID^: ^[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]^," -Path $jsonFile
@@ -388,6 +404,8 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
         #endregion
 
         #region virtualNetworks
+    if (!$ExistingVnet)
+    {
         Add-Content -Value "$($indents[2]){" -Path $jsonFile
             Add-Content -Value "$($indents[3])^apiVersion^: ^$apiVersion^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^type^: ^Microsoft.Network/virtualNetworks^," -Path $jsonFile
@@ -407,23 +425,24 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
                 Add-Content -Value "$($indents[4])^subnets^: " -Path $jsonFile
                 Add-Content -Value "$($indents[4])[" -Path $jsonFile
                     Add-Content -Value "$($indents[5]){" -Path $jsonFile
-                        Add-Content -Value "$($indents[6])^name^: ^[variables('subnet1Name')]^," -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^name^: ^[variables('defaultSubnet')]^," -Path $jsonFile
                         Add-Content -Value "$($indents[6])^properties^: " -Path $jsonFile
                         Add-Content -Value "$($indents[6]){" -Path $jsonFile
-                            Add-Content -Value "$($indents[7])^addressPrefix^: ^[variables('subnet1Prefix')]^" -Path $jsonFile
-                        Add-Content -Value "$($indents[6])}" -Path $jsonFile
-                    Add-Content -Value "$($indents[5])}," -Path $jsonFile
-                    Add-Content -Value "$($indents[5]){" -Path $jsonFile
-                        Add-Content -Value "$($indents[6])^name^: ^[variables('subnet2Name')]^," -Path $jsonFile
-                        Add-Content -Value "$($indents[6])^properties^: " -Path $jsonFile
-                        Add-Content -Value "$($indents[6]){" -Path $jsonFile
-                            Add-Content -Value "$($indents[7])^addressPrefix^: ^[variables('subnet2Prefix')]^" -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^addressPrefix^: ^[variables('defaultSubnetPrefix')]^" -Path $jsonFile
                         Add-Content -Value "$($indents[6])}" -Path $jsonFile
                     Add-Content -Value "$($indents[5])}" -Path $jsonFile
+                    #Add-Content -Value "$($indents[5]){" -Path $jsonFile
+                    #    Add-Content -Value "$($indents[6])^name^: ^[variables('subnet2Name')]^," -Path $jsonFile
+                    #    Add-Content -Value "$($indents[6])^properties^: " -Path $jsonFile
+                    #    Add-Content -Value "$($indents[6]){" -Path $jsonFile
+                    #        Add-Content -Value "$($indents[7])^addressPrefix^: ^[variables('subnet2Prefix')]^" -Path $jsonFile
+                    #    Add-Content -Value "$($indents[6])}" -Path $jsonFile
+                    #Add-Content -Value "$($indents[5])}" -Path $jsonFile
                 Add-Content -Value "$($indents[4])]" -Path $jsonFile
             Add-Content -Value "$($indents[3])}" -Path $jsonFile
         Add-Content -Value "$($indents[2])}," -Path $jsonFile
         LogMsg "Added Virtual Network $virtualNetworkName.."
+    }
         #endregion
 
     #endregion
@@ -667,6 +686,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                 Add-Content -Value "$($indents[4])]" -Path $jsonFile
 }
                  #endregion
+
             Add-Content -Value "$($indents[3])}" -Path $jsonFile
         Add-Content -Value "$($indents[2])}," -Path $jsonFile
     #endregion
@@ -677,7 +697,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
 {
     $VnetName = $RGXMLData.VnetName
     $instanceSize = $newVM.ARMInstanceSize
-    $SubnetName = $newVM.SubnetName
+    $ExistingSubnet = $newVM.ARMSubnetName
     $DnsServerIP = $RGXMLData.DnsServerIP
     if($newVM.RoleName)
     {
@@ -703,8 +723,11 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
             Add-Content -Value "$($indents[3])^dependsOn^: " -Path $jsonFile
             Add-Content -Value "$($indents[3])[" -Path $jsonFile
                 Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]^," -Path $jsonFile
-                Add-Content -Value "$($indents[4])^[variables('lbID')]^," -Path $jsonFile
-                Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]^" -Path $jsonFile
+            if(!$ExistingVnet)
+            {
+                Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))],^" -Path $jsonFile
+            }
+                Add-Content -Value "$($indents[4])^[variables('lbID')]^" -Path $jsonFile
             Add-Content -Value "$($indents[3])]," -Path $jsonFile
 
             Add-Content -Value "$($indents[3])^properties^:" -Path $jsonFile
@@ -748,7 +771,14 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                             
                             Add-Content -Value "$($indents[7])^subnet^:" -Path $jsonFile
                             Add-Content -Value "$($indents[7]){" -Path $jsonFile
-                                Add-Content -Value "$($indents[8])^id^: ^[variables('subnet1Ref')]^" -Path $jsonFile
+                            if ( $existingSubnet )
+                            {
+                                Add-Content -Value "$($indents[8])^id^: ^[concat(variables('vnetID'),'/subnets/', '$existingSubnet')]^" -Path $jsonFile
+                            }
+                            else
+                            {
+                                Add-Content -Value "$($indents[8])^id^: ^[variables('defaultSubnetID')]^" -Path $jsonFile
+                            }
                             Add-Content -Value "$($indents[7])}," -Path $jsonFile
                             Add-Content -Value "$($indents[7])^privateIPAllocationMethod^: ^Dynamic^" -Path $jsonFile
                         Add-Content -Value "$($indents[6])}" -Path $jsonFile
@@ -862,7 +892,7 @@ if ( $numberOfVMs -eq 1)
     $vmCount = $vmCount + 1
     $VnetName = $RGXMLData.VnetName
     $instanceSize = $newVM.ARMInstanceSize
-    $SubnetName = $newVM.SubnetName
+    $SubnetName = $newVM.ARMSubnetName
     $DnsServerIP = $RGXMLData.DnsServerIP
     $NIC = "NIC" + "-$vmName"
 
@@ -893,7 +923,7 @@ if ( $numberOfVMs -eq 1)
                             Add-Content -Value "$($indents[7])}," -Path $jsonFile
                             Add-Content -Value "$($indents[7])^subnet^:" -Path $jsonFile
                             Add-Content -Value "$($indents[7]){" -Path $jsonFile
-                                Add-Content -Value "$($indents[8])^id^: ^[variables('subnet1Ref')]^" -Path $jsonFile
+                                Add-Content -Value "$($indents[8])^id^: ^[variables('defaultSubnetID')]^" -Path $jsonFile
                             Add-Content -Value "$($indents[7])}" -Path $jsonFile
                         Add-Content -Value "$($indents[6])}" -Path $jsonFile
                     Add-Content -Value "$($indents[5])}" -Path $jsonFile
