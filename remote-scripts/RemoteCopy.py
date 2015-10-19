@@ -19,7 +19,7 @@ parser.add_argument('-f', '--files', help='mention the complete path of files yo
 
 args = parser.parse_args()
 
-SetVnetGlobalParameters()
+#SetVnetGlobalParameters()
 
 hostIP = args.serverip
 hostPassword = args.password
