@@ -60,7 +60,7 @@ def DownloadUrl(url, destination_folder, output_file=None):
     cmd = "wget -P "+destination_folder+" "+url+ " 2>&1"
     if output_file is not None:
         cmd = "wget {0} -O {1} 2>&1".format(url, output_file)
-        
+
     rtrn = Run(cmd)
 
     if(rtrn.rfind("wget: command not found") != -1):
@@ -74,63 +74,63 @@ def DownloadUrl(url, destination_folder, output_file=None):
         return False
 
 def DetectDistro():
-	distribution = 'unknown'
-	version = 'unknown'
-	
-	RunLog.info("Detecting Distro ")
-	output = Run("cat /etc/*-release")
-	outputlist = re.split("\n", output)
-	
-	for line in outputlist:
-		line = re.sub('"', '', line)
-		if (re.match(r'^ID=(.*)',line,re.M|re.I) ):
-			matchObj = re.match( r'^ID=(.*)', line, re.M|re.I)
-			distribution  = matchObj.group(1)
-		elif (re.match(r'^VERSION_ID=(.*)',line,re.M|re.I) ):
-			matchObj = re.match( r'^VERSION_ID=(.*)', line, re.M|re.I)
-			version = matchObj.group(1)
+    distribution = 'unknown'
+    version = 'unknown'
 
-	if(distribution == "ol"):
-		distribution = 'Oracle'
-		
-	if(distribution == 'unknown'):
-		# Finding the Distro
-		for line in outputlist:
-			if (re.match(r'.*Ubuntu.*',line,re.M|re.I) ):
-				distribution = 'ubuntu'
-				break
-			elif (re.match(r'.*SUSE Linux.*',line,re.M|re.I)):
-				distribution = 'SUSE'
-				break
-			elif (re.match(r'.*openSUSE.*',line,re.M|re.I)):
-				distribution = 'opensuse'
-				break
-			elif (re.match(r'.*centos.*',line,re.M|re.I)):
-				distribution = 'centos'
-				break
-			elif (re.match(r'.*Oracle.*',line,re.M|re.I)):
-				distribution = 'Oracle'
-				break
-			elif (re.match(r'.*Red Hat.*',line,re.M|re.I)):
-				distribution = 'rhel'
-				break
-			elif (re.match(r'.*Fedora.*',line,re.M|re.I)):
-				distribution = 'fedora'
-				break					
-	return [distribution, version]
+    RunLog.info("Detecting Distro ")
+    output = Run("cat /etc/*-release")
+    outputlist = re.split("\n", output)
+
+    for line in outputlist:
+        line = re.sub('"', '', line)
+        if (re.match(r'^ID=(.*)',line,re.M|re.I) ):
+            matchObj = re.match( r'^ID=(.*)', line, re.M|re.I)
+            distribution  = matchObj.group(1)
+        elif (re.match(r'^VERSION_ID=(.*)',line,re.M|re.I) ):
+            matchObj = re.match( r'^VERSION_ID=(.*)', line, re.M|re.I)
+            version = matchObj.group(1)
+
+    if(distribution == "ol"):
+        distribution = 'Oracle'
+
+    if(distribution == 'unknown'):
+        # Finding the Distro
+        for line in outputlist:
+            if (re.match(r'.*Ubuntu.*',line,re.M|re.I) ):
+                distribution = 'ubuntu'
+                break
+            elif (re.match(r'.*SUSE Linux.*',line,re.M|re.I)):
+                distribution = 'SUSE'
+                break
+            elif (re.match(r'.*openSUSE.*',line,re.M|re.I)):
+                distribution = 'opensuse'
+                break
+            elif (re.match(r'.*centos.*',line,re.M|re.I)):
+                distribution = 'centos'
+                break
+            elif (re.match(r'.*Oracle.*',line,re.M|re.I)):
+                distribution = 'Oracle'
+                break
+            elif (re.match(r'.*Red Hat.*',line,re.M|re.I)):
+                distribution = 'rhel'
+                break
+            elif (re.match(r'.*Fedora.*',line,re.M|re.I)):
+                distribution = 'fedora'
+                break
+    return [distribution, version]
 
 def FileGetContents(filename):
     with open(filename) as f:
         return f.read()
 
 def ExecMultiCmdsLocalSudo(cmd_list):
-	f = open('/tmp/temp_script.sh','w')
-	for line in cmd_list:
-			f.write(line+'\n')
-	f.close()
-	Run ("chmod +x /tmp/temp_script.sh")
-	Run ("/tmp/temp_script.sh 2>&1 > /tmp/exec_multi_cmds_local_sudo.log")
-	return FileGetContents("/tmp/exec_multi_cmds_local_sudo.log")
+    f = open('/tmp/temp_script.sh','w')
+    for line in cmd_list:
+            f.write(line+'\n')
+    f.close()
+    Run ("chmod +x /tmp/temp_script.sh")
+    Run ("/tmp/temp_script.sh 2>&1 > /tmp/exec_multi_cmds_local_sudo.log")
+    return FileGetContents("/tmp/exec_multi_cmds_local_sudo.log")
 
 def DetectLinuxDistro():
     if os.path.isfile("/etc/redhat-release"):
@@ -163,7 +163,7 @@ def Run(cmd):
             str_code = str(code)
             return op
 #use method communicate() instead of wait()
-#This will deadlock when using stdout=PIPE and/or stderr=PIPE and the child process generates enough output to a pipe 
+#This will deadlock when using stdout=PIPE and/or stderr=PIPE and the child process generates enough output to a pipe
 #such that it blocks waiting for the OS pipe buffer to accept more data. Use communicate() to avoid that.
 def RunUpdate(cmd):
         proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
@@ -187,7 +187,7 @@ def UpdateState(testState):
     stateFile = open('state.txt', 'w')
     stateFile.write(testState)
     stateFile.close()
-    
+
 def GetFileContents(filepath):
     file = None
     try:
@@ -204,176 +204,176 @@ def GetFileContents(filepath):
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------
 # Instlaltion routines
-		
-def YumPackageInstall(package):
-	RunLog.info(("\nyum_package_install: " + package))
-	output = Run("yum install -y "+package)
-	outputlist = re.split("\n", output)
 
-	for line in outputlist:
-		#Package installed successfully
-		if (re.match(r'Complete!', line, re.M|re.I)):
-			RunLog.info((package+": package installed successfully.\n"+line))
-			return True
-		#package is already installed
-		elif (re.match(r'.* already installed and latest version', line, re.M|re.I)):
-			RunLog.info((package + ": package is already installed.\n"+line))
-			return True
-		elif (re.match(r'^Nothing to do', line, re.M|re.I)):
-			RunLog.info((package + ": package already installed.\n"+line))
-			return True
-		#Package installation failed
-		elif (re.match(r'^Error: Nothing to do', line, re.M|re.I)):
-			break
-		#package is not found on the repository
-		elif (re.match(r'^No package '+ re.escape(package)+ r' available', line, re.M|re.I)):
-			break
-			
-	#Consider package installation failed if non of the above matches.
-	RunLog.error((package + ": package installation failed!\n" +output))
-	return False
+def YumPackageInstall(package):
+    RunLog.info(("\nyum_package_install: " + package))
+    output = Run("yum install -y "+package)
+    outputlist = re.split("\n", output)
+
+    for line in outputlist:
+        #Package installed successfully
+        if (re.match(r'Complete!', line, re.M|re.I)):
+            RunLog.info((package+": package installed successfully.\n"+line))
+            return True
+        #package is already installed
+        elif (re.match(r'.* already installed and latest version', line, re.M|re.I)):
+            RunLog.info((package + ": package is already installed.\n"+line))
+            return True
+        elif (re.match(r'^Nothing to do', line, re.M|re.I)):
+            RunLog.info((package + ": package already installed.\n"+line))
+            return True
+        #Package installation failed
+        elif (re.match(r'^Error: Nothing to do', line, re.M|re.I)):
+            break
+        #package is not found on the repository
+        elif (re.match(r'^No package '+ re.escape(package)+ r' available', line, re.M|re.I)):
+            break
+
+    #Consider package installation failed if non of the above matches.
+    RunLog.error((package + ": package installation failed!\n" +output))
+    return False
 
 def AptgetPackageInstall(package,dbpasswd = "root"):
-	RunLog.info("Installing Package: " + package)
-	# Identify the package for Ubuntu
-	# We Haven't installed mysql-secure_installation for Ubuntu Distro
-	if (package == 'mysql-server'):
-		RunLog.info( "apt-get function package:" + package) 		
-		cmds = ("export DEBIAN_FRONTEND=noninteractive","echo mysql-server mysql-server/root_password select " + dbpasswd + " | debconf-set-selections", "echo mysql-server mysql-server/root_password_again select " + dbpasswd  + "| debconf-set-selections", "apt-get install -y  --force-yes mysql-server")
-		output = ExecMultiCmdsLocalSudo(cmds)
-	else:
-		output = Run("apt-get install -y  --force-yes "+package)
-	
-	outputlist = re.split("\n", output)	
- 
-	unpacking = False
-	setting_up = False
+    RunLog.info("Installing Package: " + package)
+    # Identify the package for Ubuntu
+    # We Haven't installed mysql-secure_installation for Ubuntu Distro
+    if (package == 'mysql-server'):
+        RunLog.info( "apt-get function package:" + package)
+        cmds = ("export DEBIAN_FRONTEND=noninteractive","echo mysql-server mysql-server/root_password select " + dbpasswd + " | debconf-set-selections", "echo mysql-server mysql-server/root_password_again select " + dbpasswd  + "| debconf-set-selections", "apt-get install -y  --force-yes mysql-server")
+        output = ExecMultiCmdsLocalSudo(cmds)
+    else:
+        output = Run("apt-get install -y  --force-yes "+package)
 
-	for line in outputlist:
-		#package is already installed
-		if (re.match(re.escape(package) + r' is already the newest version', line, re.M|re.I)):
-			RunLog.info(package + ": package is already installed."+line)
-			return True
-		#package installation check 1	
-		elif (re.match(r'Unpacking '+ re.escape(package) + r" \(.*" , line, re.M|re.I)):
-			unpacking = True
-		#package installation check 2
-		elif (re.match(r'Setting up '+ re.escape(package) + r" \(.*" , line, re.M|re.I)):
-			setting_up = True
-		#Package installed successfully
-		if (setting_up and unpacking):
-			RunLog.info(package+": package installed successfully.")
-			return True
-		#package is not found on the repository
-		elif (re.match(r'E: Unable to locate package '+ re.escape(package), line, re.M|re.I)):
-			break
-		#package installation failed due to server unavailability
-		elif (re.match(r'E: Unable to fetch some archives', line, re.M|re.I)):
-			break
-		
-	#Consider package installation failed if non of the above matches.
-	RunLog.info(package + ": package installation failed!\n")
-	RunLog.info("Error log: "+output)
-	return False
+    outputlist = re.split("\n", output)
+
+    unpacking = False
+    setting_up = False
+
+    for line in outputlist:
+        #package is already installed
+        if (re.match(re.escape(package) + r' is already the newest version', line, re.M|re.I)):
+            RunLog.info(package + ": package is already installed."+line)
+            return True
+        #package installation check 1
+        elif (re.match(r'Unpacking '+ re.escape(package) + r" \(.*" , line, re.M|re.I)):
+            unpacking = True
+        #package installation check 2
+        elif (re.match(r'Setting up '+ re.escape(package) + r" \(.*" , line, re.M|re.I)):
+            setting_up = True
+        #Package installed successfully
+        if (setting_up and unpacking):
+            RunLog.info(package+": package installed successfully.")
+            return True
+        #package is not found on the repository
+        elif (re.match(r'E: Unable to locate package '+ re.escape(package), line, re.M|re.I)):
+            break
+        #package installation failed due to server unavailability
+        elif (re.match(r'E: Unable to fetch some archives', line, re.M|re.I)):
+            break
+
+    #Consider package installation failed if non of the above matches.
+    RunLog.info(package + ": package installation failed!\n")
+    RunLog.info("Error log: "+output)
+    return False
 
 def ZypperPackageInstall(package):
-	RunLog.info( "\nzypper_package_install: " + package)
+    RunLog.info( "\nzypper_package_install: " + package)
 
-	output = Run("zypper --non-interactive in "+package)
-	outputlist = re.split("\n", output)
-		
-	for line in outputlist:
-		#Package installed successfully
-		if (re.match(r'.*Installing: '+re.escape(package)+r'.*done', line, re.M|re.I)):
-			RunLog.info((package+": package installed successfully.\n"+line))
-			return True
-		#package is already installed
-		elif (re.match(r'\''+re.escape(package)+r'\' is already installed', line, re.M|re.I)):
-			RunLog.info((package + ": package is already installed.\n"+line))
-			return True
-		#package is not found on the repository
-		elif (re.match(r'^No provider of \''+ re.escape(package) + r'\' found', line, re.M|re.I)):
-			break
+    output = Run("zypper --non-interactive in "+package)
+    outputlist = re.split("\n", output)
 
-	#Consider package installation failed if non of the above matches.
-	RunLog.error((package + ": package installation failed!\n"+output))
-	return False
+    for line in outputlist:
+        #Package installed successfully
+        if (re.match(r'.*Installing: '+re.escape(package)+r'.*done', line, re.M|re.I)):
+            RunLog.info((package+": package installed successfully.\n"+line))
+            return True
+        #package is already installed
+        elif (re.match(r'\''+re.escape(package)+r'\' is already installed', line, re.M|re.I)):
+            RunLog.info((package + ": package is already installed.\n"+line))
+            return True
+        #package is not found on the repository
+        elif (re.match(r'^No provider of \''+ re.escape(package) + r'\' found', line, re.M|re.I)):
+            break
+
+    #Consider package installation failed if non of the above matches.
+    RunLog.error((package + ": package installation failed!\n"+output))
+    return False
 
 def ZypperPackageRemove(package):
-	RunLog.info( "\nzypper_package_remove: " + package)
+    RunLog.info( "\nzypper_package_remove: " + package)
 
-	output = Run("zypper --non-interactive remove "+package)
-	outputlist = re.split("\n", output)
-		
-	for line in outputlist:
-		#Package removed successfully
-		if (re.match(r'.*Removing '+re.escape(package)+r'.*done', line, re.M|re.I)):
-			RunLog.info((package+": package removed successfully.\n"+line))
-			return True
-		#package is not installed
-		elif (re.match(r'\''+re.escape(package)+r'\' is not installed', line, re.M|re.I)):
-			RunLog.info((package + ": package is not installed.\n"+line))
-			return True
-		#package is not found on the repository
-		elif (re.match(r'\''+re.escape(package)+r'\' not found in package names', line, re.M|re.I)):
-			return True
+    output = Run("zypper --non-interactive remove "+package)
+    outputlist = re.split("\n", output)
 
-	#Consider package remove failed if non of the above matches.
-	RunLog.error((package + ": package remove failed!\n"+output))
-	return False
-	
+    for line in outputlist:
+        #Package removed successfully
+        if (re.match(r'.*Removing '+re.escape(package)+r'.*done', line, re.M|re.I)):
+            RunLog.info((package+": package removed successfully.\n"+line))
+            return True
+        #package is not installed
+        elif (re.match(r'\''+re.escape(package)+r'\' is not installed', line, re.M|re.I)):
+            RunLog.info((package + ": package is not installed.\n"+line))
+            return True
+        #package is not found on the repository
+        elif (re.match(r'\''+re.escape(package)+r'\' not found in package names', line, re.M|re.I)):
+            return True
+
+    #Consider package remove failed if non of the above matches.
+    RunLog.error((package + ": package remove failed!\n"+output))
+    return False
+
 def InstallPackage(package):
-	RunLog.info( "\nInstall_package: "+package)
-	[current_distro, distro_version] = DetectDistro()
-	if ((current_distro == "ubuntu") or (current_distro == "Debian")):
-		return AptgetPackageInstall(package)
-	elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos') or (current_distro == 'fedora')):
-		return YumPackageInstall(package)
-	elif ((current_distro == "SUSE") or (current_distro == "opensuse") or (current_distro == "sles")):
-		return ZypperPackageInstall(package)
-	else:
-		RunLog.error((package + ": package installation failed!"))
-		RunLog.info((current_distro + ": Unrecognised Distribution OS Linux found!"))
-		return False
+    RunLog.info( "\nInstall_package: "+package)
+    [current_distro, distro_version] = DetectDistro()
+    if ((current_distro == "ubuntu") or (current_distro == "Debian")):
+        return AptgetPackageInstall(package)
+    elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos') or (current_distro == 'fedora')):
+        return YumPackageInstall(package)
+    elif ((current_distro == "SUSE") or (current_distro == "opensuse") or (current_distro == "sles")):
+        return ZypperPackageInstall(package)
+    else:
+        RunLog.error((package + ": package installation failed!"))
+        RunLog.info((current_distro + ": Unrecognised Distribution OS Linux found!"))
+        return False
 
 def InstallDeb(file_path):
-	RunLog.info( "\nInstalling package: "+file_path)
-	output = Run("dpkg -i "+file_path+" 2>&1")
-	RunLog.info(output)
-	outputlist = re.split("\n", output)
+    RunLog.info( "\nInstalling package: "+file_path)
+    output = Run("dpkg -i "+file_path+" 2>&1")
+    RunLog.info(output)
+    outputlist = re.split("\n", output)
 
-	for line in outputlist:
-		#package is already installed
-		if(re.match("installation successfully completed", line, re.M|re.I)):
-			RunLog.info(file_path + ": package installed successfully."+line)
-			return True			
-			
-	RunLog.info(file_path+": Installation failed"+output)
-	return False
+    for line in outputlist:
+        #package is already installed
+        if(re.match("installation successfully completed", line, re.M|re.I)):
+            RunLog.info(file_path + ": package installed successfully."+line)
+            return True
+
+    RunLog.info(file_path+": Installation failed"+output)
+    return False
 
 def InstallRpm(file_path, package_name):
-	RunLog.info( "\nInstalling package: "+file_path)
-	output = Run("rpm -ivh --nodeps "+file_path+" 2>&1")
-	RunLog.info(output)
-	outputlist = re.split("\n", output)
-	package = re.split("/", file_path )[-1]
-	matchObj = re.match( r'(.*?)\.rpm', package, re.M|re.I)
-	package = matchObj.group(1)
-	
-	for line in outputlist:
-		#package is already installed
-		if (re.match(r'.*package'+re.escape(package) + r'.*is already installed', line, re.M|re.I)):
-			RunLog.info(file_path + ": package is already installed."+line)
-			return True
-		elif(re.match(re.escape(package) + r'.*######', line, re.M|re.I)):
-			RunLog.info(package + ": package installed successfully."+line)
-			return True
-		elif(re.match(re.escape(package_name) + r'.*######', line, re.M|re.I)): 
-			RunLog.info(package + ": package installed successfully."+line) 
-			return True 
-			
-	RunLog.info(file_path+": Installation failed"+output)
-	return False
+    RunLog.info( "\nInstalling package: "+file_path)
+    output = Run("rpm -ivh --nodeps "+file_path+" 2>&1")
+    RunLog.info(output)
+    outputlist = re.split("\n", output)
+    package = re.split("/", file_path )[-1]
+    matchObj = re.match( r'(.*?)\.rpm', package, re.M|re.I)
+    package = matchObj.group(1)
+
+    for line in outputlist:
+        #package is already installed
+        if (re.match(r'.*package'+re.escape(package) + r'.*is already installed', line, re.M|re.I)):
+            RunLog.info(file_path + ": package is already installed."+line)
+            return True
+        elif(re.match(re.escape(package) + r'.*######', line, re.M|re.I)):
+            RunLog.info(package + ": package installed successfully."+line)
+            return True
+        elif(re.match(re.escape(package_name) + r'.*######', line, re.M|re.I)):
+            RunLog.info(package + ": package installed successfully."+line)
+            return True
+
+    RunLog.info(file_path+": Installation failed"+output)
+    return False
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -400,16 +400,16 @@ def GetServerCommand():
                 command = command + ' -M' + str(args.maxsegset)
         if args.maxsegdisplay == 'yes':
                 command = command + ' -m'
-	
-	finalCommand = 'nohup ' + command + ' >  iperf-server.txt &'
+
+        finalCommand = 'nohup ' + command + ' >  iperf-server.txt &'
         return finalCommand
 
 #_________________________________________________________________________________________________________________________________________________
 
 def StopServer():
-	RunLog.info("Killing iperf server if running ..")
-	temp = Run("killall iperf")
-	
+    RunLog.info("Killing iperf server if running ..")
+    temp = Run("killall iperf")
+
 def StartServer(server):
     StopServer()
     RunLog.info("Starting iperf server..")
@@ -429,7 +429,7 @@ def StartServer(server):
                 iperfPID = Run('pidof iperf')
                 RunLog.info("Server started successfully. PID : %s", iperfPID)
                 Run('echo "yes" > isServerStarted.txt')
-		#UpdateState('TestCompleted')
+        #UpdateState('TestCompleted')
 
     else :
         RunLog.error('Server Failed to start..')
@@ -468,11 +468,11 @@ def AnalyseClientUpdateResult():
                         UpdateState("TestCompleted")
 
         else:
-		if("No address associated" in output):
-                	RunLog.error('Client was not connected to server.')
-	                RunLog.error("No address associated with hostname")
-	                ResultLog.info('FAIL')
-	                UpdateState("TestCompleted")
+                if("No address associated" in output):
+                    RunLog.error('Client was not connected to server.')
+                    RunLog.error("No address associated with hostname")
+                    ResultLog.info('FAIL')
+                    UpdateState("TestCompleted")
 
                 elif("Connection refused" in output):
                         RunLog.error('Client was not connected to server.')
@@ -489,7 +489,7 @@ def AnalyseClientUpdateResult():
                         UpdateState("TestCompleted")
 
 
-		else:
+                else:
                         RunLog.error('Client was not connected to server.')
                         RunLog.error("Unlisted error. Check logs for more information...!")
                         ResultLog.info('FAIL')
@@ -515,22 +515,31 @@ def isProcessRunning(processName):
 
 
 #DECLARE GLOBAL VARIBALES HERE FIRST AND THEN ADD THEM TO SetVnetGlobalParametesrs()
-lisvnetlab_db_filepath = ''
-lisvnetlab_rev_filepath = ''
+vnetDomain_db_filepath = ''
+vnetDomain_rev_filepath = ''
 dns_server_ip = ''
 resolv_conf_filepath = ''
 hosts_filepath = ''
 def SetVnetGlobalParameters():
+    import argparse
+    import sys
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--dns_server_ip', help='DNS server IP address',required=True)
+    parser.add_argument('-D', '--vnetDomain_db_filepath', help='VNET Domain db filepath', required=True)
+    parser.add_argument('-r', '--vnetDomain_rev_filepath', help='VNET rev filepath',required=True)
+    parser.add_argument('-R', '--resolv_conf_filepath', help='resolv.conf filepath', required=True)
+    parser.add_argument('-h', '--hosts_filepath', help='hosts filepath',required = True)
+    args = parser.parse_args()
     global dns_server_ip
-    global lisvnetlab_db_filepath
-    global lisvnetlab_rev_filepath
+    global vnetDomain_db_filepath
+    global vnetDomain_rev_filepath
     global resolv_conf_filepath
     global hosts_filepath
-    lisvnetlab_db_filepath =  '/etc/bind/zones/lisvnetlab.com.db'
-    lisvnetlab_rev_filepath = '/etc/bind/zones/rev.4.168.192.in-addr.arpa'
-    dns_server_ip = '192.168.3.120'
-    resolv_conf_filepath = '/etc/resolv.conf'
-    hosts_filepath = '/etc/hosts'
+    vnetDomain_db_filepath =  str(args.vnetDomain_db_filepath)
+    vnetDomain_rev_filepath = str(args.vnetDomain_rev_filepath)
+    dns_server_ip = str(args.dns_server_ip)
+    resolv_conf_filepath = str(args.resolv_conf_filepath)
+    hosts_filepath = str(args.hosts_filepath)
 
 def GetFileContentsByLines(filepath):
     file = None
@@ -589,15 +598,13 @@ def GetStringMatchCount(filepath, matchString):
     #except:
         print ('File : %s not found.' % filepath)
 
-def RemoveICAVMsFromDBfile():
-    SetVnetGlobalParameters()    
+def RemoveICAVMsFromDBfile(vnetDomain_db_filepath):
     matchString = 'ICA-'
-    RemoveStringMatchLinesFromFile(lisvnetlab_db_filepath,matchString)
+    RemoveStringMatchLinesFromFile(vnetDomain_db_filepath,matchString)
 
-def RemoveICAVMsFromREVfile():
-    SetVnetGlobalParameters()
+def RemoveICAVMsFromREVfile(vnetDomain_rev_filepath):
     matchString = 'ICA-'
-    RemoveStringMatchLinesFromFile(lisvnetlab_rev_filepath,matchString)
+    RemoveStringMatchLinesFromFile(vnetDomain_rev_filepath,matchString)
 
 
 def RetryOperation(operation, description, expectResult=None, maxRetryCount=18, retryInterval=10):
@@ -637,21 +644,40 @@ def AppendTextToFile(filepath,textString):
         print('File %s not found' % filepath)
 
 
-def AddICAVMsToDnsServer(HostnameDIP):
-    SetVnetGlobalParameters()
+def AddICAVMsToDnsServer(HostnameDIP,vnetDomain_db_filepath,vnetDomain_rev_filepath):
+    #SetVnetGlobalParameters()
+    vnetDomain=(vnetDomain_db_filepath.split("/"))[len((vnetDomain_db_filepath.split("/")))-1].replace(".db","")
     #PARSE THE VM DETAILS FIRST.
     separatedVMs = HostnameDIP.split('^')
+    vmCounter = 0
+    successCount = 0
     for eachVM in separatedVMs:
+        vmCounter = vmCounter + 1
         eachVMdata = eachVM.split(':')
         eachVMHostname = eachVMdata[0]
         eachVMDIP = eachVMdata[1]
         lastDigitofVMDIP = eachVMDIP.split('.')[3]
-        lisvnetlabDBstring = '%s\tIN\tA\t%s\n' % (eachVMHostname,eachVMDIP)
-        print(lisvnetlabDBstring.replace('\n',''))
-        AppendTextToFile(lisvnetlab_db_filepath,lisvnetlabDBstring)
-        lisvnetlabREVstring = '%s\tIN\tPTR\t%s.lisvnetlab.com.\n' % (lastDigitofVMDIP,eachVMHostname)
-        AppendTextToFile(lisvnetlab_rev_filepath,lisvnetlabREVstring)
-        print(lisvnetlabREVstring.replace('\n',''))
+        vnetDomainDBstring = '%s\tIN\tA\t%s\n' % (eachVMHostname,eachVMDIP)
+        print(vnetDomainDBstring.replace('\n',''))
+        AppendTextToFile(vnetDomain_db_filepath,vnetDomainDBstring)
+        vnetDomainREVstring = '%s\tIN\tPTR\t%s.%s.\n' % (lastDigitofVMDIP,eachVMHostname,vnetDomain)
+        AppendTextToFile(vnetDomain_rev_filepath,vnetDomainREVstring)
+        print(vnetDomainREVstring.replace('\n',''))
+        isDBFileEntry =  GetStringMatchCount(vnetDomain_db_filepath,vnetDomainDBstring)
+        isREVFileEntry =  GetStringMatchCount(vnetDomain_rev_filepath,vnetDomainREVstring)
+        if isDBFileEntry >= 1 and isREVFileEntry >= 1:
+            print (vnetDomain_db_filepath + " file edited for " + eachVMDIP + " : " + eachVMHostname)
+            print (vnetDomain_rev_filepath + " file edited for " + eachVMDIP + " : " + eachVMHostname)
+            successCount = successCount + 1
+        else:
+            if isDBFileEntry != 1:
+                print ("Failed to edit " + vnetDomain_db_filepath + " for " + eachVMDIP + " : " + eachVMHostname)
+            if isREVFileEntry != 1:
+                print ("Failed to edit " + vnetDomain_rev_filepath + " for " + eachVMDIP + " : " + eachVMHostname)
+    if successCount == vmCounter:
+        return 0
+    else:
+        return 1
 
 def RemoteUpload(hostIP, hostPassword, hostUsername, hostPort, filesToUpload, remoteLocation):
     import paramiko
@@ -682,8 +708,8 @@ def RemoteUpload(hostIP, hostPassword, hostUsername, hostPort, filesToUpload, re
                     print ('...OK!')
                 except:
                     print('...Error!')
-            transport.close()					
-        except:    
+            transport.close()
+        except:
             print("Failed to upload to %s" % hostIP)
 
     except:
@@ -726,26 +752,33 @@ def RemoteDownload(hostIP, hostPassword, hostUsername, hostPort, filesToDownload
         print("...Failed!")
 
 
-def ConfigureResolvConf():
+def ConfigureResolvConf(resolv_conf_filepath,dns_server_ip,vnetDomain):
     isDnsEntry =  GetStringMatchCount(resolv_conf_filepath,dns_server_ip)
     hostName = JustRun('hostname')
     if isDnsEntry == 1:
-        ReplaceStringMatchLinesFromFile(resolv_conf_filepath,'search','search lisvnetlab.com')
-        ConfigureHostsFile()
-        isHostsEdited = GetStringMatchCount(hosts_filepath, hostName)
-        isDnsEntry =  GetStringMatchCount(resolv_conf_filepath,dns_server_ip)
-        isDnsNameEntry =  GetStringMatchCount(resolv_conf_filepath,'search lisvnetlab.com')
-        if isDnsEntry == 1 and isDnsNameEntry == 1 and isHostsEdited >= 1:
-            print "ExitCode : 0"
+        domainReplaceString="search " + vnetDomain
+        ReplaceStringMatchLinesFromFile(resolv_conf_filepath,'search',domainReplaceString)
+        isDnsNameEntry =  GetStringMatchCount(resolv_conf_filepath,domainReplaceString)
+        if isDnsNameEntry == 1:
+            print('Added string "search ' + vnetDomain + '" to ' + resolv_conf_filepath)
+            return 0
         else :
-            print "ExitCode : 1"
+            print('Failed to add string "search ' + vnetDomain + '" to ' + resolv_conf_filepath)
+            return 1
     else:
-        print('Dns server IP is not present in resolv.conf file')
-        print "ExitCode : 2"
+        print('DNS server IP is not present in ' + resolv_conf_filepath + ' file')
+        return 2
 
-def ConfigureHostsFile():
+def ConfigureHostsFile(hosts_filepath):
     hostName = JustRun('hostname')
     AppendTextToFile(hosts_filepath,"127.0.0.1 %s\n" % hostName)
+    isHostsEdited = GetStringMatchCount(hosts_filepath, hostName)
+    if isHostsEdited >= 1:
+        print('Added string "127.0.0.1 ' + hostName + '" to ' + hosts_filepath)
+        return 0
+    else :
+        print('Failed to Add string "127.0.0.1 ' + hostName + '" to ' + hosts_filepath)
+        return 1
 
 def GetOSDisk():
     if(IsUbuntu()):
