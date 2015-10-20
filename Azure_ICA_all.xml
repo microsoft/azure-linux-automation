@@ -106,7 +106,7 @@
 						<RAM>114688</RAM>
 					</A9>
 				</VMsizes>
-				<UserName>test</UserName>
+				<UserName>linuxuser</UserName>
 				<Password>"Your_preferred_password"</Password>
 				<sshKey>myPrivateKey.ppk</sshKey>
 				<sshPublicKey>myCert.cer</sshPublicKey>
@@ -780,12 +780,22 @@
 			<VNETVMPR>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
-					<VnetName>VNet</VnetName>
-					<DnsServerIP>"192.168.3.120"</DnsServerIP>
+					<VnetName>AzureDTAP02Net</VnetName>
+					<VnetDomainDBFilePath>/etc/bind/zones/lisvnetlab.com.db</VnetDomainDBFilePath>
+					<VnetDomainRevFilePath>/etc/bind/zones/rev.4.168.192.in-addr.arpa</VnetDomainRevFilePath>
+					<Subnet1Range>192.168.2.0/27</Subnet1Range>
+					<Subnet2Range>192.168.2.32/27</Subnet2Range>
+					<ARMVnetName>DTAPWestUSvn</ARMVnetName>
+					<ARMVnetDomainDBFilePath>/etc/bind/zones/dtaparm01.com.db</ARMVnetDomainDBFilePath>
+					<ARMVnetDomainRevFilePath>/etc/bind/zones/rev.3.168.192.in-addr.arpa</ARMVnetDomainRevFilePath>
+					<ARMSubnet1Range>10.0.2.0/24</ARMSubnet1Range>
+					<ARMSubnet2Range>10.0.3.0/24</ARMSubnet2Range>					
+					<DnsServerIP>192.168.3.120</DnsServerIP>
 					<VirtualMachine>
 						<state></state>
 						<SubnetName>Subnet1</SubnetName>
 						<InstanceSize>Small</InstanceSize>
+						<ARMSubnetName>Subnet1</ARMSubnetName>
 						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -813,7 +823,8 @@
 						<state></state>
 						<SubnetName>Subnet2</SubnetName>
 						<InstanceSize>Small</InstanceSize>
-						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
+						<ARMSubnetName>Subnet2</ARMSubnetName>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>						
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -838,12 +849,22 @@
 					</VirtualMachine>
 				</HostedService>
 				<HostedService>
-					<VnetName>VNet</VnetName>
-					<DnsServerIP>"192.168.3.120"</DnsServerIP>
+					<VnetName>AzureDTAP02Net</VnetName>
+					<VnetDomainDBFilePath>/etc/bind/zones/lisvnetlab.com.db</VnetDomainDBFilePath>
+					<VnetDomainRevFilePath>/etc/bind/zones/rev.4.168.192.in-addr.arpa</VnetDomainRevFilePath>
+					<Subnet1Range>192.168.2.0/27</Subnet1Range>
+					<Subnet2Range>192.168.2.32/27</Subnet2Range>
+					<ARMVnetName>DTAPWestUSvn</ARMVnetName>
+					<ARMVnetDomainDBFilePath>/etc/bind/zones/dtaparm01.com.db</ARMVnetDomainDBFilePath>
+					<ARMVnetDomainRevFilePath>/etc/bind/zones/rev.3.168.192.in-addr.arpa</ARMVnetDomainRevFilePath>
+					<ARMSubnet1Range>10.0.2.0/24</ARMSubnet1Range>
+					<ARMSubnet2Range>10.0.3.0/24</ARMSubnet2Range>					
+					<DnsServerIP>192.168.3.120</DnsServerIP>
 					<VirtualMachine>
 						<state></state>
 						<SubnetName>Subnet2</SubnetName>
 						<InstanceSize>Small</InstanceSize>
+						<ARMSubnetName>Subnet2</ARMSubnetName>
 						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -871,6 +892,7 @@
 						<state></state>
 						<SubnetName>Subnet1</SubnetName>
 						<InstanceSize>Small</InstanceSize>
+						<ARMSubnetName>Subnet1</ARMSubnetName>
 						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -899,12 +921,22 @@
 			<VNETVM-EXT>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
-					<VnetName>VNet</VnetName>
-					<DnsServerIP>"192.168.3.120"</DnsServerIP>
+					<VnetName>AzureDTAP02Net</VnetName>
+					<VnetDomainDBFilePath>/etc/bind/zones/lisvnetlab.com.db</VnetDomainDBFilePath>
+					<VnetDomainRevFilePath>/etc/bind/zones/rev.4.168.192.in-addr.arpa</VnetDomainRevFilePath>
+					<Subnet1Range>192.168.2.0/27</Subnet1Range>
+					<Subnet2Range>192.168.2.32/27</Subnet2Range>
+					<ARMVnetName>DTAPWestUSvn</ARMVnetName>
+					<ARMVnetDomainDBFilePath>/etc/bind/zones/dtaparm01.com.db</ARMVnetDomainDBFilePath>
+					<ARMVnetDomainRevFilePath>/etc/bind/zones/rev.3.168.192.in-addr.arpa</ARMVnetDomainRevFilePath>
+					<ARMSubnet1Range>10.0.2.0/24</ARMSubnet1Range>
+					<ARMSubnet2Range>10.0.3.0/24</ARMSubnet2Range>					
+					<DnsServerIP>192.168.3.120</DnsServerIP>
 					<VirtualMachine>
 						<state></state>
 						<SubnetName>Subnet1</SubnetName>
 						<InstanceSize>Small</InstanceSize>
+						<ARMSubnetName>Subnet1</ARMSubnetName>
 						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -932,6 +964,7 @@
 						<state></state>
 						<SubnetName>Subnet2</SubnetName>
 						<InstanceSize>Small</InstanceSize>
+						<ARMSubnetName>Subnet2</ARMSubnetName>
 						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -957,12 +990,22 @@
 					</VirtualMachine>
 				</HostedService>
 				<HostedService>
-					<VnetName>VNet</VnetName>
-					<DnsServerIP>"192.168.3.120"</DnsServerIP>
+					<VnetName>AzureDTAP02Net</VnetName>
+					<VnetDomainDBFilePath>/etc/bind/zones/lisvnetlab.com.db</VnetDomainDBFilePath>
+					<VnetDomainRevFilePath>/etc/bind/zones/rev.4.168.192.in-addr.arpa</VnetDomainRevFilePath>
+					<Subnet1Range>192.168.4.192/26</Subnet1Range>
+					<Subnet2Range>192.168.4.128/26</Subnet2Range>
+					<ARMVnetName>DTAPWestUSvn</ARMVnetName>
+					<ARMVnetDomainDBFilePath>/etc/bind/zones/dtaparm01.com.db</ARMVnetDomainDBFilePath>
+					<ARMVnetDomainRevFilePath>/etc/bind/zones/rev.3.168.192.in-addr.arpa</ARMVnetDomainRevFilePath>
+					<ARMSubnet1Range>10.0.2.0/24</ARMSubnet1Range>
+					<ARMSubnet2Range>10.0.3.0/24</ARMSubnet2Range>					
+					<DnsServerIP>192.168.3.120</DnsServerIP>
 					<VirtualMachine>
 						<state></state>
 						<SubnetName>Subnet2</SubnetName>
 						<InstanceSize>Small</InstanceSize>
+						<ARMSubnetName>Subnet2</ARMSubnetName>
 						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -990,6 +1033,7 @@
 						<state></state>
 						<SubnetName>Subnet1</SubnetName>
 						<InstanceSize>Small</InstanceSize>
+						<ARMSubnetName>Subnet1</ARMSubnetName>
 						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -1019,7 +1063,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
-						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
+						<ARMInstanceSize>Basic_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -3235,11 +3279,11 @@
 			<testName>VNET-PING-VNET-TO-LOCAL-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-PING-VNET-TO-LOCAL-ACCESS.ps1</testScriptps1>
-			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\ConfigureDnsServer.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\ping.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\ConfigureDnsServer.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureVnetVM.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\ping.py</files>
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureVNET_INTER_001</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>DIP,Hostname</TestMode>
@@ -3248,11 +3292,11 @@
 			<testName>VNET-PING-LOCAL-TO-VNET-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-PING-LOCAL-TO-VNET-ACCESS.ps1</testScriptps1>
-			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\ConfigureDnsServer.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\ping.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\ConfigureDnsServer.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureVnetVM.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\ping.py</files>
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureVNET_INTER_008</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>DIP,Hostname</TestMode>
@@ -3261,11 +3305,11 @@
 			<testName>VNET-PING-INTRAVNET-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-PING-INTRAVNET-ACCESS.ps1</testScriptps1>
-			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\ConfigureDnsServer.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\ping.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\ConfigureDnsServer.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureVnetVM.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\ping.py</files>
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureVNET_INTRA_001</TestID>
 			<SubtestValues>SameHS-DiffSubnet,DiffHS-SameSubnet,DiffHS-DiffSubnet</SubtestValues>
 			<TestMode>DIP,Hostname</TestMode>
@@ -3274,11 +3318,11 @@
 			<testName>VNET-PING-OUTBOUND-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-PING-OUTBOUND-ACCESS.ps1</testScriptps1>
-			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\ConfigureDnsServer.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\ping.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\ConfigureDnsServer.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureVnetVM.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\ping.py</files>
 			<setupType>VNETVM-EXT</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureVNET_OA_001</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>IP</TestMode>
@@ -3291,7 +3335,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureVNET_SANITY_001</TestID>
 			<SubtestValues></SubtestValues>
 			<TestMode></TestMode>
@@ -3304,7 +3348,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureVNET_SANITY_002</TestID>
 			<SubtestValues></SubtestValues>
 			<TestMode></TestMode>
@@ -3317,7 +3361,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureVNET_SANITY_006</TestID>
 			<SubtestValues></SubtestValues>
 			<TestMode></TestMode>
@@ -3330,7 +3374,7 @@
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureVNET_SANITY_005</TestID>
 			<SubtestValues></SubtestValues>
 			<TestMode></TestMode>
@@ -3339,11 +3383,11 @@
 			<testName>VNET-VERIFY-REMOTE-SSH-SCP-INTRAVNET-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-VERIFY-REMOTE-SSH-SCP-INTRAVNET-ACCESS.ps1</testScriptps1>
-			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureDnsServer.py,.\remote-scripts\ConfigureVnetVM.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py</files>
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureVNET_INTRA_002</TestID>
 			<SubtestValues>SameHS-DiffSubnet,DiffHS-SameSubnet,DiffHS-DiffSubnet</SubtestValues>
 			<TestMode>DIP,Hostname</TestMode>
@@ -3352,7 +3396,7 @@
 			<testName>VNET-VERIFY-REMOTE-SSH-SCP-INTERVNET-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-VERIFY-REMOTE-SSH-SCP-INTERVNET-ACCESS.ps1</testScriptps1>
-			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureDnsServer.py,.\remote-scripts\ConfigureVnetVM.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py</files>
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -3365,11 +3409,11 @@
 			<testName>VNET-VERIFY-REMOTE-SSH-SCP-OUTBOUND-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-VERIFY-REMOTE-SSH-SCP-OUTBOUND-ACCESS.ps1</testScriptps1>
-			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py</files>
 			<setupType>VNETVM-EXT</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureVNET_OA_002</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>IP</TestMode>
@@ -3379,11 +3423,11 @@
 			<testName>VNET-IPERF-UDP-INTRAVNET-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-IPERF-UDP-INTRAVNET-ACCESS.ps1</testScriptps1>
-			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureDnsServer.py,.\remote-scripts\ConfigureVnetVM.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py</files>
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureVNET_INTRA_003</TestID>
 			<SubtestValues>SameHS-DiffSubnet,DiffHS-SameSubnet,DiffHS-DiffSubnet</SubtestValues>
 			<TestMode>DIP,Hostname</TestMode>
@@ -3392,11 +3436,11 @@
 			<testName>VNET-IPERF-UDP-VNET-TO-LOCAL-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-IPERF-UDP-VNET-TO-LOCAL-ACCESS.ps1</testScriptps1>
-			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureDnsServer.py,.\remote-scripts\ConfigureVnetVM.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py</files>
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureVNET_INTER_007</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>IP,Hostname</TestMode>
@@ -3405,11 +3449,11 @@
 			<testName>VNET-IPERF-UDP-LOCAL-TO-VNET-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-IPERF-UDP-LOCAL-TO-VNET-ACCESS.ps1</testScriptps1>
-			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureDnsServer.py,.\remote-scripts\ConfigureVnetVM.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py</files>
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureVNET_INTER_010</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>DIP,Hostname</TestMode>
@@ -3420,11 +3464,11 @@
 			<testName>VNET-IPERF-UDP-OUTBOUND-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-IPERF-UDP-OUTBOUND-ACCESS.ps1</testScriptps1>
-			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureResolvConf.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\CleanupDnsServer.py,.\remote-scripts\ConfigureDnsServer.py,.\remote-scripts\ConfigureVnetVM.py,.\remote-scripts\RunSSHCmd.py,.\remote-scripts\RemoteCopy.py,.\remote-scripts\start-server.py,.\remote-scripts\start-client.py,.\remote-scripts\check-server.py</files>
 			<setupType>VNETVM-EXT</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureVNET_OA_003</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>IP,URL</TestMode>
@@ -3487,11 +3531,11 @@
 			<testName>VNET-VERIFY-REMOTE-SSH-SCP-LOCAL-TO-VNET-ACCESS</testName>
 			<testScript></testScript>
 			<testScriptps1>VNET-VERIFY-REMOTE-SSH-SCP-LOCAL-TO-VNET-ACCESS.ps1</testScriptps1>
-			<files>.\remote-scripts\RunSSHCmd.py,.\remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\RunSSHCmd.py,.\remote-scripts\azuremodules.py,.\remote-scripts\RemoteCopy.py</files>
 			<setupType>VNETVMPR</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureVNET_INTER_009</TestID>
 			<SubtestValues>HS1VM1,HS1VM2,HS2VM1,HS2VM2</SubtestValues>
 			<TestMode>DIP,Hostname</TestMode>
@@ -4449,14 +4493,12 @@
 				<Name>VNET-VERIFY-REMOTE-SSH-SCP-OUTBOUND-ACCESS</Name>
 			</test>
 			<test>
-				<!--this test case is bad, needs work-->
 				<Name>VNET-VERIFY-REMOTE-SSH-SCP-LOCAL-TO-VNET-ACCESS</Name>
 			</test>
 			<test>
 				<Name>VNET-PING-VNET-TO-LOCAL-ACCESS</Name>
 			</test>
 			<test>
-				<!--this test case needs work, the logic is wrong should ping from local network -->
 				<Name>VNET-PING-LOCAL-TO-VNET-ACCESS</Name>
 			</test>
 			<!-- 
