@@ -1,6 +1,7 @@
 <!--#This list contains packages tobe installed separate each package name with space or tab or multiple number of spaces.-->
 <setup>
     <branch>
+	    <packages distro="debian">iperf,mysql-server,gcc,bind9,python-crypto,python-paramiko,nfs-common,psmisc,tcpdump,ntp,libaio1,xfsprogs</packages>
 	    <packages distro="ubuntu">iperf,mysql-server,gcc,bind9,python-crypto,python-paramiko,nfs-common,psmisc,tcpdump,ntp,libaio1,xfsprogs</packages>
 	    <packages distro="SUSE">iperf,mysql,gcc,bind,python,python-argparse,python-paramiko,nfs-kernel-server,psmisc,tcpdump,ntp,libaio,xfsprogs</packages>
 		<packages distro="sles">iperf,mysql,gcc,bind,python,python-argparse,python-paramiko,nfs-kernel-server,psmisc,tcpdump,ntp,libaio,xfsprogs</packages>
