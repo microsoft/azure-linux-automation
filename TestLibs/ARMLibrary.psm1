@@ -264,7 +264,7 @@ if ($RGXMLData.ARMVnetName)
 {
     $ExistingVnet = $RGXMLData.ARMVnetName
     LogMsg "Getting $ExistingVnet Virtual Netowrk info ..."
-    $ExistingVnetResourceGroupName = ( Get-AzureResource -OutputObjectFormat New | Where {$_.Name -eq "DTAPWestUSvn"}).ResourceGroupName
+    $ExistingVnetResourceGroupName = ( Get-AzureResource -OutputObjectFormat New | Where {$_.Name -eq $ExistingVnet}).ResourceGroupName
     LogMsg "ARM VNET : $ExistingVnet (ResourceGroup : $ExistingVnetResourceGroupName)"
     $virtualNetworkName = $ExistingVnet
 }
