@@ -16,8 +16,14 @@ while echo $1 | grep ^- > /dev/null; do
     shift
 done
         if [ -e /etc/debian_version ]; then
-                echo "UBUNTU"
-                exitVal=0
+		        tmp=`cat /etc/*-release`
+                if [[ "$tmp" == *Ubuntu* ]]; then
+                    echo "UBUNTU"
+                    exitVal=0
+                else
+                    echo "DEBIAN"
+                    exitVal=0
+                fi
         elif [ -e /etc/redhat-release ]; then
                 tmp=`cat /etc/redhat-release`
                 if [ -e /etc/oracle-release ]; then
