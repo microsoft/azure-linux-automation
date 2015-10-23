@@ -61,13 +61,14 @@ def download_and_install_rpm(package):
 
 def easy_install(package):
         RunLog.info("Installing Package: " + package+" via easy_install")
-        if not (os.path.isfile("/usr/local/bin/easy_install")):
-            install_ez_setup()	
+        temp = Run("command -v easy_install")
+        if not ("easy_install" in temp):
+            install_ez_setup()
         if package == "python-crypto":
-            output = Run("{0} {1}".format(python_cmd, pycrypto))
+            output = Run("easy_install pycrypto")
             return ("Finished" in output)
         if package == "python-paramiko":
-            output = Run("{0} {1}".format(python_cmd, paramiko))
+            output = Run("easy_install paramiko")
             return ("Finished" in output)
         RunLog.error("Installing Package: " + package+" via easy_install failed!!")
         return False
