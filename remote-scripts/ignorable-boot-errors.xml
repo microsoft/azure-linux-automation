@@ -85,6 +85,8 @@
 		<errors>
 			<keywords>Broken pipe</keywords>
 			<keywords>errors=remount-ro</keywords>			
+			<keywords>end_request: I/O error, dev fd0, sector 0</keywords>
+			<keywords>floppy: error -5 while reading block 0</keywords>
 		</errors>
 		<warnings/>
 	</distro>
