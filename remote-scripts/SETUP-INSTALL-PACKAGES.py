@@ -59,11 +59,26 @@ def download_and_install_rpm(package):
         RunLog.error("Installing Package: " + package+" from rpmlink failed!!")
         return False
 
+def easy_install(package):
+        RunLog.info("Installing Package: " + package+" via easy_install")
+        if not (os.path.isfile("/usr/local/bin/easy_install")):
+            install_ez_setup()	
+        if package == "python-crypto":
+            output = Run("{0} {1}".format(python_cmd, pycrypto))
+            return ("Finished" in output)
+        if package == "python-paramiko":
+            output = Run("{0} {1}".format(python_cmd, paramiko))
+            return ("Finished" in output)
+        RunLog.error("Installing Package: " + package+" via easy_install failed!!")
+        return False
+
 def yum_package_install(package):
         if(YumPackageInstall(package) == True):
                 return True
         elif(download_and_install_rpm(package) == True):
                 return True
+        elif(easy_install(package) == True):
+		        return True
         else:
                 return False
 
