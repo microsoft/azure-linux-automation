@@ -179,7 +179,7 @@ def verify_udev_rules(distro):
                         return False
 
 
-if distro == "UBUNTU":
+if (distro == "UBUNTU") or (distro == "DEBIAN"):
 	RunLog.info("DISTRO PROVIDED : "+distro)
 	#Test 1 : verify that hv-kvp-daemon-init is installed or not, it's optional not strict.
 	RunLog.info("Checking if hv-kvp-daemon-init is installed or not..")

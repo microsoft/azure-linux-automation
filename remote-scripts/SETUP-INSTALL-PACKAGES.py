@@ -34,7 +34,7 @@ def set_variables_OS_dependent():
                 RunLog.error ("unknown distribution found, exiting")
                 ResultLog.info('ABORTED')
                 exit()
-        if(current_distro == "ubuntu" or current_distro == "Debian"):
+        if(current_distro == "ubuntu" or current_distro == "debian"):
                 startup_file = '/etc/rc.local'
         elif(current_distro == "centos" or current_distro == "rhel" or current_distro == "fedora" or current_distro == "Oracle"):
                 startup_file = '/etc/rc.d/rc.local'
