@@ -192,7 +192,7 @@ def install_package(package):
         if (package == "ez_setup"):
                 return install_ez_setup()
         else:
-                if ((current_distro == "ubuntu") or (current_distro == "Debian")):
+                if ((current_distro == "ubuntu") or (current_distro == "debian")):
                         return AptgetPackageInstall(package)
                 elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos') or (current_distro == 'fedora')):
                         return yum_package_install(package)
