@@ -36,7 +36,7 @@ def Restartwaagent():
         Run("echo '"+passwd+"' | sudo -S sed -i s/Logs.Verbose=n/Logs.Verbose=y/g  /etc/waagent.conf")
     RunLog.info("Restart waagent service...")
     result = Run("echo '"+passwd+"' | sudo -S find / -name systemctl |wc -l | tr -d '\n'")    
-    if (distro[0] == "Ubuntu") :
+    if (distro[0] == "Ubuntu") or (distro[0] == "debian"):
         Run("echo '"+passwd+"' | sudo -S service walinuxagent restart")
     else :  
         if (result == "0") :
