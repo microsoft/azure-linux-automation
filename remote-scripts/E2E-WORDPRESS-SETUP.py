@@ -3,11 +3,13 @@ import re
 import time
 import imp
 import sys
+import os.path
 from azuremodules import *
 
 #OS independent variables
 wdp_downlink = "http://wordpress.org/latest.tar.gz"
-wdp_db_root_password = "wordpress_root_password"
+##wdp_db_root_password = "wordpress_root_password"
+wdp_db_root_password = "wordpress_password"
 wdp_db_name		= "wordpressdb"
 wdp_db_hostname = "localhost"
 wdp_db_username = "wordpress_user"
@@ -48,16 +50,16 @@ def set_variables_OS_dependent():
 		service_command		= "service "  #space character after service is mandatory here.
 
 	# Identify the Distro to Set OS Dependent Variables
-	if ((current_distro == "Oracle") or (current_distro == "centos")):
+	if ((current_distro == "Oracle") or (current_distro == "ol") or (current_distro == "centos") or (current_distro == "fedora")):
 		pexpect_pkg_name	= "pexpect"
 		service_httpd_name	= "httpd"
 		service_mysqld_name = "mysqld"
 		mysql_pkg_name		= "mysql-server"
-		frontend_packages_list = ["mysql.x86_64","php", "php-mysql", "httpd" , "wget","sendmail"]
-		if(distro_version == "7" or "7.0"):
+		frontend_packages_list = ["mysql.x86_64","php", "php-mysql","httpd","wget","sendmail"]
+		if(distro_version == "7" or distro_version == "7.0" or distro_version == "7.1"):
 			service_mysqld_name	= "mariadb"
 			mysql_pkg_name		= "mariadb-server"
-			frontend_packages_list = ["mariadb","mariadb.x86_64","php.x86_64", "php-mysql", "httpd","vim","wget","sendmail"]
+			frontend_packages_list = ["mariadb","php", "php-mysql","httpd","wget","sendmail"]
 	elif (current_distro == "ubuntu"):
 		pexpect_pkg_name	= "python-pexpect"
 		service_httpd_name	= "apache2"
@@ -90,10 +92,11 @@ def set_variables_OS_dependent():
 	elif ((current_distro == "Red Hat") or (current_distro == "rhel")):
 		pexpect_pkg_name	= "pexpect"					 
 		service_httpd_name	= "httpd"
-		service_mysqld_name	= "mariadb"
-		mysql_pkg_name		= "mariadb-server"
+		service_mysqld_name	= "mysqld"
+		mysql_pkg_name		= "mysql-server"
 		frontend_packages_list = ["mysql.x86_64","php", "php-mysql", "httpd" , "wget","sendmail"]
-		if(distro_version == "7.0"):
+		if(distro_version.rfind("7.") != -1):
+		#if((distro_version == "7.0") or (distro_version == "7.1")or (distro_version == "7.2")):
 			service_mysqld_name	= "mariadb"
 			mysql_pkg_name		= "mariadb-server"
 			frontend_packages_list = ["mariadb","mysql.x86_64","php", "php-mysql", "httpd" , "wget","sendmail"]
@@ -127,9 +130,9 @@ def DetectDistro():
 				distribution = 'SUSE Linux'
 				break
 			elif (re.match(r'.*openSUSE.*',line,re.M|re.I)):
-				distribution = 'openSUSE'
+				distribution = 'opensuse'
 				break
-			elif (re.match(r'.*centos.*',line,re.M|re.I)):
+			elif (re.match(r'.*CentOS.*',line,re.M|re.I)):
 				distribution = 'centos'
 				break
 			elif (re.match(r'.*Oracle.*',line,re.M|re.I)):
@@ -137,6 +140,9 @@ def DetectDistro():
 				break
 			elif (re.match(r'.*Red Hat.*',line,re.M|re.I)):
 				distribution = 'Red Hat'
+				break
+			elif (re.match(r'.*Fedora.*',line,re.M|re.I)):
+				distribution = 'fedora'
 				break
 				
 	return [distribution, version]
@@ -158,7 +164,7 @@ def exec_multi_cmds_local_sudo(cmd_list):
 		f.write(line+'\n')
 	f.close()
 	Run ("chmod +x /tmp/temp_script.sh")
-	Run ("echo '"+vm_password+"' | sudo -S /tmp/temp_script.sh 2>&1 > /tmp/exec_multi_cmds_local_sudo.log")
+	Run ("echo '"+vm_password+"' | sudo -S bash /tmp/temp_script.sh 2>&1 >  /tmp/exec_multi_cmds_local_sudo.log")
 	return file_get_contents("/tmp/exec_multi_cmds_local_sudo.log")
 
 def yum_package_uninstall(package):
@@ -180,7 +186,7 @@ def uninstall_package(package):
 	RunLog.info( "\nUninstall package: "+package)
 	if ((current_distro == "ubuntu") or (current_distro == "Debian")):
 		return aptget_package_uninstall(package)
-	elif ((current_distro == "Red Hat") or (current_distro == "Oracle") or (current_distro == 'centos') or (current_distro == 'rhel') ):
+	elif ((current_distro == "Red Hat") or (current_distro == "Oracle") or (current_distro == "ol") or (current_distro == 'centos') or (current_distro == 'rhel') or (current_distro == "fedora")):
 		return yum_package_uninstall(package)
 	elif ((current_distro == "SUSE Linux") or (current_distro == "sles") or (current_distro == "opensuse")):
 		return zypper_package_uninstall(package)
@@ -293,7 +299,7 @@ def install_package(package):
 	RunLog.info("Installing Packages based on Distro's")
 	if ((current_distro == "ubuntu") or (current_distro == "Debian")):
 		return aptget_package_install(package)
-	elif ((current_distro == "Red Hat") or (current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos')):
+	elif ((current_distro == "Red Hat") or(current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == "ol") or (current_distro == 'centos') or (current_distro == "fedora") ):
 		return yum_package_install(package)
 	elif (current_distro == "SUSE Linux") or (current_distro == "opensuse") or (current_distro == "sles"):
 		return zypper_package_install(package)
@@ -429,70 +435,75 @@ def mysql_secure_install(wdp_db_root_password):
 			return
 	# Check the status of the function for Pass and Fail case
 
-def create_db_wdp(wdp_db_name):
-	RunLog.info("Creating DataBase for WordPress ")
-	#spawn command
-	child = pexpect.spawn ('mysql -uroot -p'+wdp_db_root_password)
+def create_db_wdp(db_name, db_root_password):
+	RunLog.info( "\nCreating a database on MySQL with name "+db_name)
+	child = pexpect.spawn ('mysql -uroot -p'+db_root_password)
 
 	#wait till expected pattern is found
 	i = child.expect (['m*>', pexpect.EOF])
 	if (i == 0):
-		child.sendline ('CREATE DATABASE '+wdp_db_name+";")
-		RunLog.info("'CREATE DATABASE' command successful\n"+child.before)
+		child.sendline ('CREATE DATABASE '+db_name+";")
+		RunLog.info( "'CREATE DATABASE' command successful\n"+child.before)
+		#wait till expected pattern is found -> Show Databases
 		i = child.expect (['m*>', pexpect.EOF])
 		if (i == 0):
-			child.sendline ("show databases;")	  #send y
-			RunLog.info("'show databases' command successful\n"+child.before)
-
+			child.sendline ("show databases;")      #send y
+		RunLog.info( "'show databases' command successful\n"+child.before)
+		#wait till expected pattern is found -> exit
 		i = child.expect (['m*>', pexpect.EOF])
 		if (i == 0):
 			child.sendline ("exit")
+		
+		RunLog.info( "Creating a database on MySQL with name "+db_name+"..[done]")
 		return True
 
+	RunLog.error( "Creating a database on MySQL with name "+db_name+"..[failed]")
 	return False
 
-def create_user_db_wdp(wdp_db_name, wdp_db_hostname, wdp_db_username, wdp_db_password):
-
-	RunLog.info("Creating Database users for WordPress")
-	#spawn command
-	child = pexpect.spawn ('mysql -uroot -p'+wdp_db_root_password)
+def create_user_db_wdp(db_name, db_root_password, db_hostname, db_username, db_password):
+	RunLog.info( "\nCreating user with username: "+db_username+", on MySQL database name: "+db_name)
+	child = pexpect.spawn ('mysql -uroot -p'+db_root_password)
 
 	#wait till expected pattern is found
 	i = child.expect (['m*>', pexpect.EOF])
 	if (i == 0):
-		child.sendline ('CREATE USER '+wdp_db_username+"@"+wdp_db_hostname+";") #send y
-		RunLog.info("'CREATE USER' command successful\n"+child.before)
+		##child.sendline ('CREATE USER '+db_username+"@"+db_hostname+";") #send y
+		child.sendline ("CREATE USER '"+db_username+"'@'"+db_hostname+"';") #send y
+		RunLog.info( "'CREATE USER' command successful\n"+child.before)
 
 	#wait till expected pattern is found
 	i = child.expect (['m*>', pexpect.EOF])
 	if (i == 0):
-		child.sendline ("GRANT ALL PRIVILEGES ON "+wdp_db_name+".* TO '"+wdp_db_username+"'@'"+wdp_db_hostname+"' IDENTIFIED by '"+wdp_db_password+"' WITH GRANT OPTION;")
-		RunLog.info("'GRANT ALL PRIVILEGES' command successful\n"+child.before)
+		child.sendline ("GRANT ALL PRIVILEGES ON "+db_name+".* TO '"+db_username+"'@'"+db_hostname+"' IDENTIFIED by '"+db_password+"' WITH GRANT OPTION;")
+		RunLog.info( "'GRANT ALL PRIVILEGES' command successful\n"+child.before)
 
 	#wait till expected pattern is found
 	i = child.expect (['m*>', pexpect.EOF])
 	if (i == 0):
-		child.sendline ("FLUSH PRIVILEGES;")	#send y
-		RunLog.info("'FLUSH PRIVILEGES' command successful\n"+child.before)
+		child.sendline ("FLUSH PRIVILEGES;")    #send y
+		RunLog.info( "'FLUSH PRIVILEGES' command successful\n"+child.before)
 
 	#wait till expected pattern is found
 	i = child.expect (['m*>', pexpect.EOF])
 	if (i == 0):
-		child.sendline ("show databases;")	  #send y
-		RunLog.info("'show databases' command successful\n"+child.before)
+		child.sendline ("show databases;")      #send y
+		RunLog.info( "'show databases' command successful\n"+child.before)
 
 	#wait till expected pattern is found
 	i = child.expect (['m*>', pexpect.EOF])
 	if (i == 0):
-		child.sendline ("select host,user from mysql.user;")	#send y
-		RunLog.info("'select user' command successful\n"+child.before)
+		child.sendline ("select host,user from mysql.user;")    #send y
+		RunLog.info( "'select user' command successful\n"+child.before)
 
 	#wait till expected pattern is found
 	i = child.expect (['m*>', pexpect.EOF])
 	if (i == 0):
 		child.sendline ("exit") #send y
-		RunLog.info("'CREATE USER' command successful\n"+child.before)
-
+		RunLog.info( "'CREATE USER' command successful\n"+child.before)
+	
+	RunLog.info( "Creating user with username: "+db_username+", on MySQL database name: "+db_name+"...[done]")
+	
+		
 def get_services_status(service):
 	RunLog.info("Acquiring the status of services")
 	current_status = "unknown"
@@ -520,7 +531,7 @@ def get_services_status(service):
 			current_status = "stopped"
 	
 	if(current_status == "unknown"):
-		output = Run("pgrep "+service+" |wc -l")
+		output = Run("pgrep "+service+" | wc -l")
 		if (int(output) > 0):
 			RunLog.info("Found '"+output+"' instances of service: "+service+" running.")
 			RunLog.info(service+": service is running\n")
@@ -566,7 +577,7 @@ def disable_selinux():
 	selinuxinfo =  Run ("echo '"+vm_password+"' | sudo -S cat /etc/selinux/config")
 	if (selinuxinfo.rfind('SELINUX=disabled') != -1):
 		RunLog.info("selinux is already disabled")
-	elif((current_distro == 'SUSE Linux')or(current_distro == 'sles')):
+	elif((current_distro == 'SUSE Linux')or(current_distro == 'sles') or (current_distro == "opensuse")):
 		cmds = ("/sbin/yast2 firewall startup manual","/sbin/rcSuSEfirewall2 stop","chkconfig SuSEfirewall2_setup off")
 		output = exec_multi_cmds_local_sudo(cmds)
 		output = Run("echo '"+vm_password+"' | sudo -S /sbin/rcSuSEfirewall2 status")
@@ -598,79 +609,88 @@ def setup_wordpress():
 	RunLog.info("Setup the details of WordPress")
 
 	wdp_install_folder = get_apache_document_root()
+	RunLog.info("wdp-folder: "+wdp_install_folder)
 	if(wdp_install_folder == None):
 		RunLog.error("Unable to find wdp_install_folder..")
 		RunLog.error("Aborting the installation.")
 		end_the_script()
 	else:
 		Run("echo '"+vm_password+"' | sudo -S cp "+wdp_install_folder+"wordpress/wp-config-sample.php "+wdp_install_folder+"wordpress/wp-config.php")
-		Run("echo '"+vm_password+"' | sudo -S sed -i 's/database_name_here/" + wdp_db_name+ "/' "+wdp_install_folder+"wordpress/wp-config.php")
+		Run("echo '"+vm_password+"' | sudo -S sed -i 's/database_name_here/" +wdp_db_name+ "/' "+wdp_install_folder+"wordpress/wp-config.php")
 		Run("echo '"+vm_password+"' | sudo -S sed -i 's/username_here/"+wdp_db_username+"/' "+wdp_install_folder+"wordpress/wp-config.php")
 		Run("echo '"+vm_password+"' | sudo -S sed -i 's/password_here/"+wdp_db_password+"/' "+wdp_install_folder+"wordpress/wp-config.php")
 		Run("echo '"+vm_password+"' | sudo -S sed -i 's/localhost/"+wdp_db_hostname+"/' "+wdp_install_folder+"wordpress/wp-config.php")
+		wdp_setup_status = Run("echo '"+vm_password+"' | sudo -S ls "+wdp_install_folder+"wordpress/wp-config.php")
+		RunLog.info("wp-config: "+wdp_setup_status)
+		if("wp-config.php" in wdp_setup_status):
+			RunLog.info(""+wdp_install_folder+"wordpress/wp-config.php updated and setup successfully")
+		else:
+			RunLog.error(""+wdp_install_folder+"wordpress/wp-config.php update and setup failed")
+			end_the_script()
 
 def UpdateRepos():
 	RunLog.info("Updating repositories")
 	#Repo update for current_distro
 	if ((current_distro == "ubuntu") or (current_distro == "Debian")):
 		Run("echo '"+vm_password+"' | sudo -S apt-get update")
-	elif ((current_distro == "RedHat") or (current_distro == "Oracle") or (current_distro == 'centos')):
+	elif ((current_distro == "RedHat") or (current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == "ol") or (current_distro == 'centos') or (current_distro == "fedora")):
 		Run("echo '"+vm_password+"' | sudo -S yum -y update")
 	elif (current_distro == "opensuse") or (current_distro == "SUSE Linux") or (current_distro == "sles"):
 		Run("echo '"+vm_password+"' | sudo -S zypper --non-interactive --gpg-auto-import-keys update")
 	else:
 		RunLog.info("Repo up-gradation failed on:"+ current_distro)
-		exit()
+		end_the_script()
 
 def setup_wordpress_singleVM():
 	RunLog.info("Setup WordPress for SingleVM")
 	if (not install_packages_singleVM()):
 		RunLog.info("Failed to install packages for singleVM")
-		exit()
+		end_the_script()
 
 	set_services_status(service_mysqld_name, "start")
 	rtrn = get_services_status(service_mysqld_name)
 	if (rtrn != "running"):
 		RunLog.info("Failed to start mysqld")
-		exit()
+		end_the_script()
 
 	if (current_distro != 'ubuntu'):
-			mysql_secure_install(wdp_db_root_password)
+		mysql_secure_install(wdp_db_root_password)
 
 	# Creating a database from mysql
-	create_db_wdp(wdp_db_name)
+	create_db_wdp(wdp_db_name, wdp_db_root_password)
 	# Creating a database from mysql
-	create_user_db_wdp(wdp_db_name, wdp_db_hostname, wdp_db_username, wdp_db_password)
+	create_user_db_wdp(wdp_db_name, wdp_db_root_password, wdp_db_hostname, wdp_db_username, wdp_db_password)
 
 	set_services_status(service_httpd_name, "start")
 	rtrn = get_services_status(service_httpd_name)
 
 	if (rtrn != "running"):
 		RunLog.info("Failed to start :" + service_httpd_name)
-		exit()
+		end_the_script()
 
 	setup_wordpress()
 	RunLog.info( "Restarting services for WordPress")
 
-	if ((current_distro == "sles") or (current_distro == "SUSE Linux")):
+	if ((current_distro == "sles") or (current_distro == "SUSE Linux") or (current_distro == "opensuse")):
 		Run ("echo '"+vm_password+"' | sudo -S chmod -R 777 /srv/www/htdocs/*")
 	else:
 		Run ("echo '"+vm_password+"' | sudo -S chmod -R 777 /var/www/html/*")
 
-	if ((current_distro == "sles") or (current_distro == "SUSE Linux")):
-		output=Run("cat /etc/sysconfig/apache2 | grep 'APACHE_MODULES=.*php5' ")		
+	if ((current_distro == "sles") or (current_distro == "SUSE Linux") or (current_distro == "opensuse")):
+		output=Run("cat /etc/sysconfig/apache2 | grep 'APACHE_MODULES=.*php5' ")
+		RunLog.info("output of /et/sysconfig/apche2 : ",output)
 		if (not re.match (r'^APACHE_MODULES=.*php5.*',output,re.M|re.I)):
 			out = exec_multi_cmds_local_sudo(["sed  -i 's/^APACHE_MODULES=\"/APACHE_MODULES=\"php5 /' /etc/sysconfig/apache2"])
 			
 	set_services_status(service_mysqld_name, "restart")
 	rtrn = get_services_status ( service_mysqld_name)
 	if (rtrn != "running"):
-		exit()
-	
+		end_the_script()
+
 	set_services_status(service_httpd_name, "restart")
 	rtrn = get_services_status (service_httpd_name)
 	if (rtrn != "running"):
-		exit()
+		end_the_script()
 
 def setup_wordpress_E2ELoadBalance_backend(front_end_users):
 	RunLog.info("Setup WordPress for E2ELoadbalancer Backend VM")
@@ -680,33 +700,38 @@ def setup_wordpress_E2ELoadBalance_backend(front_end_users):
 	# Installing packages in Backend VM Role
 	if (not install_packages_backend()):
 		RunLog.info("Failed to install packages for Backend VM Role")
-		exit()
+		end_the_script()
 
 	set_services_status(service_mysqld_name, "start")
 	rtrn = get_services_status(service_mysqld_name)
 	if (rtrn != "running"):
 		RunLog.info( "Failed to start mysqld")
-		exit()
+		end_the_script()
 
 	# To make to connection from backend to other IP's ranging from 0.0.0.0
-	bind = Run("echo '"+vm_password+"' | sudo -S sed -i 's/\(bind-address.*= \)\(.*\)/\\1 0.0.0.0/' /etc/mysql/my.cnf | grep bind")
+	#bind = Run("echo '"+vm_password+"' | sudo -S sed -i 's/\(bind-address.*= \)\(.*\)/\\1 0.0.0.0/' /etc/mysql/my.cnf | grep bind")
+	bind = Run("echo '"+vm_password+"' | sudo -S sed -i 's/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/' /etc/mysql/my.cnf| grep bind")
+	bind = Run("echo '"+vm_password+"' | sudo -S sed -i 's/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/' /etc/mysql/mysql.conf.d/mysqld.cnf | grep bind")
+	bind = Run("echo '"+vm_password+"' | sudo -S sed -i 's/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/' /etc/mysql/mariadb.conf.d/mysqld.cnf | grep bind")
 	set_services_status(service_mysqld_name, "restart")
 	rtrn = get_services_status(service_mysqld_name)
 	if (rtrn != "running"):
 		RunLog.info("Failed to start mysqld")
-		exit()
+		end_the_script()
 
 	# Installing the "mysql secure installation" in other Distro's (not in Ubuntu)
 	if (current_distro != 'ubuntu'):
+		RunLog.info("mskip")
 		mysql_secure_install(wdp_db_root_password)
 
 	# Creating database using mysql
-	create_db_wdp (wdp_db_name)
+	create_db_wdp(wdp_db_name, wdp_db_root_password)
 	# Creating users to access database from mysql
 	#Create_user_db_wdp(wdp_db_name, wdp_db_hostname, wdp_db_username, wdp_db_password)
 
 	for ip in front_end_users:
-		create_user_db_wdp(wdp_db_name, ip, wdp_db_username, wdp_db_password)
+		create_user_db_wdp(wdp_db_name, wdp_db_root_password, ip, wdp_db_username, wdp_db_password)
+	
 	Run ("echo '"+vm_password+"' | sudo -S /sbin/chkconfig --add mysqld")
 	Run ("echo '"+vm_password+"' | sudo -S /sbin/chkconfig mysqld on")
 
@@ -737,20 +762,21 @@ def setup_wordpress_E2ELoadBalance_frontend():
 	setup_wordpress()
 	RunLog.info("Restarting services for WordPress")
 
-	if ((current_distro == "sles") or (current_distro == "SUSE Linux")):
+	if ((current_distro == "sles") or (current_distro == "SUSE Linux") or (current_distro == "opensuse")):
 		Run ("echo '"+vm_password+"' | sudo -S chmod -R 777 /srv/www/htdocs/*")
 	else:
 		Run ("echo '"+vm_password+"' | sudo -S chmod -R 777 /var/www/html/*")
 
-	if ((current_distro == "sles") or (current_distro == "SUSE Linux")):
+	if ((current_distro == "sles") or (current_distro == "SUSE Linux") or (current_distro == "opensuse")):
 		output=Run("cat /etc/sysconfig/apache2 | grep 'APACHE_MODULES=.*php5' ")
+		RunLog.info("output of /et/sysconfig/apche2 : ",output)
 		if (not re.match (r'^APACHE_MODULES=.*php5.*',output,re.M|re.I)):
 			out = exec_multi_cmds_local_sudo(["sed  -i 's/^APACHE_MODULES=\"/APACHE_MODULES=\"php5 /' /etc/sysconfig/apache2"])
 
 	set_services_status(service_httpd_name, "restart")
 	rtrn = get_services_status (service_httpd_name)
 	if (rtrn != "running"):
-		exit()
+		end_the_script()
 	Run ("echo '"+vm_password+"' | sudo -S /sbin/chkconfig --add httpd")
 	Run ("echo '"+vm_password+"' | sudo -S /sbin/chkconfig httpd on")
 	Run ("echo '"+vm_password+"' | sudo -S /sbin/chkconfig apache2 on")
@@ -935,7 +961,7 @@ def show_usage():
 	RunLog.info("Usage: \"python "+__file__+" frontend_setup <back end vm ip>\" frontend setup for locadbalanced wordpress setup")
 	end_the_script()
 
-def end_the_script( ):
+def end_the_script():
 	print file_get_contents("/home/"+vm_username+"/Runtime.log")
 	exit(0)
 
@@ -981,6 +1007,11 @@ def main():
 							RunLog.info(put_file_sftp(front_endVM_username, front_endVM_password, ip, "azuremodules.py"))
 							RunLog.info("Copying wordpress_install.XML to "+ ip)
 							RunLog.info(put_file_sftp(front_endVM_username, front_endVM_password, ip, "wordpress_install.XML"))
+							if(current_distro == 'sles'):
+								RunLog.info( "Copying "+"Python pexpect rpm"+" to "+ip)
+								RunLog.info( put_file_sftp(front_endVM_username, front_endVM_password, ip, "python-pexpect-3.1-1.1.noarch.rpm"))
+							else:
+								RunLog.info( "Python pexpect is available in repository ")							
 							RunLog.info("Starting frontend VM setup on "+ ip)
 							RunLog.info(exec_cmd_remote_ssh(front_endVM_username, front_endVM_password, ip, "python "+file_name+" frontend_setup "+ back_endVM_ip))
 							frontend_count = frontend_count+1
@@ -1029,21 +1060,18 @@ except ImportError:
 	if(not install_package(pexpect_pkg_name)):
 		RunLog.info( "pexpect module could not be installed")
 		pythonversion = Run ("echo '"+vm_password+"' | sudo -S python --version 2>&1")
-		if(pythonversion.find('2.7.*')):
+		if(pythonversion.find('Python 2.7.') or pythonversion.find('Python 3.')):
 				if((current_distro == 'sles') and (distro_version == "12")):
 					RunLog.info( "Trying to install pexpect module using rpm package")
-					Run("echo '"+vm_password+"' | sudo -S wget ftp://rpmfind.net/linux/opensuse/ports/aarch64/factory/repo/oss/suse/noarch/python-pexpect-3.1-1.1.noarch.rpm")
-					out = Run("echo '"+vm_password+"' | sudo -S zypper install -y python-pexpect-3.1-1.1.noarch.rpm")
-					print "out = "+out
-					if(out.find('done')!= -1):
-						RunLog.info( " pexpect module rpm installation done..")
-					else:
-						RunLog.info( " pexpect module rpm installation failed..")
-						RunLog.info( "Installing pexpect from source..")
-						update_python_and_install_pexpect()
-						RunLog.info( "\n\nInvoking the script with new python:....")
-						RunLog.info( Run("python "+__file__+" "+' '.join(sys.argv[1:])))
-						exit()
+					out = Run("echo '"+vm_password+"' | sudo -S rpm -ivh python-pexpect-3.1-1.1.noarch.rpm 2>&1")
+					RunLog.info("out = "+out)
+					try:
+						imp.find_module('pexpect')
+						import pexpect
+						RunLog.info( "pexpect module rpm installation done..")
+					except ImportError:
+						RunLog.info("Pexpect module import failed")
+						end_the_script()
 				elif(current_distro == 'rhel'):
 					easy_install( module_name)
 				else:
@@ -1051,13 +1079,13 @@ except ImportError:
 					update_python_and_install_pexpect()
 					RunLog.info( "\n\nInvoking the script with new python:....")
 					RunLog.info( Run("python "+__file__+" "+' '.join(sys.argv[1:])))
-					exit()
+					end_the_script()
 		else:
 			RunLog.info( "Installing pexpect from source..")
 			update_python_and_install_pexpect()
 			RunLog.info( "\n\nInvoking the script with new python:....")
 			RunLog.info( Run("python "+__file__+" "+' '.join(sys.argv[1:])))
-			exit()
+			end_the_script()
 import pexpect
 RunLog.info("Executing Main Function...")
 main()
@@ -1065,4 +1093,3 @@ result = verify_wdp_instllation()
 collect_logs()
 end_the_script()
 #We should be able to see wordpress install page in the browser.
-
