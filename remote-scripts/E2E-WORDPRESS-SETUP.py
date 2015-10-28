@@ -56,7 +56,7 @@ def set_variables_OS_dependent():
 		service_mysqld_name = "mysqld"
 		mysql_pkg_name		= "mysql-server"
 		frontend_packages_list = ["mysql.x86_64","php", "php-mysql","httpd","wget","sendmail"]
-		if(distro_version == "7" or distro_version == "7.0" or distro_version == "7.1"):
+		if(distro_version >= 7):		
 			service_mysqld_name	= "mariadb"
 			mysql_pkg_name		= "mariadb-server"
 			frontend_packages_list = ["mariadb","php", "php-mysql","httpd","wget","sendmail"]
@@ -85,7 +85,7 @@ def set_variables_OS_dependent():
 		service_mysqld_name	= "mysql"
 		mysql_pkg_name		= "mariadb"		 
 		frontend_packages_list = ["mariadb-client","apache2-mod_php5","apache2","php5", "php5-mysql","wget","sendmail"]
-		if(distro_version == "12"):
+		if(distro_version >= 12):
 			service_mysqld_name	= "mysql"
 			mysql_pkg_name		= "mariadb"
 			frontend_packages_list = ["mariadb-client","apache2-mod_php5","apache2","php5", "php5-mysql","wget","sendmail"]
@@ -95,8 +95,7 @@ def set_variables_OS_dependent():
 		service_mysqld_name	= "mysqld"
 		mysql_pkg_name		= "mysql-server"
 		frontend_packages_list = ["mysql.x86_64","php", "php-mysql", "httpd" , "wget","sendmail"]
-		if(distro_version.rfind("7.") != -1):
-		#if((distro_version == "7.0") or (distro_version == "7.1")or (distro_version == "7.2")):
+		if(distro_version >= 7):		
 			service_mysqld_name	= "mariadb"
 			mysql_pkg_name		= "mariadb-server"
 			frontend_packages_list = ["mariadb","mysql.x86_64","php", "php-mysql", "httpd" , "wget","sendmail"]
@@ -119,7 +118,7 @@ def DetectDistro():
 			distribution  = matchObj.group(1)
 		elif (re.match(r'^VERSION_ID=(.*)',line,re.M|re.I) ):
 			matchObj = re.match( r'^VERSION_ID=(.*)', line, re.M|re.I)
-			version = matchObj.group(1)
+			version = float(matchObj.group(1))
 	
 	if(distribution == 'unknown'):
 		for line in outputlist:
