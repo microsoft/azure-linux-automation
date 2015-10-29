@@ -41,6 +41,19 @@
 			<Version>2.*</Version>
 			<LatestVersion>2.0</LatestVersion>
 		</Extension>
+		<Extension>
+			<Name>VMAccess</Name>
+			<OfficialName>VMAccessForLinux</OfficialName>
+			<Publisher>Microsoft.OSTCExtensions</Publisher>
+			<PrivateConfiguration>
+				<username>VMAccessUser</username>
+				<password>VMAccessUserPassword</password>
+				<expiration>2016-01-01</expiration>
+			</PrivateConfiguration>	
+			<Version>1.*</Version>
+			<LatestVersion>1.3</LatestVersion>
+			<NewPassword>VMAccessUserNewPassword</NewPassword>
+			<ExtensionTask>AddUser,ResetPassword,DeleteUser,ResetSSHConfig</ExtensionTask>
+		</Extension>
 	</Extensions>
-	
 	
