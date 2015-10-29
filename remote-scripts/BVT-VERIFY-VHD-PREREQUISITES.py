@@ -207,6 +207,30 @@ if distro == "UBUNTU":
 	#Test 4 : Make sure that default targetpw is commented in /etc/sudoers file.
 	result = verify_default_targetpw(distro)
 
+if distro == "DEBIAN":
+	RunLog.info("DISTRO PROVIDED : "+distro)
+	#Test 1 : verify that hv-kvp-daemon-init is installed or not, it's optional not strict.
+	RunLog.info("Checking if hv-kvp-daemon-init is installed or not..")
+	kvp_install_status = Run("pgrep -lf hv_kvp_daemon")
+	matchCount = 0
+	if "hv_kvp_daemon" in kvp_install_status:
+		matchCount = matchCount + 1
+	if matchCount == 1:
+		print(distro+"_TEST_KVP_INSTALLED")
+	else:
+		print(distro+"_TEST_KVP_NOT_INSTALLED")
+
+	#Test 2 : Make sure that repositories are installed.
+	RunLog.info("Checking if repositories are installed or not..")
+	repository_out = Run("apt-get update")
+	if "security.debian.org" in repository_out and "debian-archive.trafficmanager.net" in repository_out and "Hit" in repository_out:
+		print(distro+"_TEST_REPOSITORIES_AVAILABLE")
+	else:
+		print(distro+"_TEST_REPOSITORIES_ERROR")
+	#Test 3 : Make sure that default targetpw is commented in /etc/sudoers file.
+	result = verify_default_targetpw(distro)
+
+	
 if distro == "SUSE":
 	#Make sure that distro contains Cloud specific repositories
 	RunLog.info("Verifying Cloud specific repositories")
