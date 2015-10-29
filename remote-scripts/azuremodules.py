@@ -42,7 +42,7 @@ ResultLog.addHandler(WResultLog)
 
 def UpdateRepos(current_distro):
     RunLog.info ("\nUpdating the repositoriy information...")
-    if ((current_distro == "ubuntu") or (current_distro == "Debian")):
+    if ((current_distro == "ubuntu") or (current_distro == "debian")):
         #method 'RunUpdate': fix deadlock when using stdout=PIPE and/or stderr=PIPE and the child process generates enough output to a pipe
         RunUpdate("apt-get update")
     elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos')):
