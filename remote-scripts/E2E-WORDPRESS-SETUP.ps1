@@ -31,26 +31,26 @@ if ($isDeployed)
 
 				"#all the IPs should be Internal ips `n<username>$user</username>`n<password>$passwd</password>" > 'wordpress_install.XML'
 				# Uploading files into VM
-                $out = RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files "wordpress_install.XML" -username $user -password $password -upload 2>&1 | Out-Null
+				$out = RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files "wordpress_install.XML" -username $user -password $password -upload 2>&1 | Out-Null
 				# Uploading files into VM
-                $out = RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload 2>&1 | Out-Null
+				$out = RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload 2>&1 | Out-Null
 				# Assiging Permissions to uploaded files into VM
-                $out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *" -runAsSudo 2>&1 | Out-Null
+				$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *" -runAsSudo 2>&1 | Out-Null
 				# Converting the file from UTF-16 to ASCII
-                $out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "iconv -f UTF-16 -t ASCII wordpress_install.XML > wordpress_install.XML.tmp ; mv -f wordpress_install.XML.tmp wordpress_install.XML" -runAsSudo 2>&1 | Out-Null
+				$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "iconv -f UTF-16 -t ASCII wordpress_install.XML > wordpress_install.XML.tmp ; mv -f wordpress_install.XML.tmp wordpress_install.XML" -runAsSudo 2>&1 | Out-Null
 
 				LogMsg "Executing : $($currentTestData.testScript)"
-		        # Wordpress installation on E2ESingleVM"
+				# Wordpress installation on E2ESingleVM"
 				Write-host "#################################################################################################"
 				Write-host ""
 				Write-host "Wordpress installation has been started on E2ESingleVM..." -foregroundcolor "magenta"
 				Write-host "It will take more than 20 minutes and may even take more time depending on internet speed." -foregroundcolor "magenta"
 				Write-host ""
 				Write-host "#################################################################################################"
-                # Wordpress Setup file is executing on E2ESingleVM"
-				$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command " python $($currentTestData.testScript) singleVM_setup  2>&1 > print.log" 2>&1 | Out-Null
-        		# Downloading the files VM		
-                RemoteCopy -download -downloadFrom $hs1VIP -files "/home/test/wdp_test.txt,/home/test/logs.tar.gz" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password 2>&1 | Out-Null
+				# Wordpress Setup file is executing on E2ESingleVM"
+				$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command " python $($currentTestData.testScript) singleVM_setup  2>&1 > print.log" -runAssudo -ignoreLinuxExitCode -runmaxallowedtime 3600 2>&1 | Out-Null
+				# Downloading the files VM		
+				RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/wdp_test.txt , /home/$user/logs.tar.gz" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password 2>&1 | Out-Null
 			}
 			elseif($currentTestData.E2ESetupCmdLineArgument -imatch "loadbalancer_setup")
 			{	
@@ -78,29 +78,29 @@ if ($isDeployed)
 				#Preparation of wordpress install xml file
 				"#all the IPs should be Internal ips `n<back_endVM_ip>$bkendip</back_endVM_ip>`n<front_endVM_ips>$fe1ip $fe2ip $fe3ip</front_endVM_ips>`n<username>$user</username>`n<password>$passwd</password>" > 'wordpress_install.XML'
 				# Uploading xml file into VM
-                $out = RemoteCopy -uploadTo $hs1VIP -port $hs1bkvmsshport -files "wordpress_install.XML" -username $user -password $password -upload 2>&1 | Out-Null
+				$out = RemoteCopy -uploadTo $hs1VIP -port $hs1bkvmsshport -files "wordpress_install.XML" -username $user -password $password -upload 2>&1 | Out-Null
 				# Uploading files into VM
 				$out = RemoteCopy -uploadTo $hs1VIP -port $hs1bkvmsshport -files $currentTestData.files -username $user -password $password -upload 2>&1 | Out-Null
 				# Assiging Permissions to uploaded files into VM
-                $out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1bkvmsshport -command "chmod 777 *.XML" -runAsSudo 2>&1 | Out-Null
-                # Converting the file from UTF-16 to ASCII
+				$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1bkvmsshport -command "chmod 777 *.XML" -runAsSudo 2>&1 | Out-Null
+				# Converting the file from UTF-16 to ASCII
 				$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1bkvmsshport -command "iconv -f UTF-16 -t ASCII wordpress_install.XML > wordpress_install.XML.tmp ; mv -f wordpress_install.XML.tmp wordpress_install.XML" -runAsSudo 2>&1 | Out-Null
 
 				LogMsg "Executing : $($currentTestData.testScript)"
-                # Wordpress installation on E2EFOURVM
+				# Wordpress installation on E2EFOURVM
 				Write-host "#################################################################################################"
 				Write-host ""
 				Write-host "Wordpress installation has been started on E2EFOURVM..." -foregroundcolor "magenta"
 				Write-host "It will take more than 30 minutes and may take more time depending on internet speed." -foregroundcolor "magenta"
 				Write-host ""
 				Write-host "#################################################################################################"
-                # Wordpress Setup file is executing on E2EFOURVM
-				$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1bkvmsshport -command "python $($currentTestData.testScript) loadbalancer_setup 2>&1 > print.log" -runAsSudo 2>&1 | Out-Null
+				# Wordpress Setup file is executing on E2EFOURVM
+				$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1bkvmsshport -command "python $($currentTestData.testScript) loadbalancer_setup 2>&1 > print.log" -runAsSudo -ignoreLinuxExitCode -runmaxallowedtime 3600 2>&1 | Out-Null 
 				# Downloading the files VM
-                RemoteCopy -download -downloadFrom $hs1VIP -files "/home/test/wdp_test.txt,/home/test/logs.tar.gz " -downloadTo $LogDir -port $hs1bkvmsshport -username $user -password $password 2>&1 | Out-Null
+				RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/wdp_test.txt,/home/$user/logs.tar.gz " -downloadTo $LogDir -port $hs1bkvmsshport -username $user -password $password 2>&1 | Out-Null
 			}else{
 				$testResult="FAIL"
-				LogErr "Command line argument not properly added for Daytrader Setup, add the argument for FourVM: loadbalancer_setup, SingleVM: singleVM_setup in azure_ica_all.xml file at E2ESetupCmdLineArgument tag"
+				LogErr "Command line argument not properly added for WordPress Setup, add the argument for FourVM: loadbalancer_setup, SingleVM: singleVM_setup in azure_ica_all.xml file at E2ESetupCmdLineArgument tag"
 			}
 #Verifying Wordpress setup id completed or not
 			try{
@@ -114,7 +114,7 @@ if ($isDeployed)
 					$testResult="FAIL"
 				}
 			}catch{
-				 write-host "Wordpress setup failed..."
+				write-host "Wordpress setup failed..."
 				$testResult="FAIL"
 			} 
 		}
@@ -147,22 +147,23 @@ else
 
 #Verification of WordPress URL
 try{
-    $webclient = New-Object System.Net.WebClient
-    $webclient.DownloadFile($wordpressUrl,"$pwd\index.html")
+	WaitFor -seconds 120
+	$webclient = New-Object System.Net.WebClient
+	$webclient.DownloadFile($wordpressUrl,"$pwd\index.html")
 
-    $out = Select-String -Simple WordPress index.html
-    if($out){
+	$out = Select-String -Simple WordPress index.html
+	if($out){
 		write-host "WordPress verification using url success." -foreground "white"
 		$testResult="PASS"
-    }else{
+	}else{
 		write-host "WordPress verification using url failed." -foreground "white"
 		$testResult="FAIL"
-    }
+	}
 }
 catch
 {
-     write-host "WordPress verification using url failed..." -foreground "green"
-	 $testResult="FAIL"
+	write-host "WordPress verification using url failed..." -foreground "green"
+	$testResult="FAIL"
 }
 $resultArr += $testResult
 $result = GetFinalResultHeader -resultarr $resultArr
