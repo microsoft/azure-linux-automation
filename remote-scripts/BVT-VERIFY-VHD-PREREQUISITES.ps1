@@ -19,6 +19,10 @@ if ($isDeployed)
 		{
 			$matchstrings = @("_TEST_SUDOERS_VERIFICATION_SUCCESS","_TEST_GRUB_VERIFICATION_SUCCESS", "_TEST_REPOSITORIES_AVAILABLE")
 		}
+		if ($detectedDistro -imatch "DEBIAN")
+		{
+			$matchstrings = @("_TEST_SUDOERS_VERIFICATION_SUCCESS", "_TEST_REPOSITORIES_AVAILABLE")
+		}
 		elseif ($detectedDistro -imatch "SUSE")
 		{
 			$matchstrings = @("_TEST_SUDOERS_VERIFICATION_SUCCESS","_TEST_GRUB_VERIFICATION_SUCCESS", "_TEST_REPOSITORIES_AVAILABLE")

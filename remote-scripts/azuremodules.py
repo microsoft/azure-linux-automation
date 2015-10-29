@@ -283,12 +283,12 @@ def ZypperPackageInstall(package):
 	outputlist = re.split("\n", output)
 		
 	for line in outputlist:
-		#Package installed successfully
-		if (re.match(r'.*Installing: '+re.escape(package)+r'.*done', line, re.M|re.I)):
+		#Package or package dependencies installed successfully
+		if (re.match(r'.*Installing: '+r'.*done', line, re.M|re.I)):
 			RunLog.info((package+": package installed successfully.\n"+line))
 			return True
-		#package is already installed
-		elif (re.match(r'\''+re.escape(package)+r'\' is already installed', line, re.M|re.I)):
+		#package or provider of package is already installed
+		elif (re.match(r'.*\''+re.escape(package)+r'\' is already installed', line, re.M|re.I)):
 			RunLog.info((package + ": package is already installed.\n"+line))
 			return True
 		#package is not found on the repository

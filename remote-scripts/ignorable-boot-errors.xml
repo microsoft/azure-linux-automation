@@ -72,6 +72,24 @@
 		</errors>
 		<warnings/>
 	</distro>
+	<distro name="debian">
+		<failures>
+			<keywords>Fast TSC calibration</keywords>
+			<keywords>failed to get extended button data</keywords>
+			<keywords>acpi PNP0A03:00</keywords>
+			<keywords>failsafe</keywords>
+			<keywords>startpar-bridge</keywords>
+			<keywords>Failed to spawn</keywords>
+			<keywords>display-manager.service</keywords>
+		</failures>
+		<errors>
+			<keywords>Broken pipe</keywords>
+			<keywords>errors=remount-ro</keywords>			
+			<keywords>end_request: I/O error, dev fd0, sector 0</keywords>
+			<keywords>floppy: error -5 while reading block 0</keywords>
+		</errors>
+		<warnings/>
+	</distro>
 	<distro name="redhat">
 		<failures>
 			<keywords>Fast TSC calibration</keywords>

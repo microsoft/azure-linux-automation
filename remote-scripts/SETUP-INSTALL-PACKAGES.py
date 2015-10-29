@@ -34,7 +34,7 @@ def set_variables_OS_dependent():
                 RunLog.error ("unknown distribution found, exiting")
                 ResultLog.info('ABORTED')
                 exit()
-        if(current_distro == "ubuntu" or current_distro == "Debian"):
+        if(current_distro == "ubuntu" or current_distro == "debian"):
                 startup_file = '/etc/rc.local'
         elif(current_distro == "centos" or current_distro == "rhel" or current_distro == "fedora" or current_distro == "Oracle"):
                 startup_file = '/etc/rc.d/rc.local'
@@ -59,11 +59,27 @@ def download_and_install_rpm(package):
         RunLog.error("Installing Package: " + package+" from rpmlink failed!!")
         return False
 
+def easy_install(package):
+        RunLog.info("Installing Package: " + package+" via easy_install")
+        temp = Run("command -v easy_install")
+        if not ("easy_install" in temp):
+            install_ez_setup()
+        if package == "python-crypto":
+            output = Run("easy_install pycrypto")
+            return ("Finished" in output)
+        if package == "python-paramiko":
+            output = Run("easy_install paramiko")
+            return ("Finished" in output)
+        RunLog.error("Installing Package: " + package+" via easy_install failed!!")
+        return False
+
 def yum_package_install(package):
         if(YumPackageInstall(package) == True):
                 return True
         elif(download_and_install_rpm(package) == True):
                 return True
+        elif(easy_install(package) == True):
+		        return True
         else:
                 return False
 
