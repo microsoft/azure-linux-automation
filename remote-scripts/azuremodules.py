@@ -255,7 +255,7 @@ def AptgetPackageInstall(package,dbpasswd = "root"):
 			RunLog.info(package + ": package is already installed."+line)
 			return True
 		#package installation check 1	
-		elif (re.match(r'Unpacking '+ re.escape(package) + r'.*', line, re.M|re.I)):
+		elif (re.match(r'Unpacking.*'+ re.escape(package) + r'.*', line, re.M|re.I)):
 			unpacking = True
 		#package installation check 2
 		elif (re.match(r'Setting up '+ re.escape(package) + r" \(.*" , line, re.M|re.I)):
