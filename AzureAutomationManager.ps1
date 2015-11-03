@@ -108,8 +108,13 @@ try
 
     if ($UseAzureResourceManager)
     {
-        Set-Variable -Name UseAzureResourceManager -Value $true -Scope Global
-        Select-AzureSubscription -SubscriptionName $AzureSetup.SubscriptionName
+		Set-Variable -Name UseAzureResourceManager -Value $true -Scope Global
+		$selectSubscription = Select-AzureRmSubscription -SubscriptionId $AzureSetup.SubscriptionID
+		LogMsg "SubscriptionName       : $($AzureSetup.SubscriptionName)"
+		LogMsg "SubscriptionId         : $($selectSubscription.Subscription.SubscriptionId)"
+		LogMsg "User                   : $($selectSubscription.Account.Id)"
+		LogMsg "ServiceEndpoint        : $($selectSubscription.Environment.ActiveDirectoryServiceEndpointResourceId)"
+		LogMsg "CurrentStorageAccount  : $($AzureSetup.ARMStorageAccount)"
     }
     else
     {
@@ -117,10 +122,10 @@ try
         LogMsg "Setting Azure Subscription ..."
         $out = SetSubscription -subscriptionID $AzureSetup.SubscriptionID -subscriptionName $AzureSetup.SubscriptionName -certificateThumbprint $AzureSetup.CertificateThumbprint -managementEndpoint $AzureSetup.ManagementEndpoint -storageAccount $AzureSetup.StorageAccount
         $currentSubscription = Get-AzureSubscription -SubscriptionId $AzureSetup.SubscriptionID -ExtendedDetails
-        LogMsg "SubscriptionName           : $($currentSubscription.SubscriptionName)"
-        LogMsg "SubscriptionId             : $($currentSubscription.SubscriptionID)"
-        LogMsg "ServiceEndpoint            : $($currentSubscription.ServiceEndpoint)"
-        LogMsg "CurrentStorageAccount      : $($currentSubscription.StorageAccount)"
+        LogMsg "SubscriptionName       : $($currentSubscription.SubscriptionName)"
+        LogMsg "SubscriptionId         : $($currentSubscription.SubscriptionID)"
+        LogMsg "ServiceEndpoint        : $($currentSubscription.ServiceEndpoint)"
+        LogMsg "CurrentStorageAccount  : $($AzureSetup.StorageAccount)"
     }
     
     #Check for the Azure platform
