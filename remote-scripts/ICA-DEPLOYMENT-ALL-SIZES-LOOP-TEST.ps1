@@ -97,26 +97,29 @@ $DeploymentCount = $currentTestData.DeploymentCount
                         }
                     }
                 }
+                DoTestCleanUp -result $deployResult -testName $currentTestData.testName -deployedServices $deployedServiceName -ResourceGroups $deployedResourceGroupName
             }
             else
             {
+                
                 $failCount += 1
+                $deployResult = "FAIL"
                 LogErr "ATTEMPT : $count/$DeploymentCount : Deploying $($VMSizes[$VMSizeNumber]) VM.. FAIL"
+                $DeploymentStatistics.result = $deployResult
                 LogMsg "Deplyment Time/Timeout  = $($DeploymentStatistics.DeploymentTime)"
                 LogMsg "Boot Time/Timeout = $($DeploymentStatistics.BootTime)"
                 LogMsg "Provision Time/Timeout= $($DeploymentStatistics.ProvisionTime)"
-
-                $deployResult = "FAIL"
+                LogMsg "[PASS/FAIL/REMAINING] : $successCount/$failCount/$($DeploymentCount-$count)"
+                $allDeploymentStatistics += $DeploymentStatistics
+                DoTestCleanUp -result $deployResult -testName $currentTestData.testName -deployedServices $deployedServiceName -ResourceGroups $deployedResourceGroupName
                 if ( $failCount -lt $allowedFails )
                 {
-                    $VMSizeNumber += 1
                 }
                 else
                 {
                     break;
                 }
             }
-            $DeploymentStatistics.result = $deployResult
             if($VMSizeNumber -gt ($NumberOfSizes-2))
             {
                 $VMSizeNumber = 0
@@ -125,9 +128,7 @@ $DeploymentCount = $currentTestData.DeploymentCount
             {
                 $VMSizeNumber += 1
             }
-            LogMsg "[PASS/FAIL/REMAINING] : $successCount/$failCount/$($DeploymentCount-$count)"
-            DoTestCleanUp -result $deployResult -testName $currentTestData.testName -deployedServices $deployedServiceName -ResourceGroups $deployedResourceGroupName
-            $allDeploymentStatistics += $DeploymentStatistics
+            
         }
         if (($successCount -eq $DeploymentCount) -and ($failCount -eq 0))
         {
