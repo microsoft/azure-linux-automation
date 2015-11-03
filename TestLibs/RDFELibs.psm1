@@ -2394,7 +2394,8 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 						LogMsg "Preserving the Resource Group(s) $group"
 						foreach ($group in $ResourceGroups)
 						{
-							#TBD : Adding description is not supported for Resource Group yet. Need to figure out another way.
+							LogMsg "Setting tags : preserve = yes; testName = $testName"
+							$out = Set-AzureRmResourceGroup -Name $group -Tag @{Name ="preserve"; Value = "yes"},@{Name ="testName"; Value = "$testName"}
 						}
 						LogMsg "Collecting VM logs.."
 						GetVMLogs -allVMData $allVMData
