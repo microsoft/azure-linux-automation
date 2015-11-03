@@ -107,10 +107,17 @@
 
 Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
 {
-    $ResourceGroup = Get-AzureResourceGroup -Name $RGName -ErrorAction Ignore
+    try
+    {
+        $ResourceGroup = Get-AzureRmResourceGroup -Name $RGName -ErrorAction Ignore
+    }
+    catch
+    {
+    }
     if ($ResourceGroup)
     {
-        $retValue =  Remove-AzureResourceGroup -Name $RGName -Force -PassThru -Verbose
+        Remove-AzureRmResourceGroup -Name $RGName -Force -Verbose
+        $retValue = $?
     }
     else
     {
@@ -134,7 +141,7 @@ Function CreateResourceGroup([string]$RGName, $location)
             if($location)
             {
                 LogMsg "Using location : $location"
-                $createRG = New-AzureResourceGroup -Name $RGName -Location $location.Replace('"','') -Force -Verbose
+                $createRG = New-AzureRmResourceGroup -Name $RGName -Location $location.Replace('"','') -Force -Verbose
             }
             $operationStatus = $createRG.ProvisioningState
             if ($operationStatus  -eq "Succeeded")
@@ -169,7 +176,7 @@ Function CreateResourceGroupDeployment([string]$RGName, $location, $setupType, $
             if($location)
             {
                 LogMsg "Creating Deployment using $TemplateFile ..."
-                $createRGDeployment = New-AzureResourceGroupDeployment -Name $ResourceGroupDeploymentName -ResourceGroupName $RGName -TemplateFile $TemplateFile -Verbose
+                $createRGDeployment = New-AzureRmResourceGroupDeployment -Name $ResourceGroupDeploymentName -ResourceGroupName $RGName -TemplateFile $TemplateFile -Verbose
             }
             $operationStatus = $createRGDeployment.ProvisioningState
             if ($operationStatus  -eq "Succeeded")
@@ -196,7 +203,7 @@ Function GenerateAzureDeployJSONFile ($RGName, $osImage, $osVHD, $RGXMLData, $Lo
 {
 $jsonFile = $azuredeployJSONFilePath
 $StorageAccountName = $xml.config.Azure.General.ARMStorageAccount
-$StorageAccountType = (Get-AzureStorageAccount | where {$_.Name -eq "$StorageAccountName"}).AccountType
+$StorageAccountType = (Get-AzureRmStorageAccount | where {$_.Name -eq "$StorageAccountName"}).AccountType
 if($StorageAccountType -match 'Premium')
 {
 	$StorageAccountType = "Premium_LRS"
@@ -218,13 +225,13 @@ $singleIndent = ""
 $indents += $indent
 $RGRandomNumber = $((Get-Random -Maximum 999999 -Minimum 100000))
 $RGrandomWord = ([System.IO.Path]::GetRandomFileName() -replace '[^a-z]')
-$dnsNameForPublicIP = $($RGName.ToLower() -replace '[^a-z0-9]') + "$RGrandomWord"
-$virtualNetworkName = "ICAVNET"
+$dnsNameForPublicIP = $($RGName.ToLower() -replace '[^a-z0-9]')
+$virtualNetworkName = $($RGName.ToUpper() -replace '[^a-z]') + "VNET"
 $defaultSubnetName = "Subnet1"
-$availibilitySetName = "ICAAvailibilitySet"
-$LoadBalancerName =  "FrontEndIPAddress"
+$availibilitySetName = $($RGName.ToUpper() -replace '[^a-z]') + "AvSet"
+$LoadBalancerName =  $($RGName.ToUpper() -replace '[^a-z]') + "LoadBalancer"
 $apiVersion = "2015-05-01-preview"
-$PublicIPName = $($RGName -replace '[^a-zA-Z]') + "PublicIP"
+$PublicIPName = $($RGName.ToUpper() -replace '[^a-z]') + "PublicIP"
 $sshPath = '/home/' + $user + '/.ssh/authorized_keys'
 $sshKeyData = ""
 if ( $CurrentTestData.ProvisionTimeExtensions )
@@ -264,7 +271,7 @@ if ($RGXMLData.ARMVnetName)
 {
     $ExistingVnet = $RGXMLData.ARMVnetName
     LogMsg "Getting $ExistingVnet Virtual Netowrk info ..."
-    $ExistingVnetResourceGroupName = ( Get-AzureResource -OutputObjectFormat New | Where {$_.Name -eq $ExistingVnet}).ResourceGroupName
+    $ExistingVnetResourceGroupName = ( Get-AzureRmResource | Where {$_.Name -eq $ExistingVnet}).ResourceGroupName
     LogMsg "ARM VNET : $ExistingVnet (ResourceGroup : $ExistingVnetResourceGroupName)"
     $virtualNetworkName = $ExistingVnet
 }
@@ -725,7 +732,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                 Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]^," -Path $jsonFile
             if(!$ExistingVnet)
             {
-                Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))],^" -Path $jsonFile
+                Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]^," -Path $jsonFile
             }
                 Add-Content -Value "$($indents[4])^[variables('lbID')]^" -Path $jsonFile
             Add-Content -Value "$($indents[3])]," -Path $jsonFile
@@ -1101,7 +1108,7 @@ Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed
         {
             $VerifiedGroups =  $NULL
             $retValue = $NULL
-            #$ExistingGroups = RetryOperation -operation { Get-AzureResourceGroup } -description "Getting information of existing resource groups.." -retryInterval 5 -maxRetryCount 5
+            #$ExistingGroups = RetryOperation -operation { Get-AzureRmResourceGroup } -description "Getting information of existing resource groups.." -retryInterval 5 -maxRetryCount 5
             $i = 0
             $role = 1
             $setupTypeData = $xmlConfig.config.Azure.Deployment.$setupType

@@ -234,47 +234,70 @@ def YumPackageInstall(package):
     return False
 
 def AptgetPackageInstall(package,dbpasswd = "root"):
-    RunLog.info("Installing Package: " + package)
-    # Identify the package for Ubuntu
-    # We Haven't installed mysql-secure_installation for Ubuntu Distro
-    if (package == 'mysql-server'):
-        RunLog.info( "apt-get function package:" + package)
-        cmds = ("export DEBIAN_FRONTEND=noninteractive","echo mysql-server mysql-server/root_password select " + dbpasswd + " | debconf-set-selections", "echo mysql-server mysql-server/root_password_again select " + dbpasswd  + "| debconf-set-selections", "apt-get install -y  --force-yes mysql-server")
-        output = ExecMultiCmdsLocalSudo(cmds)
-    else:
-        output = Run("apt-get install -y  --force-yes "+package)
+	RunLog.info("Installing Package: " + package)
+	# Identify the package for Ubuntu
+	# We Haven't installed mysql-secure_installation for Ubuntu Distro
+	if (package == 'mysql-server'):
+		RunLog.info( "apt-get function package:" + package) 		
+		cmds = ("export DEBIAN_FRONTEND=noninteractive","echo mysql-server mysql-server/root_password select " + dbpasswd + " | debconf-set-selections", "echo mysql-server mysql-server/root_password_again select " + dbpasswd  + "| debconf-set-selections", "apt-get install -y  --force-yes mysql-server")
+		output = ExecMultiCmdsLocalSudo(cmds)
+	else:
+		output = Run("apt-get install -y  --force-yes "+package)
+	
+	outputlist = re.split("\n", output)	
+ 
+	unpacking = False
+	setting_up = False
 
-    outputlist = re.split("\n", output)
+	for line in outputlist:
+		#package is already installed
+		if (re.match(re.escape(package) + r' is already the newest version', line, re.M|re.I)):
+			RunLog.info(package + ": package is already installed."+line)
+			return True
+		#package installation check 1	
+		elif (re.match(r'Unpacking.*'+ re.escape(package) + r'.*', line, re.M|re.I)):
+			unpacking = True
+		#package installation check 2
+		elif (re.match(r'Setting up '+ re.escape(package) + r" \(.*" , line, re.M|re.I)):
+			setting_up = True
+		#Package installed successfully
+		if (setting_up and unpacking):
+			RunLog.info(package+": package installed successfully.")
+			return True
+		#package is not found on the repository
+		elif (re.match(r'E: Unable to locate package '+ re.escape(package), line, re.M|re.I)):
+			break
+		#package installation failed due to server unavailability
+		elif (re.match(r'E: Unable to fetch some archives', line, re.M|re.I)):
+			break
+		
+	#Consider package installation failed if non of the above matches.
+	RunLog.info(package + ": package installation failed!\n")
+	RunLog.info("Error log: "+output)
+	return False
 
-    unpacking = False
-    setting_up = False
+def ZypperPackageInstall(package):
+	RunLog.info( "\nzypper_package_install: " + package)
 
-    for line in outputlist:
-        #package is already installed
-        if (re.match(re.escape(package) + r' is already the newest version', line, re.M|re.I)):
-            RunLog.info(package + ": package is already installed."+line)
-            return True
-        #package installation check 1
-        elif (re.match(r'Unpacking '+ re.escape(package) + r" \(.*" , line, re.M|re.I)):
-            unpacking = True
-        #package installation check 2
-        elif (re.match(r'Setting up '+ re.escape(package) + r" \(.*" , line, re.M|re.I)):
-            setting_up = True
-        #Package installed successfully
-        if (setting_up and unpacking):
-            RunLog.info(package+": package installed successfully.")
-            return True
-        #package is not found on the repository
-        elif (re.match(r'E: Unable to locate package '+ re.escape(package), line, re.M|re.I)):
-            break
-        #package installation failed due to server unavailability
-        elif (re.match(r'E: Unable to fetch some archives', line, re.M|re.I)):
-            break
+	output = Run("zypper --non-interactive in "+package)
+	outputlist = re.split("\n", output)
+		
+	for line in outputlist:
+		#Package or package dependencies installed successfully
+		if (re.match(r'.*Installing: '+r'.*done', line, re.M|re.I)):
+			RunLog.info((package+": package installed successfully.\n"+line))
+			return True
+		#package or provider of package is already installed
+		elif (re.match(r'.*\''+re.escape(package)+r'\' is already installed', line, re.M|re.I)):
+			RunLog.info((package + ": package is already installed.\n"+line))
+			return True
+		#package is not found on the repository
+		elif (re.match(r'^No provider of \''+ re.escape(package) + r'\' found', line, re.M|re.I)):
+			break
 
-    #Consider package installation failed if non of the above matches.
-    RunLog.info(package + ": package installation failed!\n")
-    RunLog.info("Error log: "+output)
-    return False
+	#Consider package installation failed if non of the above matches.
+	RunLog.error((package + ": package installation failed!\n"+output))
+	return False
 
 def ZypperPackageRemove(package):
 	RunLog.info( "\nzypper_package_remove: " + package)
@@ -298,82 +321,59 @@ def ZypperPackageRemove(package):
 	#Consider package remove failed if non of the above matches.
 	RunLog.error((package + ": package remove failed!\n"+output))
 	return False
-
-def ZypperPackageRemove(package):
-    RunLog.info( "\nzypper_package_remove: " + package)
-
-    output = Run("zypper --non-interactive remove "+package)
-    outputlist = re.split("\n", output)
-
-    for line in outputlist:
-        #Package removed successfully
-        if (re.match(r'.*Removing '+re.escape(package)+r'.*done', line, re.M|re.I)):
-            RunLog.info((package+": package removed successfully.\n"+line))
-            return True
-        #package is not installed
-        elif (re.match(r'\''+re.escape(package)+r'\' is not installed', line, re.M|re.I)):
-            RunLog.info((package + ": package is not installed.\n"+line))
-            return True
-        #package is not found on the repository
-        elif (re.match(r'\''+re.escape(package)+r'\' not found in package names', line, re.M|re.I)):
-            return True
-
-    #Consider package remove failed if non of the above matches.
-    RunLog.error((package + ": package remove failed!\n"+output))
-    return False
-
+	
 def InstallPackage(package):
-    RunLog.info( "\nInstall_package: "+package)
-    [current_distro, distro_version] = DetectDistro()
-    if ((current_distro == "ubuntu") or (current_distro == "Debian")):
-        return AptgetPackageInstall(package)
-    elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos') or (current_distro == 'fedora')):
-        return YumPackageInstall(package)
-    elif ((current_distro == "SUSE") or (current_distro == "opensuse") or (current_distro == "sles")):
-        return ZypperPackageInstall(package)
-    else:
-        RunLog.error((package + ": package installation failed!"))
-        RunLog.info((current_distro + ": Unrecognised Distribution OS Linux found!"))
-        return False
+	RunLog.info( "\nInstall_package: "+package)
+	[current_distro, distro_version] = DetectDistro()
+	if ((current_distro == "ubuntu") or (current_distro == "Debian")):
+		return AptgetPackageInstall(package)
+	elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos') or (current_distro == 'fedora')):
+		return YumPackageInstall(package)
+	elif ((current_distro == "SUSE") or (current_distro == "opensuse") or (current_distro == "sles")):
+		return ZypperPackageInstall(package)
+	else:
+		RunLog.error((package + ": package installation failed!"))
+		RunLog.info((current_distro + ": Unrecognised Distribution OS Linux found!"))
+		return False
 
 def InstallDeb(file_path):
-    RunLog.info( "\nInstalling package: "+file_path)
-    output = Run("dpkg -i "+file_path+" 2>&1")
-    RunLog.info(output)
-    outputlist = re.split("\n", output)
+	RunLog.info( "\nInstalling package: "+file_path)
+	output = Run("dpkg -i "+file_path+" 2>&1")
+	RunLog.info(output)
+	outputlist = re.split("\n", output)
 
-    for line in outputlist:
-        #package is already installed
-        if(re.match("installation successfully completed", line, re.M|re.I)):
-            RunLog.info(file_path + ": package installed successfully."+line)
-            return True
-
-    RunLog.info(file_path+": Installation failed"+output)
-    return False
+	for line in outputlist:
+		#package is already installed
+		if(re.match("installation successfully completed", line, re.M|re.I)):
+			RunLog.info(file_path + ": package installed successfully."+line)
+			return True			
+			
+	RunLog.info(file_path+": Installation failed"+output)
+	return False
 
 def InstallRpm(file_path, package_name):
-    RunLog.info( "\nInstalling package: "+file_path)
-    output = Run("rpm -ivh --nodeps "+file_path+" 2>&1")
-    RunLog.info(output)
-    outputlist = re.split("\n", output)
-    package = re.split("/", file_path )[-1]
-    matchObj = re.match( r'(.*?)\.rpm', package, re.M|re.I)
-    package = matchObj.group(1)
-
-    for line in outputlist:
-        #package is already installed
-        if (re.match(r'.*package'+re.escape(package) + r'.*is already installed', line, re.M|re.I)):
-            RunLog.info(file_path + ": package is already installed."+line)
-            return True
-        elif(re.match(re.escape(package) + r'.*######', line, re.M|re.I)):
-            RunLog.info(package + ": package installed successfully."+line)
-            return True
-        elif(re.match(re.escape(package_name) + r'.*######', line, re.M|re.I)):
-            RunLog.info(package + ": package installed successfully."+line)
-            return True
-
-    RunLog.info(file_path+": Installation failed"+output)
-    return False
+	RunLog.info( "\nInstalling package: "+file_path)
+	output = Run("rpm -ivh --nodeps "+file_path+" 2>&1")
+	RunLog.info(output)
+	outputlist = re.split("\n", output)
+	package = re.split("/", file_path )[-1]
+	matchObj = re.match( r'(.*?)\.rpm', package, re.M|re.I)
+	package = matchObj.group(1)
+	
+	for line in outputlist:
+		#package is already installed
+		if (re.match(r'.*package'+re.escape(package) + r'.*is already installed', line, re.M|re.I)):
+			RunLog.info(file_path + ": package is already installed."+line)
+			return True
+		elif(re.match(re.escape(package) + r'.*######', line, re.M|re.I)):
+			RunLog.info(package + ": package installed successfully."+line)
+			return True
+		elif(re.match(re.escape(package_name) + r'.*######', line, re.M|re.I)): 
+			RunLog.info(package + ": package installed successfully."+line) 
+			return True 
+			
+	RunLog.info(file_path+": Installation failed"+output)
+	return False
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------
 

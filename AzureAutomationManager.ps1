@@ -108,41 +108,25 @@ try
 
     if ($UseAzureResourceManager)
     {
-        Switch-AzureMode -Name AzureResourceManager
         Set-Variable -Name UseAzureResourceManager -Value $true -Scope Global
         Select-AzureSubscription -SubscriptionName $AzureSetup.SubscriptionName
     }
     else
     {
-        Switch-AzureMode -Name AzureServiceManagement
         Set-Variable -Name UseAzureResourceManager -Value $false -Scope Global
-        LogMsg "Setting Subscription"
-        SetSubscription -subscriptionID $AzureSetup.SubscriptionID -subscriptionName $AzureSetup.SubscriptionName -certificateThumbprint $AzureSetup.CertificateThumbprint -managementEndpoint $AzureSetup.ManagementEndpoint -storageAccount $AzureSetup.StorageAccount
-        $AllSubscriptions = Get-AzureSubscription
-        foreach ($subscription in $AllSubscriptions)
-        {
-            if (($subscription.CurrentStorageAccountName -imatch $AzureSetup.StorageAccount) -and ( $subscription.SubscriptionName -imatch $AzureSetup.SubscriptionName))
-            {
-                $currentSubscription = $subscription
-            }
-        }
+        LogMsg "Setting Azure Subscription ..."
+        $out = SetSubscription -subscriptionID $AzureSetup.SubscriptionID -subscriptionName $AzureSetup.SubscriptionName -certificateThumbprint $AzureSetup.CertificateThumbprint -managementEndpoint $AzureSetup.ManagementEndpoint -storageAccount $AzureSetup.StorageAccount
+        $currentSubscription = Get-AzureSubscription -SubscriptionId $AzureSetup.SubscriptionID -ExtendedDetails
         LogMsg "SubscriptionName           : $($currentSubscription.SubscriptionName)"
         LogMsg "SubscriptionId             : $($currentSubscription.SubscriptionID)"
         LogMsg "ServiceEndpoint            : $($currentSubscription.ServiceEndpoint)"
-        LogMsg "CurrentStorageAccount      : $($currentSubscription.CurrentStorageAccountName)"
+        LogMsg "CurrentStorageAccount      : $($currentSubscription.StorageAccount)"
     }
     
     #Check for the Azure platform
     if($Platform -eq "Azure")
     {
 	    #Installing Azure-SDK
-	    .\SetupScripts\ImportAzureSDK.ps1
-	    if(!$?)
-	    {
-	        LogMsg "Failed to import Azure-SDK"
-	        exit 2
-	   
-	    }
         if ( $UseAzureResourceManager )
         {
             LogMsg "*************AZURE RESOURCE GROUP MODE****************"

@@ -1162,7 +1162,7 @@ Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFa
 				$servicesToVerify = $deployedServices.Split('^')
 				if ( $GetDeploymentStatistics )
 				{
-					$VMBooTime = GetVMBootTime -DeployedServices $deployedServices -TimeoutInSeconds 1800
+					$VMBooTime = GetVMBootTime -DeployedServices $deployedServices -TimeoutInSeconds 200
 					$verifyAll = VerifyAllDeployments -servicesToVerify $servicesToVerify -GetVMProvisionTime $GetDeploymentStatistics
 					$isAllVerified = $verifyAll[0]
 					$VMProvisionTime = $verifyAll[1]
@@ -1469,7 +1469,7 @@ Function GetVMBootTime($DeployedServices, $TimeoutInSeconds)
 {
 	$VMBootStarted = Get-Date
 	$TestIPPOrts = ""
-	$sleepTime = 3
+	$sleepTime = 1
 	$maxRetryCount = $TimeoutInSeconds / $sleepTime
 	foreach ($hostedservice in $DeployedServices.Split("^"))
 	{
@@ -4095,8 +4095,8 @@ Function Get-SSHDetailofVMs($DeployedServices, $ResourceGroups)
 	{
 		foreach ($ResourceGroup in $ResourceGroups.Split("^"))
 		{
-			$RGIPdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/publicIPAddresses" -ExpandProperties -OutputObjectFormat New -Verbose
-			$RGVMs = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Compute/virtualMachines" -ExpandProperties -OutputObjectFormat New -Verbose
+			$RGIPdata = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/publicIPAddresses" -ExpandProperties -IsCollection -Verbose
+			$RGVMs = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Compute/virtualMachines" -ExpandProperties -IsCollection -Verbose
 			foreach ($testVM in $RGVMs)
 			{
 				$AllEndpoints = $testVM.Properties.NetworkProfile.InputEndpoints
@@ -4141,9 +4141,9 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 		foreach ($ResourceGroup in $ResourceGroups.Split("^"))
 		{
 			LogMsg "Collecting $ResourceGroup data.."
-			$RGIPdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/publicIPAddresses" -ExpandProperties -OutputObjectFormat New -Verbose
-			$RGVMs = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Compute/virtualMachines" -ExpandProperties -OutputObjectFormat New -Verbose
-			$NICdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/networkInterfaces" -ExpandProperties -OutputObjectFormat New -Verbose
+			$RGIPdata = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/publicIPAddresses" -Verbose -ExpandProperties -IsCollection
+			$RGVMs = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Compute/virtualMachines" -Verbose -ExpandProperties -IsCollection
+			$NICdata = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/networkInterfaces" -Verbose -ExpandProperties -IsCollection
 			$numberOfVMs = 0
 			foreach ($testVM in $RGVMs)
 			{
@@ -4151,7 +4151,7 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 			}
 			if ( $numberOfVMs -gt 1 )
 			{
-				$LBdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/loadBalancers" -ExpandProperties -OutputObjectFormat New -Verbose
+				$LBdata = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/loadBalancers" -ExpandProperties -IsCollection -Verbose
 			}
 			foreach ($testVM in $RGVMs)
 			{
@@ -6342,13 +6342,13 @@ Function GetStorageAccountKey ($xmlConfig)
 	if ( $UseAzureResourceManager )
 	{
 		$storageAccountName =  $xmlConfig.config.Azure.General.ARMStorageAccount
-		$StorageAccounts = Get-AzureStorageAccount
+		$StorageAccounts = Get-AzureRmStorageAccount
 		foreach ($SA in $StorageAccounts)
 		{
 			if ( $SA.Name -eq $storageAccountName )
 			{
 				LogMsg "Getting $storageAccountName storage account key..."
-				$storageAccountKey = (Get-AzureStorageAccountKey -ResourceGroupName $SA.ResourceGroupName -Name $SA.Name).Key1
+				$storageAccountKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $SA.ResourceGroupName -Name $SA.Name).Key1
 			}
 		}
 	}
