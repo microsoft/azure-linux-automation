@@ -4047,6 +4047,15 @@
 			<SubtestValues>Needs_To_Executed_In_Subtest_Mode</SubtestValues>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-DOCKER-EXTENSION-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-DOCKER-EXTENSION-TEST.ps1</testScriptps1>
+			<ProvisionTimeExtensions>Docker</ProvisionTimeExtensions>
+			<setupType>ExtensionTest</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<Priority>P0</Priority>
 		</test>		
 	</testsDefinition>
 
@@ -4636,6 +4645,12 @@
 			</test>
 			<test>
 				<Name>ICA-VM-DIAGNOSTIC-EXTENSION-TEST</Name>
+			</test>
+			<test>
+				<Name>ICA-VM-ACCESS-EXTENSION-TEST</Name>
+			</test>
+			<test>
+				<Name>ICA-DOCKER-EXTENSION-TEST</Name>
 			</test>			
 		</Cycle>
 
