@@ -5,7 +5,7 @@ from azuremodules import *
 def RunTest(command):
     UpdateState("TestRunning")
     RunLog.info("Checking WALinuxAgent in running processes")
-    temp = RunUpdate(command)
+    temp = Run(command)
     timeout = 0
     output = temp
     if ("waagent" in output) :
@@ -17,4 +17,8 @@ def RunTest(command):
                     ResultLog.Error('FAIL')
                     UpdateState("TestCompleted")
         
+<<<<<<< HEAD
 RunTest("ps -ef | grep waagent | grep -v grep")
+=======
+RunTest("ps -ef | grep waagent | grep -v 'grep waagent'")
+>>>>>>> minor fix
