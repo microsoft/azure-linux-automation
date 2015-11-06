@@ -1,0 +1,8 @@
+<!--#This list contains the ignorable boot errors of different images.-->
+<messages>		
+	<errors>
+		<keywords>Error Code is 127</keywords>
+		<keywords>parted</keywords>			
+		<keywords>Failed to config rdma device</keywords>
+	</errors>
+</messages>

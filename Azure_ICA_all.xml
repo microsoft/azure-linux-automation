@@ -2504,7 +2504,7 @@
 			<testName>BVT-VERIFY-NO-ERROR-IN-LOGS</testName>
 			<testScript>BVT-VERIFY-NO-ERROR-IN-LOGS.py</testScript>
 			<testScriptPs1>BVT-VERIFY-NO-ERROR-IN-LOGS.ps1</testScriptPs1>
-			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\BVT-VERIFY-NO-ERROR-IN-LOGS.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\BVT-VERIFY-NO-ERROR-IN-LOGS.py,.\remote-scripts\ignorable-walalog-errors.xml</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
