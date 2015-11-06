@@ -4,25 +4,56 @@ from azuremodules import *
 
 
 import argparse
-import sys
-import time
+import os
 
-expectedValue = "0"
+parser = argparse.ArgumentParser()
+parser.add_argument('-wl', '--whitelist', help='specify the xml file which contains the ignorable errors')
 
-def RunTest(expectedvalue):
+args = parser.parse_args()
+white_list_xml = args.whitelist
+
+def RunTest():
     UpdateState("TestRunning")
-    RunLog.info("Checking log waagent.log...")
-    temp = Run("grep -i error /var/log/waagent.log | grep -v health | wc -l | tr -d '\n'")
-    output = temp
-    if (expectedvalue == output) :
+    RunLog.info("Checking for ERROR messages in waagent.log...")
+    errors = Run("grep -i error /var/log/waagent.log")
+    if (not errors) :
         RunLog.info('There is no errors in the logs waagent.log')
         ResultLog.info('PASS')
         UpdateState("TestCompleted")
     else :
-        RunLog.error('Verify log waagent.log fail. Current value : %s Expected value : %s' % (output, expectedvalue))
-        errorInfo = Run("grep -i error /var/log/waagent.log")
-        RunLog.error('error Info from waagent.log as below: \n' + errorInfo)
-        ResultLog.error('FAIL')
-        UpdateState("TestCompleted")
+        if white_list_xml and os.path.isfile(white_list_xml):
+            try:
+                import xml.etree.cElementTree as ET
+            except ImportError:
+                import xml.etree.ElementTree as ET
 
-RunTest(expectedValue)
+            white_list_file = ET.parse(white_list_xml)
+            xml_root = white_list_file.getroot()
+            RunLog.info('Checking ignorable walalog ERROR messages...')
+            for node in xml_root:
+                if (errors and node.tag == "errors"):
+                    errors = RemoveIgnorableMessages(errors, node)
+        if (errors):
+            RunLog.info('ERROR are  present in wala log.')
+            RunLog.info('Errors: ' + ''.join(errors))
+            ResultLog.error('FAIL')
+        else:
+            ResultLog.info('PASS')
+        UpdateState("TestCompleted")
+		
+def RemoveIgnorableMessages(messages, keywords_xml_node):
+    message_list = messages.strip().split('\n')
+    valid_list = []
+    for msg in message_list:
+        for keywords in keywords_xml_node:
+            if keywords.text in msg:
+                RunLog.info('Ignorable ERROR message: ' + msg)
+                break 
+        else:
+            valid_list.append(msg)
+    if len(valid_list) > 0:
+        return valid_list
+    else:
+        return None                
+
+RunTest()
