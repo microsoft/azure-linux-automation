@@ -276,7 +276,7 @@ def ConfigFilesUpdate():
                         RunLog.error('**Failed to disable Firewall**')
                         firewall_disabled = False
         else:
-                FirewallCmds = ("iptables -F","iptables -X","iptables -t nat -F","iptables -t nat -X","iptables -t mangle -F","iptables -t mangle -X","iptables -P INPUT ACCEPT","iptables -P OUTPUT ACCEPT","iptables -P FORWARD ACCEPT","systemctl stop iptables.service","systemctl disable iptables.service","systemctl stop firewalld.service","systemctl disable firewalld.service")
+                FirewallCmds = ("iptables -F","iptables -X","iptables -t nat -F","iptables -t nat -X","iptables -t mangle -F","iptables -t mangle -X","iptables -P INPUT ACCEPT","iptables -P OUTPUT ACCEPT","iptables -P FORWARD ACCEPT","systemctl stop iptables.service","systemctl disable iptables.service","systemctl stop firewalld.service","systemctl disable firewalld.service","chkconfig iptables off")
                 output = ExecMultiCmdsLocalSudo(FirewallCmds)
                 RunLog.info("Firewall disabled successfully\n")
                 Run("echo '** Firewall disabled successfully **' >> PackageStatus.txt")
