@@ -48,6 +48,10 @@ Download dos2unix executables from http://sourceforge.net/projects/dos2unix/ and
 
         •	dos2unix.exe
 		
+Download 7-zip executable from http://www.7-zip.org/ ( Direct Download Link : http://www.7-zip.org/a/7za920.zip ) and keep them in `.\automation_root_folder\tools`. You should have the following utility:
+
+        •	7za.exe
+		
 ### Update Azure_ICA_all.xml file
 1.	Setup Subscription details.
 

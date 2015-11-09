@@ -8,40 +8,74 @@ $resultArr = @()
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if($isDeployed)
 {
-#region EXTRACT ALL INFORMATION ABOUT DEPLOYED VMs
-	$SSHDetails = Get-SSHDetailofVMs -DeployedServices $isDeployed
-#endregion
+	$allVnetData = GetVNETDetailsFromXMLDeploymentData -deploymentType $currentTestData.setupType
+	$vnetName = $allVnetData[0]
+	$subnet1Range = $allVnetData[1]
+	$subnet2Range = $allVnetData[2]
+	$vnetDomainDBFilePath = $allVnetData[3]
+	$vnetDomainRevFilePath = $allVnetData[4]
+	$dnsServerIP = $allVnetData[5]
+	$SSHDetails = ""
+	foreach ($vmData in $allVMData)
+	{
+		if($SSHDetails)
+		{
+			$SSHDetails = $SSHDetails + "^$($vmData.PublicIP)" + ':' +"$($vmData.SSHPort)"
+		}
+		else
+		{
+			$SSHDetails = "$($vmData.PublicIP)" + ':' +"$($vmData.SSHPort)"
+		}
+	}
 #region CONFIGURE VNET VMS AND MAKE THEM READY FOR VNET TEST EXECUTION...
-	try
-	{
-        # NO PRECONFIGURATION NEEDED FOR THIS TEST.
-        $tmp = ConfigureVNETVMs -SSHDetails $SSHDetails
+		# NO PRECONFIGURATION NEEDED FOR THIS TEST.
 		$isAllConfigured = "True"
-	}
-	catch
-	{
-		$isAllConfigured = "False"
-		$ErrorMessage =  $_.Exception.Message
-		LogErr "EXCEPTION : $ErrorMessage"   
-	}
 #endregion
 
 #region TEST EXECUTION
 	if ($isAllConfigured -eq "True")
 	{
+		$verifyIPScriptBlock = {
+			$ErrCount = 0
+			foreach ($vmData in $allVMData)
+			{
+				LogMsg "Checking : $($vmData.Rolename)"
+				$out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "$ifconfig_cmd -a" -runAsSudo
+				LogMsg $out -LinuxConsoleOuput
+				if ($out -imatch $vmData.InternalIP)
+				{
+					LogMsg "Expected DIP : $($vmData.InternalIP); Recorded DIP : $($vmData.InternalIP);"
+					LogMsg "$($vmData.Rolename) has correct DIP.."
+				}
+				else
+				{
+					LogErr "INCORRECT DIP DETAIL : $($vmData.Rolename)"
+					$ErrCount = $ErrCount + 1
+				}
+			}
+			if ($ErrCount -eq 0)
+			{
+				$testResult = "PASS"
+			}
+			else 
+			{
+				$testResult = "FAIL"
+			}
+			return $testResult
+		}
 		try
 		{
-			$testResultBeforeReboot = VerifyDIPafterInitialDeployment -DeployedServices $isDeployed
+			$testResultBeforeReboot = Invoke-Command -ScriptBlock $verifyIPScriptBlock
 # Now Reboot all the deployments..
-			if ($testResultBeforeReboot -eq "True")
+			if ($testResultBeforeReboot -eq "PASS")
 			{
-				$isRestarted = RestartAllDeployments -DeployedServices $isDeployed
+				$isRestarted = RestartAllDeployments -allVMData $allVMData
 				if ($isRestarted -eq "True")
 				{
-					$testResultAfterReboot = VerifyDIPafterInitialDeployment -DeployedServices $isDeployed
-					if($testResultAfterReboot -eq "True")
+					$testResultAfterReboot = Invoke-Command -ScriptBlock $verifyIPScriptBlock
+					if($testResultAfterReboot -eq "PASS")
 					{
-						LogMsg "ALL VMs have correct DIPs."
+						LogMsg "ALL VMs have correct DIPs after reboot."
 						$testResult = "PASS"
 					}
 					else
@@ -99,7 +133,7 @@ $result = GetFinalResultHeader -resultarr $resultArr
 #endregion
 
 #Clean up the setup
-DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed
+DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed -ResourceGroups $isDeployed
 
 #Return the result and summery to the test suite script..
 return $result

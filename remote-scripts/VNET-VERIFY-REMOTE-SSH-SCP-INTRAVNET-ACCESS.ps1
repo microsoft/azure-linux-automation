@@ -6,71 +6,97 @@ $result = ""
 $testResult = ""
 $resultArr = @()
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
-
 if($isDeployed)
 {
-#region EXTRACT ALL INFORMATION ABOUT DEPLOYED VMs
-#Extract the VM information..
-	$hsNames = $isDeployed
-	$hsNames = $hsNames.Split("^")
-	$hs1Name = $hsNames[0]
-	$hs2Name = $hsNames[1]
-	$testService1Data = Get-AzureService -ServiceName $hs1Name
-	$testService2Data =  Get-AzureService -ServiceName $hs2Name
+	#region EXTRACT ALL INFORMATION ABOUT DEPLOYED VMs
+	$allVnetData = GetVNETDetailsFromXMLDeploymentData -deploymentType $currentTestData.setupType
+	$vnetName = $allVnetData[0]
+	$subnet1Range = $allVnetData[1]
+	$subnet2Range = $allVnetData[2]
+	$vnetDomainDBFilePath = $allVnetData[3]
+	$vnetDomainRevFilePath = $allVnetData[4]
+	$dnsServerIP = $allVnetData[5]
 
-#Get VMs deployed in the service..
-	$hs1vms = $testService1Data | Get-AzureVM
-	$hs2vms = $testService2Data | Get-AzureVM
-	$hs1vm1 = $hs1vms[0]
-	$hs1vm2 = $hs1vms[1]
-	$hs2vm1 = $hs2vms[0]
-	$hs2vm2 = $hs2vms[1]
-#Get the IP addresses
-	$hs1vm1IP = $hs1vm1.IPaddress
-	$hs1vm2IP = $hs1vm2.IPaddress
-	$hs2vm1IP = $hs2vm1.IPaddress
-	$hs2vm2IP = $hs2vm2.IPaddress
-	$hs1vm1Hostname = $hs1vm1.InstanceName
-	$hs1vm2Hostname = $hs1vm2.InstanceName
-	$hs2vm1Hostname = $hs2vm1.InstanceName
-	$hs2vm2Hostname = $hs2vm2.InstanceName
-	$hs1vm1Endpoints = $hs1vm1 | Get-AzureEndpoint
-	$hs1vm2Endpoints = $hs1vm2 | Get-AzureEndpoint
-	$hs2vm1Endpoints = $hs2vm1 | Get-AzureEndpoint
-	$hs2vm2Endpoints = $hs2vm2 | Get-AzureEndpoint
-	$hs1VIP = $hs1vm1Endpoints[0].Vip
-	$hs2VIP = $hs2vm1Endpoints[0].Vip
-	$hs1ServiceUrl = $hs1vm1.DNSName
-	$hs1ServiceUrl = $hs1ServiceUrl.Replace("http://","")
-	$hs1ServiceUrl = $hs1ServiceUrl.Replace("/","")
-	$hs2ServiceUrl = $hs2vm1.DNSName
-	$hs2ServiceUrl = $hs2ServiceUrl.Replace("http://","")
-	$hs2ServiceUrl = $hs2ServiceUrl.Replace("/","")
-	$hs1vm1tcpport = GetPort -Endpoints $hs1vm1Endpoints -usage tcp
-	$hs1vm2tcpport = GetPort -Endpoints $hs1vm2Endpoints -usage tcp
-	$hs2vm1tcpport = GetPort -Endpoints $hs2vm1Endpoints -usage tcp
-	$hs2vm2tcpport = GetPort -Endpoints $hs2vm2Endpoints -usage tcp
-	$hs1vm1udpport = GetPort -Endpoints $hs1vm1Endpoints -usage udp
-	$hs1vm2udpport = GetPort -Endpoints $hs1vm2Endpoints -usage udp
-	$hs2vm1udpport = GetPort -Endpoints $hs2vm1Endpoints -usage udp
-	$hs2vm2udpport = GetPort -Endpoints $hs2vm2Endpoints -usage udp
-	$hs1vm1sshport = GetPort -Endpoints $hs1vm1Endpoints -usage ssh	
-	$hs1vm2sshport = GetPort -Endpoints $hs1vm2Endpoints -usage ssh	
-	$hs2vm1sshport = GetPort -Endpoints $hs2vm1Endpoints -usage ssh	
-	$hs2vm2sshport = GetPort -Endpoints $hs2vm2Endpoints -usage ssh	
-	$SSHDetails = Get-SSHDetailofVMs -DeployedServices $isDeployed
-	$HostnameDIPDetails = Get-AllVMHostnameAndDIP $isDeployed
+	$hs1vm1IP = $allVMData[0].InternalIP
+	$hs1vm2IP = $allVMData[1].InternalIP
+	$hs2vm1IP = $allVMData[2].InternalIP
+	$hs2vm2IP = $allVMData[3].InternalIP
 
-#endregion
+	$hs1vm1Hostname = $allVMData[0].RoleName
+	$hs1vm2Hostname = $allVMData[1].RoleName
+	$hs2vm1Hostname = $allVMData[2].RoleName
+	$hs2vm2Hostname = $allVMData[3].RoleName
+
+	$hs1VIP = $allVMData[0].PublicIP
+	$hs2VIP = $allVMData[2].PublicIP
+
+	$hs1ServiceUrl = $allVMData[0].URL
+	$hs2ServiceUrl = $allVMData[2].URL
+
+	$hs1vm1sshport = $allVMData[0].SSHPort
+	$hs1vm2sshport = $allVMData[1].SSHPort
+	$hs2vm1sshport = $allVMData[2].SSHPort
+	$hs2vm2sshport = $allVMData[3].SSHPort
+
+	$hs1vm1tcpport = $allVMData[0].TCPtestPort
+	$hs1vm2tcpport = $allVMData[1].TCPtestPort
+	$hs2vm1tcpport = $allVMData[2].TCPtestPort
+	$hs2vm2tcpport = $allVMData[3].TCPtestPort
+
+	$hs1vm1udpport = $allVMData[0].UDPtestPort
+	$hs1vm2udpport = $allVMData[1].UDPtestPort
+	$hs2vm1udpport = $allVMData[2].UDPtestPort
+	$hs2vm2udpport = $allVMData[3].UDPtestPort
+
+	$SSHDetails = ""
+	$HostnameDIPDetails = ""
+	foreach ($vmData in $allVMData)
+	{
+		if($SSHDetails)
+		{
+			$SSHDetails = $SSHDetails + "^$($vmData.PublicIP)" + ':' +"$($vmData.SSHPort)"
+		}
+		else
+		{
+			$SSHDetails = "$($vmData.PublicIP)" + ':' +"$($vmData.SSHPort)"
+		}
+		$VMhostname = $vmData.RoleName
+		$VMDIP = $vmData.InternalIP
+		if($HostnameDIPDetails)
+		{
+			$HostnameDIPDetails = $HostnameDIPDetails + "^$VMhostname" + ':' +"$VMDIP"
+		}
+		else
+		{
+			$HostnameDIPDetails = "$VMhostname" + ':' +"$VMDIP"
+		}
+	}	
+	#endregion
+
 #region CONFIGURE VNET VMS AND MAKE THEM READY FOR VNET TEST EXECUTION...
 	try
 	{
-		$dnsServer = CreateVMNode -nodeIp '192.168.3.120' -nodeSshPort 22 -user root -password "redhat" -nodeHostname ubuntudns
-		$intermediateVM = CreateVMNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -user $user -password $password -nodeDip $hs1vm1IP -nodeHostname $hs1vm1Hostname
-		ConfigureVNETVms -SSHDetails $SSHDetails
+		ConfigureVNETVms -SSHDetails $SSHDetails -vnetDomainDBFilePath $vnetDomainDBFilePath -dnsServerIP $dnsServerIP
 		UploadFilesToAllDeployedVMs -SSHDetails $SSHDetails -files $currentTestData.files
-		RunLinuxCmdOnAllDeployedVMs -SSHDetails $SSHDetails -command "chmod +x *.py"
-		ConfigureDnsServer -intermediateVM $intermediateVM -DnsServer $dnsServer -HostnameDIPDetails $HostnameDIPDetails
+		RunLinuxCmdOnAllDeployedVMs -SSHDetails $SSHDetails -command "chmod +x *.py"		
+		if ($UseAzureResourceManager)
+		{
+			$dnsServer = CreateVMNode -nodeIp "192.168.3.120" -nodeSshPort 22 -user "root" -password "redhat" -nodeHostname "dns-srv-01-arm"
+			$nfsServer = CreateVMNode -nodeIp "192.168.3.125" -nodeSshPort 22 -user "root" -password "redhat" -nodeHostname "nfs-srv-01-arm"
+			$mysqlServer = CreateVMNode -nodeIp "192.168.3.127" -nodeSshPort 22 -user "root" -password "redhat" -nodeHostname "mysql-srv-01-arm"
+		}
+		else
+		{
+			$dnsServer = CreateVMNode -nodeIp "192.168.3.120" -nodeSshPort 22 -user "root" -password "redhat" -nodeHostname "ubuntudns"
+			$nfsServer = CreateVMNode -nodeIp "192.168.3.125" -nodeSshPort 22 -user "root" -password "redhat" -nodeHostname "ubuntunfsserver"
+			$mysqlServer = CreateVMNode -nodeIp "192.168.3.127" -nodeSshPort 22 -user "root" -password "redhat" -nodeHostname "ubuntumysql"
+		}
+		$intermediateVM = CreateVMNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -user $user -password $password -nodeDip $hs1vm1IP -nodeHostname $hs1vm1Hostname
+		$currentLinuxFiles = ConvertFileNames -ToLinux -currentWindowsFiles $currentTestData.files -expectedLinuxPath "/home/$user"
+		RemoteCopyRemoteVM -upload -intermediateVM $intermediateVM -remoteVM $dnsServer  -remoteFiles $currentLinuxFiles
+		RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $dnsServer -remoteCommand "chmod +x /home/$user/*.py" -runAsSudo
+		#Configure DNS Server
+		ConfigureDnsServer -intermediateVM $intermediateVM -DnsServer $dnsServer -HostnameDIPDetails $HostnameDIPDetails -vnetDomainDBFilePath $vnetDomainDBFilePath -vnetDomainREVFilePath $vnetDomainRevFilePath
 		$isAllConfigured = "True"
 	}
 	catch
@@ -150,7 +176,7 @@ if($isDeployed)
 					$resultArr += $testResult
 					$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
 
-				}     
+				}	 
 			}
 		}
 	}
@@ -171,9 +197,10 @@ else
 }
 $result = GetFinalResultHeader -resultarr $resultArr
 #region Clenup the DNS server.
-#   THIS TEST DOESN'T REQUIRE DNS SERVER CLEANUP
+$dnsServer.cmd = "/home/$user/CleanupDnsServer.py -D $vnetDomainDBFilePath -r $vnetDomainRevFilePath"
+RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $dnsServer -runAsSudo -remoteCommand $dnsServer.cmd
 #endregion
 #Clean up the setup
-DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed
+DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed -ResourceGroups $isDeployed
 #Return the result and summery to the test suite script..
 return $result, $resultSummary
