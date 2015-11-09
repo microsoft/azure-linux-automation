@@ -2260,7 +2260,7 @@
 			<testName>BVT-VERIFY-DEPLOYMENT-PROVISION</testName>
 			<testScript></testScript>
 			<testScriptPs1>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</testScriptPs1>
-			<files></files>
+			<files>.\remote-scripts\nslookup.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
