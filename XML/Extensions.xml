@@ -55,5 +55,12 @@
 			<NewPassword>VMAccessUserNewPassword</NewPassword>
 			<ExtensionTask>AddUser,ResetPassword,DeleteUser,ResetSSHConfig</ExtensionTask>
 		</Extension>
+		<Extension>
+			<Name>Docker</Name>
+			<OfficialName>DockerExtension</OfficialName>
+			<Publisher>Microsoft.Azure.Extensions</Publisher>
+			<Version>1.*</Version>
+			<LatestVersion>1.0</LatestVersion>			
+		</Extension>
 	</Extensions>
 	
