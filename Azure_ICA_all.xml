@@ -4548,6 +4548,47 @@
 				<Name>VNET-VERIFY-CA-AFTER-REBOOT</Name>
 			</test>
 		</Cycle>
+		
+		<!-- All network tests for CI -->		
+		<Cycle>
+			<cycleName>CI-NETWORK</cycleName>
+			<test>
+				<Name>NETWORK-OUTBOUND-ACCESS-IPERF-DTAP-TCP</Name>
+			</test>
+			<test>
+				<Name>NETWORK-OUTBOUND-ACCESS-IPERF-DTAP-UDP</Name>
+			</test>
+			<test>
+				<Name>NETWORK-INPUT-ENDPOINT-IPERF-TCP</Name>
+			</test>
+			<test>
+				<Name>NETWORK-INPUT-ENDPOINT-IPERF-UDP</Name>
+			</test>
+			<test>
+				<Name>NETWORK-IE-TCP-SINGLE-HS</Name>
+			</test>
+			<test>
+				<Name>NETWORK-IE-UDP-SINGLE-HS</Name>
+			</test>
+			<test>
+				<Name>NETWORK-IDNS-SINGLEHS-CHANGED-HOSTNAME</Name>
+			</test>
+		</Cycle>
+
+		<!-- VNET tests for CI -->
+		<Cycle>
+			<cycleName>CI-VNET</cycleName>
+			<test>
+				<Name>VNET-VERIFY-REMOTE-SSH-SCP-INTRAVNET-ACCESS</Name>
+			</test>
+			<test>
+				<Name>VNET-VERIFY-REMOTE-SSH-SCP-LOCAL-TO-VNET-ACCESS</Name>
+			</test>
+			<test>
+				<Name>VNET-VERIFY-REMOTE-SSH-SCP-OUTBOUND-ACCESS</Name>
+			</test>
+		</Cycle>
+		
 		<!-- xSMB tests -->
 		<Cycle>
 			<cycleName>XSMB</cycleName>
