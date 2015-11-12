@@ -2315,7 +2315,7 @@
 			<testName>BVT-VERIFY-HOSTNAME</testName>
 			<testScript>BVT-VERIFY-HOSTNAME.py</testScript>
 			<testScriptPs1>BVT-VERIFY-HOSTNAME.ps1</testScriptPs1>
-			<files>.\remote-scripts\BVT-VERIFY-HOSTNAME.py,.\remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\nslookup.py,.\remote-scripts\BVT-VERIFY-HOSTNAME.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
