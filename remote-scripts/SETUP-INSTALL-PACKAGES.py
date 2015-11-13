@@ -88,6 +88,8 @@ def zypper_package_install(package):
                 return True
         elif(download_and_install_rpm(package) == True):
                 return True
+        elif(package == 'gcc'):
+                return InstallGcc()    
         else:
                 return False
 
@@ -156,6 +158,32 @@ def install_ez_setup():
         output = Run("{0} {1}".format(python_cmd, ez_setup))
         return ("Finished" in output)
 
+def InstallGcc():
+        RunLog.info("Installing Package: gcc interactive")
+        Run("wget http://pexpect.sourceforge.net/pexpect-2.3.tar.gz;tar xzf pexpect-2.3.tar.gz;cd pexpect-2.3;python ./setup.py install;cd ..")
+        import pexpect
+        cmd = 'zypper install gcc'
+        child = pexpect.spawn(cmd)
+        child.logfile = sys.stdout
+        index = child.expect(["(?i)Choose from above solutions by number or cancel", pexpect.EOF, pexpect.TIMEOUT])
+        if(index == 0):
+                child.sendline('1')
+                index = child.expect(["(?i)Continue?", pexpect.EOF, pexpect.TIMEOUT])
+                if(index == 0):
+                        child.sendline('y')
+                        index = child.expect(["Installing: gcc-.*[done]", pexpect.EOF, pexpect.TIMEOUT])
+                        if(index == 0):
+                                RunLog.info("gcc: package installed successfully.\n")
+                                return True
+                        else:
+                                RunLog.error("gcc: package installed failed.\n")
+                                return False
+                else:
+                        RunLog.error("gcc: package installed failed.\n")
+                        return False
+        else:
+                RunLog.error("gcc: package installed failed.\n")
+                return False
 
 
 def install_waagent_from_github():
