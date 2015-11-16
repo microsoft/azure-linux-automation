@@ -2395,7 +2395,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 						foreach ($group in $ResourceGroups)
 						{
 							LogMsg "Setting tags : preserve = yes; testName = $testName"
-							$out = Set-AzureRmResourceGroup -Name $group -Tag @{Name ="preserve"; Value = "yes"},@{Name ="testName"; Value = "$testName"}
+							$out = Set-AzureResourceGroup -Name $group -Tag @{Name ="preserve"; Value = "yes"},@{Name ="testName"; Value = "$testName"}
 						}
 						LogMsg "Collecting VM logs.."
 						GetVMLogs -allVMData $allVMData
@@ -4096,8 +4096,8 @@ Function Get-SSHDetailofVMs($DeployedServices, $ResourceGroups)
 	{
 		foreach ($ResourceGroup in $ResourceGroups.Split("^"))
 		{
-			$RGIPdata = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/publicIPAddresses" -ExpandProperties -IsCollection -Verbose
-			$RGVMs = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Compute/virtualMachines" -ExpandProperties -IsCollection -Verbose
+			$RGIPdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/publicIPAddresses" -ExpandProperties -OutputObjectFormat New -Verbose
+			$RGVMs = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Compute/virtualMachines" -ExpandProperties -OutputObjectFormat New -Verbose
 			foreach ($testVM in $RGVMs)
 			{
 				$AllEndpoints = $testVM.Properties.NetworkProfile.InputEndpoints
@@ -4142,9 +4142,9 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 		foreach ($ResourceGroup in $ResourceGroups.Split("^"))
 		{
 			LogMsg "Collecting $ResourceGroup data.."
-			$RGIPdata = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/publicIPAddresses" -Verbose -ExpandProperties -IsCollection
-			$RGVMs = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Compute/virtualMachines" -Verbose -ExpandProperties -IsCollection
-			$NICdata = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/networkInterfaces" -Verbose -ExpandProperties -IsCollection
+			$RGIPdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/publicIPAddresses" -Verbose -ExpandProperties -OutputObjectFormat New
+			$RGVMs = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Compute/virtualMachines" -Verbose -ExpandProperties -OutputObjectFormat New
+			$NICdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/networkInterfaces" -Verbose -ExpandProperties -OutputObjectFormat New
 			$numberOfVMs = 0
 			foreach ($testVM in $RGVMs)
 			{
@@ -4152,7 +4152,7 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 			}
 			if ( $numberOfVMs -gt 1 )
 			{
-				$LBdata = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/loadBalancers" -ExpandProperties -IsCollection -Verbose
+				$LBdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/loadBalancers" -ExpandProperties -OutputObjectFormat New -Verbose
 			}
 			foreach ($testVM in $RGVMs)
 			{
@@ -6343,13 +6343,13 @@ Function GetStorageAccountKey ($xmlConfig)
 	if ( $UseAzureResourceManager )
 	{
 		$storageAccountName =  $xmlConfig.config.Azure.General.ARMStorageAccount
-		$StorageAccounts = Get-AzureRmStorageAccount
+		$StorageAccounts = Get-AzureStorageAccount
 		foreach ($SA in $StorageAccounts)
 		{
 			if ( $SA.Name -eq $storageAccountName )
 			{
 				LogMsg "Getting $storageAccountName storage account key..."
-				$storageAccountKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $SA.ResourceGroupName -Name $SA.Name).Key1
+				$storageAccountKey = (Get-AzureStorageAccountKey -ResourceGroupName $SA.ResourceGroupName -Name $SA.Name).Key1
 			}
 		}
 	}

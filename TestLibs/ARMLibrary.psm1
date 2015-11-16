@@ -46,7 +46,7 @@
             $groupName = $groupName + "-" + $resourceGroupCount
         }
 
-        while (($isServiceDeployed -eq "False") -and ($retryDeployment -lt 5))
+        while (($isServiceDeployed -eq "False") -and ($retryDeployment -lt 1))
         {
             LogMsg "Creating Resource Group : $groupName."
             LogMsg "Verifying that Resource group name is not in use."
@@ -109,14 +109,14 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
 {
     try
     {
-        $ResourceGroup = Get-AzureRmResourceGroup -Name $RGName -ErrorAction Ignore
+        $ResourceGroup = Get-AzureResourceGroup -Name $RGName -ErrorAction Ignore
     }
     catch
     {
     }
     if ($ResourceGroup)
     {
-        Remove-AzureRmResourceGroup -Name $RGName -Force -Verbose
+        Remove-AzureResourceGroup -Name $RGName -Force -Verbose
         $retValue = $?
     }
     else
@@ -141,7 +141,7 @@ Function CreateResourceGroup([string]$RGName, $location)
             if($location)
             {
                 LogMsg "Using location : $location"
-                $createRG = New-AzureRmResourceGroup -Name $RGName -Location $location.Replace('"','') -Force -Verbose
+                $createRG = New-AzureResourceGroup -Name $RGName -Location $location.Replace('"','') -Force -Verbose
             }
             $operationStatus = $createRG.ProvisioningState
             if ($operationStatus  -eq "Succeeded")
@@ -168,7 +168,7 @@ Function CreateResourceGroupDeployment([string]$RGName, $location, $setupType, $
     $FailCounter = 0
     $retValue = "False"
     $ResourceGroupDeploymentName = $RGName + "-deployment"
-    While(($retValue -eq $false) -and ($FailCounter -lt 5))
+    While(($retValue -eq $false) -and ($FailCounter -lt 1))
     {
         try
         {
@@ -176,7 +176,7 @@ Function CreateResourceGroupDeployment([string]$RGName, $location, $setupType, $
             if($location)
             {
                 LogMsg "Creating Deployment using $TemplateFile ..."
-                $createRGDeployment = New-AzureRmResourceGroupDeployment -Name $ResourceGroupDeploymentName -ResourceGroupName $RGName -TemplateFile $TemplateFile -Verbose
+                $createRGDeployment = New-AzureResourceGroupDeployment -Name $ResourceGroupDeploymentName -ResourceGroupName $RGName -TemplateFile $TemplateFile -Verbose
             }
             $operationStatus = $createRGDeployment.ProvisioningState
             if ($operationStatus  -eq "Succeeded")
@@ -205,7 +205,7 @@ LogMsg "Generating Template : $azuredeployJSONFilePath"
 $jsonFile = $azuredeployJSONFilePath
 $StorageAccountName = $xml.config.Azure.General.ARMStorageAccount
 LogMsg "Getting Storage Account : $StorageAccountName details ..."
-$StorageAccountType = (Get-AzureRmStorageAccount | where {$_.StorageAccountName -eq "$StorageAccountName"}).AccountType
+$StorageAccountType = (Get-AzureStorageAccount | where {$_.StorageAccountName -eq "$StorageAccountName"}).AccountType
 if($StorageAccountType -match 'Premium')
 {
     $StorageAccountType = "Premium_LRS"
@@ -272,7 +272,7 @@ if ($RGXMLData.ARMVnetName)
 {
     $ExistingVnet = $RGXMLData.ARMVnetName
     LogMsg "Getting $ExistingVnet Virtual Netowrk info ..."
-    $ExistingVnetResourceGroupName = ( Get-AzureRmResource | Where {$_.Name -eq $ExistingVnet}).ResourceGroupName
+    $ExistingVnetResourceGroupName = ( Get-AzureResource | Where {$_.Name -eq $ExistingVnet}).ResourceGroupName
     LogMsg "ARM VNET : $ExistingVnet (ResourceGroup : $ExistingVnetResourceGroupName)"
     $virtualNetworkName = $ExistingVnet
 }
@@ -1170,7 +1170,7 @@ Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed
         {
             $VerifiedGroups =  $NULL
             $retValue = $NULL
-            #$ExistingGroups = RetryOperation -operation { Get-AzureRmResourceGroup } -description "Getting information of existing resource groups.." -retryInterval 5 -maxRetryCount 5
+            #$ExistingGroups = RetryOperation -operation { Get-AzureResourceGroup } -description "Getting information of existing resource groups.." -retryInterval 5 -maxRetryCount 5
             $i = 0
             $role = 1
             $setupTypeData = $xmlConfig.config.Azure.Deployment.$setupType
