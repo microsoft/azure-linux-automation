@@ -32,7 +32,8 @@ def RunTest():
             RunLog.info('Checking ignorable walalog ERROR messages...')
             for node in xml_root:
                 if (errors and node.tag == "errors"):
-                    errors = RemoveIgnorableMessages(errors, node)
+                    for keywords in node:
+                        errors = RemoveIgnorableMessages(''.join(errors), keywords.text)
         if (errors):
             RunLog.info('ERROR are  present in wala log.')
             RunLog.info('Errors: ' + ''.join(errors))
@@ -41,19 +42,23 @@ def RunTest():
             ResultLog.info('PASS')
         UpdateState("TestCompleted")
 		
-def RemoveIgnorableMessages(messages, keywords_xml_node):
-    message_list = messages.strip().split('\n')
-    valid_list = []
-    for msg in message_list:
-        for keywords in keywords_xml_node:
-            if keywords.text in msg:
-                RunLog.info('Ignorable ERROR message: ' + msg)
-                break 
+def RemoveIgnorableMessages(messages, keywords):
+    matchstring = re.findall(keywords,messages,re.M)
+    if(matchstring):			
+        for msg in matchstring:
+            RunLog.info('Ignorable ERROR message:\n' + msg)
+        str = re.split(matchstring[0],messages)
+        valid_list = []
+        for substr in str:
+            if re.search('error', substr, re.IGNORECASE):
+                valid_list.append(substr)
+            else:
+                continue
+        if len(valid_list) > 0:
+            return valid_list
         else:
-            valid_list.append(msg)
-    if len(valid_list) > 0:
-        return valid_list
+            return None             
     else:
-        return None                
+        return messages
 
 RunTest()
