@@ -2315,7 +2315,7 @@
 			<testName>BVT-VERIFY-HOSTNAME</testName>
 			<testScript>BVT-VERIFY-HOSTNAME.py</testScript>
 			<testScriptPs1>BVT-VERIFY-HOSTNAME.ps1</testScriptPs1>
-			<files>.\remote-scripts\BVT-VERIFY-HOSTNAME.py,.\remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\nslookup.py,.\remote-scripts\BVT-VERIFY-HOSTNAME.py,.\remote-scripts\azuremodules.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -4091,6 +4091,15 @@
 			<SubtestValues>Needs_To_Executed_In_Subtest_Mode</SubtestValues>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-DOCKER-EXTENSION-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-DOCKER-EXTENSION-TEST.ps1</testScriptps1>
+			<ProvisionTimeExtensions>Docker</ProvisionTimeExtensions>
+			<setupType>ExtensionTest</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<Priority>P0</Priority>
 		</test>		
 	</testsDefinition>
 
@@ -4548,6 +4557,47 @@
 				<Name>VNET-VERIFY-CA-AFTER-REBOOT</Name>
 			</test>
 		</Cycle>
+		
+		<!-- All network tests for CI -->		
+		<Cycle>
+			<cycleName>CI-NETWORK</cycleName>
+			<test>
+				<Name>NETWORK-OUTBOUND-ACCESS-IPERF-DTAP-TCP</Name>
+			</test>
+			<test>
+				<Name>NETWORK-OUTBOUND-ACCESS-IPERF-DTAP-UDP</Name>
+			</test>
+			<test>
+				<Name>NETWORK-INPUT-ENDPOINT-IPERF-TCP</Name>
+			</test>
+			<test>
+				<Name>NETWORK-INPUT-ENDPOINT-IPERF-UDP</Name>
+			</test>
+			<test>
+				<Name>NETWORK-IE-TCP-SINGLE-HS</Name>
+			</test>
+			<test>
+				<Name>NETWORK-IE-UDP-SINGLE-HS</Name>
+			</test>
+			<test>
+				<Name>NETWORK-IDNS-SINGLEHS-CHANGED-HOSTNAME</Name>
+			</test>
+		</Cycle>
+
+		<!-- VNET tests for CI -->
+		<Cycle>
+			<cycleName>CI-VNET</cycleName>
+			<test>
+				<Name>VNET-VERIFY-REMOTE-SSH-SCP-INTRAVNET-ACCESS</Name>
+			</test>
+			<test>
+				<Name>VNET-VERIFY-REMOTE-SSH-SCP-LOCAL-TO-VNET-ACCESS</Name>
+			</test>
+			<test>
+				<Name>VNET-VERIFY-REMOTE-SSH-SCP-OUTBOUND-ACCESS</Name>
+			</test>
+		</Cycle>
+		
 		<!-- xSMB tests -->
 		<Cycle>
 			<cycleName>XSMB</cycleName>
@@ -4678,6 +4728,12 @@
 			</test>
 			<test>
 				<Name>ICA-VM-DIAGNOSTIC-EXTENSION-TEST</Name>
+			</test>
+			<test>
+				<Name>ICA-VM-ACCESS-EXTENSION-TEST</Name>
+			</test>
+			<test>
+				<Name>ICA-DOCKER-EXTENSION-TEST</Name>
 			</test>			
 		</Cycle>
 

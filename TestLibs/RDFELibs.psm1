@@ -592,6 +592,10 @@ Function GenerateCommand ($Setup, $serviceName, $osImage, $HSData)
 							{
 								$ExtensionCommand = "Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName) -ReferenceName $extn -Publisher $($newExtn.Publisher) -Version $($newExtn.Version) -PrivateConfiguration `$PrivateConfiguration[$extensionCounter]"
 							}
+                            else
+                            {
+                                $ExtensionCommand = "Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName) -ReferenceName $extn -Publisher $($newExtn.Publisher) -Version $($newExtn.Version)"
+                            }								
 						}
 						LogMsg "Extension $extn (OfficialName : $($newExtn.OfficialName)) added to deployment command."
 						$extensionCounter += 1

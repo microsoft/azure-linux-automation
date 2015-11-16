@@ -305,6 +305,17 @@ if distro == "REDHAT" or distro == "FEDORA":
 		if "updates" not in r_out:
 			RunLog.error("Updates repository not present")
 			print(distro+"_TEST_REPOSITORIES_ERROR")
+
+	if distro == "REDHAT":
+			ra_out = Run("yum repolist all | grep 'rhui-rhel-' | wc -l")
+			if(ra_out > 5):
+			    RunLog.info("yum repolist all status: Success, repo count = %s", ra_out)
+			    print(distro+"_TEST_RHUIREPOSITORIES_AVAILABLE")
+			else:
+			    RunLog.error("yum repolist all status: Fail, repo count = %s", ra_out)
+			    print(distro+"_TEST_RHUIREPOSITORIES_ERROR")
+
+
 	#Verify etc/yum.conf
 	y_out = Run("cat /etc/yum.conf")
 	if "http_caching=packages" in y_out:
