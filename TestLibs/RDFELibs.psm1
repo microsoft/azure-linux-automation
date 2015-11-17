@@ -2296,6 +2296,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 				$hsNames = $DeployedServices
 				$allDeploymentData = $allVMData
 				$hsNames = $hsNames.Split("^")
+				$isVMLogsCollected = $false
 				foreach ($hs in $hsNames)
 				{
 					$hsDetails = Get-AzureService -ServiceName $hs
@@ -2331,12 +2332,13 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 						{
 							LogMsg "Preserving the hosted service(s) $hsNames"
 							LogMsg "Integrating Test Case Name in the `"Description`" of preserved setups.."
-							foreach ($service in $hsNames)
-							{
-								$suppressedOut = RetryOperation -operation { RunAzureCmd -AzureCmdlet "Set-AzureService -ServiceName $service -Description `"Preserving this setup for FAILED/ABORTED test : $testName`"" -maxWaitTimeSeconds 120 } -maxRetryCount 5 -retryInterval 5
-							}
+							$suppressedOut = RetryOperation -operation { RunAzureCmd -AzureCmdlet "Set-AzureService -ServiceName $hs -Description `"Preserving this setup for FAILED/ABORTED test : $testName`"" -maxWaitTimeSeconds 120 } -maxRetryCount 5 -retryInterval 5
 							LogMsg "Collecting VM logs.."
-							GetVMLogs -allVMData $allDeploymentData
+							if ( !$isVMLogsCollected )
+							{
+								GetVMLogs -allVMData $allDeploymentData
+							}
+							$isVMLogsCollected = $true
 							if(!$keepUserDirectory -and !$keepReproInact -and $EconomyMode)
 								{
 									RemoveAllFilesFromHomeDirectory -allDeployedVMs $allVMData
@@ -2365,6 +2367,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 			else
 			{
 				$ResourceGroups = $ResourceGroups.Split("^")
+				$isVMLogsCollected = $false
 				foreach ($group in $ResourceGroups)
 				{
 					if($result -eq "PASS")
@@ -2396,13 +2399,14 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 					else
 					{
 						LogMsg "Preserving the Resource Group(s) $group"
-						foreach ($group in $ResourceGroups)
-						{
-							LogMsg "Setting tags : preserve = yes; testName = $testName"
-							$out = Set-AzureResourceGroup -Name $group -Tag @{Name ="preserve"; Value = "yes"},@{Name ="testName"; Value = "$testName"}
-						}
+						LogMsg "Setting tags : preserve = yes; testName = $testName"
+						$out = Set-AzureResourceGroup -Name $group -Tag @{Name ="preserve"; Value = "yes"},@{Name ="testName"; Value = "$testName"}
 						LogMsg "Collecting VM logs.."
-						GetVMLogs -allVMData $allVMData
+						if ( !$isVMLogsCollected)
+						{
+							GetVMLogs -allVMData $allVMData
+						}
+						$isVMLogsCollected = $true
 						if(!$keepUserDirectory -and !$keepReproInact -and $EconomyMode)
 							{
 								RemoveAllFilesFromHomeDirectory -allDeployedVMs $allVMData
