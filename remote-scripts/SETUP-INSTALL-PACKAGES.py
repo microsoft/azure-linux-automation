@@ -171,7 +171,7 @@ def InstallGcc():
                 index = child.expect(["(?i)Continue?", pexpect.EOF, pexpect.TIMEOUT])
                 if(index == 0):
                         child.sendline('y')
-                        index = child.expect(["Installing: gcc-.*[done]", pexpect.EOF, pexpect.TIMEOUT])
+                        index = child.expect(["Installing: gcc-.*done]", pexpect.EOF, pexpect.TIMEOUT])
                         if(index == 0):
                                 RunLog.info("gcc: package installed successfully.\n")
                                 return True
