@@ -178,8 +178,7 @@ def InstallGcc():
                                 RunLog.info("gcc: package installed successfully.\n")
                                 return True
                         else:
-                                RunLog.error("gcc: package installed failed unexpectedly.\n")
-                                return False
+                                return ZypperPackageInstall('gcc')
                 else:
                         RunLog.error("gcc: package installed failed in the second step.\n")
                         return False
