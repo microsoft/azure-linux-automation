@@ -178,6 +178,7 @@ def InstallGcc():
                                 RunLog.info("gcc: package installed successfully.\n")
                                 return True
                         else:
+                                Run('killall zypper')
                                 return ZypperPackageInstall('gcc')
                 else:
                         RunLog.error("gcc: package installed failed in the second step.\n")
