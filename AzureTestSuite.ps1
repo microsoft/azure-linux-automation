@@ -286,7 +286,11 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 						FinishLogTestCase $testcase "ERROR" "$($test.Name) is aborted." $caseLog
 					}
 				} 
-				
+				$currentJobs = Get-Job
+				foreach ( $job in $currentJobs )
+				{
+					$out = Remove-Job $job -Force -Verbose
+				}
 				Write-Host $testSuiteResultDetails.totalPassTc,$testSuiteResultDetails.totalFailTc,$testSuiteResultDetails.totalAbortedTc
 				#Back to Test Suite Main Logging
 				$global:logFile = $testSuiteLogFile

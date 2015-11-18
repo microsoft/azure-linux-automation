@@ -25,7 +25,7 @@ if ($isDeployed)
         $hs1vm1Hostname =  $hs1vm1.Name
 
 
-        RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
+        RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload -doNotCompress
         RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *" -runAsSudo
 
         LogMsg "Executing : $($currentTestData.testScript)"
@@ -34,7 +34,7 @@ if ($isDeployed)
  
             if ($DistroName -eq "COREOS")  
             {  
-                RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files "Tools\CoreosPreparationTools.zip" -username $user -password $password -upload  
+                RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files "Tools\CoreosPreparationTools.zip" -username $user -password $password -upload -doNotCompress
                 $output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "/usr/share/oem/python/bin/python ./$($currentTestData.testScript)" -runAsSudo
             }  
             else{  
