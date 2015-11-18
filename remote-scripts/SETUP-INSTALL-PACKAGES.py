@@ -164,7 +164,8 @@ def InstallGcc():
         import pexpect
         cmd = 'zypper install gcc'
         child = pexpect.spawn(cmd)
-        child.logfile = sys.stdout
+        fout = file('GccInstallLog.txt','w')
+        child.logfile = fout
         index = child.expect(["(?i)Choose from above solutions by number or cancel", pexpect.EOF, pexpect.TIMEOUT])
         if(index == 0):
                 child.sendline('1')
@@ -173,13 +174,16 @@ def InstallGcc():
                 if(index == 0):
                         child.sendline('y')
                         RunLog.info("choose option y")
-                        index = child.expect(["Installing: gcc-.*done]", pexpect.EOF, pexpect.TIMEOUT])
-                        if(index == 0):
-                                RunLog.info("gcc: package installed successfully.\n")
-                                return True
-                        else:
-                                Run('killall zypper')
-                                return ZypperPackageInstall('gcc')
+                        while True:
+                                index = child.expect(["Installing: gcc-.*done]", pexpect.EOF, pexpect.TIMEOUT])
+                                if(index == 0):
+                                        RunLog.info("gcc: package installed successfully.\n")
+                                        return True
+                                elif(index == 2):
+                                        RunLog.info("pexpect.TIMEOUT\n")
+                                        pass
+                                else:
+                                        RunLog.error("gcc: package installed failed unexpectly.\n")
                 else:
                         RunLog.error("gcc: package installed failed in the second step.\n")
                         return False
