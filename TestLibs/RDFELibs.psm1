@@ -1752,7 +1752,7 @@ Function GetTestVMHardwareDetails ($xmlConfigFile, $setupType, [switch]$VCPU, [s
 #endregion
 
 #region Linux Commands Methods
-Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $username, $password, [switch]$upload, [switch]$download, [switch]$usePrivateKey) #Removed XML config
+Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $username, $password, [switch]$upload, [switch]$download, [switch]$usePrivateKey, [switch]$doNotCompress) #Removed XML config
 {
 	$retry=1
 	$maxRetry=3
@@ -1779,7 +1779,7 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 					$fileCounter ++
 				}
 			}
-			if ($fileCounter -gt 2)
+			if (($fileCounter -gt 2) -and (!($doNotCompress)))
 			{
 				$tarFileName = ($uploadTo+"@"+$port).Replace(".","-")+".tar"
 				foreach ($f in $files.Split(","))
