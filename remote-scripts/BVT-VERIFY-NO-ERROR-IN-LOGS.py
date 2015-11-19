@@ -33,7 +33,8 @@ def RunTest():
             for node in xml_root:
                 if (errors and node.tag == "errors"):
                     for keywords in node:
-                        errors = RemoveIgnorableMessages(''.join(errors), keywords.text)
+                        if(errors):
+                            errors = RemoveIgnorableMessages(''.join(errors), keywords.text)
         if (errors):
             RunLog.info('ERROR are  present in wala log.')
             RunLog.info('Errors: ' + ''.join(errors))
