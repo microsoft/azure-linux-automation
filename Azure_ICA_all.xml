@@ -2575,7 +2575,7 @@
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
-			<TestID>AzureBVT_025</TestID>
+			<TestID>AzureBVT_026</TestID>
 		</test>
 		
 		<test>
