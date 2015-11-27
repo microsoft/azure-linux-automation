@@ -2292,7 +2292,7 @@
 			<testName>SETUP-INSTALL-PACKAGES</testName>
 			<testScript>SETUP-INSTALL-PACKAGES.py</testScript>
 			<testScriptPs1>SETUP-INSTALL-PACKAGES.ps1</testScriptPs1>
-			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\SETUP-INSTALL-PACKAGES.py,.\remote-scripts\packages.xml</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\SETUP-INSTALL-PACKAGES.py,.\remote-scripts\AddNewUserWithSudoPremission.sh,.\remote-scripts\packages.xml</files>
 			<setupType>VMImage</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -4135,6 +4135,9 @@
 			<cycleName>BVT</cycleName>
 			<test>
 				<Name>BVT-VERIFY-NO-ERROR-IN-LOGS</Name>
+			</test>
+			<test>
+				<Name>BVT-VERIFY-RHUI-DOWNLOAD</Name>
 			</test>
 			<test>
 				<Name>BVT-VERIFY-VHD-PREREQUISITES</Name>
