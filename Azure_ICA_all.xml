@@ -2575,7 +2575,7 @@
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
-			<TestID>AzureBVT_025</TestID>
+			<TestID>AzureBVT_026</TestID>
 		</test>
 		
 		<test>
@@ -4135,6 +4135,9 @@
 			<cycleName>BVT</cycleName>
 			<test>
 				<Name>BVT-VERIFY-NO-ERROR-IN-LOGS</Name>
+			</test>
+			<test>
+				<Name>BVT-VERIFY-RHUI-DOWNLOAD</Name>
 			</test>
 			<test>
 				<Name>BVT-VERIFY-VHD-PREREQUISITES</Name>
