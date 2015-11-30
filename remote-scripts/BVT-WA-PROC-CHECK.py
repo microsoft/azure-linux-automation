@@ -18,7 +18,11 @@ def RunTest(command):
                     UpdateState("TestCompleted")
         
 <<<<<<< HEAD
+<<<<<<< HEAD
 RunTest("ps -ef | grep waagent | grep -v grep")
 =======
 RunTest("ps -ef | grep waagent | grep -v 'grep waagent'")
+>>>>>>> minor fix
+=======
+RunTest("ps -ef | grep waagent | grep -v waagent")
 >>>>>>> minor fix
