@@ -38,7 +38,7 @@ if ($isDeployed)
                 $output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "/usr/share/oem/python/bin/python ./$($currentTestData.testScript)" -runAsSudo
             }  
             else{  
-                $output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "python ./$($currentTestData.testScript)" -runAsSudo -runMaxAllowedTime 2700
+                $output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "python ./$($currentTestData.testScript)" -runAsSudo -runMaxAllowedTime 5400
             }  
 
 			$output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "ls /home/$user/SetupStatus.txt  2>&1" -runAsSudo
@@ -71,10 +71,10 @@ if ($isDeployed)
 					{
 						$usePython3 = $true
 					}
-					#Add a User with sudo premissions for investigating issue
+					#Add a User with sudo permissions for investigating issue
 					$newUser = 'shostctest'
 					$newPassword = 'P@ssw0rd01'
-					$userAddOutput = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "./AddNewUserWithSudoPremission.sh -newUser $newUser -newPassword $newPassword" -runAsSudo					
+					$userAddOutput = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "./AddNewUserWithSudoPermission.sh -newUser $newUser -newPassword $newPassword" -runAsSudo					
 
 					if ($userAddOutput -imatch "AUTOMATION_USER_ADDED")
 					{
