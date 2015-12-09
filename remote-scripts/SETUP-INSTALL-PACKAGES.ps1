@@ -72,8 +72,8 @@ if ($isDeployed)
 						$usePython3 = $true
 					}
 					#Add a User with sudo permissions for investigating issue
-					$newUser = 'shostctest'
-					$newPassword = 'P@ssw0rd01'
+					$newUser = $env:LinuxSudoUser
+					$newPassword = $env:LinuxSudoPwd
 					$userAddOutput = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "./AddNewUserWithSudoPermission.sh -newUser $newUser -newPassword $newPassword" -runAsSudo					
 
 					if ($userAddOutput -imatch "AUTOMATION_USER_ADDED")
