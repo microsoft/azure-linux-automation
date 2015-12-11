@@ -306,6 +306,7 @@ def ConfigFilesUpdate():
 
         return success
 
+# Check command or python module is exist on system
 def CheckCmdPyModExist(it):
         ret = True
         if(it.lower().startswith('python')):
@@ -341,6 +342,7 @@ def RunTest():
         for branch in xml_root:
                 for node in branch:
                         if (node.tag == "packages"):
+                                # Get the requisite package list from 'universal' node, that's must have on system
                                 if(node.attrib['distro'] == 'universal'):
                                         required_packages_list = node.text.split(',')
                                 elif(current_distro == node.attrib["distro"]):
@@ -357,12 +359,14 @@ def RunTest():
         if not (current_distro=="coreos"):
                 for package in packages_list:
                         if(not install_package(package)):
+                                # Check if the requisite package is exist already when failed this time
                                 if(package in required_packages_list):
                                         if(not CheckCmdPyModExist(package)):
                                                 success = False
                                                 Run("echo '"+package+"' failed to install >> PackageStatus.txt")
                                 else:
-                                        Run("echo '"+package+"' failed to install but can be ingored for tests >> PackageStatus.txt")
+                                        # failure can be ignored
+                                        Run("echo '"+package+"' failed to install but can be ignored for tests >> PackageStatus.txt")
                                 #break
                         else:
                                 Run("echo '"+package+"' installed successfully >> PackageStatus.txt")
@@ -377,7 +381,8 @@ def RunTest():
                 iperf_cmd = Run("command -v iperf")
                 iperf3_cmd = Run("command -v iperf3")
                 if not iperf_cmd and iperf3_cmd:
-                        RunLog.info('iperf3 has been installed instead of iperf from default repository')                        
+                        RunLog.info('iperf3 has been installed instead of iperf from default repository')
+                        # ensure iperf v2 is installed rather than iperf v3                        
                         if (ZypperPackageRemove('iperf') and download_and_install_rpm('iperf') and CheckCmdPyModExist('iperf')):
                                 Run("echo 'iperf' installed successfully >> PackageStatus.txt")
                         else:
