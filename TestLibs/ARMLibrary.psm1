@@ -1305,3 +1305,95 @@ Function isAllSSHPortsEnabledRG($AllVMDataObject)
 
     return $retValue
 }
+
+#Deployment via template file and template parameters file
+Function CreateRGDeploymentWithTempParameters([string]$RGName, $TemplateFile, $TemplateParameterFile)
+{
+    $FailCounter = 0
+    $retValue = "False"
+    $ResourceGroupDeploymentName = $RGName + "-deployment"
+    While(($retValue -eq $false) -and ($FailCounter -lt 1))
+    {
+        try
+        {
+            $FailCounter++
+            LogMsg "Creating Deployment using $TemplateFile $TemplateParameterFile..."
+            $createRGDeployment = New-AzureResourceGroupDeployment -Name $ResourceGroupDeploymentName -ResourceGroupName $RGName -TemplateFile $TemplateFile -TemplateParameterFile $TemplateParameterFile -Verbose
+            $operationStatus = $createRGDeployment.ProvisioningState
+            if ($operationStatus  -eq "Succeeded")
+            {
+                LogMsg "Resource Group Deployment Created."
+                $retValue = $true
+            }
+            else 
+            {
+                LogErr "Failed to create Resource Group Deployment."
+                $retValue = $false
+            }
+        }
+        catch
+        {
+            $retValue = $false
+        }
+    }
+    return $retValue
+}
+
+Function CreateAllRGDeploymentsWithTempParameters($setupType, $templateName, $location, $TemplateFile, $TemplateParameterFile)
+{
+    $resourceGroupCount = 0
+    LogMsg $setupType
+
+    $curtime = Get-Date
+    $isServiceDeployed = "False"
+    $retryDeployment = 0
+    $groupName = "ICA-RG-" + $setupType + "-" + $templateName + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
+
+    while (($isServiceDeployed -eq "False") -and ($retryDeployment -lt 3))
+    {
+        LogMsg "Creating Resource Group : $groupName."
+        LogMsg "Verifying that Resource group name is not in use."
+        $isRGDeleted = DeleteResourceGroup -RGName $groupName
+        if ($isRGDeleted)
+        {    
+            $isServiceCreated = CreateResourceGroup -RGName $groupName -location $location
+            if ($isServiceCreated -eq "True")
+            {
+                $DeploymentStartTime = (Get-Date)
+				$CreateRGDeployments = CreateRGDeploymentWithTempParameters -RGName $groupName -location $location -TemplateFile $TemplateFile -TemplateParameterFile $TemplateParameterFile
+                $DeploymentEndTime = (Get-Date)
+                $DeploymentElapsedTime = $DeploymentEndTime - $DeploymentStartTime
+                if ( $CreateRGDeployments )
+                {
+                        $retValue = "True"
+                        $isServiceDeployed = "True"
+                        $resourceGroupCount = $resourceGroupCount + 1
+                        $deployedGroups = $groupName
+
+                }
+                else
+                {
+                    LogErr "Unable to Deploy one or more VM's"
+                    $retryDeployment = $retryDeployment + 1
+                    $retValue = "False"
+                    $isServiceDeployed = "False"
+                }
+            }
+            else
+            {
+                LogErr "Unable to create $groupName"
+                $retryDeployment = $retryDeployment + 1
+                $retValue = "False"
+                $isServiceDeployed = "False"
+            }
+        }    
+        else
+        {
+            LogErr "Unable to delete existing resource group - $groupName"
+            $retryDeployment = $retryDeployment + 1
+            $retValue = "False"
+            $isServiceDeployed = "False"
+        }
+    }
+    return $retValue, $deployedGroups, $resourceGroupCount, $DeploymentElapsedTime
+}
