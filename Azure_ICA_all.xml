@@ -2577,6 +2577,17 @@
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_026</TestID>
 		</test>
+		<test>
+			<testName>BVT-VERIFY-BASH-HISTORY</testName>
+			<testScript>BVT-VERIFY-BASH-HISTORY.py</testScript>
+			<testScriptPs1>BVT-VERIFY-BASH-HISTORY.ps1</testScriptPs1>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\BVT-VERIFY-BASH-HISTORY.py</files>
+			<setupType>BVTDeployment</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<TestID>AzureBVT_027</TestID>
+		</test>
 		
 		<test>
 			<testName>NETWORK-OUTBOUND-ACCESS-IPERF-DTAP-UDP</testName>
@@ -4138,6 +4149,9 @@
 			</test>
 			<test>
 				<Name>BVT-VERIFY-RHUI-DOWNLOAD</Name>
+			</test>
+			<test>
+				<Name>BVT-VERIFY-BASH-HISTORY</Name>
 			</test>
 			<test>
 				<Name>BVT-VERIFY-VHD-PREREQUISITES</Name>

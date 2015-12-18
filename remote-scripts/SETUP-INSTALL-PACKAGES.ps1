@@ -24,7 +24,7 @@ if ($isDeployed)
         $hs1ServiceUrl = $hs1ServiceUrl.Replace("/","")
         $hs1vm1Hostname =  $hs1vm1.Name
 
-
+        RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cp /root/.bash_history /root/default_bash_history" -runAsSudo -ignoreLinuxExitCode
         RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload -doNotCompress
         RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *" -runAsSudo
 
