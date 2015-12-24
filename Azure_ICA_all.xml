@@ -1386,6 +1386,7 @@
 					</VirtualMachine>
 				</HostedService>
 			</BVTDeployment>
+			
 			<MeshVM>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -4124,7 +4125,56 @@
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<Priority>P0</Priority>
 		</test>		
-	</testsDefinition>
+
+		<test>
+		  <testName>Template-datastax-enterprise</testName>
+		  <testScript></testScript>
+		  <testScriptPs1>Template-datastax-enterprise.ps1</testScriptPs1>
+		  <files></files>
+		  <setupType></setupType>
+          <parameters>
+			<storageAccountPrefix>testaccount</storageAccountPrefix>
+			<dnsName>datastax</dnsName>
+			<virtualNetworkName>datastaxvnet</virtualNetworkName>
+			<clusterVmSize>Standard_D1</clusterVmSize>
+			<clusterNodeCount>1</clusterNodeCount>
+			<clusterName>TestCluster</clusterName>
+          </parameters>
+		  <TestType>
+		  </TestType>
+		  <TestFeature>
+		  </TestFeature>
+		  <SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+		  <TestID>AzureTemplate_001</TestID>
+		</test>
+
+		<test>
+		  <testName>Template-cloudera-centos</testName>
+		  <testScript></testScript>
+		  <testScriptPs1>Template-cloudera-centos.ps1</testScriptPs1>
+		  <files></files>
+		  <setupType></setupType>
+		  <parameters>
+			<storageAccountPrefix>testaccount</storageAccountPrefix>
+			<dnsNamePrefix>cloudera</dnsNamePrefix>
+			<virtualNetworkName>clouderavnet</virtualNetworkName>
+			<subnetName>clouderasubvnet</subnetName>
+			<numberOfDataNodes>1</numberOfDataNodes>
+			<VmSize>Standard_D4</VmSize>
+			<company>yourcompany</company>
+			<emailAddress>email@yourcompany.com</emailAddress>
+			<firstName>myfirstname</firstName>
+			<lastName>mylastname</lastName>			
+          </parameters>
+		  <TestType>
+		  </TestType>
+		  <TestFeature>
+		  </TestFeature>
+		  <SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+		  <TestID>AzureTemplate_002</TestID>
+		</test>
+
+		</testsDefinition>
 
 	<testCycles>
 		<!-- Setup related tests -->
@@ -4770,7 +4820,13 @@
 		<Cycle>
 			<cycleName>WaagentBVT</cycleName>
 			<test>
+				<Name>ICA-CUSTOM-SCRIPT-EXTENSION-TEST</Name>
+			</test>
+			<test>
 				<Name>BVT-VERIFY-NO-ERROR-IN-LOGS</Name>
+			</test>
+			<test>
+				<Name>BVT-VERIFY-BASH-HISTORY</Name>
 			</test>
 			<test>
 				<Name>BVT-WA-PROC-CHECK</Name>
