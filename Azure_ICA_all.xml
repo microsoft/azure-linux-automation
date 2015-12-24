@@ -4820,7 +4820,13 @@
 		<Cycle>
 			<cycleName>WaagentBVT</cycleName>
 			<test>
+				<Name>ICA-CUSTOM-SCRIPT-EXTENSION-TEST</Name>
+			</test>
+			<test>
 				<Name>BVT-VERIFY-NO-ERROR-IN-LOGS</Name>
+			</test>
+			<test>
+				<Name>BVT-VERIFY-BASH-HISTORY</Name>
 			</test>
 			<test>
 				<Name>BVT-WA-PROC-CHECK</Name>
