@@ -1339,15 +1339,13 @@ Function CreateRGDeploymentWithTempParameters([string]$RGName, $TemplateFile, $T
     return $retValue
 }
 
-Function CreateAllRGDeploymentsWithTempParameters($setupType, $templateName, $location, $TemplateFile, $TemplateParameterFile)
+Function CreateAllRGDeploymentsWithTempParameters($templateName, $location, $TemplateFile, $TemplateParameterFile)
 {
     $resourceGroupCount = 0
-    LogMsg $setupType
-
     $curtime = Get-Date
     $isServiceDeployed = "False"
     $retryDeployment = 0
-    $groupName = "ICA-RG-" + $setupType + "-" + $templateName + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
+    $groupName = "ICA-RG-" + $templateName + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
 
     while (($isServiceDeployed -eq "False") -and ($retryDeployment -lt 3))
     {

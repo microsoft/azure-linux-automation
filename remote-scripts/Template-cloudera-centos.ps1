@@ -6,10 +6,8 @@ $resultArr = @()
 
 try
 {
-	$setuptype = $currentTestData.setupType
-	$templateName = $currentTestData.TemplateName
-	$setupTypeData = $xmlConfig.config.Azure.Deployment.$setupType
-	$parameters = $xmlConfig.config.Azure.Deployment.$setupType.$templateName.parameters
+	$templateName = $currentTestData.testName
+	$parameters = $currentTestData.parameters
 	$location = $xmlConfig.config.Azure.General.Location
 
 	if(Test-Path .\azuredeploy.parameters.json)
@@ -59,7 +57,7 @@ try
 		LogMsg "fail to save azuredeploy.parameters.json"
 	}
 
-	$isDeployed = CreateAllRGDeploymentsWithTempParameters -setupType $setupType -templateName $templateName -location $location -TemplateFile ..\azure-quickstart-templates\cloudera-on-centos\azuredeploy.json  -TemplateParameterFile .\azuredeploy.parameters.json
+	$isDeployed = CreateAllRGDeploymentsWithTempParameters -templateName $templateName -location $location -TemplateFile ..\azure-quickstart-templates\cloudera-on-centos\azuredeploy.json  -TemplateParameterFile .\azuredeploy.parameters.json
 
 
 	if ($isDeployed[0] -eq $True)

@@ -1387,34 +1387,6 @@
 				</HostedService>
 			</BVTDeployment>
 			
-		  <ARMTemplate>
-			<isDeployed>NO</isDeployed>
-			<datastax-enterprise>
-			  <parameters>
-				<storageAccountPrefix>testaccount</storageAccountPrefix>
-				<dnsName>datastax</dnsName>
-				<virtualNetworkName>datastaxvnet</virtualNetworkName>
-				<clusterVmSize>Standard_D1</clusterVmSize>
-				<clusterNodeCount>1</clusterNodeCount>
-				<clusterName>TestCluster</clusterName>
-			  </parameters>
-			</datastax-enterprise>
-			<cloudera-on-centos>
-			  <parameters>
-				<storageAccountPrefix>testaccount</storageAccountPrefix>
-				<dnsNamePrefix>cloudera</dnsNamePrefix>
-				<virtualNetworkName>clouderavnet</virtualNetworkName>
-				<subnetName>clouderasubvnet</subnetName>
-				<numberOfDataNodes>1</numberOfDataNodes>
-				<VmSize>Standard_D4</VmSize>
-				<company>Microsoft</company>
-				<emailAddress>lislab@microsoft.com</emailAddress>
-				<firstName>myfirstname</firstName>
-				<lastName>mylastname</lastName>			
-			  </parameters>
-			</cloudera-on-centos>
-		  </ARMTemplate>
-			
 			<MeshVM>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -4148,8 +4120,15 @@
 		  <testScript></testScript>
 		  <testScriptPs1>Template-datastax-enterprise.ps1</testScriptPs1>
 		  <files></files>
-		  <setupType>ARMTemplate</setupType>
-		  <TemplateName>datastax-enterprise</TemplateName>
+		  <setupType></setupType>
+          <parameters>
+			<storageAccountPrefix>testaccount</storageAccountPrefix>
+			<dnsName>datastax</dnsName>
+			<virtualNetworkName>datastaxvnet</virtualNetworkName>
+			<clusterVmSize>Standard_D1</clusterVmSize>
+			<clusterNodeCount>1</clusterNodeCount>
+			<clusterName>TestCluster</clusterName>
+          </parameters>
 		  <TestType>
 		  </TestType>
 		  <TestFeature>
@@ -4163,8 +4142,19 @@
 		  <testScript></testScript>
 		  <testScriptPs1>Template-cloudera-centos.ps1</testScriptPs1>
 		  <files></files>
-		  <setupType>ARMTemplate</setupType>
-		  <TemplateName>cloudera-on-centos</TemplateName>
+		  <setupType></setupType>
+		  <parameters>
+			<storageAccountPrefix>testaccount</storageAccountPrefix>
+			<dnsNamePrefix>cloudera</dnsNamePrefix>
+			<virtualNetworkName>clouderavnet</virtualNetworkName>
+			<subnetName>clouderasubvnet</subnetName>
+			<numberOfDataNodes>1</numberOfDataNodes>
+			<VmSize>Standard_D4</VmSize>
+			<company>yourcompany</company>
+			<emailAddress>email@yourcompany.com</emailAddress>
+			<firstName>myfirstname</firstName>
+			<lastName>mylastname</lastName>			
+          </parameters>
 		  <TestType>
 		  </TestType>
 		  <TestFeature>
