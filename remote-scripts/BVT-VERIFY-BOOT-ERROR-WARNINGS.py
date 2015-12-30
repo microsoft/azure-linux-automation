@@ -5,13 +5,10 @@ import argparse
 import os
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-d', '--distro', help='specify the distro name', required=True)
 parser.add_argument('-wl', '--whitelist', help='specify the xml file which contains the ignorable errors')
 
 args = parser.parse_args()
-distro_name = args.distro.lower()
 white_list_xml = args.whitelist
-RunLog.info(distro_name)
 
 def RunTest():
     UpdateState("TestRunning")
@@ -34,16 +31,14 @@ def RunTest():
             xml_root = white_list_file.getroot()
 
             RunLog.info('Checking ignorable boot ERROR/WARNING/FAILURE messages...')
-            for distro in xml_root:
-                if distro_name == distro.attrib["name"]:
-                    for node in distro:
-                        if (failures and node.tag == "failures"):
-                            failures = RemoveIgnorableMessages(failures, node)                            
-                        if (errors and node.tag == "errors"):
-                            errors = RemoveIgnorableMessages(errors, node)
-                        if (warnings and node.tag == "warnings"):
-                            warnings = RemoveIgnorableMessages(warnings, node)
-                    break
+            for node in xml_root:
+                if (failures and node.tag == "failures"):
+                    failures = RemoveIgnorableMessages(failures, node)                            
+                if (errors and node.tag == "errors"):
+                    errors = RemoveIgnorableMessages(errors, node)
+                if (warnings and node.tag == "warnings"):
+                    warnings = RemoveIgnorableMessages(warnings, node)
+
         if (errors or warnings or failures):
             RunLog.info('ERROR/WARNING/FAILURE are  present in kernel boot line.')
             if(errors):
