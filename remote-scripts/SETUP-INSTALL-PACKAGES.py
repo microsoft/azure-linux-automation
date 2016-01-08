@@ -88,6 +88,8 @@ def zypper_package_install(package):
                 return True
         elif(download_and_install_rpm(package) == True):
                 return True
+        elif(package == 'gcc'):
+                return InstallGcc()    
         else:
                 return False
 
@@ -156,6 +158,38 @@ def install_ez_setup():
         output = Run("{0} {1}".format(python_cmd, ez_setup))
         return ("Finished" in output)
 
+def InstallGcc():
+        RunLog.info("Interactive installing Package: gcc")
+        Run("wget http://pexpect.sourceforge.net/pexpect-2.3.tar.gz;tar xzf pexpect-2.3.tar.gz;cd pexpect-2.3;python ./setup.py install;cd ..")
+        import pexpect
+        cmd = 'zypper install gcc'
+        child = pexpect.spawn(cmd)
+        fout = file('GccInstallLog.txt','w')
+        child.logfile = fout
+        index = child.expect(["(?i)Choose from above solutions by number or cancel", pexpect.EOF, pexpect.TIMEOUT])
+        if(index == 0):
+                child.sendline('1')
+                RunLog.info("choose option 1")
+                index = child.expect(["(?i)Continue?", pexpect.EOF, pexpect.TIMEOUT])
+                if(index == 0):
+                        child.sendline('y')
+                        RunLog.info("choose option y")
+                        while True:
+                                index = child.expect(["Installing: gcc-.*done]", pexpect.EOF, pexpect.TIMEOUT])
+                                if(index == 0):
+                                        RunLog.info("gcc: package installed successfully.\n")
+                                        return True
+                                elif(index == 2):
+                                        RunLog.info("pexpect.TIMEOUT\n")
+                                        pass
+                                else:
+                                        RunLog.error("gcc: package installed failed unexpectly.\n")
+                else:
+                        RunLog.error("gcc: package installed failed in the second step.\n")
+                        return False
+        else:
+                RunLog.error("gcc: package installed failed in the first step.\n")
+                return False
 
 
 def install_waagent_from_github():
@@ -306,6 +340,25 @@ def ConfigFilesUpdate():
 
         return success
 
+# Check command or python module is exist on system
+def CheckCmdPyModExist(it):
+        ret = True
+        if(it.lower().startswith('python')):
+                try:
+                        pymod_name = it[it.index('-')+1:]
+                        if(pymod_name == 'crypto'):
+                                pymod_name = 'Crypto'
+                        imp.find_module(pymod_name)
+                except ImportError:
+                        ret = False
+                        RunLog.error("requisite python module: "+it+" is not exists on system.")
+        else:
+                output = Run('command -v '+it)
+                if(output.find(it) == -1):
+                        ret = False
+                        RunLog.error("requisite command: "+it+" is not exists on system.")
+        return ret
+
 def RunTest():
         UpdateState("TestRunning")
         success = True
@@ -323,7 +376,10 @@ def RunTest():
         for branch in xml_root:
                 for node in branch:
                         if (node.tag == "packages"):
-                                if(current_distro == node.attrib["distro"]):
+                                # Get the requisite package list from 'universal' node, that's must have on system
+                                if(node.attrib['distro'] == 'universal'):
+                                        required_packages_list = node.text.split(',')
+                                elif(current_distro == node.attrib["distro"]):
                                         packages_list = node.text.split(",")
                         elif node.tag == "waLinuxAgent_link":
                                 tar_link[node.attrib["name"]] = node.text
@@ -337,8 +393,14 @@ def RunTest():
         if not (current_distro=="coreos"):
                 for package in packages_list:
                         if(not install_package(package)):
-                                success = False
-                                Run("echo '"+package+"' failed to install >> PackageStatus.txt")
+                                # Check if the requisite package is exist already when failed this time
+                                if(package in required_packages_list):
+                                        if(not CheckCmdPyModExist(package)):
+                                                success = False
+                                                Run("echo '"+package+"' failed to install >> PackageStatus.txt")
+                                else:
+                                        # failure can be ignored
+                                        Run("echo '"+package+"' failed to install but can be ignored for tests >> PackageStatus.txt")
                                 #break
                         else:
                                 Run("echo '"+package+"' installed successfully >> PackageStatus.txt")
@@ -353,11 +415,14 @@ def RunTest():
                 iperf_cmd = Run("command -v iperf")
                 iperf3_cmd = Run("command -v iperf3")
                 if not iperf_cmd and iperf3_cmd:
-                        RunLog.info('iperf3 has been installed instead of iperf from default repository')                        
-                        if (ZypperPackageRemove('iperf') and download_and_install_rpm('iperf')):
+                        RunLog.info('iperf3 has been installed instead of iperf from default repository')
+                        # ensure iperf v2 is installed rather than iperf v3                        
+                        if (ZypperPackageRemove('iperf') and download_and_install_rpm('iperf') and CheckCmdPyModExist('iperf')):
                                 Run("echo 'iperf' installed successfully >> PackageStatus.txt")
                         else:
-                                Run("echo 'iperf' failed to install >> PackageStatus.txt")                                
+                                Run("echo 'iperf' failed to install >> PackageStatus.txt")
+                                success = False
+
                                 
         Run("echo '** Packages Installation Completed **' >> PackageStatus.txt")                
         if success == True:

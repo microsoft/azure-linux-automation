@@ -24,7 +24,7 @@ if ($isDeployed)
         $hs1ServiceUrl = $hs1ServiceUrl.Replace("/","")
         $hs1vm1Hostname =  $hs1vm1.Name
 
-
+        RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cp /root/.bash_history /root/default_bash_history" -runAsSudo -ignoreLinuxExitCode
         RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload -doNotCompress
         RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *" -runAsSudo
 
@@ -38,7 +38,7 @@ if ($isDeployed)
                 $output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "/usr/share/oem/python/bin/python ./$($currentTestData.testScript)" -runAsSudo
             }  
             else{  
-                $output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "python ./$($currentTestData.testScript)" -runAsSudo -runMaxAllowedTime 2700
+                $output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "python ./$($currentTestData.testScript)" -runAsSudo -runMaxAllowedTime 5400
             }  
 
 			$output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "ls /home/$user/SetupStatus.txt  2>&1" -runAsSudo
@@ -70,6 +70,24 @@ if ($isDeployed)
                     if($output -match 'python3')
 					{
 						$usePython3 = $true
+					}
+					#Add a User with sudo permissions for investigating issue
+					$newUser = $env:LinuxSudoUser
+					$newPassword = $env:LinuxSudoPwd
+					$userAddOutput = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "./AddNewUserWithSudoPermission.sh -newUser $newUser -newPassword $newPassword" -runAsSudo					
+
+					if ($userAddOutput -imatch "AUTOMATION_USER_ADDED")
+					{
+						$newUserAdded = $true
+						Set-Content -Value $userAddOutput -Path $LogDir\userAddOutput.txt -Force
+						LogMsg "Add new user : $newUser : SUCCESS"
+						LogMsg "Password for : $newUser : $newPassword"
+					}
+					else
+					{
+						$newUserAdded = $false
+						LogErr "Add new user : $newUser : FAILED"
+						LogErr "Output : $userAddOutput"
 					}
 					#VM De-provision
                     if ($DistroName -eq "COREOS")   

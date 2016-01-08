@@ -113,8 +113,8 @@ if ($isDeployed)
 					LogErr "$ExtensionName extension status is Failed in Properties.ProvisioningState"
 					$ExtensionVerfiedWithPowershell = $false
 				}
+				return $ExtensionVerfiedWithPowershell
 			}
-			return $ExtensionVerfiedWithPowershell
 		}
 		else
 		{

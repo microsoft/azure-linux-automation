@@ -1386,6 +1386,7 @@
 					</VirtualMachine>
 				</HostedService>
 			</BVTDeployment>
+			
 			<MeshVM>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -2292,7 +2293,7 @@
 			<testName>SETUP-INSTALL-PACKAGES</testName>
 			<testScript>SETUP-INSTALL-PACKAGES.py</testScript>
 			<testScriptPs1>SETUP-INSTALL-PACKAGES.ps1</testScriptPs1>
-			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\SETUP-INSTALL-PACKAGES.py,.\remote-scripts\packages.xml</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\SETUP-INSTALL-PACKAGES.py,.\remote-scripts\AddNewUserWithSudoPermission.sh,.\remote-scripts\packages.xml</files>
 			<setupType>VMImage</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2548,7 +2549,7 @@
 			<testName>BVT-VERIFY-NO-ERROR-IN-LOGS</testName>
 			<testScript>BVT-VERIFY-NO-ERROR-IN-LOGS.py</testScript>
 			<testScriptPs1>BVT-VERIFY-NO-ERROR-IN-LOGS.ps1</testScriptPs1>
-			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\BVT-VERIFY-NO-ERROR-IN-LOGS.py</files>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\BVT-VERIFY-NO-ERROR-IN-LOGS.py,.\remote-scripts\ignorable-walalog-errors.xml</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -2566,6 +2567,29 @@
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_025</TestID>
 		</test>
+		<test>
+			<testName>BVT-VERIFY-RHUI-DOWNLOAD</testName>
+			<testScript>BVT-VERIFY-RHUI-DOWNLOAD.sh</testScript>
+			<testScriptPs1>BVT-VERIFY-RHUI-DOWNLOAD.ps1</testScriptPs1>
+			<files>.\remote-scripts\package-download-test.sh,.\remote-scripts\BVT-VERIFY-RHUI-DOWNLOAD.sh</files>
+			<setupType>BVTDeployment</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<TestID>AzureBVT_026</TestID>
+		</test>
+		<test>
+			<testName>BVT-VERIFY-BASH-HISTORY</testName>
+			<testScript>BVT-VERIFY-BASH-HISTORY.py</testScript>
+			<testScriptPs1>BVT-VERIFY-BASH-HISTORY.ps1</testScriptPs1>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\BVT-VERIFY-BASH-HISTORY.py</files>
+			<setupType>BVTDeployment</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<TestID>AzureBVT_027</TestID>
+		</test>
+		
 		<test>
 			<testName>NETWORK-OUTBOUND-ACCESS-IPERF-DTAP-UDP</testName>
 			<TestMode>IP</TestMode>
@@ -4112,7 +4136,56 @@
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<Priority>P0</Priority>
 		</test>		
-	</testsDefinition>
+
+		<test>
+		  <testName>Template-datastax-enterprise</testName>
+		  <testScript></testScript>
+		  <testScriptPs1>Template-datastax-enterprise.ps1</testScriptPs1>
+		  <files></files>
+		  <setupType></setupType>
+          <parameters>
+			<storageAccountPrefix>testaccount</storageAccountPrefix>
+			<dnsName>datastax</dnsName>
+			<virtualNetworkName>datastaxvnet</virtualNetworkName>
+			<clusterVmSize>Standard_D1</clusterVmSize>
+			<clusterNodeCount>1</clusterNodeCount>
+			<clusterName>TestCluster</clusterName>
+          </parameters>
+		  <TestType>
+		  </TestType>
+		  <TestFeature>
+		  </TestFeature>
+		  <SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+		  <TestID>AzureTemplate_001</TestID>
+		</test>
+
+		<test>
+		  <testName>Template-cloudera-centos</testName>
+		  <testScript></testScript>
+		  <testScriptPs1>Template-cloudera-centos.ps1</testScriptPs1>
+		  <files></files>
+		  <setupType></setupType>
+		  <parameters>
+			<storageAccountPrefix>testaccount</storageAccountPrefix>
+			<dnsNamePrefix>cloudera</dnsNamePrefix>
+			<virtualNetworkName>clouderavnet</virtualNetworkName>
+			<subnetName>clouderasubvnet</subnetName>
+			<numberOfDataNodes>1</numberOfDataNodes>
+			<VmSize>Standard_D4</VmSize>
+			<company>yourcompany</company>
+			<emailAddress>email@yourcompany.com</emailAddress>
+			<firstName>myfirstname</firstName>
+			<lastName>mylastname</lastName>			
+          </parameters>
+		  <TestType>
+		  </TestType>
+		  <TestFeature>
+		  </TestFeature>
+		  <SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+		  <TestID>AzureTemplate_002</TestID>
+		</test>
+
+		</testsDefinition>
 
 	<testCycles>
 		<!-- Setup related tests -->
@@ -4134,6 +4207,12 @@
 			<cycleName>BVT</cycleName>
 			<test>
 				<Name>BVT-VERIFY-NO-ERROR-IN-LOGS</Name>
+			</test>
+			<test>
+				<Name>BVT-VERIFY-RHUI-DOWNLOAD</Name>
+			</test>
+			<test>
+				<Name>BVT-VERIFY-BASH-HISTORY</Name>
 			</test>
 			<test>
 				<Name>BVT-VERIFY-VHD-PREREQUISITES</Name>
@@ -4752,7 +4831,13 @@
 		<Cycle>
 			<cycleName>WaagentBVT</cycleName>
 			<test>
+				<Name>ICA-CUSTOM-SCRIPT-EXTENSION-TEST</Name>
+			</test>
+			<test>
 				<Name>BVT-VERIFY-NO-ERROR-IN-LOGS</Name>
+			</test>
+			<test>
+				<Name>BVT-VERIFY-BASH-HISTORY</Name>
 			</test>
 			<test>
 				<Name>BVT-WA-PROC-CHECK</Name>

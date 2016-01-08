@@ -4,34 +4,39 @@ $result = ""
 $testResult = ""
 $resultArr = @()
 
-
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
+
 	try
 	{
 		$hs1VIP = $AllVMData.PublicIP
 		$hs1vm1sshport = $AllVMData.SSHPort
 		$hs1ServiceUrl = $AllVMData.URL
 		$hs1vm1Dip = $AllVMData.InternalIP
-
-
-		RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
-		RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *" -runAsSudo
-
-
-		LogMsg "Executing : $($currentTestData.testScript)"
-		RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "$python_cmd $($currentTestData.testScript) -wl ignorable-boot-errors.xml" -runAsSudo
-		RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "mv Runtime.log $($currentTestData.testScript).log" -runAsSudo
-		RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/state.txt, /home/$user/Summary.log, /home/$user/$($currentTestData.testScript).log" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
-		$testResult = Get-Content $LogDir\Summary.log
-		$testStatus = Get-Content $LogDir\state.txt
-		LogMsg "Test result : $testResult"
-
+		$DistroName = DetectLinuxDistro -VIP $hs1VIP -SSHport $hs1vm1sshport -testVMUser $user -testVMPassword $password
+		if ($DistroName -eq "REDHAT")
+		{
+			RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
+			RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *" -runAsSudo
+			LogMsg "Executing : $($currentTestData.testScript)"
+			RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "bash $($currentTestData.testScript)" -runAsSudo -runMaxAllowedTime 1800
+			RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "mv /var/log/package-download-test.log $($currentTestData.testScript).log" -runAsSudo
+			RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/state.txt, /home/$user/Summary.log, /home/$user/$($currentTestData.testScript).log" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
+			$testResult = Get-Content $LogDir\Summary.log
+			$testStatus = Get-Content $LogDir\state.txt
+			LogMsg "Test result : $testResult"
+		}
+		else
+		{
+			LogMsg "The Distro is not Redhat, skip the test!"
+			$testResult = 'PASS'
+			$testStatus = 'TestCompleted'
+		}
 		if ($testStatus -eq "TestCompleted")
 		{
 			LogMsg "Test Completed"
-		}
+		}		
 	}
 
 	catch
