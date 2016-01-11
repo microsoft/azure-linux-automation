@@ -1166,12 +1166,12 @@ Function GetAndCheckKernelLogs($allDeployedVMs, $status, $vmUser, $vmPassword)
 				if ( $UseAzureResourceManager )
 				{
 					LogMsg "Adding preserve tag to $($VM.ResourceGroup) .."
-					$out = Set-AzureResourceGroup -Name $($VM.ResourceGroup) -Tag @{Name ="preserve"; Value = "yes"},@{Name ="callTrace"; Value = "yes"}
+					$out = Set-AzureResourceGroup -Name $($VM.ResourceGroup) -Tag @{Name =$preserveKeyword; Value = "yes"},@{Name ="callTrace"; Value = "yes"}
 				}
 				else
 				{
 					LogMsg "Adding preserve tag to $($VM.ServiceName) .."
-					$out = Set-AzureService -ServiceName $($VM.ServiceName) -Description "preserve"
+					$out = Set-AzureService -ServiceName $($VM.ServiceName) -Description $preserveKeyword
 				}
 			}
 		}
@@ -1832,7 +1832,7 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 				}
 				else
 				{
-					if ( ( $f -imatch ".sh" ) -or ( $f -imatch ".py" ))
+					if ( ( $f.Split(".")[$f.Split(".").count-1] -eq "sh" ) -or ( $f.Split(".")[$f.Split(".").count-1] -eq "py" ) )
 					{
 						$out = .\tools\dos2unix.exe $f 2>&1
 						LogMsg $out
@@ -1894,11 +1894,10 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 							$retry=$maxRetry+1
 						}
 					}
-
-					LogMsg "Decompressing files in VM ..."
-					$out = RunLinuxCmd -username $username -password $password -ip $uploadTo -port $port -command "tar -xf $tarFileName" -runAsSudo
 					LogMsg "Removing compressed file : $tarFileName"
 					Remove-Item -Path $tarFileName -Force 2>&1 | Out-Null
+					LogMsg "Decompressing files in VM ..."
+					$out = RunLinuxCmd -username $username -password $password -ip $uploadTo -port $port -command "tar -xf $tarFileName" -runAsSudo
 				}
 				else
 				{
@@ -2150,6 +2149,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 			{
 				LogMsg "$command is running in background with ID $($runLinuxCmdJob.Id) ..."
 				Add-Content -Path $LogDir\CurrentTestBackgroundJobs.txt -Value $runLinuxCmdJob.Id
+				$retValue = $runLinuxCmdJob.Id
 			}
 			else
 			{
@@ -2375,7 +2375,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 							}
 							else
 							{
-								if ( $hsDetails.Description -imatch "preserve" )
+								if ( $hsDetails.Description -imatch $preserveKeyword )
 								{
 									LogMsg "Skipping cleanup of preserved service."
 									LogMsg "Collecting VM logs.."
@@ -2455,7 +2455,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 						else
 						{
 							$RGdetails = Get-AzureResourceGroup -Name $group
-							if ( (  $RGdetails.Tags[0].Name -eq "preserve" ) -and (  $RGdetails.Tags[0].Value -eq "yes" ))
+							if ( (  $RGdetails.Tags[0].Name -eq $preserveKeyword ) -and (  $RGdetails.Tags[0].Value -eq "yes" ))
 							{
 								LogMsg "Skipping Cleanup of preserved resource group."
 								LogMsg "Collecting VM logs.."
@@ -2484,7 +2484,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 					{
 						LogMsg "Preserving the Resource Group(s) $group"
 						LogMsg "Setting tags : preserve = yes; testName = $testName"
-						$out = Set-AzureResourceGroup -Name $group -Tag @{Name ="preserve"; Value = "yes"},@{Name ="testName"; Value = "$testName"}
+						$out = Set-AzureResourceGroup -Name $group -Tag @{Name =$preserveKeyword; Value = "yes"},@{Name ="testName"; Value = "$testName"}
 						LogMsg "Collecting VM logs.."
 						if ( !$isVMLogsCollected)
 						{
