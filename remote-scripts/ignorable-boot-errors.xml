@@ -16,6 +16,8 @@
 			<keywords>startpar-bridge</keywords>
 			<keywords>Failed to spawn</keywords>
 			<keywords>display-manager.service</keywords>
+			<keywords>ACPI PCC probe failed</keywords>
+			
 		</failures>
 		<errors>
 			<keywords>end_request: I/O error, dev fd0, sector 0</keywords>

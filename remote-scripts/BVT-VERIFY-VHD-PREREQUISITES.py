@@ -240,7 +240,7 @@ if distro == "SUSE":
 	Update_repo_enable_refresh = Run("zypper lr | grep -vi debug | grep -vi non | grep Update | grep -o Yes | wc -l | tr -d '\n'")
 	if int(Oss_repo_count) > 0 and int(Update_repo_count) > 0:
 		RunLog.info("All expected repositories are present")
-		if int(Oss_repo_enable_refresh) == 2 and int(Update_repo_enable_refresh) == 2:
+		if int(Oss_repo_enable_refresh) >= 2 and int(Update_repo_enable_refresh) >= 2:
 			RunLog.info("All expected repositories are enabled and refreshed")
 			print(distro+"_TEST_REPOSITORIES_AVAILABLE")
 		else:
