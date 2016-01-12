@@ -27,6 +27,13 @@ mkdir $code_path/sysbenchlog
 LOGDIR="${code_path}/sysbenchlog"
 LOGFILE="${LOGDIR}/sysbench.log.txt"
 
+echo "uname: -------------------------------------------------" > $LOGFILE
+uname -a 2>&1 >> $LOGFILE
+echo "LIS version: --------------------------------------------" >> $LOGFILE
+modinfo hv_vmbus 2>&1 >> $LOGFILE
+echo "----------------------------------------------------------" >> $LOGFILE
+
+
 iteration=0
 ioruntime=300
 maxThread=1024
