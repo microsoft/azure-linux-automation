@@ -18,7 +18,7 @@ if ($isDeployed)
 	try
 	{
 		$allVMData  = GetAllDeployementData -DeployedServices $isDeployed
-        Set-Variable -Name AllVMData -Value $allVMData
+		Set-Variable -Name AllVMData -Value $allVMData
 		$hs1VIP = $allVMData.PublicIP
 		$hs1ServiceUrl = $allVMData.URL
 		$hs1vm1IP = $allVMData.InternalIP
