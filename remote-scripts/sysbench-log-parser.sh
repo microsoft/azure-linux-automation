@@ -1,8 +1,10 @@
+#!/bin/bash
 #
 # This script converts Sysbench output file into csv format.
 # Author	: Srikanth M
 # Email	: v-srm@microsoft.com
 #
+####
 syslog_file_name=$1
 
 if [ "$#" -ne 1 ]; then
