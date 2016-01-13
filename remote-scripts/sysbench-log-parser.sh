@@ -3,8 +3,8 @@
 # This script converts Sysbench output file into csv format.
 # Author	: Srikanth M
 # Email	: v-srm@microsoft.com
-#
 ####
+
 syslog_file_name=$1
 
 if [ "$#" -ne 1 ]; then
@@ -48,6 +48,7 @@ res_WriteBytes=(`cat $syslog_file_name | grep "Read "| awk '{print $4}'`)
 res_WriteOperations=(`cat $syslog_file_name | grep "Operations performed:"| awk  '{print $5}'`)
 res_threads=(`cat $syslog_file_name | grep "Number of threads:" | sed "s/Number of threads: //"`)
 res_TotalBytes=(`cat $syslog_file_name | grep "Read "| awk '{print $7}'`)
+
 count=0
 
 while [ "x${res_Iteration[$count]}" != "x" ]
@@ -62,6 +63,7 @@ sed -i  -e  "s/seqrd/Sequential read/" $csv_file
 sed -i  -e  "s/seqrewr/Sequential write/" $csv_file
 sed -i  -e  "s/rndwr/Random write/" $csv_file
 
-echo "Output csv file: $csv_file created succesfully."
+echo "Output csv file: $csv_file created successfully."
+echo "LOGPARSER COMPLETED."
 
 rm -rf $TEMP_DIR
