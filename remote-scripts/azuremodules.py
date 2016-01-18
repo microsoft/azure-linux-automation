@@ -9,13 +9,20 @@ import subprocess
 import logging
 import string
 import os
-import commands
 import time
 import os.path
 import array
 import linecache
 import sys
 import re
+
+try:
+    import commands
+except ImportError:
+    import subprocess as commands
+
+py_ver_str = sys.version
+print(sys.version)
 
 #THIS LOG WILL COLLECT ALL THE LOGS THAT ARE RUN WHILE THE TEST IS GOING ON...
 RunLog = logging.getLogger("RuntimeLog : ")
@@ -42,12 +49,12 @@ ResultLog.addHandler(WResultLog)
 
 def UpdateRepos(current_distro):
     RunLog.info ("\nUpdating the repositoriy information...")
-    if ((current_distro == "ubuntu") or (current_distro == "debian")):
+    if (current_distro.find("ubuntu") != -1) or (current_distro.find("debian") != -1): 
         #method 'RunUpdate': fix deadlock when using stdout=PIPE and/or stderr=PIPE and the child process generates enough output to a pipe
         RunUpdate("apt-get update")
-    elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos')):
+    elif (current_distro.find("rhel") != -1) or (current_distro.find("Oracle") != -1) or (current_distro.find('centos') != -1):
         RunUpdate("yum -y update")
-    elif (current_distro == "opensuse") or (current_distro == "SUSE") or (current_distro == "sles"):
+    elif (current_distro.find("opensuse") != -1) or (current_distro.find("SUSE") != -1) or (current_distro.find("sles") != -1):
         RunUpdate("zypper --non-interactive --gpg-auto-import-keys update")
     else:
         RunLog.info("Repo upgradation failed on:"+current_distro)
@@ -154,10 +161,12 @@ def Run(cmd):
         op = proc.stdout.read()
         RunLog.debug(op)
         code=proc.returncode
-        int(code)
-        if code !=0:
+        if int(code) !=0:
             exception = 1
         else:
+            #ensure type str return
+            if py_ver_str[0] == '3':
+                op = op.decode('utf-8')
             return op
         if exception == 1:
             str_code = str(code)
@@ -171,10 +180,11 @@ def RunUpdate(cmd):
         op = retval[0]
         RunLog.debug(op)
         code = proc.returncode
-        int(code)
-        if code !=0:
+        if int(code) !=0:
             exception = 1
         else:
+            if py_ver_str[0] == '3':
+                op = op.decode('utf-8')
             return op
         if exception == 1:
             str_code = str(code)
@@ -325,11 +335,11 @@ def ZypperPackageRemove(package):
 def InstallPackage(package):
 	RunLog.info( "\nInstall_package: "+package)
 	[current_distro, distro_version] = DetectDistro()
-	if ((current_distro == "ubuntu") or (current_distro == "Debian")):
+	if (("ubuntu" in current_distro) or  ("Debian" in current_distro)):
 		return AptgetPackageInstall(package)
-	elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos') or (current_distro == 'fedora')):
+	elif (("rhel" in current_distro) or ("Oracle" in current_distro) or ("centos" in current_distro) or ("fedora" in current_distro)):
 		return YumPackageInstall(package)
-	elif ((current_distro == "SUSE") or (current_distro == "opensuse") or (current_distro == "sles")):
+	elif (("SUSE" in current_distro) or ("opensuse" in current_distro) or ("sles" in current_distro)):
 		return ZypperPackageInstall(package)
 	else:
 		RunLog.error((package + ": package installation failed!"))
@@ -421,11 +431,11 @@ def StartServer(server):
     #print output
     RunLog.info("Checking if server is started..")
     if ("listening" in output) :
-        str_out = string.split(output)
+        str_out = str.split(output)
         #len_out = len(str_out)
         for each in str_out :
             #print(each)
-            if cmp(each, "listening")==0 :
+            if each == "listening" :
                 iperfPID = Run('pidof iperf')
                 RunLog.info("Server started successfully. PID : %s", iperfPID)
                 Run('echo "yes" > isServerStarted.txt')
@@ -501,7 +511,6 @@ def AnalyseClientUpdateResult():
 def isProcessRunning(processName):
         temp = 'ps -ef'
         outProcess = Run(temp)
-        #print(iperfProcess)
         ProcessCount = outProcess.count('iperf -c')
         if (ProcessCount > 0):
                 return "True"
