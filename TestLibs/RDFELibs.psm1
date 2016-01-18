@@ -2543,11 +2543,14 @@ Function GetFinalizedResult($resultArr, $checkValues, $subtestValues, $currentTe
 
 Function CreateResultSummary($testResult, $checkValues, $testName, $metaData)
 {
-	if ($checkValues -imatch $testResult)
-	{				
+	if ( $metaData )
+	{
 		$resultString = "		  $testName : $metaData : $testResult <br />"
 	}
-
+	else
+	{
+		$resultString = "		  $testName : $testResult <br />"
+	}
 	return $resultString
 }
 

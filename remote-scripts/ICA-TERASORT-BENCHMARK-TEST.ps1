@@ -12,6 +12,7 @@ if ($isDeployed)
 		$slaveMachinesHostNames = ""
 		$noMaster = $true
 		$noSlave = $true
+		$terasortSummary = $null
 		foreach ( $vmData in $allVMData )
 		{
 			if ( $vmData.RoleName -imatch "master" )
@@ -82,9 +83,9 @@ if ($isDeployed)
 		Add-Content -Value "TERAGEN_RECORDS=$($currentTestData.TERAGEN_RECORDS)" -Path $constantsFile
 		Add-Content -Value "HADOOP_VERSION=`"$hadoopVersion`"" -Path $constantsFile
 		Add-Content -Value "sshKey=`"/root/$sshKey`"" -Path $constantsFile
-		<#
-			You can add as much as teerasort test parameters here.
-		#>
+		
+		#	You can add as much as teerasort test parameters here.
+		
 		LogMsg "constanst.sh created successfully..."
 		Set-Content -Value "/root/perf_hadoopterasort.sh &> terasortConsoleLogs.txt" -Path "$LogDir\StartTerasortTest.sh"
 		Set-Content -Value "echo `"Host *`" > /home/$user/.ssh/config" -Path "$LogDir\disableHostKeyVerification.sh"
@@ -123,27 +124,40 @@ if ($isDeployed)
 			LogMsg "Current Test Staus : $currentStatus"
 			WaitFor -seconds 10
 		}
+		
 		$currentStatus = RunLinuxCmd -ip $masterVMData.PublicIP -port $masterVMData.SSHPort -username "root" -password $password -command "tail -n 1 /root/hadoop.log"
 		$finalStatus = RunLinuxCmd -ip $masterVMData.PublicIP -port $masterVMData.SSHPort -username "root" -password $password -command "cat /root/state.txt"
-		RemoteCopy -downloadFrom $masterVMData.PublicIP -port $masterVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/terasortConsoleLogs.txt" 
+		
+		RemoteCopy -downloadFrom $masterVMData.PublicIP -port $masterVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/terasortConsoleLogs.txt"
+		RemoteCopy -downloadFrom $masterVMData.PublicIP -port $masterVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/summary.log"
+		$terasortSummary = Get-Content -Path "$LogDir\summary.log" -ErrorAction SilentlyContinue
+		if (!$terasortSummary)
+		{
+			LogMsg "summary.log file is empty."
+			$terasortSummary = "<EMPTY>"
+		}
 		if ( $finalStatus -imatch "TestFailed")
 		{
 			LogErr "Test failed. Last known status : $currentStatus."
+			LogMsg "Contests of summary.log : $terasortSummary"
 			$testResult = "FAIL"
 		}
 		elseif ( $finalStatus -imatch "TestAborted")
 		{
 			LogErr "Test Aborted. Last known status : $currentStatus."
+			LogMsg "Contests of summary.log : $terasortSummary"
 			$testResult = "ABORTED"
 		}
 		elseif ( $finalStatus -imatch "TestCompleted")
 		{
 			LogMsg "Test Completed. Last known status : $currentStatus."
+			LogMsg "$terasortSummary"
 			$testResult = "PASS"
 		}
 		elseif ( $finalStatus -imatch "TestRunning")
 		{
 			LogMsg "Powershell backgroud job for test is completed but VM is reporting that test is still running. Please check $LogDir\terasortConsoleLogs.txt"
+			LogMsg "Contests of summary.log : $terasortSummary"
 			$testResult = "PASS"
 		}
 		LogMsg "Test result : $testResult"
@@ -156,13 +170,13 @@ if ($isDeployed)
 	}
 	Finally
 	{
-		$metaData = ""
+		$metaData = "summary.log"
 		if (!$testResult)
 		{
 			$testResult = "Aborted"
 		}
 		$resultArr += $testResult
-		#$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
+		$resultSummary +=  CreateResultSummary -testResult $terasortSummary -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
 	}   
 }
 
@@ -178,4 +192,4 @@ $result = GetFinalResultHeader -resultarr $resultArr
 DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed -ResourceGroups $isDeployed
 
 #Return the result and summery to the test suite script..
-return $result
+return $result, $resultSummary

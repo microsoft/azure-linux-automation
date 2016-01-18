@@ -4331,6 +4331,7 @@
 			<remoteFiles>https://raw.githubusercontent.com/LIS/lis-test/master/WS2012R2/lisa/remote-scripts/ica/perf_hadoopterasort.sh</remoteFiles>
 			<!--Remote XML will be downloaded to automation server for analysis-->
 			<remoteXML>https://raw.githubusercontent.com/LIS/lis-test/master/WS2012R2/lisa/xml/perf_hadoopterasort.xml</remoteXML>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<Priority>P0</Priority>
 		</test>		
 		
