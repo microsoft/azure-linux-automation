@@ -3,7 +3,6 @@ Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""
 $resultArr = @()
-$ExtensionName = "DockerExtension"
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
@@ -18,6 +17,7 @@ if ($isDeployed)
 		$LogFilesPaths = ""
 		$LogFiles = ""
 		$folderToSearch = "/var/log/azure"
+		$ExtensionName = "DockerExtension"
 		$FoundFiles = GetFilePathsFromLinuxFolder -folderToSearch $folderToSearch -IpAddress $hs1VIP -SSHPort $hs1vm1sshport -username $user -password $password
 		$LogFilesPaths = $FoundFiles[0]
 		$LogFiles = $FoundFiles[1]
@@ -29,13 +29,16 @@ if ($isDeployed)
 			{   LogMsg "Attempt : $retryCount/$maxRetryCount : Checking extension log files...."
 				foreach ($file in $LogFilesPaths.Split(","))
 				{
-					foreach ($fileName in $LogFiles.Split(","))
+					$fileName = $file.Split("/")[$file.Split("/").Count -1]
+					if ( $file -imatch $ExtensionName )
 					{
-						if ( $file -imatch $fileName )
-						{
-							$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat $file > $fileName" -runAsSudo
-							RemoteCopy -download -downloadFrom $hs1VIP -files $fileName -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
-						}
+						$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat $file > $fileName" -runAsSudo
+						RemoteCopy -download -downloadFrom $hs1VIP -files $fileName -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
+					}
+					else
+					{
+						LogErr "Unexpected Extension Found : $($file.Split("/")[4]) with version $($file.Split("/")[5])"
+						LogMsg "Skipping download for : $($file.Split("/")[4]) : $fileName"
 					}
 				}
 				if ( Test-Path "$LogDir\docker-extension.log" )
