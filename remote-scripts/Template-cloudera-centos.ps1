@@ -20,13 +20,13 @@ try
 	$jsonfile =  Get-Content ..\azure-quickstart-templates\cloudera-on-centos\azuredeploy.parameters.json -Raw | ConvertFrom-Json
 	$curtime = Get-Date
 	$timestr = "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
-	$jsonfile.storageAccountPrefix.value = $parameters.storageAccountPrefix + $curtime.Month + $curtime.Day + $curtime.Hour + $curtime.Minute + $curtime.Second
-	$jsonfile.dnsNamePrefix.value = $parameters.dnsNamePrefix + $timestr
-	$jsonfile.virtualNetworkName.value = $parameters.virtualNetworkName + $timestr
-	$jsonfile.subnetName.value = $parameters.subnetName + $timestr
-	$jsonfile.numberOfDataNodes.value = [int]$parameters.numberOfDataNodes
-	$jsonfile.adminPassword.value = $password.Replace('"','')
-	$jsonfile.cmPassword.value = $password.Replace('"','')
+	$jsonfile.parameters.storageAccountPrefix.value = $parameters.storageAccountPrefix + $curtime.Month + $curtime.Day + $curtime.Hour + $curtime.Minute + $curtime.Second
+	$jsonfile.parameters.dnsNamePrefix.value = $parameters.dnsNamePrefix + $timestr
+	$jsonfile.parameters.virtualNetworkName.value = $parameters.virtualNetworkName + $timestr
+	$jsonfile.parameters.subnetName.value = $parameters.subnetName + $timestr
+	$jsonfile.parameters.numberOfDataNodes.value = [int]$parameters.numberOfDataNodes
+	$jsonfile.parameters.adminPassword.value = $password.Replace('"','')
+	$jsonfile.parameters.cmPassword.value = $password.Replace('"','')
 	if($env:GetRandomValue -eq $True)
 	{
 		$AllowedValue =  Get-Content ..\azure-quickstart-templates\cloudera-on-centos\azuredeploy.json -Raw | ConvertFrom-Json
