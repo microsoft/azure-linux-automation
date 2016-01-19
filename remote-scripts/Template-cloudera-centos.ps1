@@ -27,23 +27,28 @@ try
 	$jsonfile.numberOfDataNodes.value = [int]$parameters.numberOfDataNodes
 	$jsonfile.adminPassword.value = $password.Replace('"','')
 	$jsonfile.cmPassword.value = $password.Replace('"','')
-	$jsonfile.location.value = $location.Replace('"','').Replace(' ','').ToLower()
-	$jsonfile.vmSize.value = $parameters.vmSize
-	$jsonfile.company.value = $parameters.company
-	$jsonfile.emailAddress.value = $parameters.emailAddress
-	$jsonfile.firstName.value = $parameters.firstName
-	$jsonfile.lastName.value = $parameters.lastName
-	if($env:RoleInstanceSize)
+	if($env:GetRandomValue -eq $True)
 	{
-		$jsonfile.vmSize.value = $env:RoleInstanceSize
-	}
-	if($jsonfile.vmSize.value -match 'DS' -or $jsonfile.vmSize.value -match 'DS')
-	{
-		$jsonfile.storageAccountType.value = 'Premium_LRS'
+		$AllowedValue =  Get-Content ..\azure-quickstart-templates\cloudera-on-centos\azuredeploy.json -Raw | ConvertFrom-Json
+		$jsonfile.parameters.location.value = $AllowedValue.parameters.location.allowedValues | Get-Random
+		$jsonfile.parameters.tshirtSize.value = $AllowedValue.parameters.tshirtSize.allowedValues | Get-Random
 	}
 	else
 	{
-		$jsonfile.storageAccountType.value = 'Standard_LRS'
+		$jsonfile.parameters.location.value = $location.Replace('"','').Replace(' ','').ToLower()	
+		$jsonfile.parameters.vmSize.value = $parameters.vmSize
+		if($env:RoleInstanceSize)
+		{
+			$jsonfile.parameters.vmSize.value = $env:RoleInstanceSize
+		}
+		if($jsonfile.parameters.vmSize.value -match 'DS' -or $jsonfile.parameters.vmSize.value -match 'DS')
+		{
+			$jsonfile.parameters.storageAccountType.value = 'Premium_LRS'
+		}
+		else
+		{
+			$jsonfile.parameters.storageAccountType.value = 'Standard_LRS'
+		}
 	}
 	# save template parameter file
 	$jsonfile | ConvertTo-Json | Out-File .\azuredeploy.parameters.json

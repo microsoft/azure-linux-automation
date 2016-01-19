@@ -4598,11 +4598,7 @@
 			<virtualNetworkName>clouderavnet</virtualNetworkName>
 			<subnetName>clouderasubvnet</subnetName>
 			<numberOfDataNodes>1</numberOfDataNodes>
-			<VmSize>Standard_D4</VmSize>
-			<company>yourcompany</company>
-			<emailAddress>email@yourcompany.com</emailAddress>
-			<firstName>myfirstname</firstName>
-			<lastName>mylastname</lastName>			
+			<VmSize>Standard_D4</VmSize>	
           </parameters>
 		  <TestType>
 		  </TestType>
