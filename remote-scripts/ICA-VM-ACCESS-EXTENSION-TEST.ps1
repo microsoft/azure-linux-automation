@@ -155,7 +155,7 @@ Function VMAccessExtTest($TaskType)
 			}  
 			else  
 			{  
- 				$VMStatus = RunLinuxCmd -username $NewUser -password $passwd -ip $hs1VIP -port $hs1vm1sshport -command "/usr/sbin/waagent --version 
+ 				$VMStatus = RunLinuxCmd -username $NewUser -password $passwd -ip $hs1VIP -port $hs1vm1sshport -command "/usr/sbin/waagent --version" 
  			}
  			$VMStatus1 = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat /etc/shadow" -runAsSudo
 			if(($VMStatus -imatch "WALinuxAgent") -and ($VMStatus1 -imatch $NewUser))
