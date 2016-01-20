@@ -96,7 +96,7 @@ Function VMAccessExtensionExecutionStatus($user,$password,$ExtensionType,$LogFil
 {
 	if ($LogFilesPaths)
 	{
-		$ExtLog = $LogFilesPaths.split(",")[1]       
+		$ExtLog = $LogFilesPaths.split(",")[1]	   
 		$extensionOutput = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat $ExtLog" -runAsSudo
 		if ( $extensionOutput -imatch "Succeeded in $ExtensionType" )
 		{
@@ -407,13 +407,16 @@ if ($isDeployed)
 		LogMsg "Collecting Logs"
 		foreach ($file in $LogFilesPaths.Split(","))
 		{
-			foreach ($fileName in $LogFiles.Split(","))
+			$fileName = $file.Split("/")[$file.Split("/").Count -1]
+			if ( $file -imatch $ExtensionName )
 			{
-				if ( $file -imatch $fileName )
-				{
-					$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat $file > $fileName" -runAsSudo
-					RemoteCopy -download -downloadFrom $hs1VIP -files $fileName -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
-				}
+				$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat $file > $fileName" -runAsSudo
+				RemoteCopy -download -downloadFrom $hs1VIP -files $fileName -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
+			}
+			else
+			{
+				LogErr "Unexpected Extension Found : $($file.Split("/")[4]) with version $($file.Split("/")[5])"
+				LogMsg "Skipping download for : $($file.Split("/")[4]) : $fileName"
 			}
 		}
 		$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod 664 /home/$user/logs/*" -runAsSudo

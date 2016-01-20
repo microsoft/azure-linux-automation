@@ -2669,7 +2669,6 @@
 					</VirtualMachine>
 				</HostedService>
 			</D14DISK32>
-			
 			<ExtensionTest>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -2687,6 +2686,64 @@
 					</VirtualMachine>
 				</HostedService>
 			</ExtensionTest>
+			<M1S3>
+				<!-- This setup type defines One Master and Three slave machines. Hence name is M(aster)1S(lave)3. -->
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D2</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<RoleName>master</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12122</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D2</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<RoleName>slave1</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12222</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D2</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<RoleName>slave2</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12322</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D2</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<RoleName>slave3</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12422</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+				</HostedService>
+			</M1S3>			
 		</Deployment>
 		
 
@@ -4129,7 +4186,7 @@
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>Perf_004</TestID>
 			<Priority>P0</Priority>
-		</test>		
+		</test>	
 		<test>
 			<testName>ICA-NETWORK-PERF-TEST</testName>
 			<testScript>NetPerf_setup_startup.sh</testScript>
@@ -4445,6 +4502,17 @@
 			<DeploymentCount>250</DeploymentCount>
 			<TestID>Reboot_01</TestID>
 		</test>
+		<test>
+			<testName>ICA-VM-REBOOT-TEST</testName>
+			<testScript></testScript>
+			<testScriptPs1>ICA-VM-REBOOT-TEST.ps1</testScriptPs1>
+			<setupType>G5</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<rebootCount>100</rebootCount>
+			<TestID>Reboot_02</TestID>
+		</test>		
 		
 		<!-- PERFORMANCE TESTS DEFINITIONS -->
 		<test>
@@ -4612,6 +4680,25 @@
 		  <TestID>AzureTemplate_002</TestID>
 		</test>
 
+		<!-- IMPORTED FROM LISA TEST DEFINITIONS -->
+		<test>
+			<testName>ICA-TERASORT-BENCHMARK-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-TERASORT-BENCHMARK-TEST.ps1</testScriptps1>
+			<setupType>M1S3</setupType>
+			<TERAGEN_RECORDS>50000</TERAGEN_RECORDS>
+			<sshKey>.\ssh\myPrivateKey.key</sshKey>
+			<!-- Hadoop version is optional here. If left blank then hadoop version will be taken from remoteXML file of this definition.-->
+			<HADOOP_VERSION></HADOOP_VERSION>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<!--Remote Files will be directly downloaded to test VM.-->
+			<remoteFiles>https://raw.githubusercontent.com/LIS/lis-test/master/WS2012R2/lisa/remote-scripts/ica/perf_hadoopterasort.sh</remoteFiles>
+			<!--Remote XML will be downloaded to automation server for analysis-->
+			<remoteXML>https://raw.githubusercontent.com/LIS/lis-test/master/WS2012R2/lisa/xml/perf_hadoopterasort.xml</remoteXML>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<Priority>P0</Priority>
+		</test>		
+		
 		</testsDefinition>
 
 	<testCycles>
@@ -5310,7 +5397,14 @@
 				<Name>BVT-VERIFY-VERBOSE-ENABLED-LOGS</Name>
 			</test>
 		</Cycle>
-		
+
+		<Cycle>
+			<cycleName>LISA-TERASORT-PERF</cycleName>
+			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
+			<test>
+				<Name>ICA-TERASORT-BENCHMARK-TEST</Name>
+			</test>
+		</Cycle>		
 		
 		<Cycle>
 			<cycleName>DEBUG</cycleName>

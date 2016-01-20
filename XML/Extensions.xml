@@ -9,7 +9,7 @@
 				<commandToExecute>touch /var/log/CustomExtensionSuccessful</commandToExecute>
 			</PublicConfiguration>
 			<Version>1.*</Version>
-			<LatestVersion>1.3</LatestVersion>
+			<LatestVersion>1.4</LatestVersion>
 		</Extension>
 		<Extension>
 			<Name>OsPatching</Name>
@@ -39,7 +39,7 @@
 				<storageAccountKey>EXECUTE-PS-GetStorageAccountKey -xmlConfig $xmlConfig</storageAccountKey>
 			</PrivateConfiguration>			
 			<Version>2.*</Version>
-			<LatestVersion>2.0</LatestVersion>
+			<LatestVersion>2.2</LatestVersion>
 		</Extension>
 		<Extension>
 			<Name>VMAccess</Name>
@@ -51,7 +51,7 @@
 				<expiration>2016-01-01</expiration>
 			</PrivateConfiguration>	
 			<Version>1.*</Version>
-			<LatestVersion>1.3</LatestVersion>
+			<LatestVersion>1.4</LatestVersion>
 			<NewPassword>VMAccessUserNewPassword</NewPassword>
 			<ExtensionTask>AddUser,ResetPassword,DeleteUser,ResetSSHConfig</ExtensionTask>
 		</Extension>

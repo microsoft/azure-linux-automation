@@ -31,6 +31,7 @@ Set-Variable -Name sshPublicKeyThumbprint -Value $sshPublicKeyThumbprint -Scope 
 Set-Variable -Name PublicConfiguration -Value @() -Scope Global
 Set-Variable -Name PrivateConfiguration -Value @() -Scope Global
 Set-Variable -Name CurrentTestData -Value $CurrentTestData -Scope Global
+Set-Variable -Name preserveKeyword -Value "preserving" -Scope Global
 
 try
 {

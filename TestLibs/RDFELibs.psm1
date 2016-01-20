@@ -596,10 +596,10 @@ Function GenerateCommand ($Setup, $serviceName, $osImage, $HSData)
 							{
 								$ExtensionCommand = "Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName) -ReferenceName $extn -Publisher $($newExtn.Publisher) -Version $($newExtn.Version) -PrivateConfiguration `$PrivateConfiguration[$extensionCounter]"
 							}
-                            else
-                            {
-                                $ExtensionCommand = "Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName) -ReferenceName $extn -Publisher $($newExtn.Publisher) -Version $($newExtn.Version)"
-                            }								
+							else
+							{
+								$ExtensionCommand = "Set-AzureVMExtension -ExtensionName $($newExtn.OfficialName) -ReferenceName $extn -Publisher $($newExtn.Publisher) -Version $($newExtn.Version)"
+							}								
 						}
 						LogMsg "Extension $extn (OfficialName : $($newExtn.OfficialName)) added to deployment command."
 						$extensionCounter += 1
@@ -1073,6 +1073,28 @@ Function GetAndCheckKernelLogs($allDeployedVMs, $status, $vmUser, $vmPassword)
 			$out = RunLinuxCmd -ip $VM.PublicIP -port $VM.SSHPort -username $vmUser -password $vmPassword -command "dmesg > /home/$vmUser/InitialBootLogs.txt" -runAsSudo
 			$out = RemoteCopy -download -downloadFrom $VM.PublicIP -port $VM.SSHPort -files "/home/$vmUser/InitialBootLogs.txt" -downloadTo $BootLogDir -username $vmUser -password $vmPassword
 			LogMsg "$($VM.RoleName): $status Kernel logs collected ..SUCCESSFULLY"
+			LogMsg "Checking for call traces in kernel logs.."
+			$KernelLogs = Get-Content $InitailBootLog 
+			$callTraceFound  = $false
+			foreach ( $line in $KernelLogs )
+			{
+				if ( $line -imatch "Call Trace" )
+				{
+					LogErr $line
+					$callTraceFound = $true
+				}
+				if ( $callTraceFound )
+				{
+					if ( $line -imatch "\[<")
+					{
+						LogErr $line
+					}
+				}
+			}
+			if ( !$callTraceFound )
+			{
+				LogMsg "No any call traces found."
+			}
 			$detectedDistro = DetectLinuxDistro -VIP $VM.PublicIP -SSHport $VM.SSHPort -testVMUser $vmUser -testVMPassword $vmPassword
 			SetDistroSpecificVariables -detectedDistro $detectedDistro
 			$retValue = $true
@@ -1081,6 +1103,28 @@ Function GetAndCheckKernelLogs($allDeployedVMs, $status, $vmUser, $vmPassword)
 		{
 			$out = RunLinuxCmd -ip $VM.PublicIP -port $VM.SSHPort -username $vmUser -password $vmPassword -command "dmesg > /home/$vmUser/FinalBootLogs.txt" -runAsSudo
 			$out = RemoteCopy -download -downloadFrom $VM.PublicIP -port $VM.SSHPort -files "/home/$vmUser/FinalBootLogs.txt" -downloadTo $BootLogDir -username $vmUser -password $vmPassword
+			LogMsg "Checking for call traces in kernel logs.."
+			$KernelLogs = Get-Content $FinalBootLog
+			$callTraceFound  = $false
+			foreach ( $line in $KernelLogs )
+			{
+				if ( $line -imatch "Call Trace" )
+				{
+					LogErr $line
+					$callTraceFound = $true
+				}
+				if ( $callTraceFound )
+				{
+					if ( $line -imatch "\[<")
+					{
+						LogErr $line
+					}
+				}
+			}
+			if ( !$callTraceFound )
+			{
+				LogMsg "No any call traces found."
+			}
 			$KernelDiff = Compare-Object -ReferenceObject (Get-Content $FinalBootLog) -DifferenceObject (Get-Content $InitailBootLog)
 			#Removing final dmesg file from logs to reduce the size of logs. We can alwayas see complete Final Logs as : Initial Kernel Logs + Difference in Kernel Logs
 			Remove-Item -Path $FinalBootLog -Force | Out-Null
@@ -1116,6 +1160,19 @@ Function GetAndCheckKernelLogs($allDeployedVMs, $status, $vmUser, $vmPassword)
 			{
 				LogErr "Found $errorCount fail/error/warning messages in kernel logs during execution."
 				$retValue = $false
+			}
+			if ( $callTraceFound )
+			{
+				if ( $UseAzureResourceManager )
+				{
+					LogMsg "Adding preserve tag to $($VM.ResourceGroup) .."
+					$out = Set-AzureResourceGroup -Name $($VM.ResourceGroup) -Tag @{Name =$preserveKeyword; Value = "yes"},@{Name ="callTrace"; Value = "yes"}
+				}
+				else
+				{
+					LogMsg "Adding preserve tag to $($VM.ServiceName) .."
+					$out = Set-AzureService -ServiceName $($VM.ServiceName) -Description $preserveKeyword
+				}
 			}
 		}
 		else
@@ -1775,7 +1832,7 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 				}
 				else
 				{
-					if ( ( $f -imatch ".sh" ) -or ( $f -imatch ".py" ))
+					if ( ( $f.Split(".")[$f.Split(".").count-1] -eq "sh" ) -or ( $f.Split(".")[$f.Split(".").count-1] -eq "py" ) )
 					{
 						$out = .\tools\dos2unix.exe $f 2>&1
 						LogMsg $out
@@ -1837,11 +1894,10 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 							$retry=$maxRetry+1
 						}
 					}
-
-					LogMsg "Decompressing files in VM ..."
-					$out = RunLinuxCmd -username $username -password $password -ip $uploadTo -port $port -command "tar -xf $tarFileName" -runAsSudo
 					LogMsg "Removing compressed file : $tarFileName"
 					Remove-Item -Path $tarFileName -Force 2>&1 | Out-Null
+					LogMsg "Decompressing files in VM ..."
+					$out = RunLinuxCmd -username $username -password $password -ip $uploadTo -port $port -command "tar -xf $tarFileName" -runAsSudo
 				}
 				else
 				{
@@ -2093,6 +2149,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 			{
 				LogMsg "$command is running in background with ID $($runLinuxCmdJob.Id) ..."
 				Add-Content -Path $LogDir\CurrentTestBackgroundJobs.txt -Value $runLinuxCmdJob.Id
+				$retValue = $runLinuxCmdJob.Id
 			}
 			else
 			{
@@ -2318,17 +2375,28 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 							}
 							else
 							{
-								#GetVMLogs -allVMData $allDeploymentData
-								LogMsg "Cleaning up deployed test virtual machines."
-								$isClened = DeleteService -serviceName $hsDetails.ServiceName
-						
-								if ($isClened -contains "False")
+								if ( $hsDetails.Description -imatch $preserveKeyword )
 								{
-									LogMsg "CleanUP unsuccessful for $($hsDetails.ServiceName).. Please delete the services manually."
-								}
+									LogMsg "Skipping cleanup of preserved service."
+									LogMsg "Collecting VM logs.."
+									if ( !$isVMLogsCollected )
+									{
+										GetVMLogs -allVMData $allDeploymentData
+									}
+									$isVMLogsCollected = $true								}
 								else
 								{
-									LogMsg "CleanUP Successful for $($hsDetails.ServiceName).."
+									LogMsg "Cleaning up deployed test virtual machines."
+									$isClened = DeleteService -serviceName $hsDetails.ServiceName
+						
+									if ($isClened -contains "False")
+									{
+										LogMsg "CleanUP unsuccessful for $($hsDetails.ServiceName).. Please delete the services manually."
+									}
+									else
+									{
+										LogMsg "CleanUP Successful for $($hsDetails.ServiceName).."
+									}
 								}
 							}
 						}
@@ -2386,17 +2454,29 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 						}
 						else
 						{
-							#GetVMLogs -allVMData $allDeploymentData
-							LogMsg "Cleaning up deployed test virtual machines."
-							$isClened = DeleteResourceGroup -RGName $group
-						
-							if (!$isClened)
+							$RGdetails = Get-AzureResourceGroup -Name $group
+							if ( (  $RGdetails.Tags[0].Name -eq $preserveKeyword ) -and (  $RGdetails.Tags[0].Value -eq "yes" ))
 							{
-								LogMsg "CleanUP unsuccessful for $group.. Please delete the services manually."
+								LogMsg "Skipping Cleanup of preserved resource group."
+								LogMsg "Collecting VM logs.."
+								if ( !$isVMLogsCollected)
+								{
+									GetVMLogs -allVMData $allVMData
+								}
+								$isVMLogsCollected = $true
 							}
 							else
 							{
-								LogMsg "CleanUP Successful for $group.."
+								LogMsg "Cleaning up deployed test virtual machines."
+								$isClened = DeleteResourceGroup -RGName $group
+								if (!$isClened)
+								{
+									LogMsg "CleanUP unsuccessful for $group.. Please delete the services manually."
+								}
+								else
+								{
+									LogMsg "CleanUP Successful for $group.."
+								}
 							}
 						}
 					}
@@ -2404,7 +2484,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 					{
 						LogMsg "Preserving the Resource Group(s) $group"
 						LogMsg "Setting tags : preserve = yes; testName = $testName"
-						$out = Set-AzureResourceGroup -Name $group -Tag @{Name ="preserve"; Value = "yes"},@{Name ="testName"; Value = "$testName"}
+						$out = Set-AzureResourceGroup -Name $group -Tag @{Name =$preserveKeyword; Value = "yes"},@{Name ="testName"; Value = "$testName"}
 						LogMsg "Collecting VM logs.."
 						if ( !$isVMLogsCollected)
 						{
@@ -2463,11 +2543,14 @@ Function GetFinalizedResult($resultArr, $checkValues, $subtestValues, $currentTe
 
 Function CreateResultSummary($testResult, $checkValues, $testName, $metaData)
 {
-	if ($checkValues -imatch $testResult)
-	{				
+	if ( $metaData )
+	{
 		$resultString = "		  $testName : $metaData : $testResult <br />"
 	}
-
+	else
+	{
+		$resultString = "		  $testName : $testResult <br />"
+	}
 	return $resultString
 }
 
