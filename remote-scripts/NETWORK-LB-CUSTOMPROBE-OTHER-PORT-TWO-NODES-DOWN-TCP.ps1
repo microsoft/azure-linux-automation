@@ -42,8 +42,8 @@ if ($isDeployed)
 
 	$wait=45
 	$Value = 2
-	$cmd1="python start-server.py -p $hs1vm1tcpport && mv Runtime.log start-server.py.log -f"
-	$cmd2="python start-server.py -p $hs1vm2tcpport && mv Runtime.log start-server.py.log -f"
+	$cmd1="$python_cmd start-server.py -p $hs1vm1tcpport && mv Runtime.log start-server.py.log -f"
+	$cmd2="$python_cmd start-server.py -p $hs1vm2tcpport && mv Runtime.log start-server.py.log -f"
 	$cmd3=""
 	$cmd11="python start-server-without-stopping.py -p $hs1vm1ProbePort -log iperf-probe.txt"
 	$cmd22="python start-server-without-stopping.py -p $hs1vm2ProbePort -log iperf-probe.txt"
@@ -63,12 +63,12 @@ if ($isDeployed)
 			$testResult = $null
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 			{
-				$client.cmd = "python start-client.py -c $hs1VIP -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P$Value"
+				$client.cmd = "$python_cmd start-client.py -c $hs1VIP -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P$Value"
 			}
 
 			if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 			{
-				$client.cmd = "python start-client.py -c $hs1ServiceUrl -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P$Value"
+				$client.cmd = "$python_cmd start-client.py -c $hs1ServiceUrl -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P$Value"
 			}
 #region Upload all Files in Test VMs
 
@@ -78,7 +78,7 @@ if ($isDeployed)
 			$server1.logDir = $LogDir + "\$mode" + "\Server1"
 			$server2.logDir = $LogDir + "\$mode" + "\Server2"
 			$client.logDir = $LogDir + "\$mode"
-			$client.cmd = "python start-client.py -c $hs1VIP -p $hs1vm1tcpport -t10 -P$Value"
+			$client.cmd = "$python_cmd start-client.py -c $hs1VIP -p $hs1vm1tcpport -t10 -P$Value"
 			LogMsg "Test Started for Parallel Connections $Value"
 			RemoteCopy -uploadTo $server1.ip -port $server1.sshPort -files $server1.files -username $server1.user -password $server1.password -upload
 			RemoteCopy -uploadTo $server2.Ip -port $server2.sshPort -files $server2.files -username $server2.user -password $server2.password -upload

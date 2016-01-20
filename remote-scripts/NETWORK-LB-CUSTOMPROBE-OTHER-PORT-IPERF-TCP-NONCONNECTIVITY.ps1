@@ -42,9 +42,9 @@ if ($isDeployed)
 	
 	$testPort = $hs1vm1tcpport + 10
 	$pSize = 6
-	$cmd1="python start-server.py -p $testPort && mv Runtime.log start-server.py.log -f"
-	$cmd2="python start-server.py -p $testPort && mv Runtime.log start-server.py.log -f"
-	$cmd3="python start-client.py -c $hs1VIP -p $testPort -t10 -P$pSize"
+	$cmd1="$python_cmd start-server.py -p $testPort && mv Runtime.log start-server.py.log -f"
+	$cmd2="$python_cmd start-server.py -p $testPort && mv Runtime.log start-server.py.log -f"
+	$cmd3="$python_cmd start-client.py -c $hs1VIP -p $testPort -t10 -P$pSize"
 	$cmd11="python start-server-without-stopping.py -p $hs1vm1ProbePort -log iperf-probe.txt"
 	$cmd22="python start-server-without-stopping.py -p $hs1vm2ProbePort -log iperf-probe.txt"
 		
@@ -60,12 +60,12 @@ if ($isDeployed)
 			$testResult = $null
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 			{
-				$client.cmd = "python start-client.py -c $hs1VIP -p $testPort -t$iperfTimeoutSeconds -P$pSize"
+				$client.cmd = "$python_cmd start-client.py -c $hs1VIP -p $testPort -t$iperfTimeoutSeconds -P$pSize"
 			}
 
 			if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 			{
-				$client.cmd = "python start-client.py -c $hs1ServiceUrl -p $testPort -t$iperfTimeoutSeconds -P$pSize"
+				$client.cmd = "$python_cmd start-client.py -c $hs1ServiceUrl -p $testPort -t$iperfTimeoutSeconds -P$pSize"
 			}
 			mkdir $LogDir\$mode\Server1 -ErrorAction SilentlyContinue | out-null
 			mkdir $LogDir\$mode\Server2 -ErrorAction SilentlyContinue | out-null

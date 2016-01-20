@@ -42,9 +42,9 @@ if ($isDeployed)
 
 	$wait=45
 	$Value = 6
-	$cmd1="python start-server.py -p $hs1vm1tcpport && mv Runtime.log start-server.py.log -f"
-	$cmd2="python start-server.py -p $hs1vm2tcpport && mv Runtime.log start-server.py.log -f"
-	$cmd3="python start-client.py -c $hs1VIP -p $hs1vm1tcpport -t10 -P$Value"
+	$cmd1="$python_cmd start-server.py -p $hs1vm1tcpport && mv Runtime.log start-server.py.log -f"
+	$cmd2="$python_cmd start-server.py -p $hs1vm2tcpport && mv Runtime.log start-server.py.log -f"
+	$cmd3="$python_cmd start-client.py -c $hs1VIP -p $hs1vm1tcpport -t10 -P$Value"
 	$cmd11="python start-server-without-stopping.py -p $hs1vm1ProbePort -log iperf-probe.txt"
 	$cmd22="python start-server-without-stopping.py -p $hs1vm2ProbePort -log iperf-probe.txt"
 	
@@ -68,11 +68,11 @@ if ($isDeployed)
 			mkdir $LogDir\$mode\Server2 -ErrorAction SilentlyContinue | out-null
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 			{#.........................................................................Client command will decided according to TestMode....
-				$cmd3="python start-client.py -c $hs1VIP -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P2" 
+				$cmd3="$python_cmd start-client.py -c $hs1VIP -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P2" 
 			}
 			if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 			{
-				$cmd3="python start-client.py -c $hs1ServiceUrl -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P2"
+				$cmd3="$python_cmd start-client.py -c $hs1ServiceUrl -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P2"
 			}
 			$server1.logDir = $LogDir + "\$mode" + "\Server1"
 			$server2.logDir = $LogDir + "\$mode" + "\Server2"

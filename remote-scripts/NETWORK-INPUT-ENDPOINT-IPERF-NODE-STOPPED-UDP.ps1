@@ -36,14 +36,14 @@ if ($isDeployed)
 		{
 			$testResult = $null
 			mkdir $LogDir\$mode -ErrorAction SilentlyContinue | out-null
-			$server.cmd ="python start-server.py -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log -f"
+			$server.cmd ="$python_cmd start-server.py -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log -f"
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 			{
-				$client.cmd ="python start-client.py -c $hs1VIP -p $hs1vm1udpport -t$iperfTimeoutSeconds -u yes -l1420"
+				$client.cmd ="$python_cmd start-client.py -c $hs1VIP -p $hs1vm1udpport -t$iperfTimeoutSeconds -u yes -l1420"
 			}
 			if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 			{
-				$client.cmd ="python start-client.py -c $hs1ServiceUrl -p $hs1vm1udpport -t$iperfTimeoutSeconds -u yes -l1420"
+				$client.cmd ="$python_cmd start-client.py -c $hs1ServiceUrl -p $hs1vm1udpport -t$iperfTimeoutSeconds -u yes -l1420"
 			}
 			$server.logDir = "$LogDir\$mode"
 			$client.logDir = "$LogDir\$mode"

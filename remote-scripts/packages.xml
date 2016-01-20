@@ -3,7 +3,7 @@
     <branch>
     	<packages distro="universal">iperf,wget,python-crypto,python-paramiko,python-argparse,tar</packages>
 	    <packages distro="debian">iperf,mysql-server,gcc,bind9,python-crypto,python-paramiko,nfs-common,psmisc,tcpdump,ntp,libaio1,xfsprogs,dnsutils</packages>
-	    <packages distro="ubuntu">iperf,mysql-server,gcc,bind9,python-crypto,python-paramiko,nfs-common,psmisc,tcpdump,ntp,libaio1,xfsprogs</packages>
+	    <packages distro="ubuntu">iperf,mysql-server,gcc,bind9,python-crypto,python-paramiko,python3-paramiko,nfs-common,psmisc,tcpdump,ntp,libaio1,xfsprogs</packages>
 	    <packages distro="SUSE">iperf,mysql,gcc,bind,python,python-argparse,python-paramiko,nfs-kernel-server,psmisc,tcpdump,ntp,libaio,xfsprogs</packages>
 		<packages distro="sles">iperf,mysql,gcc,bind,python,python-argparse,python-crypto,python-paramiko,nfs-kernel-server,psmisc,tcpdump,ntp,libaio,xfsprogs</packages>
 	    <packages distro="opensuse">wget,iperf,mysql-community-server,gcc,bind,python,python-argparse,python-crypto,python-paramiko,nfs-kernel-server,psmisc,tcpdump,ntp,libaio1,xfsprogs</packages>

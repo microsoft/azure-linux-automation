@@ -40,14 +40,14 @@ if ($isDeployed)
 			try
 			{
 				$testResult = $null
-				$server.cmd = "python start-server.py -i1 -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log -f"
+				$server.cmd = "$python_cmd start-server.py -i1 -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log -f"
 				LogMsg "Test Started for Parallel Connections $Value in $mode mode.."
 				if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 				{
-					$client.cmd = "python start-client.py -c $hs1VIP -i1 -p $hs1vm1udpport -t$iperfTimeoutSeconds -P$Value -u yes -l1420"
+					$client.cmd = "$python_cmd start-client.py -c $hs1VIP -i1 -p $hs1vm1udpport -t$iperfTimeoutSeconds -P$Value -u yes -l1420"
 				}
 				if(($mode -eq "URL") -or ($mode -eq "Hostname")){
-					$client.cmd = "python start-client.py -c $hs1ServiceUrl  -i1 -p $hs1vm1udpport -t$iperfTimeoutSeconds -P$Value -u yes -l1420"
+					$client.cmd = "$python_cmd start-client.py -c $hs1ServiceUrl  -i1 -p $hs1vm1udpport -t$iperfTimeoutSeconds -P$Value -u yes -l1420"
 				}
 				mkdir $LogDir\$Value\$mode -ErrorAction SilentlyContinue | out-null
 				$server.logDir = $LogDir + "\$Value\$mode"

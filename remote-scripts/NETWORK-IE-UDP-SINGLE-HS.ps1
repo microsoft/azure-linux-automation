@@ -21,7 +21,7 @@ if($isDeployed)
 	$hs1vm2udpport = $allVMData[1].UDPtestPort
 
 
-	$cmd1="python start-server.py -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log -f"
+	$cmd1="$python_cmd start-server.py -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log -f"
 	$server = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -nodeTcpPort $hs1vm1udpport -nodeIperfCmd $cmd1 -user $user -password $password -files $currentTestData.files -logDir $LogDir
 	
 	foreach ($mode in $currentTestData.TestMode.Split(","))
@@ -40,7 +40,7 @@ if($isDeployed)
 			mkdir $LogDir\$mode -ErrorAction SilentlyContinue | out-null
 			LogMsg "Starting iperf Server..."
 			$suppressedOut = StartIperfServer -node $server
-			#$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "python start-server.py -i1 -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log -f" -runAsSudo
+			#$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "$python_cmd start-server.py -i1 -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log -f" -runAsSudo
 			#RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/start-server.py.log" -downloadTo $LogDir\$mode  -port $hs1vm1sshport -username $user -password $password
 			
 			#>>>Verify, if server started...
@@ -56,11 +56,11 @@ if($isDeployed)
 				LogMsg "Startin iperf client and trying to connect to port $hs1vm1udpport..."
 				if(($mode -eq "IP") -or ($mode -eq "VIP"))
 				{
-					$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "python start-client.py -c $hs1vm1IP -i1 -p $hs1vm1udpport -t$iperfTimeoutSeconds -u yes " -runAsSudo
+					$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "$python_cmd start-client.py -c $hs1vm1IP -i1 -p $hs1vm1udpport -t$iperfTimeoutSeconds -u yes " -runAsSudo
 				}
 				if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 				{
-					$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "python start-client.py -c $hs1vm1Hostname -i1 -p $hs1vm1udpport -t$iperfTimeoutSeconds -u yes " -runAsSudo
+					$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "$python_cmd start-client.py -c $hs1vm1Hostname -i1 -p $hs1vm1udpport -t$iperfTimeoutSeconds -u yes " -runAsSudo
 				}
 				$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "mv Runtime.log start-client.py.log -f" -runAsSudo
 				RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/start-client.py.log, /home/$user/iperf-client.txt" -downloadTo $LogDir\$mode  -port $hs1vm2sshport -username $user -password $password
@@ -78,7 +78,7 @@ if($isDeployed)
 				if($clientState -eq "TestCompleted" -and $clientSummary -eq "PASS")
 				{
 					#>>>Now we know that our client was connected. Let's go and check the server now...
-					$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "python check-server.py && mv Runtime.log check-server.py.log -f" -runAsSudo
+					$suppressedOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "$python_cmd check-server.py && mv Runtime.log check-server.py.log -f" -runAsSudo
 					RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/check-server.py.log, /home/$user/iperf-server.txt" -downloadTo $LogDir\$mode  -port $hs1vm1sshport -username $user -password $password
 					RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/state.txt, /home/$user/Summary.log" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
 					$serverState = Get-Content $LogDir\state.txt

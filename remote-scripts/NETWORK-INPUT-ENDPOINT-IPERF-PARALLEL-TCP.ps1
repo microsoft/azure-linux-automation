@@ -29,8 +29,8 @@ if($isDeployed)
 	LogMsg "DTAP Machine : $dtapServerIp : $hs1vm1sshport"
 	$iperfTimeoutSeconds = $currentTestData.iperfTimeoutSeconds
 
-	$cmd1="python start-client.py -c $hs1VIP -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P$Value"
-	$cmd2="python start-server.py -p $hs1vm1tcpport && mv Runtime.log start-server.py.log -f"
+	$cmd1="$python_cmd start-client.py -c $hs1VIP -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P$Value"
+	$cmd2="$python_cmd start-server.py -p $hs1vm1tcpport && mv Runtime.log start-server.py.log -f"
 
 	$client = CreateIperfNode -nodeIp $dtapServerIp -nodeSshPort $dtapServerSshport -nodeTcpPort $dtapServerTcpport -nodeIperfCmd $cmd1 -user $user -password $password -files $currentTestData.files -logDir $LogDir
 	$server = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -nodeTcpPort $hs1vm1tcpport -nodeIperfCmd $cmd2 -user $user -password $password -files $currentTestData.files -logDir $LogDir
@@ -51,11 +51,11 @@ if($isDeployed)
 				LogMsg "Starting the test in $mode.."
 				if(($mode -eq "IP") -or ($mode -eq "VIP"))
 				{
-					$client.cmd = "python start-client.py -c $hs1VIP  -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P$Value"
+					$client.cmd = "$python_cmd start-client.py -c $hs1VIP  -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P$Value"
 				}
 				if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 				{
-					$client.cmd = "python start-client.py -c $hs1ServiceUrl  -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P$Value"
+					$client.cmd = "$python_cmd start-client.py -c $hs1ServiceUrl  -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P$Value"
 				}
 				mkdir $LogDir\$Value\$mode -ErrorAction SilentlyContinue | out-null
 				$server.logDir = $LogDir + "\$Value" + "\$mode"
