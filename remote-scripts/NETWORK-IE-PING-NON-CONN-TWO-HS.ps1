@@ -33,11 +33,11 @@ if($isDeployed)
 			$testResult = $null
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 			{
-				$pingFrom.cmd = "python ping.py -x $hs2VIP -c 10"
+				$pingFrom.cmd = "$python_cmd ping.py -x $hs2VIP -c 10"
 			}
 			if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 			{
-				$pingFrom.cmd = "python ping.py -x $hs2ServiceUrl -c 10"
+				$pingFrom.cmd = "$python_cmd ping.py -x $hs2ServiceUrl -c 10"
 			}
 			LogMsg "Test Started in $mode mode.."
 

@@ -80,17 +80,17 @@ if ($isDeployed)
 					if($serverState -eq $true)
 					{
 						LogMsg "Stopping Server.."
-						$suppressedOut = RunLinuxCmd -username $server.user -password $server.password -ip $server.ip -port $server.sshPort -command "python stop-server.py" -runAsSudo
+						$suppressedOut = RunLinuxCmd -username $server.user -password $server.password -ip $server.ip -port $server.sshPort -command "$python_cmd stop-server.py" -runAsSudo
 						$suppressedOut = RunLinuxCmd -username $server.user -password $server.password -ip $server.ip -port $server.sshPort -command "echo ServerStopped1 >> iperf-server.txt" -runAsSudo
 						LogMsg "Stopping Client.."
-						$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "python stop-client.py" -runAsSudo
+						$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "$python_cmd stop-client.py" -runAsSudo
 						
 						#Step 2. Do not start iperf server and start the client..
 						LogMsg "Starting the client without starting the server.."
 						$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo ClientStarted2 >> iperf-client.txt" -runAsSudo
 
 						StartIperfClient $client
-						$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "python stop-client.py" -runAsSudo
+						$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "$python_cmd stop-client.py" -runAsSudo
 						$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo ClientStopped2 >> iperf-client.txt" -runAsSudo
 						$isClientStarted = IsIperfClientStarted $client -beginningText ClientStarted2 -endText ClientStopped2
 						Write-Host "isClientConnected : $isClientStarted"
@@ -114,7 +114,7 @@ if ($isDeployed)
 								if($isClientStarted -eq $true)
 								{
 									$serverState = IsIperfServerRunning $server
-									$suppressedOut = RunLinuxCmd -username $server.user -password $server.password -ip $server.ip -port $server.sshPort -command "python stop-server.py" -runAsSudo
+									$suppressedOut = RunLinuxCmd -username $server.user -password $server.password -ip $server.ip -port $server.sshPort -command "$python_cmd stop-server.py" -runAsSudo
 									$suppressedOut = RunLinuxCmd -username $server.user -password $server.password -ip $server.ip -port $server.sshPort -command "echo ServerStopped3 >> iperf-server.txt" -runAsSudo
 
 									if($serverState -eq $true)

@@ -129,18 +129,18 @@ if ($isDeployed)
 				{
 #region Test Case steps Execution
 #Step 2: Stop Iperf client
-					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "python stop-client.py" -runAsSudo
+					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "$python_cmd stop-client.py" -runAsSudo
 					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo Client Stopped 1 >> iperf-client.txt" -runAsSudo
 
 #Step 3 : Stop Iperf Server on VM1
-					$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshport -command "python stop-server.py" -runAsSudo
+					$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshport -command "$python_cmd stop-server.py" -runAsSudo
 					$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshport -command "echo Both Servers Stopped 1 >> iperf-server.txt" -runAsSudo
 					$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshport -command "echo Both Servers Stopped 1 >> iperf-probe.txt" -runAsSudo
 #Start iperf Server on Custom Probe Again, as stopping Iperfserver in above command have stopped all iperf server processes
 #$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshport -command "python start-server-without-stopping.py -p $hs1vm1ProbePort -log iperf-probe.txt" -runAsSudo
 
 #Step 4 : Stop Iperf Server on VM2
-					$suppressedOut = RunLinuxCmd -username $server2.user -password $server2.password -ip $server2.ip -port $server2.sshport -command "python stop-server.py" -runAsSudo
+					$suppressedOut = RunLinuxCmd -username $server2.user -password $server2.password -ip $server2.ip -port $server2.sshport -command "$python_cmd stop-server.py" -runAsSudo
 					$suppressedOut = RunLinuxCmd -username $server2.user -password $server2.password -ip $server2.ip -port $server2.sshport -command "echo Both Servers Stopped 1 >> iperf-server.txt" -runAsSudo			
 					$suppressedOut = RunLinuxCmd -username $server2.user -password $server2.password -ip $server2.ip -port $server2.sshport -command "echo Both Servers Stopped 1 >> iperf-probe.txt" -runAsSudo
 #Start iperf Server on Custom Probe Again, as stopping Iperfserver in above command have stopped all iperf server processes
@@ -153,7 +153,7 @@ if ($isDeployed)
 					StartIperfClient $client
 
 #Step 6: Stop Iperf client Again
-					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "python stop-client.py" -runAsSudo
+					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "$python_cmd stop-client.py" -runAsSudo
 					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo Client Stopped 2 >> iperf-client.txt" -runAsSudo
 					$BothServersStarted_2 = GetStopWatchElapasedTime $stopWatch "ss"
 #Step5 : Start Iperf Server on VM1 Again

@@ -107,11 +107,11 @@ if ($isDeployed)
 				if($isClientStarted -eq $true)
 				{
 #Step 2: Stop Iperf client
-					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "python stop-client.py" -runAsSudo
+					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "$python_cmd stop-client.py" -runAsSudo
 					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo Client Stopped 1 >> iperf-client.txt" -runAsSudo
 
 #Step3 : Stop Iperf Server on VM1
-					$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshport -command "python stop-server.py" -runAsSudo
+					$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshport -command "$python_cmd stop-server.py" -runAsSudo
 					$lapServer1Stopped1=GetStopWatchElapasedTime $stopWatch "ss"
 					$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshport -command "echo Server1 Stopped 1 >> iperf-server.txt" -runAsSudo
 					$suppressedOut = RunLinuxCmd -username $server2.user -password $server2.password -ip $server2.ip -port $server2.sshport -command "echo Server1 Stopped 1 >> iperf-server.txt" -runAsSudo
@@ -122,7 +122,7 @@ if ($isDeployed)
 					StartIperfClient $client
 
 #Step5 :  Stop Iperf Client Again 
-					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "python stop-client.py" -runAsSudo
+					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "$python_cmd stop-client.py" -runAsSudo
 					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo Client Stopped 2 >> iperf-client.txt" -runAsSudo
 
 #Step6 : Start Iperf Server on VM1 
