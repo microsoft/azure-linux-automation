@@ -45,8 +45,8 @@ if ($isDeployed)
 	$cmd1="$python_cmd start-server.py -p $hs1vm1tcpport && mv Runtime.log start-server.py.log -f"
 	$cmd2="$python_cmd start-server.py -p $hs1vm2tcpport && mv Runtime.log start-server.py.log -f"
 	$cmd3=""
-	$cmd11="python start-server-without-stopping.py -p $hs1vm1ProbePort -log iperf-probe.txt"
-	$cmd22="python start-server-without-stopping.py -p $hs1vm2ProbePort -log iperf-probe.txt"
+	$cmd11="$python_cmd start-server-without-stopping.py -p $hs1vm1ProbePort -log iperf-probe.txt"
+	$cmd22="$python_cmd start-server-without-stopping.py -p $hs1vm2ProbePort -log iperf-probe.txt"
 	
 	$server1 = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -nodeTcpPort $hs1vm1tcpport -nodeIperfCmd $cmd1 -user $user -password $password -files $currentTestData.files -logDir $LogDir -nodeDip $hs1vm1.IpAddress
 	$server2 = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm2sshport -nodeTcpPort $hs1vm2tcpport -nodeIperfCmd $cmd2 -user $user -password $password -files $currentTestData.files -logDir $LogDir -nodeDip $hs1vm2.IpAddress
