@@ -5,6 +5,8 @@ import sys
 from azuremodules import *
 import paramiko
 
+py_ver_str = sys.version
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-u', '--user', help='usename', required=True)
@@ -44,6 +46,8 @@ try:
     stdin.write(passwd)
     stdin.flush()
     outResult =  stdout.read()
+    if py_ver_str[0] == '3':
+        outResult = outResult.decode('utf-8')
     outError = stderr.read()
     outputFile.writelines(outResult)
     exitCode =  stdout.channel.recv_exit_status()
