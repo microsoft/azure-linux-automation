@@ -324,7 +324,7 @@ if distro == "REDHAT" or distro == "FEDORA":
 	else:
 		RunLog.error("http_caching=packages not present in /etc/yum.conf")
 		print(distro+"_TEST_YUM_CONF_ERROR")
-		result = verify_grub(distro)
+	result = verify_grub(distro)
 
 if distro == "ORACLELINUX":
 	#Test 1 : Make sure Network Manager is not installed
