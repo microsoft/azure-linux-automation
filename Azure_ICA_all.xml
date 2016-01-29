@@ -2686,14 +2686,14 @@
 					</VirtualMachine>
 				</HostedService>
 			</ExtensionTest>
-			<M1S3>
+			<M1S5>
 				<!-- This setup type defines One Master and Three slave machines. Hence name is M(aster)1S(lave)3. -->
 				<isDeployed>NO</isDeployed>
 				<HostedService>
 					<VirtualMachine>
 						<state></state>
-						<InstanceSize>Standard_D2</InstanceSize>
-						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<InstanceSize>Standard_G5</InstanceSize>
+						<ARMInstanceSize>Standard_G5</ARMInstanceSize>
 						<RoleName>master</RoleName>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -2705,8 +2705,8 @@
 					</VirtualMachine>
 					<VirtualMachine>
 						<state></state>
-						<InstanceSize>Standard_D2</InstanceSize>
-						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<InstanceSize>Standard_G5</InstanceSize>
+						<ARMInstanceSize>Standard_G5</ARMInstanceSize>
 						<RoleName>slave1</RoleName>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -2718,8 +2718,8 @@
 					</VirtualMachine>					
 					<VirtualMachine>
 						<state></state>
-						<InstanceSize>Standard_D2</InstanceSize>
-						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<InstanceSize>Standard_G5</InstanceSize>
+						<ARMInstanceSize>Standard_G5</ARMInstanceSize>
 						<RoleName>slave2</RoleName>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -2731,8 +2731,8 @@
 					</VirtualMachine>					
 					<VirtualMachine>
 						<state></state>
-						<InstanceSize>Standard_D2</InstanceSize>
-						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<InstanceSize>Standard_G5</InstanceSize>
+						<ARMInstanceSize>Standard_G5</ARMInstanceSize>
 						<RoleName>slave3</RoleName>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -2742,8 +2742,34 @@
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_G5</InstanceSize>
+						<ARMInstanceSize>Standard_G5</ARMInstanceSize>
+						<RoleName>slave4</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12522</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_G5</InstanceSize>
+						<ARMInstanceSize>Standard_G5</ARMInstanceSize>
+						<RoleName>slave5</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12622</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
 				</HostedService>
-			</M1S3>			
+			</M1S5>			
 		</Deployment>
 		
 
@@ -4685,8 +4711,8 @@
 			<testName>ICA-TERASORT-BENCHMARK-TEST</testName>
 			<testScript></testScript>
 			<testScriptps1>ICA-TERASORT-BENCHMARK-TEST.ps1</testScriptps1>
-			<setupType>M1S3</setupType>
-			<TERAGEN_RECORDS>50000</TERAGEN_RECORDS>
+			<setupType>M1S5</setupType>
+			<TERAGEN_RECORDS>60000000</TERAGEN_RECORDS>
 			<sshKey>.\ssh\myPrivateKey.key</sshKey>
 			<!-- Hadoop version is optional here. If left blank then hadoop version will be taken from remoteXML file of this definition.-->
 			<HADOOP_VERSION></HADOOP_VERSION>
