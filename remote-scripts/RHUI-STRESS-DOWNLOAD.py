@@ -48,7 +48,7 @@ def RunTest():
 	download_details = []
 
 	# cleanup before kickoff
-	RemoveDownload()
+	CleanUp()
 	counter = 1
 	start_time = time.time()
 	# todo: if need to clean cache here
@@ -56,7 +56,7 @@ def RunTest():
 		RigsterSigHandler(timeout)
 		download_details.append(DownloadPkg(pkg, pkg_download_path, counter))
 		UnrigsterSigHandler()
-		RemoveDownload()
+		CleanUp()
 		print('Test Round #%s is finished.' % counter)
 		counter += 1
 
@@ -110,6 +110,19 @@ def DownloadPkg(pkg, download_path, counter):
 
 def RemoveDownload():
 	JustRun('rm -rf %s' % pkg_download_path)
+	RunLog.info('Downloaded packages removed.')
+
+def CleanYumCache():
+	out = JustRun('yum clean all')
+	if 'Cleaning up everything' in out.split('\n') or 'Cleaning up Everything' in out.split('\n'):
+		RunLog.info('yum cache cleanup.')
+	else:
+		RunLog.error('yum cache cleanup failed.')
+
+def CleanUp():
+	RemoveDownload()
+	CleanYumCache()
+	RunLog.info('Test cleanup done.')
 
 def AnalyseResult(l_download):
 	success_download_count, fail_download_count, timeout_download_count = 0,0,0

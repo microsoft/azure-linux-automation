@@ -54,7 +54,7 @@ if ($isDeployed)
 		RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "mv Runtime.log $($currentTestData.testScript).log" -runAsSudo
 		RunLinuxCmd -username $user -password $password -ip $hs2VIP -port $hs2vm1sshport -command "mv Runtime.log $($currentTestData.testScript).log" -runAsSudo
 		RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/state.txt, /home/$user/Summary.log, /home/$user/$($currentTestData.testScript).log" -downloadTo $LogDir\$hs1vm1Hostname -port $hs1vm1sshport -username $user -password $password
-		RemoteCopy -download -downloadFrom $hs2VIP -files "/home/$user/state.txt, /home/$user/Summary.log, /home/$user/$($currentTestData.testScript).log" -downloadTo $LogDir\$hs2vm1Hostname -port $hs2vm1sshport -username $user -password $password
+		RemoteCopy -download -downloadFrom $hs2VIP -files "/home/$user/state.txt, /home/$user/Summary.log, /home/$user/$($currentTestData.testScript).log, /home/$user/download*.log" -downloadTo $LogDir\$hs2vm1Hostname -port $hs2vm1sshport -username $user -password $password
 
 		$runtimelog1 = Get-Content $LogDir\$hs1vm1Hostname\$($currentTestData.testScript).log
 		$runtimelog2 = Get-Content $LogDir\$hs2vm1Hostname\$($currentTestData.testScript).log
