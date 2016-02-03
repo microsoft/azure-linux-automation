@@ -1129,7 +1129,7 @@ Function GetAndCheckKernelLogs($allDeployedVMs, $status, $vmUser, $vmPassword)
 
 Function SetDistroSpecificVariables($detectedDistro)
 {
-	$python_cmd = "python3"	
+	$python_cmd = "python"	
 	LogMsg "Set `$python_cmd > $python_cmd"
 	Set-Variable -Name python_cmd -Value $python_cmd -Scope Global
 	Set-Variable -Name ifconfig_cmd -Value "ifconfig" -Scope Global
