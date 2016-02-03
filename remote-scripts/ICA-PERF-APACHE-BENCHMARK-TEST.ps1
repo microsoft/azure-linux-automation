@@ -133,6 +133,7 @@ if ($isDeployed)
 		}
 		elseif ( $finalStatus -imatch "TestCompleted")
 		{
+			RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/abtest.log"
 			LogMsg "Test Completed. Result : $abResult."
 			$testResult = "PASS"
 		}
