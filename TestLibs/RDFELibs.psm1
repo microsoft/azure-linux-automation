@@ -1,7 +1,7 @@
 #region Azure RDFE Methods
 
 Import-Module .\TestLibs\ExtensionLibrary.psm1 -Force
-
+Import-Module .\TestLibs\LISALibrary.psm1 -Force
 <#
 .SYNOPSIS 
 List All OS Images in Cluster

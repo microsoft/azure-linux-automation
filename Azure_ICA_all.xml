@@ -2686,6 +2686,37 @@
 					</VirtualMachine>
 				</HostedService>
 			</ExtensionTest>
+			<M1S1>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_G5</InstanceSize>
+						<ARMInstanceSize>Standard_G5</ARMInstanceSize>
+						<RoleName>server-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12122</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_G5</InstanceSize>
+						<ARMInstanceSize>Standard_G5</ARMInstanceSize>
+						<RoleName>client-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12222</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+				</HostedService>
+			</M1S1>			
 			<M1S5>
 				<!-- This setup type defines One Master and Three slave machines. Hence name is M(aster)1S(lave)3. -->
 				<isDeployed>NO</isDeployed>
@@ -4717,15 +4748,25 @@
 			<!-- Hadoop version is optional here. If left blank then hadoop version will be taken from remoteXML file of this definition.-->
 			<HADOOP_VERSION></HADOOP_VERSION>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
-			<!--Remote Files will be directly downloaded to test VM.-->
 			<remoteFiles>https://raw.githubusercontent.com/LIS/lis-test/master/WS2012R2/lisa/remote-scripts/ica/perf_hadoopterasort.sh</remoteFiles>
 			<!--Remote XML will be downloaded to automation server for analysis-->
 			<remoteXML>https://raw.githubusercontent.com/LIS/lis-test/master/WS2012R2/lisa/xml/perf_hadoopterasort.xml</remoteXML>
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<Priority>P0</Priority>
 		</test>		
-		
-		</testsDefinition>
+		<test>
+			<testName>ICA-PERF-REDIS-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-REDIS-TEST.ps1</testScriptps1>
+			<setupType>M1S1</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<remoteFiles>https://raw.githubusercontent.com/LIS/lis-test/master/WS2012R2/lisa/remote-scripts/ica/performance_redis.sh</remoteFiles>
+			<!--Remote XML will be downloaded to automation server for analysis-->
+			<remoteXML>https://raw.githubusercontent.com/LIS/lis-test/master/WS2012R2/lisa/xml/Perf_Redis.xml</remoteXML>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<Priority>P0</Priority>
+		</test>				
+	</testsDefinition>
 
 	<testCycles>
 		<!-- Setup related tests -->
@@ -5429,6 +5470,13 @@
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
 			<test>
 				<Name>ICA-TERASORT-BENCHMARK-TEST</Name>
+			</test>
+		</Cycle>		
+		<Cycle>
+			<cycleName>LISA-REDIS-PERF</cycleName>
+			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
+			<test>
+				<Name>ICA-PERF-REDIS-TEST</Name>
 			</test>
 		</Cycle>		
 		
