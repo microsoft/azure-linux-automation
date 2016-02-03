@@ -5467,14 +5467,12 @@
 
 		<Cycle>
 			<cycleName>LISA-TERASORT-PERF</cycleName>
-			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
 			<test>
 				<Name>ICA-TERASORT-BENCHMARK-TEST</Name>
 			</test>
 		</Cycle>		
 		<Cycle>
 			<cycleName>LISA-REDIS-PERF</cycleName>
-			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
 			<test>
 				<Name>ICA-PERF-REDIS-TEST</Name>
 			</test>
