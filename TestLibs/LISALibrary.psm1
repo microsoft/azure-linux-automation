@@ -36,10 +36,10 @@
 
 		LogMsg "Executing $scriptName ..."
 		$provisionJob = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "/root/$scriptName" -RunInBackground
-
+		#endregion
 		while ( (Get-Job -Id $provisionJob).State -eq "Running" )
 		{
-			$currentStatus = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "tail -n 1 /root/provisionLinux.log"
+			$currentStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "tail -n 1 /root/provisionLinux.log"
 			LogMsg "Current Staus : $currentStatus"
 			WaitFor -seconds 10
 		}
@@ -47,4 +47,5 @@
 		Rename-Item -Path "$LogDir\provisionLinux.log" -NewName "$($vmData.RoleName)-provisionLinux.log" -Force | Out-Null
 		LogMsg "$($vmData.RoleName) preparation finished."
 	}
+	#endregion
 }
