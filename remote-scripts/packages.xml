@@ -9,7 +9,7 @@
 	    <packages distro="opensuse">wget,iperf,mysql-community-server,gcc,bind,python,python-argparse,python-crypto,python-paramiko,nfs-kernel-server,psmisc,tcpdump,ntp,libaio1,xfsprogs</packages>
 	    <packages distro="centos">wget,mysql,iperf,gcc,bind,python,python-argparse,python-crypto,python-paramiko,nfs-utils,psmisc,tcpdump,ntp,libaio,xfsprogs,tar</packages>
 	    <packages distro="Oracle">wget,iperf,mysql,gcc,bind,python,python-argparse,python-devel,python-crypto,python-paramiko,nfs-utils,psmisc,tcpdump,ntp,libaio,xfsprogs,tar</packages>
-	    <packages distro="rhel">wget,iperf mysql gcc bind python python-argparse python-crypto python-paramiko nfs-utils psmisc tcpdump ntp libaio xfsprogs</packages>
+	    <packages distro="rhel">wget,iperf,mysql,gcc,bind,python,python-argparse,python-crypto,python-paramiko,nfs-utils,psmisc,tcpdump,ntp,libaio,xfsprogs</packages>
 	    <packages distro="fedora">wget,iperf,mysql,gcc,bind,python,python-argparse,python-crypto,python-paramiko,nfs-utils,psmisc,tcpdump,ntp,xfsprogs,libaio,vim,gnuplot</packages>
 	    <waLinuxAgent_link name="waagent">https://github.com/Azure/WALinuxAgent/archive/WALinuxAgent-2.0.14.zip</waLinuxAgent_link>
 	    <ez_setup_link name="ez_setup.py">https://bootstrap.pypa.io/ez_setup.py</ez_setup_link>
