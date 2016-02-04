@@ -45,10 +45,19 @@ def RunTest():
 		
 def RemoveIgnorableMessages(messages, keywords):
     matchstring = re.findall(keywords,messages,re.M)
+    matchcount = 0
+    index = 0
     if(matchstring):			
         for msg in matchstring:
             RunLog.info('Ignorable ERROR message:\n' + msg)
-        str = re.split(matchstring[0],messages)
+            matchcount +=1
+            
+        while matchcount > 0:
+            matchcount -=1
+            str = re.split(matchstring[index],messages)
+            index+=1
+            messages=str[1]
+   
         valid_list = []
         for substr in str:
             if re.search('error', substr, re.IGNORECASE):
