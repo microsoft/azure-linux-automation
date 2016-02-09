@@ -769,6 +769,7 @@ Function CreateAllDeployments($setupType, $xmlConfig, $Distro)
 {
 
 	$hostedServiceCount = 0
+	$osImage = @()
 	$xml = $xmlConfig
 	LogMsg $setupType
 	$setupTypeData = $xml.config.Azure.Deployment.$setupType
@@ -788,7 +789,7 @@ Function CreateAllDeployments($setupType, $xmlConfig, $Distro)
 
 		if ($newDistro.Name -eq $Distro)
 		{
-			$osImage = $newDistro.OsImage
+			$osImage += $newDistro.OsImage
 		}
 	}
 
@@ -797,95 +798,98 @@ Function CreateAllDeployments($setupType, $xmlConfig, $Distro)
 
 	foreach ($HS in $setupTypeData.HostedService )
 	{
-		$curtime = Get-Date
-		$isServiceDeployed = "False"
-		$retryDeployment = 0
-		if ( $HS.Tag -ne $null )
-		{
-			$serviceName = "ICA-HS-" + $HS.Tag + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
-		}
-		else
-		{
-			$serviceName = "ICA-HS-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
-		}
-		if($isMultiple -eq "True")
-		{
-			$serviceName = $serviceName + "-" + $hostedServiceCount
-		}
+        foreach ($img in $osImage)
+        {
+        	$curtime = Get-Date
+		    $isServiceDeployed = "False"
+		    $retryDeployment = 0
+		    if ( $HS.Tag -ne $null )
+		    {
+			    $serviceName = "ICA-HS-" + $HS.Tag + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
+		    }
+		    else
+		    {
+			    $serviceName = "ICA-HS-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
+		    }
+		    if($isMultiple -eq "True")
+		    {
+			    $serviceName = $serviceName + "-" + $hostedServiceCount
+		    }
 
-		while (($isServiceDeployed -eq "False") -and ($retryDeployment -lt 5))
-		{
-			LogMsg "Creating Hosted Service : $serviceName."
-			LogMsg "Verifying that service name is not in use."
-			$isServiceDeleted = DeleteService -serviceName $serviceName
-#$isServiceDeleted = "True"
-			if ($isServiceDeleted -eq "True")
-			{	 
-				$isServiceCreated = CreateService -serviceName $serviceName -location $location -AffinityGroup $AffinityGroup
-#$isServiceCreated = "True"
-				if ($isServiceCreated -eq "True")
-				{
-					$isCertAdded = AddCertificate -serviceName $serviceName
-#$isCertAdded = "True"
-					if ($isCertAdded -eq "True")
-					{
-						LogMsg "Certificate added successfully."
-						$DeploymentCommand = GenerateCommand -Setup $Setup -serviceName $serviceName -osImage $osImage -HSData $HS
-						Set-AzureSubscription -SubscriptionName $xmlConfig.config.Azure.General.SubscriptionName  -CurrentStorageAccountName $xmlConfig.config.Azure.General.StorageAccount
-						$DeploymentStartTime = (Get-Date)
-						$isDeployed = CreateDeployment -DeploymentCommand $DeploymentCommand[0] -NewServiceName $DeploymentCommand[1] -vmCount $DeploymentCommand[2]
-						$DeploymentEndTime = (Get-Date)
-						$DeploymentElapsedTime = $DeploymentEndTime - $DeploymentStartTime
-						if ( $isDeployed -eq "True" )
-						{
-							LogMsg "Deployment Created!"
-							$retValue = "True"
-							$isServiceDeployed = "True"
-							$hostedServiceCount = $hostedServiceCount + 1
-							if ($hostedServiceCount -eq 1)
-							{
-								$deployedServices = $serviceName
-							}
-							else
-							{
-								$deployedServices = $deployedServices + "^" + $serviceName
-							}
+		    while (($isServiceDeployed -eq "False") -and ($retryDeployment -lt 5))
+		    {
+			    LogMsg "Creating Hosted Service : $serviceName."
+			    LogMsg "Verifying that service name is not in use."
+			    $isServiceDeleted = DeleteService -serviceName $serviceName
+    #$isServiceDeleted = "True"
+			    if ($isServiceDeleted -eq "True")
+			    {	 
+				    $isServiceCreated = CreateService -serviceName $serviceName -location $location -AffinityGroup $AffinityGroup
+    #$isServiceCreated = "True"
+				    if ($isServiceCreated -eq "True")
+				    {
+					    $isCertAdded = AddCertificate -serviceName $serviceName
+    #$isCertAdded = "True"
+					    if ($isCertAdded -eq "True")
+					    {
+						    LogMsg "Certificate added successfully."
+						    $DeploymentCommand = GenerateCommand -Setup $Setup -serviceName $serviceName -osImage $img -HSData $HS
+						    Set-AzureSubscription -SubscriptionName $xmlConfig.config.Azure.General.SubscriptionName  -CurrentStorageAccountName $xmlConfig.config.Azure.General.StorageAccount
+						    $DeploymentStartTime = (Get-Date)
+						    $isDeployed = CreateDeployment -DeploymentCommand $DeploymentCommand[0] -NewServiceName $DeploymentCommand[1] -vmCount $DeploymentCommand[2]
+						    $DeploymentEndTime = (Get-Date)
+						    $DeploymentElapsedTime = $DeploymentEndTime - $DeploymentStartTime
+						    if ( $isDeployed -eq "True" )
+						    {
+							    LogMsg "Deployment Created!"
+							    $retValue = "True"
+							    $isServiceDeployed = "True"
+							    $hostedServiceCount = $hostedServiceCount + 1
+							    if ($hostedServiceCount -eq 1)
+							    {
+								    $deployedServices = $serviceName
+							    }
+							    else
+							    {
+								    $deployedServices = $deployedServices + "^" + $serviceName
+							    }
 
-						}
-						else
-						{
-							LogErr "Unable to Deploy one or more VM's"
-							$retryDeployment = $retryDeployment + 1
-							$retValue = "False"
-							$isServiceDeployed = "False"
-						}
-					}
-					else
-					{
-						LogErr "Unable to Add certificate to $serviceName"
-						$retryDeployment = $retryDeployment + 1
-						$retValue = "False"
-						$isServiceDeployed = "False"
-					}
+						    }
+						    else
+						    {
+							    LogErr "Unable to Deploy one or more VM's"
+							    $retryDeployment = $retryDeployment + 1
+							    $retValue = "False"
+							    $isServiceDeployed = "False"
+						    }
+					    }
+					    else
+					    {
+						    LogErr "Unable to Add certificate to $serviceName"
+						    $retryDeployment = $retryDeployment + 1
+						    $retValue = "False"
+						    $isServiceDeployed = "False"
+					    }
 
-				}
-				else
-				{
-					LogErr "Unable to create $serviceName"
-					$retryDeployment = $retryDeployment + 1
-					$retValue = "False"
-					$isServiceDeployed = "False"
-				}
-			}	
-			else
-			{
-				LogErr "Unable to delete existing service - $serviceName"
-				$retryDeployment = 3
-				$retValue = "False"
-				$isServiceDeployed = "False"
-			}
+				    }
+				    else
+				    {
+					    LogErr "Unable to create $serviceName"
+					    $retryDeployment = $retryDeployment + 1
+					    $retValue = "False"
+					    $isServiceDeployed = "False"
+				    }
+			    }	
+			    else
+			    {
+				    LogErr "Unable to delete existing service - $serviceName"
+				    $retryDeployment = 3
+				    $retValue = "False"
+				    $isServiceDeployed = "False"
+			    }
 
-		}
+		    }
+        }
 	}
 	return $retValue, $deployedServices, $DeploymentElapsedTime
 }

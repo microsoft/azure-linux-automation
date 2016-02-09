@@ -1447,6 +1447,24 @@
 					</VirtualMachine>
 				</HostedService>
 			</BVTDeployment>
+
+			<RHUIStressDep>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Basic_A1</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</RHUIStressDep>
 			
 			<MeshVM>
 				<isDeployed>NO</isDeployed>
@@ -4779,9 +4797,25 @@
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<Priority>P0</Priority>
 		</test>			
-		
-	</testsDefinition>
+		<test>
+		  <testName>RHUI-STRESS-DOWNLOAD</testName>
+		  <entrytestScript>start-rhui-stress-test-in-background.py</entrytestScript>
+		  <testScript>RHUI-STRESS-DOWNLOAD.py</testScript>
+		  <testScriptPs1>RHUI-STRESS-DOWNLOAD.ps1</testScriptPs1>
+		  <files>.\remote-scripts\azuremodules.py,.\remote-scripts\RHUI-STRESS-DOWNLOAD.py,.\remote-scripts\start-rhui-stress-test-in-background.py</files>
+		  <setupType>RHUIStressDep</setupType>
+		  <parameters>
+			<duration>1800</duration>
+			<pkg>gcc</pkg>
+			<timeout>100</timeout>			
+          </parameters>
+		  <TestType></TestType>
+		  <TestFeature></TestFeature>
+		  <SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+		  <TestID>AzureRHUIStress_001</TestID>
+		</test>
 
+		</testsDefinition>
 	<testCycles>
 		<!-- Setup related tests -->
 		<Cycle>
@@ -5498,6 +5532,13 @@
 			</test>
 		</Cycle>		
 		
+		<Cycle>
+			<cycleName>RHUI-Stress</cycleName>
+			<test>
+				<Name>RHUI-STRESS-DOWNLOAD</Name>
+			</test>
+		</Cycle>
+
 		<Cycle>
 			<cycleName>DEBUG</cycleName>
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
