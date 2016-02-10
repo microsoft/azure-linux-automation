@@ -2818,7 +2818,51 @@
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
 				</HostedService>
-			</M1S5>			
+			</M1S5>	
+			<S2C1>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_G5</InstanceSize>
+						<ARMInstanceSize>Standard_G5</ARMInstanceSize>
+						<RoleName>Server1</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12122</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_G5</InstanceSize>
+						<ARMInstanceSize>Standard_G5</ARMInstanceSize>
+						<RoleName>Server2</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12222</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_G5</InstanceSize>
+						<ARMInstanceSize>Standard_G5</ARMInstanceSize>
+						<RoleName>Client</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12322</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+				</HostedService>
+			</S2C1>			
 		</Deployment>
 		
 
@@ -4815,6 +4859,28 @@
 		  <TestID>AzureRHUIStress_001</TestID>
 		</test>
 
+			<test>
+				<testName>ICA-PERF-ZOOKEEPER-TEST</testName>
+				<testScript></testScript>
+				<testScriptps1>ICA-PERF-ZOOKEEPER-TEST.ps1</testScriptps1>
+				<setupType>S2C1</setupType>
+				<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+				<TestParameters>
+					<param>ZK_VERSION=3.4.6</param>
+					<param>ZK_TIMEOUT=1000000</param>
+					<param>ZK_ZNODE_SIZE=100</param>
+					<param>ZK_ZNODE_COUNT=100</param>
+					<param>ZK_FORCE=true</param>
+					<param>ZK_SYNCHRONOUS=true</param>
+					<param>ZK_VERBOSE=false</param>				
+				</TestParameters>
+				<!--Remote Files will be directly downloaded to test VM.-->
+				<remoteFiles>https://raw.githubusercontent.com/phunt/zk-smoketest/master/zkclient.py,https://raw.githubusercontent.com/phunt/zk-smoketest/master/zk-latencies.py,https://github.com/phunt/zk-smoketest/raw/master/lib.linux-x86_64-2.6/libzookeeper_mt.so.2,https://github.com/phunt/zk-smoketest/raw/master/lib.linux-x86_64-2.6/zookeeper.so</remoteFiles>
+				<!--Remote XML will be downloaded to automation server for analysis-->
+				<remoteXML></remoteXML>
+				<Priority>P0</Priority>
+			</test>			
+			
 		</testsDefinition>
 	<testCycles>
 		<!-- Setup related tests -->
@@ -5529,6 +5595,12 @@
 			<cycleName>LISA-APACHE-PERF</cycleName>
 			<test>
 				<Name>ICA-PERF-APACHE-BENCHMARK-TEST</Name>
+			</test>
+		</Cycle>		
+		<Cycle>
+			<cycleName>LISA-ZK-PERF</cycleName>
+			<test>
+				<Name>ICA-PERF-ZOOKEEPER-TEST</Name>
 			</test>
 		</Cycle>		
 		

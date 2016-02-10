@@ -40,7 +40,7 @@
 		while ( (Get-Job -Id $provisionJob).State -eq "Running" )
 		{
 			$currentStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "tail -n 1 /root/provisionLinux.log"
-			LogMsg "Current Staus : $currentStatus"
+			LogMsg "Current Package Installation Status : $currentStatus"
 			WaitFor -seconds 10
 		}
 		RemoteCopy -download -downloadFrom $vmData.PublicIP -port $vmData.SSHPort -files "/root/provisionLinux.log" -username "root" -password $password -downloadTo $LogDir
