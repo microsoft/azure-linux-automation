@@ -4193,16 +4193,31 @@
 			<Priority>P0</Priority>
 		</test>
 		<test>
-			<testName>ICA-IO-DISK-PERF-TEST</testName>
+			<testName>ICA-IO-DISK-PERF-TEST-RAID</testName>
 			<testScript>io-test-setup.sh</testScript>
 			<testScriptps1>ICA-IO-DISK-PERF-TEST.ps1</testScriptps1>
 			<files>.\remote-scripts\sysbench-full-io-test.sh,.\remote-scripts\sysbench-log-parser.sh,.\remote-scripts\io-test-setup.sh,.\remote-scripts\keep_cmds_in_startup.sh</files>
 			<setupType>D14DISK32</setupType>
 			<!-- <setupType>DS14DISK32</setupType> -->
 			<TestType></TestType>
+			<DiskType>RAID</DiskType>
 			<TestFeature></TestFeature>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>Perf_004</TestID>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-IO-DISK-PERF-TEST-LVM</testName>
+			<testScript>io-test-setup.sh</testScript>
+			<testScriptps1>ICA-IO-DISK-PERF-TEST.ps1</testScriptps1>
+			<files>.\remote-scripts\sysbench-full-io-test.sh,.\remote-scripts\sysbench-log-parser.sh,.\remote-scripts\io-test-setup.sh,.\remote-scripts\keep_cmds_in_startup.sh</files>
+			<setupType>D14DISK32</setupType>
+			<!-- <setupType>DS14DISK32</setupType> -->
+			<TestType></TestType>
+			<DiskType>LVM</DiskType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<TestID>Perf_006</TestID>
 			<Priority>P0</Priority>
 		</test>	
 		<test>
@@ -5266,12 +5281,17 @@
 			</test>
 		</Cycle>
 		<Cycle>
-			<cycleName>IOPERF</cycleName>
+			<cycleName>IOPERF-RAID</cycleName>
 			<test>
-				<Name>ICA-IO-DISK-PERF-TEST</Name>
+				<Name>ICA-IO-DISK-PERF-TEST-RAID</Name>
 			</test>
 		</Cycle>
-		
+		<Cycle>
+			<cycleName>IOPERF-LVM</cycleName>
+			<test>
+				<Name>ICA-IO-DISK-PERF-TEST-LVM</Name>
+			</test>
+		</Cycle>
 		<!-- E2E tests -->
 
 		<Cycle>

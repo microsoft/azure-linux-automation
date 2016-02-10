@@ -121,3 +121,6 @@ fi
 bash $code_path/sysbench-log-parser.sh $LOGFILE
 
 echo "Test logs are located at ${LOGDIR}"
+
+vm_bus_ver=`modinfo hv_vmbus| grep ^version| awk '{print $2}'`
+tar -cvf $code_path/logs-`hostname`-`uname -r`-$vm_bus_ver.tar $code_path/*
