@@ -63,7 +63,7 @@ sed -i  -e  "s/seqrd/Sequential read/" $csv_file
 sed -i  -e  "s/seqrewr/Sequential write/" $csv_file
 sed -i  -e  "s/rndwr/Random write/" $csv_file
 
-echo "Output csv file: $csv_file created successfully."
-echo "LOGPARSER COMPLETED."
+echo "Output csv file: $csv_file created successfully." >> $syslog_file_name
+echo "LOGPARSER COMPLETED." >> $syslog_file_name
 
 rm -rf $TEMP_DIR
