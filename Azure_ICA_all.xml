@@ -837,7 +837,7 @@
 					</VirtualMachine>
 				</HostedService>
 			</VNETVM>			
-			<DeploymentWithMaxNICs>
+			<VMWithMaxNICs>
 				<isDeployed>NO</isDeployed>
 				<MaxNic>8</MaxNic>
 				<HostedService>
@@ -885,7 +885,7 @@
 						</NetworkInterfaces>
 					</VirtualMachine>
 				</HostedService>
-			</DeploymentWithMaxNICs>
+			</VMWithMaxNICs>
 			<VNETVMPR>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -3108,21 +3108,6 @@
 			<TestID>AzureBVT_027</TestID>
 		</test>
 		<test>
-			<testName>BVT-VERIFY-MAX-NIC</testName>
-			<testScript>
-			</testScript>
-			<testScriptPs1>BVT-VERIFY-MAX-NIC.ps1</testScriptPs1>
-			<files>
-			</files>
-			<setupType>DeploymentWithMaxNICs</setupType>
-			<TestType>
-			</TestType>
-			<TestFeature>
-			</TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
-			<TestID>AzureBVT_028</TestID>
-		</test>		
-		<test>
 			<testName>NETWORK-OUTBOUND-ACCESS-IPERF-DTAP-UDP</testName>
 			<TestMode>IP</TestMode>
 			<testScript></testScript>
@@ -4502,6 +4487,22 @@
 			<SubtestValues></SubtestValues>
 			<Priority>P0</Priority>
 		</test>
+		<test>
+			<testName>E2E-VERIFY-MAX-NIC</testName>
+			<testScript>
+			</testScript>
+			<testScriptPs1>E2E-VERIFY-MAX-NIC.ps1</testScriptPs1>
+			<files>
+			</files>
+			<setupType>VMWithMaxNICs</setupType>
+			<TestType>
+			</TestType>
+			<TestFeature>
+			</TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<TestID>
+			</TestID>
+		</test>		
 
 		<test>
 			<testName>INJECTION-VERIFY-ENABLE</testName>
@@ -5360,6 +5361,9 @@
 			</test>
 			<test>
 				<Name>E2E-WA-UNINST</Name>
+			</test>
+			<test>
+				<Name>E2E-VERIFY-MAX-NIC</Name>
 			</test>
 		</Cycle>
 		
