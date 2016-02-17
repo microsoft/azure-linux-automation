@@ -6,6 +6,17 @@
 #
 #
 
+function check_exit_status ()
+{
+    exit_status=$?
+    message=$1
+    if [ $exit_status -ne 0 ]; then
+        echo "$message: Failed (exit code: $exit_status)" 
+        exit $exit_status 
+    fi
+    echo "$message: Success" 
+}
+
 function detect_linux_ditribution_version()
 {
     local  distro_version=`cat /etc/*release*|sed 's/"//g'|grep "VERSION_ID="| sed 's/VERSION_ID=//'| sed 's/\r//'`
@@ -143,4 +154,34 @@ function remove_partitions ()
        (echo p; echo d; echo w;) | fdisk ${disk_list[$count]}
        count=$(( $count + 1 ))   
     done
+}
+
+function create_raid_and_mount()
+{
+# Creats RAID using unused data disks attached to the VM.
+    local deviceName=$1
+    local mountdir=$2
+    local format=$3
+
+    local uuid=""
+    local list=""
+
+    echo "IO test setup started.."
+    list=(`fdisk -l | grep 'Disk.*/dev/sd[a-z]' |awk  '{print $2}' | sed s/://| sort| grep -v "/dev/sd[ab]$" `)
+
+    lsblk
+
+    echo "--- Raid $deviceName creation started ---"
+    (echo y)| mdadm --create $deviceName --level 0 --raid-devices ${#list[@]} ${list[@]}
+    check_exit_status "$deviceName Raid creation"
+
+    time mkfs -t $format $deviceName
+    check_exit_status "$deviceName Raid format" 
+
+    mkdir $mountdir
+    uuid=`blkid $deviceName| sed "s/.*UUID=\"//"| sed "s/\".*\"//"`
+    echo "UUID of RAID device: $uuid"
+    echo "UUID=$uuid $mountdir $format defaults 0 2" >> /etc/fstab
+    mount $deviceName $mountdir
+    check_exit_status "create_raid_and_mount"
 }
