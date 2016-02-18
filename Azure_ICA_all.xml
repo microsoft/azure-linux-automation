@@ -4815,7 +4815,7 @@
 			<testScriptps1>ICA-VM-ACCESS-EXTENSION-TEST.ps1</testScriptps1>
 			<setupType>ExtensionTest</setupType>
 			<!-- <ProvisionTimeExtensions>VMAccess</ProvisionTimeExtensions> -->
-			<SubtestValues>Needs_To_Executed_In_Subtest_Mode</SubtestValues>
+			<SubtestValues>AddUser,ResetPassword,DeleteUser,ResetSSHConfig</SubtestValues>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<Priority>P0</Priority>
 		</test>

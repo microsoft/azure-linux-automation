@@ -47,13 +47,12 @@
 			<Publisher>Microsoft.OSTCExtensions</Publisher>
 			<PrivateConfiguration>
 				<username>VMAccessUser</username>
-				<password>VMAccessUserPassword</password>
+				<password>VMAccessPassword</password>
 				<expiration>2016-01-01</expiration>
 			</PrivateConfiguration>	
 			<Version>1.*</Version>
 			<LatestVersion>1.4</LatestVersion>
-			<NewPassword>VMAccessUserNewPassword</NewPassword>
-			<ExtensionTask>AddUser,ResetPassword,DeleteUser,ResetSSHConfig</ExtensionTask>
+			<NewPassword>VMAccessNewPassword</NewPassword>
 		</Extension>
 		<Extension>
 			<Name>Docker</Name>
