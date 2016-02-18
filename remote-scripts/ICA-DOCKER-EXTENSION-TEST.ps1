@@ -18,6 +18,33 @@ if ($isDeployed)
 		$LogFiles = ""
 		$folderToSearch = "/var/log/azure"
 		$ExtensionName = "DockerExtension"
+		$statusFile = GetStatusFileNameToVerfiy -vmData $AllVMData -expectedExtensionName $ExtensionName
+		
+		#region check Extension Status from 0.status file
+		LogMsg "--------------------- STAGE 1/3 : verification of $statusFile : START ---------------------"
+
+		if ( $statusFile )
+		{
+			$statusFilePath = GetFilePathsFromLinuxFolder -folderToSearch "/var/lib/waagent" -IpAddress $allVMData.PublicIP -SSHPort $allVMData.SSHPort -username $user -password $password -expectedFiles "$statusFile"
+			$ExtensionStatusInStatusFile = GetExtensionStatusFromStatusFile -statusFilePaths $statusFilePath[0] -ExtensionName $ExtensionName -vmData $allVMData
+		}
+
+		else
+		{
+			LogErr "status file not found under /var/lib/waagent"
+			$ExtensionStatusInStatusFile = $false
+		}
+		LogMsg "--------------------- STAGE 1/3 : verification of $statusFile : END ---------------------"
+		#endregion
+
+		#region check Extension from Azure Side
+		LogMsg "--------------------- STAGE 2/3 : verification from Azure : START ---------------------"
+		$ExtensionStatusFromAzure = VerifyExtensionFromAzure -ExtensionName $ExtensionName -ServiceName $isDeployed -ResourceGroupName $isDeployed
+		LogMsg "--------------------- STAGE 2/3 : verification from Azure : END ---------------------"
+		#endregion
+
+		#region check if extension has done its job properply...
+		LogMsg "--------------------- STAGE 3/3 : verification of Extension Execution : START ---------------------"
 		$FoundFiles = GetFilePathsFromLinuxFolder -folderToSearch $folderToSearch -IpAddress $hs1VIP -SSHPort $hs1vm1sshport -username $user -password $password
 		$LogFilesPaths = $FoundFiles[0]
 		$LogFiles = $FoundFiles[1]
@@ -49,16 +76,16 @@ if ($isDeployed)
 						if (($line -imatch "completed: 'enable'") -and ($line -imatch "DockerExtension"))
 						{
 							$waitForExtension = $false
-							$ExtensionVerifiedInExtensionLog = $true
+							$extensionExecutionVerified = $true
 							break
 						}
 						else
 						{
 							$waitForExtension = $true
-							$ExtensionVerifiedInExtensionLog = $false
+							$extensionExecutionVerified = $false
 						}
 					}
-					if ($ExtensionVerifiedInExtensionLog)
+					if ($extensionExecutionVerified)
 					{
 						LogMsg "$ExtensionName status is Succeeded from docker-extension.log in Linux VM."
 					}
@@ -70,7 +97,7 @@ if ($isDeployed)
 				}
 				else
 				{
-					$ExtensionVerifiedInExtensionLog = $false
+					$extensionExecutionVerified = $false
 					LogErr "docker-extension.log file does not present"
 					$waitForExtension = $true
 					WaitFor -Seconds 60
@@ -82,44 +109,8 @@ if ($isDeployed)
 		else
 		{
 			LogErr "No Extension logs are available."
-			$ExtensionVerifiedInExtensionLog = $false
+			$extensionExecutionVerified = $false
 		}
-		if ( $UseAzureResourceManager )
-		{
-			$ConfirmExtensionScriptBlock = {
-				$ExtensionStatus = Get-AzureResource -OutputObjectFormat New -ResourceGroupName $isDeployed  -ResourceType "Microsoft.Compute/virtualMachines/extensions" -ExpandProperties
-				if ( ($ExtensionStatus.Properties.ProvisioningState -eq "Succeeded") -and ( $ExtensionStatus.Properties.Type -eq $ExtensionName ) )
-				{
-					LogMsg "$ExtensionName status is Succeeded in Properties.ProvisioningState"
-					$ExtensionVerfiedWithPowershell = $true
-				}
-				else
-				{
-					LogErr "$ExtensionName status is Failed in Properties.ProvisioningState"
-					$ExtensionVerfiedWithPowershell = $false
-				}
-				return $ExtensionVerfiedWithPowershell
-			}
-		}
-		else
-		{
-			$ConfirmExtensionScriptBlock = {
-		
-			$vmDetails = Get-AzureVM -ServiceName $isDeployed
-				if ( ( $vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Status -eq "Success" ) -and ($vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Operation -imatch "Docker" ))
-				{
-					$ExtensionVerfiedWithPowershell = $true
-					LogMsg "$ExtensionName status is SUCCESS in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
-				}
-				else
-				{
-					$ExtensionVerfiedWithPowershell = $false
-					LogErr "$ExtensionName status is FAILED in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
-				}
-				return $ExtensionVerfiedWithPowershell
-			}
-		}
-		$ExtensionVerfiedWithPowershell = RetryOperation -operation $ConfirmExtensionScriptBlock -description "Confirming $ExtensionName from Azure side." -expectResult $true -maxRetryCount 50 -retryInterval 60
 		
 		$DockerInfo = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "docker info" -runAsSudo -ignoreLinuxExitCode
 		if ($DockerInfo -imatch "Operating System")
@@ -132,10 +123,11 @@ if ($isDeployed)
 			LogErr "Docker not installed in Linux VM"
 			$ExtensionVerifiedInVM = $false
 		}
+
 		$DockerStatusInWaagent = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat /var/log/waagent.log" -runAsSudo -ignoreLinuxExitCode
 		$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat /var/log/waagent.log > waagent.log" -runAsSudo
 		RemoteCopy -download -downloadFrom $hs1VIP -files waagent.log -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
-		if ($DockerStatusInWaagent -imatch "docker-extension install PID" -and $DockerStatusInWaagent -imatch "installCommand completed")
+		if ($DockerStatusInWaagent -imatch "Microsoft.Azure.Extensions.DockerExtension" -and $DockerStatusInWaagent -imatch "Current handler state is: Enabled")
 		{
 			LogMsg "Docker status is enabled in waagent.log."
 			$ExtensionVerifiedInWaagentLog = $true
@@ -145,12 +137,31 @@ if ($isDeployed)
 			LogErr "Docker status is not enabled in waagent.log."
 			$ExtensionVerifiedInWaagentLog = $false
 		}
-		if ( $ExtensionVerfiedWithPowershell -and $ExtensionVerifiedInExtensionLog -and $ExtensionVerifiedInWaagentLog -and $ExtensionVerifiedInVM)
+
+		LogMsg "--------------------- STAGE 3/3 : verification of Extension Execution : END ---------------------"
+		#endregion
+
+		if ($ExtensionStatusFromAzure -and $extensionExecutionVerified  -and $ExtensionStatusInStatusFile -and $ExtensionVerifiedInWaagentLog -and $ExtensionVerifiedInVM)
 		{
+			LogMsg "STATUS FILE VERIFICATION : PASS"
+			LogMsg "AZURE STATUS VERIFICATION : PASS"
+			LogMsg "EXTENSION EXECUTION VERIFICATION : PASS"
 			$testResult = "PASS"
 		}
 		else
 		{
+			if ( !$ExtensionStatusInStatusFile )
+			{
+				LogErr "STATUS FILE VERIFICATION : FAIL"
+			}
+			if ( !$ExtensionStatusFromAzure )
+			{
+				LogErr "AZURE STATUS VERIFICATION : FAIL"
+			}
+			if ( !$extensionExecutionVerified )
+			{
+				LogErr "EXTENSION EXECUTION VERIFICATION : FAIL"
+			}
 			$testResult = "FAIL"
 		}
 		LogMsg "Test result : $testResult"
@@ -169,7 +180,6 @@ if ($isDeployed)
 			$testResult = "Aborted"
 		}
 		$resultArr += $testResult
-#$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
 	}   
 }
 
