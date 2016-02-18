@@ -21,11 +21,6 @@ csv_file=`echo $syslog_file_name | sed s/\.log\.txt//`
 csv_file=$csv_file.csv
 echo $csv_file
 
-TEMP_DIR='temp'
-mkdir $TEMP_DIR
-
-echo "Iteration,StartTime,Threads,FileSize,BlockSize,IOMode,TestType,ReadOperations,WriteOperations,OtherOperations,TotalOperations,ReadBytes,WriteBytes,TotalBytes,Throughput,IOPS,TotalTime(s),TotalEvents,MinLatency(ms),AvgLatency(ms),MaxLatency(ms), 95% PercentileLatency(ms)" > $csv_file
-
 res_AvgLatency=(`cat $syslog_file_name | grep "avg:" | awk '{print $2}' | sed s/ms//`)
 res_BlockSize=(`cat $syslog_file_name | grep "Block size "| sed "s/Block size //"`)
 res_FileSize=(`cat $syslog_file_name | grep "total file size"| sed "s/ total file size//"`)
@@ -48,6 +43,22 @@ res_WriteBytes=(`cat $syslog_file_name | grep "Read "| awk '{print $4}'`)
 res_WriteOperations=(`cat $syslog_file_name | grep "Operations performed:"| awk  '{print $5}'`)
 res_threads=(`cat $syslog_file_name | grep "Number of threads:" | sed "s/Number of threads: //"`)
 res_TotalBytes=(`cat $syslog_file_name | grep "Read "| awk '{print $7}'`)
+res_kernel_version=(`cat $syslog_file_name | grep "Linux.*x86_64.*GNU"| awk '{print $3}'`)
+res_total_cpu_cores=(`cat $syslog_file_name| grep "Number of CPU cores" | awk '{print $5}'`)
+res_LIS_version=(`cat $syslog_file_name| grep "^version:"| awk '{print $2}'`)
+
+if [ "x$res_LIS_version" == "x" ]
+then
+	res_LIS_version="Default LIS Version"
+fi
+
+echo "" > $csv_file
+echo ",Kernel version,"$res_kernel_version >> $csv_file
+echo ",Total CPU cores,"$res_total_cpu_cores >> $csv_file
+echo ",LIS Version,"$res_LIS_version >> $csv_file
+echo "" >> $csv_file
+
+echo "Iteration,StartTime,Threads,FileSize,BlockSize,IOMode,TestType,ReadOperations,WriteOperations,OtherOperations,TotalOperations,ReadBytes,WriteBytes,TotalBytes,Throughput,IOPS,TotalTime(s),TotalEvents,MinLatency(ms),AvgLatency(ms),MaxLatency(ms), 95% PercentileLatency(ms)" >> $csv_file
 
 count=0
 
@@ -65,5 +76,3 @@ sed -i  -e  "s/rndwr/Random write/" $csv_file
 
 echo "Output csv file: $csv_file created successfully." >> $syslog_file_name
 echo "LOGPARSER COMPLETED." >> $syslog_file_name
-
-rm -rf $TEMP_DIR

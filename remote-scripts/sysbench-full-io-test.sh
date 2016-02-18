@@ -32,7 +32,7 @@ uname -a 2>&1 >> $LOGFILE
 echo "LIS version: --------------------------------------------" >> $LOGFILE
 modinfo hv_vmbus 2>&1 >> $LOGFILE
 echo "----------------------------------------------------------" >> $LOGFILE
-
+echo "Number of CPU cores" `nproc` >> $LOGFILE
 
 iteration=0
 ioruntime=300
