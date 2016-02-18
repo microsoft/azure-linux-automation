@@ -6512,9 +6512,8 @@ Function GetFilePathsFromLinuxFolder ([string]$folderToSearch, $IpAddress, $SSHP
 	$retryCount = 1
 	while (($LogFilesPaths -eq "") -and ($retryCount -le $maxRetryCount ))
 	{
-		WaitFor -seconds 10
 		LogMsg "Attempt $retryCount/$maxRetryCount : Getting all file paths inside $folderToSearch"
-		$lsOut = RunLinuxCmd -username $username -password $password -ip $IpAddress -port $SSHPort -command "ls -lR $parentFolder > /home/$user/listDir.txt" -runAsSudo
+		$lsOut = RunLinuxCmd -username $username -password $password -ip $IpAddress -port $SSHPort -command "ls -lR $parentFolder > /home/$user/listDir.txt" -runAsSudo -ignoreLinuxExitCode
 		RemoteCopy -downloadFrom $IpAddress -port $SSHPort -files "/home/$user/listDir.txt" -username $username -password $password -downloadTo $LogDir -download
 		$lsOut = Get-Content -Path "$LogDir\listDir.txt" -Force
 		Remove-Item "$LogDir\listDir.txt"  -Force | Out-Null
@@ -6568,6 +6567,10 @@ Function GetFilePathsFromLinuxFolder ([string]$folderToSearch, $IpAddress, $SSHP
 				}
 			}
 		}
+        if ($LogFilesPaths -eq "")
+        {
+            WaitFor -seconds 10
+        }
 		$retryCount += 1
 	}
 	if ( !$LogFilesPaths )
