@@ -260,7 +260,6 @@ Function GetStatusFileNameToVerfiy ($vmData, $expectedExtensionName, [switch]$up
 	do
 		{
 		$retryCount += 1		
-		LogMsg "attempt [$retryCount/$maxRetryCount] : Setting $ExtensionName for $($vmData.RoleName) ..."
 		$currentExtFiles = GetFilePathsFromLinuxFolder -folderToSearch "/var/lib/waagent" -IpAddress $vmData.PublicIP -SSHPort $vmData.SSHPort -username $user -password $password -maxRetryCount 5
 		foreach ($line in $currentExtFiles[0].Split(","))
 		{
