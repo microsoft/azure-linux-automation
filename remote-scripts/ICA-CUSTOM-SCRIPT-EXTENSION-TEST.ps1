@@ -17,14 +17,14 @@ if ($isDeployed)
 		$LogFilesPaths = ""
 		$LogFiles = ""
 		$ExtensionName = "CustomScriptForLinux"
-		$statusFile = "0.status"
-		
+
+		$statusFile = GetStatusFileNameToVerfiy -vmData $AllVMData -expectedExtensionName $ExtensionName
 		#region check Extension Status from 0.status file
 		LogMsg "--------------------- STAGE 1/3 : verification of $statusFile : START ---------------------"
-		$statusFilePath = GetFilePathsFromLinuxFolder -folderToSearch "/var/lib/waagent" -IpAddress $allVMData.PublicIP -SSHPort $allVMData.SSHPort -username $user -password $password -expectedFiles "$statusFile"
 
-		if ( $statusFilePath[0] )
+		if ( $statusFile )
 		{
+			$statusFilePath = GetFilePathsFromLinuxFolder -folderToSearch "/var/lib/waagent" -IpAddress $allVMData.PublicIP -SSHPort $allVMData.SSHPort -username $user -password $password -expectedFiles "$statusFile"
 			$ExtensionStatusInStatusFile = GetExtensionStatusFromStatusFile -statusFilePaths $statusFilePath[0] -ExtensionName $ExtensionName -vmData $allVMData
 		}
 		else
