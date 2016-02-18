@@ -13,7 +13,7 @@ Function RetryStartTest($vmuser, $vmpassword, $vmvip, $vmport)
 	{
 		RunLinuxCmd -username $vmuser -password $vmpassword -ip $vmvip -port $vmport -command "python $($currentTestData.entrytestScript) -d $($currentTestData.parameters.duration) -p $($currentTestData.parameters.pkg) -t $($currentTestData.parameters.timeout) -s" -runAsSudo
 		sleep 5
-		$out = RunLinuxCmd -username $vmuser -password $vmpassword -ip $vmvip -port $vmport -command "cat Runtime.log | grep -i 'red hat' | wc -l"
+		$out = RunLinuxCmd -username $vmuser -password $vmpassword -ip $vmvip -port $vmport -command "cat Runtime.log | grep -i 'nmap' | wc -l"
 	}
 }
 
