@@ -27,7 +27,7 @@ Function VerfiyAddUserScenario ($vmData, $PublicConfigString, $PrivateConfigStri
 		$ExitCode = "ABORTED"
 		$errorCount = 0
 		LogMsg "Starting scenario $metaData"
-		$statusFileToVerify = GetStatusFileNameToVerfiy -vmData $vmData -expectedExtensionName $ExtensionName -upcoming
+		$statusFileToVerify = GetStatusFileNameToVerfiy -vmData $vmData -expectedExtensionName $ExtensionName -upcomings
 		$isExtensionEnabled = SetAzureVMExtension -publicConfigString $PublicConfigString -privateConfigString $PrivateConfigString -ExtensionName $ExtensionName -ExtensionVersion $ExtVersion -LatestExtensionVersion $ExtVersionForARM -Publisher $Publisher -vmData $vmData
 		if ($isExtensionEnabled)
 		{
@@ -67,7 +67,7 @@ Function VerfiyAddUserScenario ($vmData, $PublicConfigString, $PrivateConfigStri
 					LogMsg "Attempt : $retryCount/$maxRetryCount : Verifying $metaData scenario in the VM...."
 					#Verify log file contents.
 					DownloadExtensionLogFilesFromVarLog -LogFilesPaths $LogFilesPaths -ExtensionName $ExtensionName -vmData $vmData
-					Rename-Item -Path "$LogDir\extension.log" -NewName "extension.log.$metaData.txt"
+					Rename-Item -Path "$LogDir\extension.log" -NewName "extension.log.$metaData.txt" -Force | Out-Null
 					$extensoinLog = [string]( Get-Content "$LogDir\extension.log.$metaData.txt" )
 
 					if ( $extensoinLog  -imatch "Succeeded in create the account" )
@@ -202,7 +202,7 @@ Function VerfiyResetPasswordScenario ($vmData, $PublicConfigString, $PrivateConf
 					LogMsg "Attempt : $retryCount/$maxRetryCount : Verifying $metaData scenario in the VM...."
 					#Verify log file contents.
 					DownloadExtensionLogFilesFromVarLog -LogFilesPaths $LogFilesPaths -ExtensionName $ExtensionName -vmData $vmData
-					Rename-Item -Path "$LogDir\extension.log" -NewName "extension.log.$metaData.txt"
+					Rename-Item -Path "$LogDir\extension.log" -NewName "extension.log.$metaData.txt" -Force | Out-Null
 					$extensoinLog = [string]( Get-Content "$LogDir\extension.log.$metaData.txt" )
 
 					if (( $extensoinLog  -imatch "Will update password" ) -and ( $extensoinLog  -imatch "Succeeded in create the account or set the password" ))
@@ -356,7 +356,7 @@ Function VerfiyDeleteUserScenario ($vmData, $PublicConfigString, $PrivateConfigS
 					#Verify log file contents.
 
 					DownloadExtensionLogFilesFromVarLog -LogFilesPaths $LogFilesPaths -ExtensionName $ExtensionName -vmData $vmData
-					Rename-Item -Path "$LogDir\extension.log" -NewName "extension.log.$metaData.txt"
+					Rename-Item -Path "$LogDir\extension.log" -NewName "extension.log.$metaData.txt" -Force | Out-Null
 					$extensoinLog = [string]( Get-Content "$LogDir\extension.log.$metaData.txt" )
 
 					LogMsg "Getting contents of /etc/shadow"
@@ -505,7 +505,7 @@ Function VerfiyResetSSHConfigScenario ($vmData, $PublicConfigString, $PrivateCon
 
 					#Verify log file contents.
 					DownloadExtensionLogFilesFromVarLog -LogFilesPaths $LogFilesPaths -ExtensionName $ExtensionName -vmData $vmData
-					Rename-Item -Path "$LogDir\extension.log" -NewName "extension.log.$metaData.txt"
+					Rename-Item -Path "$LogDir\extension.log" -NewName "extension.log.$metaData.txt" -Force | Out-Null
 					$extensoinLog = [string]( Get-Content "$LogDir\extension.log.$metaData.txt" )
 					if  ( ($extensionLog) -imatch "Succeeded in reset sshd_config" )
 					{
