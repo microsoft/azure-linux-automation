@@ -114,6 +114,13 @@ if ($isDeployed)
 		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/abConsoleLogs.txt"
 		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/summary.log"
 		$abSummary = Get-Content -Path "$LogDir\summary.log" -ErrorAction SilentlyContinue
+		foreach ( $line in $detailedResult.Split("`n") )
+		{
+			if ( $line -imatch "Time taken for tests" )
+			{
+				$abSummary = $line
+			}
+		}
         #endregion
 
 		if (!$abSummary)
@@ -134,7 +141,7 @@ if ($isDeployed)
 		elseif ( $finalStatus -imatch "TestCompleted")
 		{
 			RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/abtest.log"
-			LogMsg "Test Completed. Result : $abResult."
+			LogMsg "Test Completed. Result : $abSummary."
 			$testResult = "PASS"
 		}
 		elseif ( $finalStatus -imatch "TestRunning")
@@ -159,7 +166,7 @@ if ($isDeployed)
 			$testResult = "Aborted"
 		}
 		$resultArr += $testResult
-		$resultSummary +=  CreateResultSummary -testResult $abResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
+		$resultSummary +=  CreateResultSummary -testResult $abSummary -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
 	}   
 }
 

@@ -4909,7 +4909,7 @@
 			<setupType>M1S1</setupType>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<!--Remote Files will be directly downloaded to test VM.-->
-			<remoteFiles>https://raw.githubusercontent.com/LIS/lis-test/master/WS2012R2/lisa/remote-scripts/ica/performance_ab.sh</remoteFiles>
+			<remoteFiles>https://raw.githubusercontent.com/iamshital/lis-test/master/WS2012R2/lisa/remote-scripts/ica/performance_ab.sh</remoteFiles>
 			<!--Remote XML will be downloaded to automation server for analysis-->
 			<remoteXML>https://raw.githubusercontent.com/LIS/lis-test/master/WS2012R2/lisa/xml/Perf_AB.xml</remoteXML>
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
@@ -5681,6 +5681,22 @@
 		</Cycle>		
 		<Cycle>
 			<cycleName>LISA-ZK-PERF</cycleName>
+			<test>
+				<Name>ICA-PERF-ZOOKEEPER-TEST</Name>
+			</test>
+		</Cycle>		
+
+		<Cycle>
+			<cycleName>LISA-PERF</cycleName>
+			<test>
+				<Name>ICA-TERASORT-BENCHMARK-TEST</Name>
+			</test>
+			<test>
+				<Name>ICA-PERF-REDIS-TEST</Name>
+			</test>
+			<test>
+				<Name>ICA-PERF-APACHE-BENCHMARK-TEST</Name>
+			</test>
 			<test>
 				<Name>ICA-PERF-ZOOKEEPER-TEST</Name>
 			</test>

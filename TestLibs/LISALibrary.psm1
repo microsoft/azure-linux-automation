@@ -1,6 +1,12 @@
-﻿Function ProvisionVMsForLisa($allVMData)
+﻿#
+# This function enables the root password and ssh key based authentication across all VMs in same service / resource group.
+# $allVMData : PSObject which contains all the VM data in same service / resource group.
+# $installPackagesOnRoleName : [string] if you want to install packages on specific role only then use this parameter. Eg. ProvisionVMsForLisa -allVMData $VMData -installPackagesOnRoleName "master"
+#    Multiple Rolenames can be given as "master,client"
+#
+Function ProvisionVMsForLisa($allVMData, $installPackagesOnRoleNames)
 {
-	$scriptUrl = "https://raw.githubusercontent.com/LIS/lis-test/master/WS2012R2/lisa/remote-scripts/ica/provisionLinuxForLisa.sh"
+	$scriptUrl = "https://raw.githubusercontent.com/iamshital/lis-test/master/WS2012R2/lisa/remote-scripts/ica/provisionLinuxForLisa.sh"
 	$sshPrivateKeyPath = ".\ssh\myPrivateKey.key"
 	$sshPrivateKey = "myPrivateKey.key"
 	LogMsg "Downloading $scriptUrl ..."
@@ -34,17 +40,40 @@
 		$out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "cp /home/$user/.ssh/config /root/.ssh/" 
 		$out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "service sshd restart" 
 
-		LogMsg "Executing $scriptName ..."
-		$provisionJob = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "/root/$scriptName" -RunInBackground
-		#endregion
-		while ( (Get-Job -Id $provisionJob).State -eq "Running" )
-		{
-			$currentStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "tail -n 1 /root/provisionLinux.log"
-			LogMsg "Current Package Installation Status : $currentStatus"
-			WaitFor -seconds 10
-		}
-		RemoteCopy -download -downloadFrom $vmData.PublicIP -port $vmData.SSHPort -files "/root/provisionLinux.log" -username "root" -password $password -downloadTo $LogDir
-		Rename-Item -Path "$LogDir\provisionLinux.log" -NewName "$($vmData.RoleName)-provisionLinux.log" -Force | Out-Null
+        if ( $installPackagesOnRoleNames )
+        {
+            if ( $installPackagesOnRoleNames -imatch $vmData.RoleName )
+            {
+		        LogMsg "Executing $scriptName ..."
+		        $provisionJob = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "/root/$scriptName" -RunInBackground
+		        #endregion
+		        while ( (Get-Job -Id $provisionJob).State -eq "Running" )
+		        {
+			        $currentStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "tail -n 1 /root/provisionLinux.log"
+			        LogMsg "Current Package Installation Status : $currentStatus"
+			        WaitFor -seconds 10
+		        }
+		        RemoteCopy -download -downloadFrom $vmData.PublicIP -port $vmData.SSHPort -files "/root/provisionLinux.log" -username "root" -password $password -downloadTo $LogDir
+		        Rename-Item -Path "$LogDir\provisionLinux.log" -NewName "$($vmData.RoleName)-provisionLinux.log" -Force | Out-Null
+            }
+            else
+            {
+                LogMsg "$($vmData.RoleName) is set to NOT install packages. Hence skipping package installation on this VM."
+            }
+        }
+        else
+        {
+		    LogMsg "Executing $scriptName ..."
+		    $provisionJob = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "/root/$scriptName" -RunInBackground
+		    #endregion
+		    while ( (Get-Job -Id $provisionJob).State -eq "Running" )
+		    {
+			    $currentStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "tail -n 1 /root/provisionLinux.log"
+			    LogMsg "Current Package Installation Status : $currentStatus"
+			    WaitFor -seconds 10
+		    }
+		    RemoteCopy -download -downloadFrom $vmData.PublicIP -port $vmData.SSHPort -files "/root/provisionLinux.log" -username "root" -password $password -downloadTo $LogDir
+		    Rename-Item -Path "$LogDir\provisionLinux.log" -NewName "$($vmData.RoleName)-provisionLinux.log" -Force | Out-Null        }        
 		LogMsg "$($vmData.RoleName) preparation finished."
 	}
 	#endregion
