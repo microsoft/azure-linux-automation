@@ -91,7 +91,7 @@ if ($isDeployed)
 					}
 					else
 					{
-						LogMsg "$ExtensionName status is not Succeeded from docker-extension.log in Linux VM."
+						LogErr "$ExtensionName status is not Succeeded from docker-extension.log in Linux VM."
 						WaitFor -Seconds 60
 					}
 				}
@@ -127,7 +127,8 @@ if ($isDeployed)
 		$DockerStatusInWaagent = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat /var/log/waagent.log" -runAsSudo -ignoreLinuxExitCode
 		$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat /var/log/waagent.log > waagent.log" -runAsSudo
 		RemoteCopy -download -downloadFrom $hs1VIP -files waagent.log -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
-		if ($DockerStatusInWaagent -imatch "Microsoft.Azure.Extensions.DockerExtension" -and $DockerStatusInWaagent -imatch "Current handler state is: Enabled")
+
+		if ( ($DockerStatusInWaagent -imatch "Microsoft.Azure.Extensions.DockerExtension") -and ( ( $DockerStatusInWaagent -imatch "succeeded: scripts/run-in-background.sh enable") -or ( $DockerStatusInWaagent -imatch "Spawned scripts/run-in-background.sh enable PID") ) ) 
 		{
 			LogMsg "Docker status is enabled in waagent.log."
 			$ExtensionVerifiedInWaagentLog = $true

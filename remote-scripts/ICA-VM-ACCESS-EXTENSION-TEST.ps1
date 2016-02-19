@@ -27,7 +27,7 @@ Function VerfiyAddUserScenario ($vmData, $PublicConfigString, $PrivateConfigStri
 		$ExitCode = "ABORTED"
 		$errorCount = 0
 		LogMsg "Starting scenario $metaData"
-		$statusFileToVerify = GetStatusFileNameToVerfiy -vmData $vmData -expectedExtensionName $ExtensionName -upcomings
+		$statusFileToVerify = GetStatusFileNameToVerfiy -vmData $vmData -expectedExtensionName $ExtensionName -upcoming
 		$isExtensionEnabled = SetAzureVMExtension -publicConfigString $PublicConfigString -privateConfigString $PrivateConfigString -ExtensionName $ExtensionName -ExtensionVersion $ExtVersion -LatestExtensionVersion $ExtVersionForARM -Publisher $Publisher -vmData $vmData
 		if ($isExtensionEnabled)
 		{
@@ -68,9 +68,9 @@ Function VerfiyAddUserScenario ($vmData, $PublicConfigString, $PrivateConfigStri
 					#Verify log file contents.
 					DownloadExtensionLogFilesFromVarLog -LogFilesPaths $LogFilesPaths -ExtensionName $ExtensionName -vmData $vmData
 					Rename-Item -Path "$LogDir\extension.log" -NewName "extension.log.$metaData.txt" -Force | Out-Null
-					$extensoinLog = [string]( Get-Content "$LogDir\extension.log.$metaData.txt" )
+					$extensionLog = [string]( Get-Content "$LogDir\extension.log.$metaData.txt" )
 
-					if ( $extensoinLog  -imatch "Succeeded in create the account" )
+					if ( $extensionLog  -imatch "Succeeded in create the account" )
 					{
 						LogMsg "extesnsion.log reported Succeeded in create the account."
 					}
@@ -203,9 +203,9 @@ Function VerfiyResetPasswordScenario ($vmData, $PublicConfigString, $PrivateConf
 					#Verify log file contents.
 					DownloadExtensionLogFilesFromVarLog -LogFilesPaths $LogFilesPaths -ExtensionName $ExtensionName -vmData $vmData
 					Rename-Item -Path "$LogDir\extension.log" -NewName "extension.log.$metaData.txt" -Force | Out-Null
-					$extensoinLog = [string]( Get-Content "$LogDir\extension.log.$metaData.txt" )
+					$extensionLog = [string]( Get-Content "$LogDir\extension.log.$metaData.txt" )
 
-					if (( $extensoinLog  -imatch "Will update password" ) -and ( $extensoinLog  -imatch "Succeeded in create the account or set the password" ))
+					if (( $extensionLog  -imatch "Will update password" ) -and ( $extensionLog  -imatch "Succeeded in create the account or set the password" ))
 					{
 						LogMsg "extesnsion.log reported Succeeded in reset password."
 					}
@@ -357,7 +357,7 @@ Function VerfiyDeleteUserScenario ($vmData, $PublicConfigString, $PrivateConfigS
 
 					DownloadExtensionLogFilesFromVarLog -LogFilesPaths $LogFilesPaths -ExtensionName $ExtensionName -vmData $vmData
 					Rename-Item -Path "$LogDir\extension.log" -NewName "extension.log.$metaData.txt" -Force | Out-Null
-					$extensoinLog = [string]( Get-Content "$LogDir\extension.log.$metaData.txt" )
+					$extensionLog = [string]( Get-Content "$LogDir\extension.log.$metaData.txt" )
 
 					LogMsg "Getting contents of /etc/shadow"
 					$out = RunLinuxCmd -username $user -password $password -ip $vmData.PublicIP -port $vmData.SSHPort -command "cat /etc/shadow > /home/$user/etcShadowFileAfterDeleteUser.txt" -runAsSudo
@@ -505,9 +505,10 @@ Function VerfiyResetSSHConfigScenario ($vmData, $PublicConfigString, $PrivateCon
 
 					#Verify log file contents.
 					DownloadExtensionLogFilesFromVarLog -LogFilesPaths $LogFilesPaths -ExtensionName $ExtensionName -vmData $vmData
+					Remove-Item -Path "$LogDir\extension.log.$metaData.txt" -Force -ErrorAction SilentlyContinue
 					Rename-Item -Path "$LogDir\extension.log" -NewName "extension.log.$metaData.txt" -Force | Out-Null
-					$extensoinLog = [string]( Get-Content "$LogDir\extension.log.$metaData.txt" )
-					if  ( ($extensionLog) -imatch "Succeeded in reset sshd_config" )
+					$extensionLog = [string]( Get-Content "$LogDir\extension.log.$metaData.txt" )
+					if  ( $extensionLog -imatch "Succeeded in reset sshd_config" )
 					{
 						LogMsg "extesnsion.log reported Succeeded in reset sshd_config."
 					}
@@ -632,7 +633,7 @@ if ($isDeployed)
 
 					"DeleteUser" 
 					{
-						if ( ($AddUserResult -eq "PASS") -or ($AddUserResult -eq "PASS") )
+						if ( ($AddUserResult -eq "PASS") -or ($ResetPasswordResult -eq "PASS") )
 						{
 							$dependancyCheck = "PASS"
 						}

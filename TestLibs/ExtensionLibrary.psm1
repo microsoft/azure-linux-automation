@@ -5,7 +5,7 @@
 	{
 		if ( $UseAzureResourceManager )
 		{
-			LogMsg "Verifying $ExtensionName from Using Get-AzureResource command ..."
+			LogMsg "Verifying $ExtensionName from Azure Using Get-AzureResource command ..."
 			$ExtensionStatus = Get-AzureResource -OutputObjectFormat New -ResourceGroupName $ResourceGroupName  -ResourceType "Microsoft.Compute/virtualMachines/extensions" -ExpandProperties
 			if ( ($ExtensionStatus.Properties.ProvisioningState -eq "Succeeded") -and ( $ExtensionStatus.Properties.Type -eq $ExtensionName ) )
 			{
@@ -23,7 +23,7 @@
 		}
 		else
 		{
-			LogMsg "Verifying $ExtensionName from Using Get-AzureVM command ..."
+			LogMsg "Verifying $ExtensionName from Azure Using Get-AzureVM command ..."
 			$vmDetails = Get-AzureVM -ServiceName $ServiceName
  			if ( ( $vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Status -eq "Success" ) -and ($vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Name -imatch $ExtensionName ))
 			{
