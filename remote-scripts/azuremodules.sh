@@ -185,3 +185,49 @@ function create_raid_and_mount()
     mount $deviceName $mountdir
     check_exit_status "create_raid_and_mount"
 }
+
+function remote_copy ()
+{
+    remote_path="~"
+
+    while echo $1 | grep -q ^-; do
+       eval $( echo $1 | sed 's/^-//' )=$2
+       shift
+       shift
+    done
+
+    if [ "x$host" == "x" ] || [ "x$user" == "x" ] || [ "x$passwd" == "x" ] || [ "x$filename" == "x" ] ; then
+       echo "Usage: -user <username> -passwd <user password> -host <host ipaddress> -filename <filename> -remote_path <location of the file on remote vm> -cmd <put/get>"
+       exit -1
+    fi
+
+    if [ "$cmd" == "get" ] || [ "x$cmd" == "x" ]; then
+       source_path="$user@$host:$remote_path/$filename"
+       destination_path="."
+    elif [ "$cmd" == "put" ]; then
+       source_path=$filename
+       destination_path=$user@$host:$remote_path/$filename
+    fi
+
+    echo "sshpass -p $passwd scp -v -o StrictHostKeyChecking=no $source_path $destination_path 2>&1"
+    status=`sshpass -p $passwd scp -v -o StrictHostKeyChecking=no $source_path $destination_path 2>&1`
+    echo $status
+}
+
+function remote_exec ()
+{
+    while echo $1 | grep -q ^-; do
+       eval $( echo $1 | sed 's/^-//' )=$2
+       shift
+       shift
+    done
+    cmd=$@
+    if [ "x$host" == "x" ] || [ "x$user" == "x" ] || [ "x$passwd" == "x" ] || [ "x$cmd" == "x" ] ; then
+       echo "Usage: -user <username> -passwd <user password> -host <host ipaddress> <onlycommand>"
+       exit -1
+    fi
+
+    echo "sshpass -p $passwd ssh -v -o StrictHostKeyChecking=no $user@$host $cmd 2>&1"
+    status=`sshpass -p $passwd ssh -v -o StrictHostKeyChecking=no $user@$host $cmd 2>&1`
+    echo $status
+}
