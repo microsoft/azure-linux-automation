@@ -309,7 +309,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
 $StorageProfileScriptBlock = {
                 Add-Content -Value "$($indents[4])^storageProfile^: " -Path $jsonFile
                 Add-Content -Value "$($indents[4]){" -Path $jsonFile
-                     if ($osImage)
+                     if (!$osVHD)
                      {
                       Add-Content -Value "$($indents[5])^imageReference^ : " -Path $jsonFile
                       Add-Content -Value "$($indents[5]){" -Path $jsonFile
@@ -325,7 +325,7 @@ $StorageProfileScriptBlock = {
                      }
                       Add-Content -Value "$($indents[5])^osDisk^ : " -Path $jsonFile
                       Add-Content -Value "$($indents[5]){" -Path $jsonFile
-                      if(!$osImage)
+                      if($osVHD)
                       {
 
                             LogMsg "├Using VHD : $osVHD"
