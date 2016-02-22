@@ -1208,8 +1208,8 @@ Function GetAndCheckKernelLogs($allDeployedVMs, $status, $vmUser, $vmPassword)
 
 Function SetDistroSpecificVariables($detectedDistro)
 {
-	$python_cmd = "python"
-	LogMsg "Set `$python_cmd > python"	
+	$python_cmd = "python"	
+	LogMsg "Set `$python_cmd > $python_cmd"
 	Set-Variable -Name python_cmd -Value $python_cmd -Scope Global
 	Set-Variable -Name ifconfig_cmd -Value "ifconfig" -Scope Global
 	if(($detectedDistro -eq "SLES") -or ($detectedDistro -eq "SUSE"))
@@ -3612,7 +3612,7 @@ Function IsIperfServerStarted($node, $expectedServerInstances = 1)
 
 Function IsIperfServerRunning($node)
 {
-	$out = RunLinuxCmd -username $node.user -password $node.password -ip $node.ip -port $node.sshport -command "python check-server.py && mv Runtime.log check-server.py.log -f" -runAsSudo
+	$out = RunLinuxCmd -username $node.user -password $node.password -ip $node.ip -port $node.sshport -command "$python_cmd check-server.py && mv Runtime.log check-server.py.log -f" -runAsSudo
 	RemoteCopy -download -downloadFrom $node.ip -files "/home/$user/check-server.py.log, /home/$user/iperf-server.txt" -downloadTo $node.LogDir -port $node.sshPort -username $node.user -password $node.password
 	RemoteCopy -download -downloadFrom $node.ip -files "/home/$user/state.txt, /home/$user/Summary.log" -downloadTo $node.logdir -port $node.sshPort -username $node.user -password $node.password
 	$serverState = Get-Content "$($node.Logdir)\state.txt"
@@ -3683,7 +3683,7 @@ Function DoNslookupTest ($vm1, $vm2)
 	$out = RunLinuxCmd -username $vm1.user -password $vm1.password -ip $vm1.Ip -port $vm1.SshPort -command "echo TestStarted > nslookup12.log" -runAsSudo
 	if ($detectedDistro -eq "COREOS")
 	{
-		$nslookupCommand = "python nslookup.py -n $($vm2.Hostname)"
+		$nslookupCommand = "$python_cmd nslookup.py -n $($vm2.Hostname)"
 	}
 	else
 	{
@@ -3718,7 +3718,7 @@ Function DoDigTest ($vm1, $vm2)
 	$out = RunLinuxCmd -username $vm1.user -password $vm1.password -ip $vm1.Ip -port $vm1.SshPort -command "echo TestStarted > dig12.log" -runAsSudo
 	if ($detectedDistro -eq "COREOS")
 	{
-		$digCommand = "python dig.py -n $($vm2.fqdn)"
+		$digCommand = "$python_cmd dig.py -n $($vm2.fqdn)"
 	}
 	else
 	{
@@ -4451,11 +4451,11 @@ Function RunLinuxCmdOnRemoteVM($intermediateVM,$remoteVM, [switch] $runAsSudo, $
 #Generate the Full command that will be actually executed on intermediate VM.
 	if(!$hostnameMode)
 	{
-		$RunSSHremoteCommand = "python /home/$user/RunSSHCmd.py -s `'$($remoteVM.ip)`' -u $($remoteVM.user) -p`'$newPass`' -P$($remoteVM.sshPort) -c `'$remoteCommand`'"
+		$RunSSHremoteCommand = "$python_cmd /home/$user/RunSSHCmd.py -s `'$($remoteVM.ip)`' -u $($remoteVM.user) -p`'$newPass`' -P$($remoteVM.sshPort) -c `'$remoteCommand`'"
 	}
 	else
 	{
-		$RunSSHremoteCommand = "python /home/$user/RunSSHCmd.py -s `'$($remoteVM.Hostname)`' -u $($remoteVM.user) -p`'$newPass`' -P$($remoteVM.sshPort) -c `'$remoteCommand`'"
+		$RunSSHremoteCommand = "$python_cmd /home/$user/RunSSHCmd.py -s `'$($remoteVM.Hostname)`' -u $($remoteVM.user) -p`'$newPass`' -P$($remoteVM.sshPort) -c `'$remoteCommand`'"
 	}
 	if($runAsSudo)
 	{
@@ -4495,11 +4495,11 @@ Function RemoteCopyRemoteVM($intermediateVM,$remoteVM,$remoteFiles, [switch]$upl
 #$allFiles = "/home/$user/azuremodules.py,/home/$user/ConfigureDnsServer.py,/home/$user/CleanupDnsServer.py,/home/$user/ConfigureResolvConf.py,/home/$user/RunSSHCmd.py,/home/$user/RemoteCopy.py"
 		if($hostnameMode)
 		{
-			$uploadCommand = "python RemoteCopy.py  -m upload -c `'$($remoteVM.Hostname)`' -u $($remoteVM.user) -p `'$($remoteVM.password)`' -P$($remoteVM.sshPort) -r `'/home/$user`' -f `'$remoteFiles`'"
+			$uploadCommand = "$python_cmd RemoteCopy.py  -m upload -c `'$($remoteVM.Hostname)`' -u $($remoteVM.user) -p `'$($remoteVM.password)`' -P$($remoteVM.sshPort) -r `'/home/$user`' -f `'$remoteFiles`'"
 		}
 		else
 		{
-			$uploadCommand = "python RemoteCopy.py  -m upload -c `'$($remoteVM.ip)`' -u $($remoteVM.user) -p `'$($remoteVM.password)`' -P$($remoteVM.sshPort) -r `'/home/$user`' -f `'$remoteFiles`'"
+			$uploadCommand = "$python_cmd RemoteCopy.py  -m upload -c `'$($remoteVM.ip)`' -u $($remoteVM.user) -p `'$($remoteVM.password)`' -P$($remoteVM.sshPort) -r `'/home/$user`' -f `'$remoteFiles`'"
 		}
 		$remoteFiles = $remoteFiles.Replace(" ",'')
 		$uploadOutput = RunLinuxCmd -ip $intermediateVM.ip -port $intermediateVM.sshPort -username $intermediateVM.user -password $intermediateVM.password -command $uploadCommand -runAsSudo
@@ -4527,11 +4527,11 @@ Function RemoteCopyRemoteVM($intermediateVM,$remoteVM,$remoteFiles, [switch]$upl
 #$allFiles = "/home/$user/azuremodules.py,/home/$user/ConfigureDnsServer.py,/home/$user/CleanupDnsServer.py,/home/$user/ConfigureResolvConf.py,/home/$user/RunSSHCmd.py,/home/$user/RemoteCopy.py"
 		if($hostnameMode)
 		{
-			$downloadCommand = "python RemoteCopy.py  -m download -c `'$($remoteVM.Hostname)`' -u $($remoteVM.user) -p `'$($remoteVM.password)`' -P$($remoteVM.sshPort) -l `'/home/$user`' -f `'$remoteFiles`'"
+			$downloadCommand = "$python_cmd RemoteCopy.py  -m download -c `'$($remoteVM.Hostname)`' -u $($remoteVM.user) -p `'$($remoteVM.password)`' -P$($remoteVM.sshPort) -l `'/home/$user`' -f `'$remoteFiles`'"
 		}
 		else
 		{
-			$downloadCommand = "python RemoteCopy.py  -m download -c `'$($remoteVM.ip)`' -u $($remoteVM.user) -p `'$($remoteVM.password)`' -P$($remoteVM.sshPort) -l `'/home/$user`' -f `'$remoteFiles`'"
+			$downloadCommand = "$python_cmd RemoteCopy.py  -m download -c `'$($remoteVM.ip)`' -u $($remoteVM.user) -p `'$($remoteVM.password)`' -P$($remoteVM.sshPort) -l `'/home/$user`' -f `'$remoteFiles`'"
 		}
 		$remoteFiles = $remoteFiles.Replace(" ",'')
 		$downloadOutput = RunLinuxCmd -ip $intermediateVM.ip -port $intermediateVM.sshPort -username $intermediateVM.user -password $intermediateVM.password -command $downloadCommand -runAsSudo
@@ -4567,7 +4567,7 @@ Function ConfigureVNETVMs($SSHDetails,$vnetDomainDBFilePath,$dnsServerIP)
 		$testIP = $IPPORT[0]
 		$testPort = $IPPORT[1]
 		LogMsg "$testIP : $testPort configuration in progress.."
-		$out = RunLinuxCmd -ip $testIP -port $testPort -username $user -password $password -command "python /home/$user/ConfigureVnetVM.py -d $dnsServerIP -D $vnetDomainDBFilePath -R /etc/resolv.conf -H /etc/hosts" -runAsSudo
+		$out = RunLinuxCmd -ip $testIP -port $testPort -username $user -password $password -command "$python_cmd /home/$user/ConfigureVnetVM.py -d $dnsServerIP -D $vnetDomainDBFilePath -R /etc/resolv.conf -H /etc/hosts" -runAsSudo
 		if ($out -imatch 'CONFIGURATION_SUCCESSFUL')
 		{
 			LogMsg $out -LinuxConsoleOuput
@@ -5244,13 +5244,13 @@ Function DoSSHTestFromLocalVM($intermediateVM, $LocalVM, $toVM,[switch]$hostname
 	if($hostnameMode)
 	{
 		LogMsg "Executing - date - command on $($toVM.Hostname) .."
-		$sshOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "python /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RunSSHCmd.py -s `"$($toVM.hostname)`" -u $user -p $($toVM.password)  -P 22 -c `"date`" -o yes`'"
+		$sshOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "$python_cmd /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RunSSHCmd.py -s `"$($toVM.hostname)`" -u $user -p $($toVM.password)  -P 22 -c `"date`" -o yes`'"
 
 	}
 	else
 	{
 		LogMsg "Executing - date - command on $($toVM.DIP) .."
-		$sshOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "python /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RunSSHCmd.py -s `"$($toVM.dip)`" -u $user -p $($toVM.password)  -P 22 -c `"date`" -o yes`'"
+		$sshOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "$python_cmd /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RunSSHCmd.py -s `"$($toVM.dip)`" -u $user -p $($toVM.password)  -P 22 -c `"date`" -o yes`'"
 	}
 	LogMsg "Verifying output.."
 	$logfilepath = $toVM.logDir + "\sshOutput.log"
@@ -5278,12 +5278,12 @@ Function DoSCPTestFromLocalVM( $intermediateVM, $LocalVM, $toVM, [switch]$hostna
 	if($hostnameMode)
 	{
 		LogMsg "File Created. Now copying it to $($toVM.Hostname) ..."
-		$scpOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "python /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RemoteCopy.py -c `"$($toVM.Hostname)`" -m upload -u `"$($toVM.user)`" -p $($toVM.password) -P 22 -r `"/home/$user`" -f `"/home/$user/testfile`"`'"
+		$scpOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "$python_cmd /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RemoteCopy.py -c `"$($toVM.Hostname)`" -m upload -u `"$($toVM.user)`" -p $($toVM.password) -P 22 -r `"/home/$user`" -f `"/home/$user/testfile`"`'"
 	}
 	else
 	{
 		LogMsg "File Created. Now copying it to $($toVM.DIP) ..."
-		$scpOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "python /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RemoteCopy.py -c `"$($toVM.DIP)`" -m upload -u `"$($toVM.user)`" -p $($toVM.password) -P 22 -r `"/home/$user`" -f `"/home/$user/testfile`"`'"
+		$scpOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "$python_cmd /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RemoteCopy.py -c `"$($toVM.DIP)`" -m upload -u `"$($toVM.user)`" -p $($toVM.password) -P 22 -r `"/home/$user`" -f `"/home/$user/testfile`"`'"
 	}
 	LogMsg "Writing output to $logfilepath ..."
 	Set-Content -Path $logFilepath -Value $scpOutput

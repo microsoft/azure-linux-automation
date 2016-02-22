@@ -46,19 +46,19 @@ def RunTest(client):
 	RunLog.info("Starting iperf Client..")
 	RunLog.info("Executing Command : %s", client)
 	temp = Run(client)
-        cmd ='sleep 2'
-        tmp = Run(cmd)
+	cmd ='sleep 2'
+	tmp = Run(cmd)
 	sleepTime = int(args.time) + 10 
 	cmd = 'sleep ' + str(sleepTime)
-        tmp = Run(cmd)
+	tmp = Run(cmd)
 
 	status = isProcessRunning('iperf -c')
-	if cmp(status, "True")==0:
+	if status == "True":
 		time.sleep(60)
 		Run('echo "ProcessRunning" >> iperf-client.txt')
 		Run('echo "Waiting for 60 secs to let iperf process finish" >> iperf-client.txt')
 		status = isProcessRunning('iperf -c')
-		if cmp(status, "True")==0:
+		if status == "True":
 			Run('echo "ProcessRunning even after 60 secs delay" >> iperf-client.txt')
 		else:
 			Run('echo iperf process finished after extra wait of 60 secs >>iperf-client.txt')

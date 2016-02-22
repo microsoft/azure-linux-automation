@@ -42,11 +42,11 @@ if($isDeployed)
 	LogMsg "DTAP Machine : $dtapServerIp : $hs1vm1sshport"
 	$iperfTimeoutSeconds = $currentTestData.iperfTimeoutSeconds
 
-	$cmd1="python start-server.py -p $hs1vm1tcpport && mv Runtime.log start-server.py.log -f"
-	$cmd2="python start-server.py -p $hs1vm2tcpport && mv Runtime.log start-server.py.log -f"
+	$cmd1="$python_cmd start-server.py -p $hs1vm1tcpport && mv Runtime.log start-server.py.log -f"
+	$cmd2="$python_cmd start-server.py -p $hs1vm2tcpport && mv Runtime.log start-server.py.log -f"
 	$cmd3=""
-	$cmd11="python start-server-without-stopping.py -p $hs1vm1ProbePort -log iperf-probe.txt"
-	$cmd22="python start-server-without-stopping.py -p $hs1vm2ProbePort -log iperf-probe.txt"
+	$cmd11="$python_cmd start-server-without-stopping.py -p $hs1vm1ProbePort -log iperf-probe.txt"
+	$cmd22="$python_cmd start-server-without-stopping.py -p $hs1vm2ProbePort -log iperf-probe.txt"
 	
 	$server1 = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -nodeTcpPort $hs1vm1tcpport -nodeIperfCmd $cmd1 -user $user -password $password -files $currentTestData.files -logDir $LogDir -nodeDip $hs1vm1.IpAddress
 	$server2 = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm2sshport -nodeTcpPort $hs1vm2tcpport -nodeIperfCmd $cmd2 -user $user -password $password -files $currentTestData.files -logDir $LogDir -nodeDip $hs1vm2.IpAddress
@@ -64,11 +64,11 @@ if($isDeployed)
 				LogMsg "Starting test for $Value parallel connections in $mode mode.."
 				if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 				{#.........................................................................Client command will decided according to TestMode....
-					$cmd3="python start-client.py -c $hs1VIP -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P$Value" 
+					$cmd3="$python_cmd start-client.py -c $hs1VIP -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P$Value" 
 				}
 				if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 				{
-					$cmd3="python start-client.py -c $hs1ServiceUrl -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P$Value"
+					$cmd3="$python_cmd start-client.py -c $hs1ServiceUrl -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P$Value"
 				}
 				mkdir $LogDir\$Value\$mode\Server1 -ErrorAction SilentlyContinue | out-null
 				mkdir $LogDir\$Value\$mode\Server2 -ErrorAction SilentlyContinue | out-null
@@ -104,8 +104,8 @@ if($isDeployed)
 				$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshport -command "echo Test Started > iperf-probe.txt" -runAsSudo
 				$suppressedOut = RunLinuxCmd -username $server2.user -password $server2.password -ip $server2.ip -port $server2.sshPort -command "echo Test Started > iperf-probe.txt" -runAsSudo
 
-				#$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshport -command "python start-server.py -p $hs1vm1tcpport  && mv Runtime.log start-server.py.log -f" -runAsSudo
-				#$suppressedOut = RunLinuxCmd -username $server2.user -password $server2.password -ip $server2.ip -port $server2.sshPort -command "python start-server.py -p $hs1vm1tcpport  && mv Runtime.log start-server.py.log -f" -runAsSudo
+				#$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshport -command "$python_cmd start-server.py -p $hs1vm1tcpport  && mv Runtime.log start-server.py.log -f" -runAsSudo
+				#$suppressedOut = RunLinuxCmd -username $server2.user -password $server2.password -ip $server2.ip -port $server2.sshPort -command "$python_cmd start-server.py -p $hs1vm1tcpport  && mv Runtime.log start-server.py.log -f" -runAsSudo
 				
 				#$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshport -command "python start-server-without-stopping.py -p $hs1vm1ProbePort -log iperf-probe.txt" -runAsSudo
 				#$suppressedOut = RunLinuxCmd -username $server2.user -password $server2.password -ip $server2.ip -port $server2.sshPort -command "python start-server-without-stopping.py -p $hs1vm2ProbePort -log iperf-probe.txt" -runAsSudo

@@ -33,12 +33,12 @@ if($isDeployed)
 				$testResult = $null
 				if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 				{
-					$pingFrom.cmd = "python ping.py -x $hs1vm2IP -c 10 -s$Value "
+					$pingFrom.cmd = "$python_cmd ping.py -x $hs1vm2IP -c 10 -s$Value "
 				}
 
 				if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 				{
-					$pingFrom.cmd = "python ping.py -x  $hs1vm2Hostname -c 10 -s$Value"
+					$pingFrom.cmd = "$python_cmd ping.py -x  $hs1vm2Hostname -c 10 -s$Value"
 				}
 				LogMsg "Test Started for packet size $Value and $mode mode.."
 
