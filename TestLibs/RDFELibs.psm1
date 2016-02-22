@@ -1,11 +1,10 @@
 #region Azure RDFE Methods
-
-Import-Module .\TestLibs\ExtensionLibrary.psm1 -Force
-Import-Module .\TestLibs\LISALibrary.psm1 -Force
 <#
 .SYNOPSIS 
 List All OS Images in Cluster
 #>
+
+
 Function ListOSImages()
 {
 	$images = Get-AzureVMImage
@@ -6504,7 +6503,7 @@ Function GetVNETDetailsFromXMLDeploymentData([string]$deploymentType)
 #endregion  
 
 #region LinuxUtilities
-Function GetFilePathsFromLinuxFolder ([string]$folderToSearch, $IpAddress, $SSHPort, $username, $password, $maxRetryCount=20, [string]$expectedFiles)
+Function GetFilePathsFromLinuxFolder ([string]$folderToSearch, $IpAddress, $SSHPort, $username, $password, $maxRetryCount=20)
 {
 	$parentFolder = $folderToSearch.Replace("/" + $folderToSearch.Split("/")[($folderToSearch.Trim().Split("/").Count)-1],"")
 	$LogFilesPaths = ""
@@ -6512,11 +6511,9 @@ Function GetFilePathsFromLinuxFolder ([string]$folderToSearch, $IpAddress, $SSHP
 	$retryCount = 1
 	while (($LogFilesPaths -eq "") -and ($retryCount -le $maxRetryCount ))
 	{
+		WaitFor -seconds 10
 		LogMsg "Attempt $retryCount/$maxRetryCount : Getting all file paths inside $folderToSearch"
-		$lsOut = RunLinuxCmd -username $username -password $password -ip $IpAddress -port $SSHPort -command "ls -lR $parentFolder > /home/$user/listDir.txt" -runAsSudo -ignoreLinuxExitCode
-		RemoteCopy -downloadFrom $IpAddress -port $SSHPort -files "/home/$user/listDir.txt" -username $username -password $password -downloadTo $LogDir -download
-		$lsOut = Get-Content -Path "$LogDir\listDir.txt" -Force
-		Remove-Item "$LogDir\listDir.txt"  -Force | Out-Null
+		$lsOut = RunLinuxCmd -username $username -password $password -ip $IpAddress -port $SSHPort -command "ls -lR $parentFolder" -runAsSudo
 		foreach ($line in $lsOut.Split("`n") )
 		{
 			$line = $line.Trim()
@@ -6531,46 +6528,19 @@ Function GetFilePathsFromLinuxFolder ([string]$folderToSearch, $IpAddress, $SSHP
 					$line = $line.Replace("  "," ")
 				}
 				$currentLogFile = $line.Split(" ")[8]
-				if ( $expectedFiles )
+				if ($LogFilesPaths)
 				{
-					if ( $expectedFiles.Split(",") -contains $currentLogFile )
-					{
-						if ($LogFilesPaths)
-						{
-							$LogFilesPaths += "," + $currentFolder + "/" + $currentLogFile
-							$LogFiles += "," + $currentLogFile
-						}
-						else
-						{
-							$LogFilesPaths = $currentFolder + "/" + $currentLogFile
-							$LogFiles += $currentLogFile
-						}
-						LogMsg "Found Expected File $currentFolder/$currentLogFile"
-					}
-					else
-					{
-						LogMsg "Ignoring File $currentFolder/$currentLogFile"
-					}
+					$LogFilesPaths += "," + $currentFolder + "/" + $currentLogFile
+					$LogFiles += "," + $currentLogFile
 				}
 				else
 				{
-					if ($LogFilesPaths)
-					{
-						$LogFilesPaths += "," + $currentFolder + "/" + $currentLogFile
-						$LogFiles += "," + $currentLogFile
-					}
-					else
-					{
-						$LogFilesPaths = $currentFolder + "/" + $currentLogFile
-						$LogFiles += $currentLogFile
-					}
+					$LogFilesPaths = $currentFolder + "/" + $currentLogFile
+					$LogFiles += $currentLogFile
 				}
+				LogMsg "Found $currentFolder/$currentLogFile"
 			}
 		}
-        if ($LogFilesPaths -eq "")
-        {
-            WaitFor -seconds 10
-        }
 		$retryCount += 1
 	}
 	if ( !$LogFilesPaths )

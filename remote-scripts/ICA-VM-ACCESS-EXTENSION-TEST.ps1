@@ -10,6 +10,7 @@ foreach ($extn in $extnXML.Extensions.Extension)
 	if($extn.Name -imatch "VMAccess")
 	{
 		$MyExtn = $extn
+		LogMsg $MyExtn.Name
 	}
 }
 
@@ -17,575 +18,355 @@ $NewUser = $MyExtn.PrivateConfiguration.username
 $passwd = $MyExtn.PrivateConfiguration.password
 $newpassword = $MyExtn.NewPassword
 $expiration = $MyExtn.PrivateConfiguration.Expiration
+$PrivateConfig = ""
+$PublicConfig = '{}'
 $ExtensionName = $MyExtn.OfficialName
 $Publisher = $MyExtn.Publisher
-$ExtVersion =  $MyExtn.Version
-$ExtVersionForARM = $MyExtn.LatestVersion
+$Version =  $MyExtn.Version
+$VersionForARM = $MyExtn.LatestVersion
+$TaskType = ""
+$LogFilesPaths = ""
+$LogFiles = ""
 
-Function VerfiyAddUserScenario ($vmData, $PublicConfigString, $PrivateConfigString, $metaData)
+if ( $UseAzureResourceManager )
 {
-		$ExitCode = "ABORTED"
-		$errorCount = 0
-		LogMsg "Starting scenario $metaData"
-		$statusFileToVerify = GetStatusFileNameToVerfiy -vmData $vmData -expectedExtensionName $ExtensionName -upcoming
-		$isExtensionEnabled = SetAzureVMExtension -publicConfigString $PublicConfigString -privateConfigString $PrivateConfigString -ExtensionName $ExtensionName -ExtensionVersion $ExtVersion -LatestExtensionVersion $ExtVersionForARM -Publisher $Publisher -vmData $vmData
-		if ($isExtensionEnabled)
+	$ConfirmExtensionScriptBlock = {
+		$ExtensionStatus = Get-AzureResource -OutputObjectFormat New -ResourceGroupName $isDeployed  -ResourceType "Microsoft.Compute/virtualMachines/extensions" -ExpandProperties
+		if ( ($ExtensionStatus.Properties.ProvisioningState -eq "Succeeded") -and ( $ExtensionStatus.Properties.Type -eq $ExtensionName ) )
 		{
-			LogMsg "--------------------- STAGE 1/3 : verification of $statusFile : START ---------------------"
-			$statusFilePath = GetFilePathsFromLinuxFolder -folderToSearch "/var/lib/waagent" -IpAddress $allVMData.PublicIP -SSHPort $allVMData.SSHPort -username $user -password $password -expectedFiles $statusFileToVerify
-
-			if ( $statusFilePath[0] )
-			{
-				$ExtensionStatusInStatusFile = GetExtensionStatusFromStatusFile -statusFilePaths $statusFilePath[0] -ExtensionName $ExtensionName -vmData $vmData
-			}
-			else
-			{
-				LogErr "status file not found under /var/lib/waagent"
-				$ExtensionStatusInStatusFile = $false
-			}
-			LogMsg "--------------------- STAGE 1/3 : verification of $statusFile : END ---------------------"
-			#endregion
-
-			#region check Extension from Azure Side
-			LogMsg "--------------------- STAGE 2/3 : verification from Azure : START ---------------------"
-			$ExtensionStatusFromAzure = VerifyExtensionFromAzure -ExtensionName $ExtensionName -ServiceName $isDeployed -ResourceGroupName $isDeployed
-			LogMsg "--------------------- STAGE 2/3 : verification from Azure : END ---------------------"
-			#endregion
-
-			#region check if extension has done its job properply...
-			LogMsg "--------------------- STAGE 3/3 : verification of Extension Execution : START ---------------------"
-			$folderToSearch = "/var/log/azure"
-			$FoundFiles = GetFilePathsFromLinuxFolder -folderToSearch $folderToSearch -IpAddress $vmData.PublicIP -SSHPort $vmData.SSHPort -username $user -password $password -expectedFiles "extension.log,CommandExecution.log"
-			$LogFilesPaths = $FoundFiles[0]
-			$LogFiles = $FoundFiles[1]
-			$retryCount = 1
-			$maxRetryCount = 10
-			if ($LogFilesPaths)
-			{   
-				do
-				{
-					LogMsg "Attempt : $retryCount/$maxRetryCount : Verifying $metaData scenario in the VM...."
-					#Verify log file contents.
-					DownloadExtensionLogFilesFromVarLog -LogFilesPaths $LogFilesPaths -ExtensionName $ExtensionName -vmData $vmData
-					Rename-Item -Path "$LogDir\extension.log" -NewName "extension.log.$metaData.txt" -Force | Out-Null
-					$extensionLog = [string]( Get-Content "$LogDir\extension.log.$metaData.txt" )
-
-					if ( $extensionLog  -imatch "Succeeded in create the account" )
-					{
-						LogMsg "extesnsion.log reported Succeeded in create the account."
-					}
-					else
-					{
-						LogErr "extesnsion.log NOT reported Succeeded in create the account."
-						$errorCount += 1
-					}
-
-					try
-					{
-						#Verfiy command execution without sudo ...
-						$testOut1 = RunLinuxCmd -username $NewUser -password $passwd -ip $vmData.PublicIP -port $vmData.SSHPort -command "uname -a"
-						LogMsg $testOut1 -LinuxConsoleOuput
-						LogMsg "NEW USER : $NewUser : command execution without sudo, verified."
-
-						#Verify command execution with sudo ...
-						$testOut2 = RunLinuxCmd -username $NewUser -password $passwd -ip $vmData.PublicIP -port $vmData.SSHPort -command "uname -a" -runAsSudo
-						LogMsg $testOut1 -LinuxConsoleOuput
-						LogMsg "NEW USER : $NewUser : command execution with sudo, verified."
-					}
-					catch
-					{
-						$errorCount += 1
-					}
-					if ($errorCount -eq 0)
-					{
-						$extensionExecutionVerified = $true
-						$waitForExtension = $false
-						LogMsg "$metaData scenario verified successfully."
-					}
-					else
-					{
-						$extensionExecutionVerified  = $false
-						LogErr "$metaData scenario failed."
-						$waitForExtension = $true
-						WaitFor -Seconds 30
-					}
-					$retryCount += 1
-				}
-				while (($retryCount -le $maxRetryCount) -and $waitForExtension )
-			}
-			else
-			{
-				LogErr "No Extension logs are available."
-				$extensionExecutionVerified  = $false
-			}
-			LogMsg "--------------------- STAGE 3/3 : verification of Extension Execution : END ---------------------"
-			#endregion
-
-			if ( $ExtensionStatusFromAzure -and $extensionExecutionVerified  -and $ExtensionStatusInStatusFile )
-			{
-				LogMsg "STATUS FILE VERIFICATION : PASS"
-				LogMsg "AZURE STATUS VERIFICATION : PASS"
-				LogMsg "EXTENSION EXECUTION VERIFICATION : PASS"
-				$ExitCode = "PASS"
-			}
-			else
-			{
-				if ( !$ExtensionStatusInStatusFile )
-				{
-					LogErr "STATUS FILE VERIFICATION : FAIL"
-				}
-				if ( !$ExtensionStatusFromAzure )
-				{
-					LogErr "AZURE STATUS VERIFICATION : FAIL"
-				}
-				if ( !$extensionExecutionVerified )
-				{
-					LogErr "EXTENSION EXECUTION VERIFICATION : FAIL"
-				}
-				$ExitCode = "FAIL"
-			}
-			LogMsg "$metaData result : $ExitCode"
+			  LogMsg "$ExtensionName extension status is Succeeded in Properties.ProvisioningState"
+			  $ExtensionVerfiedWithPowershell = $True
 		}
 		else
 		{
-			LogErr "Failed to enable $ExtensionName"
-			$ExitCode = "FAIL"
+			  LogErr "$ExtensionName extension status is Failed in Properties.ProvisioningState"
+			  $ExtensionVerfiedWithPowershell = $False
 		}
-return $ExitCode
+		return $ExtensionVerfiedWithPowershell
+	}
 }
-
-Function VerfiyResetPasswordScenario ($vmData, $PublicConfigString, $PrivateConfigString, $metaData, $PrevTestStatus)
+else
 {
-	$errorCount = 0
-	if ( $PrevTestStatus -eq "PASS" )
-	{
-		$ExitCode = "ABORTED"
-		$errorCount = 0
-		LogMsg "Starting scenario $metaData"
-		$statusFileToVerify = GetStatusFileNameToVerfiy -vmData $vmData -expectedExtensionName $ExtensionName -upcoming
-		$isExtensionEnabled = SetAzureVMExtension -publicConfigString $PublicConfigString -privateConfigString $PrivateConfigString -ExtensionName $ExtensionName -ExtensionVersion $ExtVersion -LatestExtensionVersion $ExtVersionForARM -vmData $vmData -Publisher $Publisher
-		if ($isExtensionEnabled)
+	$ConfirmExtensionScriptBlock = {
+
+	$vmDetails = Get-AzureVM -ServiceName $isDeployed
+		if ( ( $vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Status -eq "Success" ) -and ($vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Name -imatch $ExtensionName ))
 		{
-			LogMsg "--------------------- STAGE 1/3 : verification of $statusFileToVerify : START ---------------------"
-			$statusFilePath = GetFilePathsFromLinuxFolder -folderToSearch "/var/lib/waagent" -IpAddress $allVMData.PublicIP -SSHPort $allVMData.SSHPort -username $user -password $password -expectedFiles $statusFileToVerify
-
-			if ( $statusFilePath[0] )
-			{
-				$ExtensionStatusInStatusFile = GetExtensionStatusFromStatusFile -statusFilePaths $statusFilePath[0] -ExtensionName $ExtensionName -vmData $vmData
-			}
-			else
-			{
-				LogErr "status file not found under /var/lib/waagent"
-				$ExtensionStatusInStatusFile = $false
-			}
-			LogMsg "--------------------- STAGE 1/3 : verification of $statusFileToVerify : END ---------------------"
-			#endregion
-
-			#region check Extension from Azure Side
-			LogMsg "--------------------- STAGE 2/3 : verification from Azure : START ---------------------"
-			$ExtensionStatusFromAzure = VerifyExtensionFromAzure -ExtensionName $ExtensionName -ServiceName $isDeployed -ResourceGroupName $isDeployed
-			LogMsg "--------------------- STAGE 2/3 : verification from Azure : END ---------------------"
-			#endregion
-
-			#region check if extension has done its job properply...
-			LogMsg "--------------------- STAGE 3/3 : verification of Extension Execution : START ---------------------"
-			$folderToSearch = "/var/log/azure"
-			$FoundFiles = GetFilePathsFromLinuxFolder -folderToSearch $folderToSearch -IpAddress $vmData.PublicIP -SSHPort $vmData.SSHPort -username $user -password $password -expectedFiles "extension.log,CommandExecution.log"
-			$LogFilesPaths = $FoundFiles[0]
-			$LogFiles = $FoundFiles[1]
-			$retryCount = 1
-			$maxRetryCount = 10
-			if ($LogFilesPaths)
-			{   
-				do
-				{
-					LogMsg "Attempt : $retryCount/$maxRetryCount : Verifying $metaData scenario in the VM...."
-					#Verify log file contents.
-					DownloadExtensionLogFilesFromVarLog -LogFilesPaths $LogFilesPaths -ExtensionName $ExtensionName -vmData $vmData
-					Rename-Item -Path "$LogDir\extension.log" -NewName "extension.log.$metaData.txt" -Force | Out-Null
-					$extensionLog = [string]( Get-Content "$LogDir\extension.log.$metaData.txt" )
-
-					if (( $extensionLog  -imatch "Will update password" ) -and ( $extensionLog  -imatch "Succeeded in create the account or set the password" ))
-					{
-						LogMsg "extesnsion.log reported Succeeded in reset password."
-					}
-					else
-					{
-						LogErr "extesnsion.log NOT reported Succeeded in reset password."
-						$errorCount += 1
-					}
-
-					try
-					{
-						#Verfiy command execution without sudo ...
-						$testOut1 = RunLinuxCmd -username $NewUser -password $newpassword -ip $vmData.PublicIP -port $vmData.SSHPort -command "uname -a"
-						LogMsg $testOut1 -LinuxConsoleOuput
-						LogMsg "NEW USER RESET PASSWORD : $NewUser : command execution without sudo, verified."
-
-						#Verify command execution with sudo ...
-						$testOut2 = RunLinuxCmd -username $NewUser -password $newpassword -ip $vmData.PublicIP -port $vmData.SSHPort -command "uname -a" -runAsSudo
-						LogMsg $testOut1 -LinuxConsoleOuput
-						LogMsg "NEW USER RESET PASSWORD : $NewUser : command execution with sudo, verified."
-					}
-					catch
-					{
-						$errorCount += 1
-					}
-					if ($errorCount -eq 0)
-					{
-						$extensionExecutionVerified = $true
-						$waitForExtension = $false
-						LogMsg "$metaData scenario verified successfully."
-					}
-					else
-					{
-						$extensionExecutionVerified  = $false
-						LogErr "$metaData scenario failed."
-						$waitForExtension = $true
-						WaitFor -Seconds 30
-					}
-					$retryCount += 1
-				}
-				while (($retryCount -le $maxRetryCount) -and $waitForExtension )
-			}
-			else
-			{
-				LogErr "No Extension logs are available."
-				$extensionExecutionVerified  = $false
-			}
-			LogMsg "--------------------- STAGE 3/3 : verification of Extension Execution : END ---------------------"
-			#endregion
-
-			if ( $ExtensionStatusFromAzure -and $extensionExecutionVerified  -and $ExtensionStatusInStatusFile )
-			{
-				LogMsg "STATUS FILE VERIFICATION : PASS"
-				LogMsg "AZURE STATUS VERIFICATION : PASS"
-				LogMsg "EXTENSION EXECUTION VERIFICATION : PASS"
-				$ExitCode = "PASS"
-			}
-			else
-			{
-				if ( !$ExtensionStatusInStatusFile )
-				{
-					LogErr "STATUS FILE VERIFICATION : FAIL"
-				}
-				if ( !$ExtensionStatusFromAzure )
-				{
-					LogErr "AZURE STATUS VERIFICATION : FAIL"
-				}
-				if ( !$extensionExecutionVerified )
-				{
-					LogErr "EXTENSION EXECUTION VERIFICATION : FAIL"
-				}
-				$ExitCode = "FAIL"
-			}
-			LogMsg "$metaData result : $ExitCode"
+			  $ExtensionVerfiedWithPowershell = $True
+			  LogMsg "$ExtensionName extension status is SUCCESS in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
 		}
 		else
 		{
-			LogErr "Failed to enable $ExtensionName"
-			$ExitCode = "FAIL"
+			  $ExtensionVerfiedWithPowershell = $False
+			  LogErr "$ExtensionName extension status is FAILED in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
 		}
-
+		return $ExtensionVerfiedWithPowershell
 	}
-	elseif ( $PrevTestStatus -imatch "FAIL" )
-	{
-		$ExitCode = "ABORTED"
-		LogMsg "Skipping TEST : $metaData due to previous failed test"
-	}
-	elseif ( $PrevTestStatus -imatch "ABORTED" )
-	{
-		$ExitCode = "ABORTED"
-		LogMsg "Skipping TEST : $metaData due to previous Aborted test"
-	}
-return $ExitCode
 }
 
-Function VerfiyDeleteUserScenario ($vmData, $PublicConfigString, $PrivateConfigString, $metaData, $PrevTestStatus)
+Function VMAccessExtensionLog($user,$password)
 {
-	$errorCount = 0
-	if ( $PrevTestStatus -eq "PASS" )
+	$varLogFolder = "/var/log/"
+	$lsOut = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "ls -lR $varLogFolder"  -runAsSudo
+	$folderToSearch = "/var/log/azure"
+	foreach ($line in $lsOut.Split("`n") )
 	{
-		$ExitCode = "ABORTED"
-		$errorCount = 0
-		LogMsg "Starting scenario $metaData"
-		$statusFileToVerify = GetStatusFileNameToVerfiy -vmData $vmData -expectedExtensionName $ExtensionName -upcoming
-		LogMsg "Getting contents of /etc/shadow"
-		$out = RunLinuxCmd -username $user -password $password -ip $vmData.PublicIP -port $vmData.SSHPort -command "cat /etc/shadow > /home/$user/etcShadowFileBeforeDeleteUser.txt" -runAsSudo
-		RemoteCopy -downloadFrom $vmData.PublicIP -port $vmData.SSHPort -downloadTo $LogDir -files "/home/$user/etcShadowFileBeforeDeleteUser.txt" -username $user -password $password -download
-		$etcShadowFileBeforeDeleteUser = [string](Get-Content "$LogDir\etcShadowFileBeforeDeleteUser.txt")
-
-		$isExtensionEnabled = SetAzureVMExtension -publicConfigString $PublicConfigString -privateConfigString $PrivateConfigString -ExtensionName $ExtensionName -ExtensionVersion $ExtVersion -LatestExtensionVersion $ExtVersionForARM -vmData $vmData -Publisher $Publisher
-		if ($isExtensionEnabled)
+		if ($line -imatch $varLogFolder)
 		{
-			LogMsg "--------------------- STAGE 1/3 : verification of $statusFileToVerify : START ---------------------"
-			$statusFilePath = GetFilePathsFromLinuxFolder -folderToSearch "/var/lib/waagent" -IpAddress $allVMData.PublicIP -SSHPort $allVMData.SSHPort -username $user -password $password -expectedFiles $statusFileToVerify
-
-			if ( $statusFilePath[0] )
-			{
-				$ExtensionStatusInStatusFile = GetExtensionStatusFromStatusFile -statusFilePaths $statusFilePath[0] -ExtensionName $ExtensionName -vmData $vmData
-			}
-			else
-			{
-				LogErr "status file not found under /var/lib/waagent"
-				$ExtensionStatusInStatusFile = $false
-			}
-			LogMsg "--------------------- STAGE 1/3 : verification of $statusFileToVerify : END ---------------------"
-			#endregion
-
-			#region check Extension from Azure Side
-			LogMsg "--------------------- STAGE 2/3 : verification from Azure : START ---------------------"
-			$ExtensionStatusFromAzure = VerifyExtensionFromAzure -ExtensionName $ExtensionName -ServiceName $isDeployed -ResourceGroupName $isDeployed
-			LogMsg "--------------------- STAGE 2/3 : verification from Azure : END ---------------------"
-			#endregion
-
-			#region check if extension has done its job properply...
-			LogMsg "--------------------- STAGE 3/3 : verification of Extension Execution : START ---------------------"
-			$folderToSearch = "/var/log/azure"
-			$FoundFiles = GetFilePathsFromLinuxFolder -folderToSearch $folderToSearch -IpAddress $vmData.PublicIP -SSHPort $vmData.SSHPort -username $user -password $password -expectedFiles "extension.log,CommandExecution.log"
-			$LogFilesPaths = $FoundFiles[0]
-			$LogFiles = $FoundFiles[1]
-			$retryCount = 1
-			$maxRetryCount = 10
+			$currentFolder = $line.Replace(":","")
+		}
+		if ( ( ($line.Split(" ")[0][0])  -eq "-" ) -and ($currentFolder -imatch $folderToSearch) )
+		{
+			$currentLogFile = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[8]
 			if ($LogFilesPaths)
-			{   
-				do
-				{
-					LogMsg "Attempt : $retryCount/$maxRetryCount : Verifying $metaData scenario in the VM...."
-
-					#Verify log file contents.
-
-					DownloadExtensionLogFilesFromVarLog -LogFilesPaths $LogFilesPaths -ExtensionName $ExtensionName -vmData $vmData
-					Rename-Item -Path "$LogDir\extension.log" -NewName "extension.log.$metaData.txt" -Force | Out-Null
-					$extensionLog = [string]( Get-Content "$LogDir\extension.log.$metaData.txt" )
-
-					LogMsg "Getting contents of /etc/shadow"
-					$out = RunLinuxCmd -username $user -password $password -ip $vmData.PublicIP -port $vmData.SSHPort -command "cat /etc/shadow > /home/$user/etcShadowFileAfterDeleteUser.txt" -runAsSudo
-					RemoteCopy -downloadFrom $vmData.PublicIP -port $vmData.SSHPort -downloadTo $LogDir -files "/home/$user/etcShadowFileAfterDeleteUser.txt" -username $user -password $password -download
-					$etcShadowFileAfterDeleteUser = [string](Get-Content "$LogDir\etcShadowFileAfterDeleteUser.txt")
-					if ( $etcShadowFileAfterDeleteUser -imatch "$NewUser`:")
-					{
-						LogErr "NEW USER : $NewUser NOT deleted from /etc/shadow file."
-						$errorCount += 1
-					}
-					else
-					{
-						LogMsg "NEW USER : $NewUser has been deleted from /etc/shadow file."
-					}
-					if ($errorCount -eq 0)
-					{
-						$extensionExecutionVerified = $true
-						$waitForExtension = $false
-						LogMsg "$metaData scenario verified successfully."
-					}
-					else
-					{
-						$extensionExecutionVerified  = $false
-						LogErr "$metaData scenario failed."
-						$waitForExtension = $true
-						WaitFor -Seconds 30
-					}
-					$retryCount += 1
-				}
-				while (($retryCount -le $maxRetryCount) -and $waitForExtension )
+			{
+				$LogFilesPaths += "," + $currentFolder + "/" + $currentLogFile
+				$LogFiles += "," + $currentLogFile
 			}
 			else
 			{
-				LogErr "No Extension logs are available."
-				$extensionExecutionVerified  = $false
+				$LogFilesPaths = $currentFolder + "/" + $currentLogFile
+				$LogFiles += $currentLogFile
 			}
-			LogMsg "--------------------- STAGE 3/3 : verification of Extension Execution : END ---------------------"
-			#endregion
-
-			if ( $ExtensionStatusFromAzure -and $extensionExecutionVerified  -and $ExtensionStatusInStatusFile )
-			{
-				LogMsg "STATUS FILE VERIFICATION : PASS"
-				LogMsg "AZURE STATUS VERIFICATION : PASS"
-				LogMsg "EXTENSION EXECUTION VERIFICATION : PASS"
-				$ExitCode = "PASS"
-			}
-			else
-			{
-				if ( !$ExtensionStatusInStatusFile )
-				{
-					LogErr "STATUS FILE VERIFICATION : FAIL"
-				}
-				if ( !$ExtensionStatusFromAzure )
-				{
-					LogErr "AZURE STATUS VERIFICATION : FAIL"
-				}
-				if ( !$extensionExecutionVerified )
-				{
-					LogErr "EXTENSION EXECUTION VERIFICATION : FAIL"
-				}
-				$ExitCode = "FAIL"
-			}
-			LogMsg "$metaData result : $ExitCode"
 		}
-		else
+	}
+	return $LogFilesPaths,$LogFiles
+}
+Function VMAccessExtensionExecutionStatus($user,$password,$ExtensionType,$LogFilesPaths)
+{
+	if ($LogFilesPaths)
+	{
+		$ExtLog = $LogFilesPaths.split(",")[1]	   
+		$extensionOutput = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat $ExtLog" -runAsSudo
+		if ( $extensionOutput -imatch "Succeeded in $ExtensionType" )
 		{
-			LogErr "Failed to enable $ExtensionName"
-			$ExitCode = "FAIL"
+			$ExtExecutionStatus = $True
 		}
-
+		else{
+			$ExtExecutionStatus = $False
+		}
 	}
-	elseif ( $PrevTestStatus -imatch "FAIL" )
+	else
 	{
-		$ExitCode = "ABORTED"
-		LogMsg "Skipping TEST : $metaData due to previous failed test"
+		LogErr "No Extension logs are available."
+		$ExtExecutionStatus = $False
 	}
-	elseif ( $PrevTestStatus -imatch "ABORTED" )
-	{
-		$ExitCode = "ABORTED"
-		LogMsg "Skipping TEST : $metaData due to previous Aborted test"
-	}
-return $ExitCode
+	return $ExtExecutionStatus
 }
 
-Function VerfiyResetSSHConfigScenario ($vmData, $PublicConfigString, $PrivateConfigString, $metaData)
+Function VMAccessExtTest($TaskType)
 {
-		$errorCount = 0
+	if($TaskType -imatch "AddUser")
+	{
+		$ExtType = "create the account or set the password"
+		[hashtable]$Param=@{};
+		$Param['username'] = $NewUser;
+		$Param['password'] = $passwd;
+		$Param['expiration'] = $expiration;
+		$PrivateConfig = ConvertTo-Json $Param;
+		$statusfile = "$LogDir\after-adduser-shadow.txt"
+		if ( $UseAzureResourceManager )
+		{
+			$RGName = $AllVMData.ResourceGroupName
+			$VMName = $AllVMData.RoleName
+			$Location = $vm.Location
+			write-host "Set-AzureVMExtension -ResourceGroupName $RGName -VMName $VMName -Location $Location -Name $ExtensionName -Publisher $Publisher -ExtensionType $ExtensionName -TypeHandlerVersion $VersionForARM -Settingstring $PublicConfig -ProtectedSettingString $PrivateConfig -Verbose"
+			$out = Set-AzureVMExtension -ResourceGroupName $RGName -VMName $VMName -Location $Location -Name $ExtensionName -Publisher $Publisher -ExtensionType $ExtensionName -TypeHandlerVersion $VersionForARM -Settingstring $PublicConfig -ProtectedSettingString $PrivateConfig -Verbose
+			WaitFor -seconds 120
+		}
+		else{
+			write-host "Set-AzureVMExtension -ExtensionName $ExtensionName -VM $vm -Publisher $Publisher -Version $Version -PrivateConfiguration $PrivateConfig | Update-AzureVM -Verbose"
+			$out = Set-AzureVMExtension -ExtensionName $ExtensionName -VM $vm -Publisher $Publisher -Version $Version -PrivateConfiguration $PrivateConfig | Update-AzureVM -Verbose
+			WaitFor -seconds 120
+		}
+		$LogPaths = VMAccessExtensionLog -user $user -password $password
+		$LogFilesPaths = $LogPaths.split(" ")[0]
+		$LogFiles = $LogPaths.split(" ")[1]
+		$ExtExecutionLogStatus = VMAccessExtensionExecutionStatus -user $user -password $password -ExtensionType $ExtType -LogFilesPaths $LogFilesPaths
+		$ExtensionStatus = RetryOperation -operation $ConfirmExtensionScriptBlock -description "Confirming $ExtensionName extension from Azure side." -expectResult $true -maxRetryCount 10 -retryInterval 10
+		LogMsg "Status of $TaskType extension ExtExecutionStatus: $ExtensionStatus and ExtExecutionLogStatus : $ExtExecutionLogStatus"
+		if(($ExtensionStatus -eq $True) -and ($ExtExecutionLogStatus -eq $True))  		
+		{
+			LogMsg "$TaskType Extension executed successfully.."
+			$output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "ps aux | grep waagent | grep -v grep" -runAsSudo  
+			if($output -match 'python3')  
+			{  
+				$VMStatus = RunLinuxCmd -username $NewUser -password $passwd -ip $hs1VIP -port $hs1vm1sshport -command "python3 /usr/sbin/waagent --version"  
+			}  
+			else  
+			{  
+ 				$VMStatus = RunLinuxCmd -username $NewUser -password $passwd -ip $hs1VIP -port $hs1vm1sshport -command "/usr/sbin/waagent --version" 
+ 			}
+ 			$VMStatus1 = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat /etc/shadow" -runAsSudo
+			if(($VMStatus -imatch "WALinuxAgent") -and ($VMStatus1 -imatch $NewUser))
+			{
+				$ExtStatus = $True
+				LogMsg "Added $NewUser logged in Successfully: $VMStatus"
+			}
+			else{
+				$ExtStatus = $False
+				LogErr "Added $NewUser login Failed: $VMStatus"
+			}
+		}
+		else{
+			LogErr "$TaskType Extension execution failed : $ExtensionStatus : $ExtExecutionLogStatus"
+			$ExtStatus = $False
+		}
+		$VMStatus1 > $statusfile
+		$VMStatus >> $statusfile
+	}
+	elseif($TaskType -imatch "ResetPassword")
+	{
+		$ExtType = "create the account or set the password"	
+		[hashtable]$Param=@{};
+		$Param['username'] = $NewUser;
+		$Param['password'] = $newpassword;
+		$Param['expiration'] = $expiration;
+		$PrivateConfig = ConvertTo-Json $Param;
+		$statusfile = "$LogDir\ResetPassword.txt"
+		$UserStatusBeforeExt = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat /etc/shadow" -runAsSudo
+		if($UserStatusBeforeExt -imatch $NewUser)
+		{
+			if ( $UseAzureResourceManager )
+			{
+				$RGName = $AllVMData.ResourceGroupName
+				$VMName = $AllVMData.RoleName
+				$Location = $vm.Location
+				write-host "Set-AzureVMExtension -ResourceGroupName $RGName -VMName $VMName -Location $Location -Name $ExtensionName -Publisher $Publisher -ExtensionType $ExtensionName -TypeHandlerVersion $VersionForARM -Settingstring $PublicConfig -ProtectedSettingString $PrivateConfig -Verbose"
+				$out = Set-AzureVMExtension -ResourceGroupName $RGName -VMName $VMName -Location $Location -Name $ExtensionName -Publisher $Publisher -ExtensionType $ExtensionName -TypeHandlerVersion $VersionForARM -Settingstring $PublicConfig -ProtectedSettingString $PrivateConfig -Verbose
+				WaitFor -seconds 120
+			}
+			else{
+				write-host "Set-AzureVMExtension -ExtensionName $ExtensionName -VM $vm -Publisher $Publisher -Version $Version -PrivateConfiguration $PrivateConfig | Update-AzureVM -Verbose"
+				$out = Set-AzureVMExtension -ExtensionName $ExtensionName -VM $vm -Publisher $Publisher -Version $Version -PrivateConfiguration $PrivateConfig | Update-AzureVM -Verbose
+				WaitFor -seconds 120
+			}
+			$LogPaths = VMAccessExtensionLog -user $user -password $password
+			$LogFilesPaths = $LogPaths.split(" ")[0]
+			$LogFiles = $LogPaths.split(" ")[1]
+			$ExtExecutionLogStatus = VMAccessExtensionExecutionStatus -user $user -password $password -ExtensionType $ExtType -LogFilesPaths $LogFilesPaths
+			$ExtensionStatus = RetryOperation -operation $ConfirmExtensionScriptBlock -description "Confirming $ExtensionName extension from Azure side." -expectResult $true -maxRetryCount 10 -retryInterval 10
+			LogMsg "Status of $TaskType extension ExtExecutionStatus: $ExtensionStatus and ExtExecutionLogStatus : $ExtExecutionLogStatus"
+			if(($ExtensionStatus -imatch $True) -and ($ExtExecutionLogStatus -eq $True))
+			{
+				LogMsg "$TaskType Extension executed successfully.."
+				$output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "ps aux | grep waagent | grep -v grep" -runAsSudo  
+				if($output -match 'python3')  
+				{
+					$VMStatus = RunLinuxCmd -username $NewUser -password $newpassword -ip $hs1VIP -port $hs1vm1sshport -command "python3 /usr/sbin/waagent --version"  
+				}
+				else  
+				{
+					$VMStatus = RunLinuxCmd -username $NewUser -password $newpassword -ip $hs1VIP -port $hs1vm1sshport -command "/usr/sbin/waagent --version"  
+				}
+  				$VMStatus2 = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat /etc/shadow" -runAsSudo
+				if(($VMStatus -imatch "WALinuxAgent") -and ($VMStatus2 -imatch $NewUser))
+				{
+					$ExtStatus = $True
+					LogMsg "Added $NewUser logged in Successfully with New Password: $VMStatus"
+				}
+				else{
+					$ExtStatus = $False
+					LogErr "Added $NewUser login Failed with New Password: $VMStatus"
+				}
+			}
+			else{
+				LogErr "$TaskType Extension execution failed : $ExtensionStatus : $ExtExecutionLogStatus"
+				$ExtStatus = $False
+			}
+			$VMStatus2 > $statusfile
+			$VMStatus >> $statusfile
+		}
+		else{
+			LogErr "$TaskType Extension execution Aborted.. due to $NewUser is not available"
+			$ExtStatus = $False
+		}
+	}
+	elseif($TaskType -imatch "DeleteUser")
+	{
+		$PrivateConfig = '{"remove_user": "' + $NewUser + '"}'
+		$statusfile = "$LogDir\after-deleteuser-shadow.txt"
+		$UserStatusBeforeExt = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat /etc/shadow" -runAsSudo
+		if($UserStatusBeforeExt -imatch $NewUser)
+		{
+			if ( $UseAzureResourceManager )
+			{
+				$RGName = $AllVMData.ResourceGroupName
+				$VMName = $AllVMData.RoleName
+				$Location = $vm.Location
+				write-host "Set-AzureVMExtension -ResourceGroupName $RGName -VMName $VMName -Location $Location -Name $ExtensionName -Publisher $Publisher -ExtensionType $ExtensionName -TypeHandlerVersion $VersionForARM -Settingstring $PublicConfig -ProtectedSettingString $PrivateConfig -Verbose"
+				$out = Set-AzureVMExtension -ResourceGroupName $RGName -VMName $VMName -Location $Location -Name $ExtensionName -Publisher $Publisher -ExtensionType $ExtensionName -TypeHandlerVersion $VersionForARM -Settingstring $PublicConfig -ProtectedSettingString $PrivateConfig -Verbose
+				WaitFor -seconds 120
+			}
+			else{
+				write-host "Set-AzureVMExtension -ExtensionName $ExtensionName -VM $vm -Publisher $Publisher -Version $Version -PrivateConfiguration $PrivateConfig | Update-AzureVM -Verbose"
+				$out = Set-AzureVMExtension -ExtensionName $ExtensionName -VM $vm -Publisher $Publisher -Version $Version -PrivateConfiguration $PrivateConfig | Update-AzureVM -Verbose
+				WaitFor -seconds 120
+			}			
+			$UserStatusAfterExt = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat /etc/shadow" -runAsSudo
+			$ExtensionStatus = RetryOperation -operation $ConfirmExtensionScriptBlock -description "Confirming $ExtensionName extension from Azure side." -expectResult $true -maxRetryCount 10 -retryInterval 10
+			LogMsg "Status of $TaskType extension ExtExecutionStatus: $ExtensionStatus"
+			if($ExtensionStatus -imatch $True)
+			{
+				LogMsg "$TaskType Extension executed successfully.."
+				if($UserStatusAfterExt -imatch $NewUser)
+				{
+					$ExtStatus = $False
+					LogErr "Deleting added $NewUser is Failed.."
+				}
+				else{
+					$ExtStatus = $True
+					LogMsg "Added $NewUser is deleted successfully.."
+				}
+			}
+			else{
+				LogErr "$TaskType Extension execution failed : $ExtensionStatus : $ExtExecutionLogStatus"
+				$ExtStatus = $False
+			}
+			$UserStatusAfterExt > $statusfile
+		}
+		else{
+			LogErr "$TaskType Extension execution Aborted.. due to $NewUser is not available"
+			$ExtStatus = $False
+		}
+	}
+	elseif($TaskType -imatch "ResetSSHConfig")
+	{
+		$ExtType = "reset sshd_config"
+		$NewSshPort = "99"
+		$password = $xmlConfig.config.Azure.Deployment.Data.Password
+		$user = $xmlConfig.config.Azure.Deployment.Data.UserName
+		$PrivateConfig = '{"reset_ssh": "True"}'
+		$SSHstatus1 = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cp /etc/ssh/sshd_config /home/$user/logs/sshd_config.bak" -runAsSudo
+		$sshdconfig = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat /etc/ssh/sshd_config | grep '#Port 22'" -runAsSudo -ignoreLinuxExitCode
+		if($sshdconfig -imatch "#Port 22")
+		{
+			$SSHstatus2 = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "sed --in-place -e 's/#Port 22\s*/#Port 99/' /etc/ssh/sshd_config" -runAsSudo -ignoreLinuxExitCode
+		}
+		else{
+			$SSHstatus3 = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "sed --in-place -e 's/Port 22\s*/Port 99/' /etc/ssh/sshd_config" -runAsSudo -ignoreLinuxExitCode
+		}
+		$SSHstatus4 = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cp /etc/ssh/sshd_config /home/$user/logs/sshd_config_mod" -runAsSudo
+		$VMStatusBeforeExt = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat /etc/ssh/sshd_config | grep 'Port 99'" -runAsSudo -ignoreLinuxExitCode
+		if ( $UseAzureResourceManager )
+		{
+			$RGName = $AllVMData.ResourceGroupName
+			$VMName = $AllVMData.RoleName
+			$Location = $vm.Location
+			write-host "Set-AzureVMExtension -ResourceGroupName $RGName -VMName $VMName -Location $Location -Name $ExtensionName -Publisher $Publisher -ExtensionType $ExtensionName -TypeHandlerVersion $VersionForARM -Settingstring $PublicConfig -ProtectedSettingString $PrivateConfig -Verbose"
+			$out = Set-AzureVMExtension -ResourceGroupName $RGName -VMName $VMName -Location $Location -Name $ExtensionName -Publisher $Publisher -ExtensionType $ExtensionName -TypeHandlerVersion $VersionForARM -Settingstring $PublicConfig -ProtectedSettingString $PrivateConfig -Verbose
+			WaitFor -seconds 120
+		}
+		else{
+			write-host "Set-AzureVMExtension -ExtensionName $ExtensionName -VM $vm -Publisher $Publisher -Version $Version -PrivateConfiguration $PrivateConfig | Update-AzureVM -Verbose"
+			$out = Set-AzureVMExtension -ExtensionName $ExtensionName -VM $vm -Publisher $Publisher -Version $Version -PrivateConfiguration $PrivateConfig | Update-AzureVM -Verbose
+			WaitFor -seconds 120
+		}	
 		
-		$ExitCode = "ABORTED"
-		LogMsg "Starting scenario $metaData"
-		$statusFileToVerify = GetStatusFileNameToVerfiy -vmData $vmData -expectedExtensionName $ExtensionName -upcoming
-		$sshdConfigFilePath = "/etc/ssh/sshd_config"
-		LogMsg "Taking backup of $sshdConfigFilePath"
-		$out = RunLinuxCmd -username $user -password $password -ip $vmData.PublicIP -port $vmData.SSHPort -command "cp -a $sshdConfigFilePath /home/$user/sshd_config.bak" -runAsSudo
-		#
-		# Edit the "/etc/ssh/sshd_config" but DONT RES
-		#
-		$out = RunLinuxCmd -username $user -password $password -ip $vmData.PublicIP -port $vmData.SSHPort -command "sed --in-place -e 's`/Port 22\s`*`/Port 99/g' $sshdConfigFilePath" -runAsSudo 
-		LogMsg "Replaced Port 22 > Port 99 in $sshdConfigFilePath"
-		LogMsg "Resetting $sshdConfigFilePath using $ExtensionName..."
-
-		$isExtensionEnabled = SetAzureVMExtension -publicConfigString $PublicConfigString -privateConfigString $PrivateConfigString -ExtensionName $ExtensionName -ExtensionVersion $ExtVersion -LatestExtensionVersion $ExtVersionForARM -vmData $vmData -Publisher $Publisher
-
-		if ($isExtensionEnabled)
+		$LogPaths = VMAccessExtensionLog -user $user -password $password
+		$LogFilesPaths = $LogPaths.split(" ")[0]
+		$LogFiles = $LogPaths.split(" ")[1]
+		$ExtExecutionLogStatus = VMAccessExtensionExecutionStatus -user $user -password $password -ExtensionType $ExtType -LogFilesPaths $LogFilesPaths
+		$ExtensionStatus = RetryOperation -operation $ConfirmExtensionScriptBlock -description "Confirming $ExtensionName extension from Azure side." -expectResult $true -maxRetryCount 10 -retryInterval 10
+		LogMsg "Status of $TaskType extension ExtExecutionStatus: $ExtensionStatus and ExtExecutionLogStatus : $ExtExecutionLogStatus"
+		if(($ExtensionStatus -imatch $True) -and ($ExtExecutionLogStatus -eq $True))
 		{
-			LogMsg "--------------------- STAGE 1/3 : verification of $statusFileToVerify : START ---------------------"
-			$statusFilePath = GetFilePathsFromLinuxFolder -folderToSearch "/var/lib/waagent" -IpAddress $allVMData.PublicIP -SSHPort $allVMData.SSHPort -username $user -password $password -expectedFiles $statusFileToVerify
-
-			if ( $statusFilePath[0] )
+			LogMsg "$TaskType Extension executed successfully.."
+			$VMStatusAfterExt = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat /etc/ssh/sshd_config | grep 'Port 22'" -runAsSudo -ignoreLinuxExitCode
+			if(($VMStatusAfterExt -imatch "Port 22") -and ($VMStatusBeforeExt -imatch "Port 99"))
 			{
-				$ExtensionStatusInStatusFile = GetExtensionStatusFromStatusFile -statusFilePaths $statusFilePath[0] -ExtensionName $ExtensionName -vmData $vmData
+				$ExtStatus = $True
 			}
-			else
-			{
-				LogErr "status file not found under /var/lib/waagent"
-				$ExtensionStatusInStatusFile = $false
-			}
-			LogMsg "--------------------- STAGE 1/3 : verification of $statusFileToVerify : END ---------------------"
-			#endregion
-
-			#region check Extension from Azure Side
-			LogMsg "--------------------- STAGE 2/3 : verification from Azure : START ---------------------"
-			$ExtensionStatusFromAzure = VerifyExtensionFromAzure -ExtensionName $ExtensionName -ServiceName $isDeployed -ResourceGroupName $isDeployed
-			LogMsg "--------------------- STAGE 2/3 : verification from Azure : END ---------------------"
-			#endregion
-
-			#region check if extension has done its job properply...
-			LogMsg "--------------------- STAGE 3/3 : verification of Extension Execution : START ---------------------"
-			$folderToSearch = "/var/log/azure"
-			$FoundFiles = GetFilePathsFromLinuxFolder -folderToSearch $folderToSearch -IpAddress $vmData.PublicIP -SSHPort $vmData.SSHPort -username $user -password $password -expectedFiles "extension.log,CommandExecution.log"
-			$LogFilesPaths = $FoundFiles[0]
-			$LogFiles = $FoundFiles[1]
-			$retryCount = 1
-			$maxRetryCount = 10
-			if ($LogFilesPaths)
-			{   
-				do
-				{
-					LogMsg "Attempt : $retryCount/$maxRetryCount : Verifying $metaData scenario in the VM...."
-					#Verify log file contents.
-					LogMsg "Getting contents of $sshdConfigFilePath"
-					$out = RunLinuxCmd -username $user -password $password -ip $vmData.PublicIP -port $vmData.SSHPort -command "cat $sshdConfigFilePath > /home/$user/sshd_config.txt" -runAsSudo
-					RemoteCopy -downloadFrom $vmData.PublicIP -port $vmData.SSHPort -downloadTo $LogDir -files "/home/$user/sshd_config.txt" -username $user -password $password -download
-					$sshd_configFile = [string](Get-Content "$LogDir\sshd_config.txt")
-
-					#Verify log file contents.
-					DownloadExtensionLogFilesFromVarLog -LogFilesPaths $LogFilesPaths -ExtensionName $ExtensionName -vmData $vmData
-					Remove-Item -Path "$LogDir\extension.log.$metaData.txt" -Force -ErrorAction SilentlyContinue
-					Rename-Item -Path "$LogDir\extension.log" -NewName "extension.log.$metaData.txt" -Force | Out-Null
-					$extensionLog = [string]( Get-Content "$LogDir\extension.log.$metaData.txt" )
-					if  ( $extensionLog -imatch "Succeeded in reset sshd_config" )
-					{
-						LogMsg "extesnsion.log reported Succeeded in reset sshd_config."
-					}
-					else
-					{
-						LogErr "extesnsion.log NOT reported Succeeded in reset sshd_config."
-						$errorCount += 1
-					}
-
-					if ( $sshd_configFile -imatch "Port 22")
-					{
-						LogMsg "$sshdConfigFilePath resetted successfully."
-					}
-					else
-					{
-						LogErr "$sshdConfigFilePath NOT resetted successfully. Reverting changes manually..."
-						$errorCount += 1
-						$out = RunLinuxCmd -username $user -password $password -ip $vmData.PublicIP -port $vmData.SSHPort -command "cp -a /home/$user/sshd_config.bak $sshdConfigFilePath" -runAsSudo
-					}
-					if ($errorCount -eq 0)
-					{
-						$extensionExecutionVerified = $true
-						$waitForExtension = $false
-						LogMsg "$metaData scenario verified successfully."
-					}
-					else
-					{
-						$extensionExecutionVerified  = $false
-						LogErr "$metaData scenario failed."
-						$waitForExtension = $true
-						WaitFor -Seconds 30
-					}
-					$retryCount += 1
+			else{
+				$ExtStatus = $False
+				LogMsg "sshd_config reset failed, ssh port reset back to 22 manually, not with extension"
+				$SSHstatus = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $NewSshPort -command "cp /home/$user/logs/sshd_config.bak  /etc/ssh/sshd_config" -runAsSudo -ignoreLinuxExitCode
+				if($Distro -imatch "UBUNTU"){
+					$SSHstatus = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $NewSshPort -command "service ssh restart" -runAsSudo -ignoreLinuxExitCode
 				}
-				while (($retryCount -le $maxRetryCount) -and $waitForExtension )
-			}
-			else
-			{
-				LogErr "No Extension logs are available."
-				$extensionExecutionVerified  = $false
-			}
-			LogMsg "--------------------- STAGE 3/3 : verification of Extension Execution : END ---------------------"
-			#endregion
-
-			if ( $ExtensionStatusFromAzure -and $extensionExecutionVerified  -and $ExtensionStatusInStatusFile )
-			{
-				LogMsg "STATUS FILE VERIFICATION : PASS"
-				LogMsg "AZURE STATUS VERIFICATION : PASS"
-				LogMsg "EXTENSION EXECUTION VERIFICATION : PASS"
-				$ExitCode = "PASS"
-			}
-			else
-			{
-				if ( !$ExtensionStatusInStatusFile )
-				{
-					LogErr "STATUS FILE VERIFICATION : FAIL"
+				else{
+					$SSHstatus = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $NewSshPort -command "service sshd restart" -runAsSudo -ignoreLinuxExitCode
 				}
-				if ( !$ExtensionStatusFromAzure )
-				{
-					LogErr "AZURE STATUS VERIFICATION : FAIL"
-				}
-				if ( !$extensionExecutionVerified )
-				{
-					LogErr "EXTENSION EXECUTION VERIFICATION : FAIL"
-				}
-				$ExitCode = "FAIL"
 			}
-			LogMsg "$metaData result : $ExitCode"
 		}
-		else
-		{
-			LogErr "Failed to enable $ExtensionName"
-			$ExitCode = "FAIL"
+		else{
+			LogErr "$TaskType Extension execution failed : $ExtensionStatus : $ExtExecutionLogStatus"
+			$ExtStatus = $False
+			$SSHstatus = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $NewSshPort -command "cp -f /home/$user/logs/sshd_config.bak  /etc/ssh/sshd_config" -runAsSudo -ignoreLinuxExitCode
+			if($Distro -imatch "UBUNTU"){
+				$SSHstatus = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $NewSshPort -command "service ssh restart" -runAsSudo -ignoreLinuxExitCode
+			}
+			else{
+				$SSHstatus = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $NewSshPort -command "service sshd restart" -runAsSudo -ignoreLinuxExitCode
+			}
 		}
-return $ExitCode
+	}
+	else{
+		LogMsg "provide the proper extension task $TaskType"
+		break
+	}
+	return $ExtStatus
 }
-
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
@@ -596,91 +377,82 @@ if ($isDeployed)
 		$hs1vm1sshport = $AllVMData.SSHPort
 		$hs1ServiceUrl = $AllVMData.URL
 		$hs1vm1Dip = $AllVMData.InternalIP
-		$vmData = $AllVMData
-
-		foreach ( $TaskType in $currentTestData.SubtestValues.split(","))
+		
+		if ( $UseAzureResourceManager )
+		{
+			$vm = Get-AzureResourceGroup -Name $AllVMData.ResourceGroupName
+		}
+		else{
+			$vm = Get-AzureVM -ServiceName $AllVMData.ServiceName -Name $AllVMData.RoleName
+		}
+		$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "mkdir /home/$user/logs" -runAsSudo
+		$SSHstatus1 = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cp /etc/ssh/sshd_config /home/$user/logs/sshd_config.bakup" -runAsSudo
+		foreach ( $TaskType in $MyExtn.ExtensionTask.split(","))
 		{
 			try
-			{
+			{			
 				LogMsg "$TaskType Test Started.."
-				switch ($TaskType)
+				$VMAccessExtStatus = VMAccessExtTest -TaskType $TaskType #-vm $vm				
+				if($VMAccessExtStatus -eq $True)
 				{
-					"AddUser" 
-					{
-						$metaData = $TaskType
-						[hashtable]$Param=@{};
-						$Param['username'] = $NewUser;
-						$Param['password'] = $passwd;
-						$Param['expiration'] = $expiration;
-						$PrivateConfig = ConvertTo-Json $Param;
-						$AddUserResult = VerfiyAddUserScenario -vmData $vmData -PrivateConfigString $PrivateConfig -metaData $metaData
-						LogMsg "-=-=-=-=-=-=-=-=-=-$metaData : END -=-=-=-=-=-=-=-=-=-"
-						$testResult = $AddUserResult
-					}
-
-					"ResetPassword" 
-					{
-						$metaData = $TaskType
-						[hashtable]$Param=@{};
-						$Param['username'] = $NewUser;
-						$Param['password'] = $newpassword;
-						$Param['expiration'] = $expiration;
-						$PrivateConfig = ConvertTo-Json $Param;
-						$ResetPasswordResult = VerfiyResetPasswordScenario -vmData $vmData -PrivateConfigString $PrivateConfig -metaData $metaData -PrevTestStatus $testResult
-						LogMsg "-=-=-=-=-=-=-=-=-=-$metaData : END -=-=-=-=-=-=-=-=-=-"
-						$testResult = $ResetPasswordResult
-					}
-
-					"DeleteUser" 
-					{
-						if ( ($AddUserResult -eq "PASS") -or ($ResetPasswordResult -eq "PASS") )
-						{
-							$dependancyCheck = "PASS"
-						}
-						else
-						{
-							$dependancyCheck = "ABORTED"
-						}
-						$metaData = $TaskType
-						[hashtable]$Param=@{};
-						$Param['remove_user'] = $NewUser;
-						$PrivateConfig = ConvertTo-Json $Param;
-						$DeleteUserResult = VerfiyDeleteUserScenario -vmData $vmData -PrivateConfigString $PrivateConfig -metaData $metaData -PrevTestStatus $dependancyCheck
-						LogMsg "-=-=-=-=-=-=-=-=-=-$metaData : END -=-=-=-=-=-=-=-=-=-"
-						$testResult = $DeleteUserResult
-
-					}
-
-					"ResetSSHConfig" 
-					{
-						$metaData = $TaskType
-						[hashtable]$Param=@{};
-						$Param['reset_ssh'] = "True";
-						$PrivateConfig = ConvertTo-Json $Param;
-						$ResetSSHConfigResult = VerfiyResetSSHConfigScenario -vmData $vmData -PrivateConfigString $PrivateConfig -metaData $metaData
-						LogMsg "-=-=-=-=-=-=-=-=-=-$metaData : END -=-=-=-=-=-=-=-=-=-"
-						$testResult = $ResetSSHConfigResult
-					}
+					$testResult = "PASS"
+					LogMsg "$TaskType is completed successfully...PASS"
+					$metaData = "$TaskType"
+				}
+				else
+				{
+					$testResult = "FAIL"
+					LogErr "$TaskType is failed...FAIL"
+					$metaData = "$TaskType"
 				}
 			}
 			catch
 			{
-				$ErrorMessage =  $_.Exception.Message
-				LogMsg "EXCEPTION : $ErrorMessage" 
+				$testResult = "Aborted"
+				LogErr "$TaskType is Aborted..."
+				$metaData = "$TaskType"   
 			}
-			Finally
+			$resultArr += $testResult
+			$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
+			$password = $xmlConfig.config.Azure.Deployment.Data.Password
+			$user = $xmlConfig.config.Azure.Deployment.Data.UserName
+		}
+		$LogPaths = VMAccessExtensionLog -user $user -password $password
+		$LogFilesPaths = $LogPaths.split(" ")[0]
+		$LogFiles = $LogPaths.split(" ")[1]
+		LogMsg "Collecting Logs"
+		foreach ($file in $LogFilesPaths.Split(","))
+		{
+			$fileName = $file.Split("/")[$file.Split("/").Count -1]
+			if ( $file -imatch $ExtensionName )
 			{
-				if (!$testResult)
-				{
-					$testResult = "Aborted"
-				}
-				$resultArr += $testResult
-				$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
+				$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat $file > $fileName" -runAsSudo
+				RemoteCopy -download -downloadFrom $hs1VIP -files $fileName -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
+			}
+			else
+			{
+				LogErr "Unexpected Extension Found : $($file.Split("/")[4]) with version $($file.Split("/")[5])"
+				LogMsg "Skipping download for : $($file.Split("/")[4]) : $fileName"
 			}
 		}
+		$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod 664 /home/$user/logs/*" -runAsSudo
+		RemoteCopy -download -downloadFrom $hs1VIP -files "/var/log/waagent.log,/home/$user/logs/*" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
 	}
 	catch
-	{}
+	{
+		$ErrorMessage =  $_.Exception.Message
+		LogMsg "EXCEPTION : $ErrorMessage" 
+	}
+	Finally
+	{
+		$metaData = ""
+		if (!$testResult)
+		{
+			$testResult = "Aborted"
+			$resultArr += $testResult
+			$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
+		}
+	}
 }
 else
 {

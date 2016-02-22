@@ -18,32 +18,6 @@ if ($isDeployed)
 		$LogFiles = ""
 		$folderToSearch = "/var/log/azure"
 		$ExtensionName = "LinuxDiagnostic"
-		$statusFile = GetStatusFileNameToVerfiy -vmData $AllVMData -expectedExtensionName $ExtensionName
-		
-		#region check Extension Status from 0.status file
-		LogMsg "--------------------- STAGE 1/3 : verification of $statusFile : START ---------------------"
-
-		if ( $statusFile )
-		{
-			$statusFilePath = GetFilePathsFromLinuxFolder -folderToSearch "/var/lib/waagent" -IpAddress $allVMData.PublicIP -SSHPort $allVMData.SSHPort -username $user -password $password -expectedFiles "$statusFile"
-			$ExtensionStatusInStatusFile = GetExtensionStatusFromStatusFile -statusFilePaths $statusFilePath[0] -ExtensionName $ExtensionName -vmData $allVMData
-		}
-
-		else
-		{
-			LogErr "status file not found under /var/lib/waagent"
-			$ExtensionStatusInStatusFile = $false
-		}
-		LogMsg "--------------------- STAGE 1/3 : verification of $statusFile : END ---------------------"
-		#endregion
-
-		#region check Extension from Azure Side
-		LogMsg "--------------------- STAGE 2/3 : verification from Azure : START ---------------------"
-		$ExtensionStatusFromAzure = VerifyExtensionFromAzure -ExtensionName $ExtensionName -ServiceName $isDeployed -ResourceGroupName $isDeployed
-		LogMsg "--------------------- STAGE 2/3 : verification from Azure : END ---------------------"
-		#endregion
-
-		#region check if extension has done its job properply...
 		$FoundFiles = GetFilePathsFromLinuxFolder -folderToSearch $folderToSearch -IpAddress $hs1VIP -SSHPort $hs1vm1sshport -username $user -password $password
 		$LogFilesPaths = $FoundFiles[0]
 		$LogFiles = $FoundFiles[1]
@@ -74,19 +48,19 @@ if ($isDeployed)
 					{
 						LogMsg "Extension Agent in started in Linux VM."
 						$waitForExtension = $false
-						$extensionExecutionVerified = $true
+						$extensionVerified = $true
 					}
 					else
 					{
 						LogMsg "Extension Agent not started in Linux VM"
 						$waitForExtension = $true
-						$extensionExecutionVerified = $false
+						$extensionVerified = $false
 						WaitFor -Seconds 30
 					}
 				}
 				else
 				{
-					$extensionExecutionVerified = $false
+					$extensionVerified = $false
 					LogErr "extension.log file does not present"
 					$waitForExtension = $true
 					WaitFor -Seconds 30
@@ -98,32 +72,52 @@ if ($isDeployed)
 		else
 		{
 			LogErr "No Extension logs are available."
-			$extensionExecutionVerified = $false
+			$extensionVerified = $false
 		}
-		LogMsg "--------------------- STAGE 3/3 : verification of Extension Execution : END ---------------------"
-		#endregion
-
-		if ( $ExtensionStatusFromAzure -and $extensionExecutionVerified  -and $ExtensionStatusInStatusFile )
+		
+		if ( $UseAzureResourceManager )
 		{
-			LogMsg "STATUS FILE VERIFICATION : PASS"
-			LogMsg "AZURE STATUS VERIFICATION : PASS"
-			LogMsg "EXTENSION EXECUTION VERIFICATION : PASS"
+			$ConfirmExtensionScriptBlock = {
+				$ExtensionStatus = Get-AzureResource -OutputObjectFormat New -ResourceGroupName $isDeployed  -ResourceType "Microsoft.Compute/virtualMachines/extensions" -ExpandProperties
+				if ( ($ExtensionStatus.Properties.ProvisioningState -eq "Succeeded") -and ( $ExtensionStatus.Properties.Type -eq $ExtensionName ) )
+				{
+					LogMsg "$ExtensionName extension status is Succeeded in Properties.ProvisioningState"
+					$ExtensionVerfiedWithPowershell = $true
+				}
+				else
+				{
+					LogErr "$ExtensionName extension status is Failed in Properties.ProvisioningState"
+					$ExtensionVerfiedWithPowershell = $false
+				}
+				return $ExtensionVerfiedWithPowershell
+			}
+		}
+		else
+		{
+			$ConfirmExtensionScriptBlock = {
+		
+			$vmDetails = Get-AzureVM -ServiceName $isDeployed
+ 				if ( ( $vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Status -eq "Success" ) -and ($vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Name -imatch $ExtensionName ))
+				{
+					$ExtensionVerfiedWithPowershell = $true
+					LogMsg "$ExtensionName extension status is SUCCESS in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
+				}
+				else
+				{
+					$ExtensionVerfiedWithPowershell = $false
+					LogErr "$ExtensionName extension status is FAILED in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"
+				}
+				return $ExtensionVerfiedWithPowershell
+			}
+		}
+		$ExtensionVerfiedWithPowershell = RetryOperation -operation $ConfirmExtensionScriptBlock -description "Confirming $ExtensionName extension from Azure side." -expectResult $true -maxRetryCount 10 -retryInterval 10
+
+		if ( $ExtensionVerfiedWithPowershell -and $extensionVerified)
+		{
 			$testResult = "PASS"
 		}
 		else
 		{
-			if ( !$ExtensionStatusInStatusFile )
-			{
-				LogErr "STATUS FILE VERIFICATION : FAIL"
-			}
-			if ( !$ExtensionStatusFromAzure )
-			{
-				LogErr "AZURE STATUS VERIFICATION : FAIL"
-			}
-			if ( !$extensionExecutionVerified )
-			{
-				LogErr "EXTENSION EXECUTION VERIFICATION : FAIL"
-			}
 			$testResult = "FAIL"
 		}
 		LogMsg "Test result : $testResult"
