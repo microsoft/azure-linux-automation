@@ -196,13 +196,13 @@ if($isDeployed)
 					if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 					{
 						Write-Host $VnetTestIP
-						$pingFrom.cmd = "./ping.py -x $($mysqlServer.ip) -c 10"
+						$pingFrom.cmd = "$python_cmd ping.py -x $($mysqlServer.ip) -c 10"
 					}
 
 					if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 					{
 						Write-Host $VnetTestHostName
-						$pingFrom.cmd = "./ping.py -x $($mysqlServer.hostname)  -c 10"
+						$pingFrom.cmd = "$python_cmd ping.py -x $($mysqlServer.hostname)  -c 10"
 					}
 					LogMsg "Test Started for $Value in $mode mode.."
 

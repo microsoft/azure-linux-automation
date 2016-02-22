@@ -17,12 +17,12 @@ def CheckServer():
     #print output
     RunLog.info("Checking if server was connected to client..")
     if ("connected" in output) :
-        str_out = string.split(output)
+        str_out = str.split(output)
         #len_out = len(str_out)
         #This for loop in used to check the every word of test output [Future plan]
         for each in str_out :
             #print(each)
-            if cmp(each, "connected")==0 :
+            if each == "connected":
                 RunLog.info("Server was successfully connected to client.")
                 ResultLog.info("PASS")
                 break

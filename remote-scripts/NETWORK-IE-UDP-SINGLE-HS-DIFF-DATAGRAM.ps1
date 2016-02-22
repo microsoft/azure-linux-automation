@@ -31,14 +31,14 @@ if ($isDeployed)
 			try
 			{
 				$testResult = $null
-				$cmd1="python start-server.py -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log -f"
+				$cmd1="$python_cmd start-server.py -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log -f"
 				if ($mode -eq "VIP")
 				{
-					$cmd2="python start-client.py -c $hs1vm1IP  -p $hs1vm1udpport -t$iperfTimeoutSeconds -u yes -l $Value" 
+					$cmd2="$python_cmd start-client.py -c $hs1vm1IP  -p $hs1vm1udpport -t$iperfTimeoutSeconds -u yes -l $Value" 
 				}
 				elseif($mode -eq "URL")
 				{
-					$cmd2="python start-client.py -c $hs1vm1Hostname  -p $hs1vm1udpport -t$iperfTimeoutSeconds -u yes -l $Value"
+					$cmd2="$python_cmd start-client.py -c $hs1vm1Hostname  -p $hs1vm1udpport -t$iperfTimeoutSeconds -u yes -l $Value"
 				}
 				LogMsg "Starting in $mode mode.."
 				$a = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -nodeUdpPort $hs1vm1udpport -nodeIperfCmd $cmd1 -user $user -password $password -files $currentTestData.files -logDir $LogDir

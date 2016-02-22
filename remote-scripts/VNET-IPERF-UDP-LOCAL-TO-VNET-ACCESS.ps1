@@ -167,7 +167,7 @@ if($isDeployed)
 			{ 
 				try
 				{
-					$udpServer.cmd = "python /home/$user/start-server.py -u yes -m yes -p 990 && mv Runtime.log start-server.py.log"
+					$udpServer.cmd = "$python_cmd /home/$user/start-server.py -u yes -m yes -p 990 && mv Runtime.log start-server.py.log"
 
 					if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 					{

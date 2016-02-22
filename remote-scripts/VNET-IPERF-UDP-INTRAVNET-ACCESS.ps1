@@ -136,7 +136,7 @@ if($isDeployed)
 				$testResult = ""
 				try
 				{
-					$udpServer = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -user $user -password $password -nodeTcpPort $hs1vm1tcpport -nodeUdpPort $hs1vm1udpport -nodeIperfCmd "python start-server.py -i1 -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log" 
+					$udpServer = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -user $user -password $password -nodeTcpPort $hs1vm1tcpport -nodeUdpPort $hs1vm1udpport -nodeIperfCmd "$python_cmd start-server.py -i1 -p $hs1vm1udpport -u yes && mv Runtime.log start-server.py.log" 
 					switch ($Value)
 					{
 						"SameHS-DiffSubnet" {
@@ -151,12 +151,12 @@ if($isDeployed)
 					}
 					if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 					{
-						$udpClient.cmd  = "python start-client.py -c $hs1vm1IP -i1 -p $hs1vm1udpport -t10 -u yes -l 1420"
+						$udpClient.cmd  = "$python_cmd start-client.py -c $hs1vm1IP -i1 -p $hs1vm1udpport -t10 -u yes -l 1420"
 					}
 
 					if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 					{
-						$udpClient.cmd  = "python start-client.py -c $hs1vm1Hostname -i1 -p $hs1vm1udpport -t10 -u yes -l 1420"
+						$udpClient.cmd  = "$python_cmd start-client.py -c $hs1vm1Hostname -i1 -p $hs1vm1udpport -t10 -u yes -l 1420"
 					}
 					LogMsg "Test Started for $Value in $mode mode.."
 

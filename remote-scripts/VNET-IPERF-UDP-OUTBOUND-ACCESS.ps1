@@ -102,7 +102,7 @@ if($isDeployed)
 				$testResult = ""
 				try
 				{
-					$udpServer = CreateIperfNode -nodeIp $externalServerIP -nodeSshPort $externalServerSSHport -user $user -password $password -nodeUdpPort $externalServerUDPport -nodeIperfCmd "python start-server.py -i1 -p $externalServerUDPport -u yes && mv Runtime.log start-server.py.log"
+					$udpServer = CreateIperfNode -nodeIp $externalServerIP -nodeSshPort $externalServerSSHport -user $user -password $password -nodeUdpPort $externalServerUDPport -nodeIperfCmd "$python_cmd start-server.py -i1 -p $externalServerUDPport -u yes && mv Runtime.log start-server.py.log"
 					switch ($Value)
 					{
 						"HS1VM1" {
@@ -121,13 +121,13 @@ if($isDeployed)
 
 					if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 					{
-						$udpClient.cmd  = "python start-client.py -c $externalServerIP -i1 -p $externalServerUDPport -t10 -u yes -l 1420"
+						$udpClient.cmd  = "$python_cmd start-client.py -c $externalServerIP -i1 -p $externalServerUDPport -t10 -u yes -l 1420"
 						$expectedResult = "PASS"
 					}
 
 					if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 					{
-						$udpClient.cmd  = "python start-client.py -c $externalServerURL -i1 -p $externalServerUDPport -t10 -u yes -l 1420"
+						$udpClient.cmd  = "$python_cmd start-client.py -c $externalServerURL -i1 -p $externalServerUDPport -t10 -u yes -l 1420"
 						$expectedResult = "FAIL"
 					}
 					LogMsg "Test Started for $Value in $mode mode.."

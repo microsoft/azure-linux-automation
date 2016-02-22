@@ -42,11 +42,11 @@ if ($isDeployed)
 
 	$wait=45
 	$Value = 6
-	$cmd1="python start-server.py -p $hs1vm1tcpport && mv Runtime.log start-server.py.log -f"
-	$cmd2="python start-server.py -p $hs1vm2tcpport && mv Runtime.log start-server.py.log -f"
-	$cmd3="python start-client.py -c $hs1VIP -p $hs1vm1tcpport -t10 -P$Value"
-	$cmd11="python start-server-without-stopping.py -p $hs1vm1ProbePort -log iperf-probe.txt"
-	$cmd22="python start-server-without-stopping.py -p $hs1vm2ProbePort -log iperf-probe.txt"
+	$cmd1="$python_cmd start-server.py -p $hs1vm1tcpport && mv Runtime.log start-server.py.log -f"
+	$cmd2="$python_cmd start-server.py -p $hs1vm2tcpport && mv Runtime.log start-server.py.log -f"
+	$cmd3="$python_cmd start-client.py -c $hs1VIP -p $hs1vm1tcpport -t10 -P$Value"
+	$cmd11="$python_cmd start-server-without-stopping.py -p $hs1vm1ProbePort -log iperf-probe.txt"
+	$cmd22="$python_cmd start-server-without-stopping.py -p $hs1vm2ProbePort -log iperf-probe.txt"
 	
 
 	$server1 = CreateIperfNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -nodeTcpPort $hs1vm1tcpport -nodeIperfCmd $cmd1 -user $user -password $password -files $currentTestData.files -logDir $LogDir -nodeDip $hs1vm1.IpAddress
@@ -68,11 +68,11 @@ if ($isDeployed)
 			mkdir $LogDir\$mode\Server2 -ErrorAction SilentlyContinue | out-null
 			if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 			{#.........................................................................Client command will decided according to TestMode....
-				$cmd3="python start-client.py -c $hs1VIP -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P2" 
+				$cmd3="$python_cmd start-client.py -c $hs1VIP -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P2" 
 			}
 			if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 			{
-				$cmd3="python start-client.py -c $hs1ServiceUrl -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P2"
+				$cmd3="$python_cmd start-client.py -c $hs1ServiceUrl -p $hs1vm1tcpport -t$iperfTimeoutSeconds -P2"
 			}
 			$server1.logDir = $LogDir + "\$mode" + "\Server1"
 			$server2.logDir = $LogDir + "\$mode" + "\Server2"
@@ -127,11 +127,11 @@ if ($isDeployed)
 				{
 #region Test Case Steps Execution
 #Step 2: Stop Iperf client
-					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "python stop-client.py" -runAsSudo
+					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "$python_cmd stop-client.py" -runAsSudo
 					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo Client Stopped 1 >> iperf-client.txt" -runAsSudo
 
 #Step3 : Stop Iperf Server on VM1
-					$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshport -command "python stop-server.py" -runAsSudo
+					$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshport -command "$python_cmd stop-server.py" -runAsSudo
 					$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshport -command "echo Server1 Stopped 1 >> iperf-server.txt" -runAsSudo
 					$suppressedOut = RunLinuxCmd -username $server2.user -password $server2.password -ip $server2.ip -port $server2.sshport -command "echo Server1 Stopped 1 >> iperf-server.txt" -runAsSudo
 					$suppressedOut = RunLinuxCmd -username $server1.user -password $server1.password -ip $server1.ip -port $server1.sshport -command "echo Server1 Stopped 1 >> iperf-probe.txt" -runAsSudo
@@ -145,7 +145,7 @@ if ($isDeployed)
 					StartIperfClient $client
 					$clientStoppedMiddleStage = GetStopWatchElapasedTime $stopWatch "ss"
 #Step5 :  Stop Iperf Client Again 
-					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "python stop-client.py" -runAsSudo
+					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "$python_cmd stop-client.py" -runAsSudo
 					$suppressedOut = RunLinuxCmd -username $client.user -password $client.password -ip $client.ip -port $client.sshPort -command "echo Client Stopped 2 >> iperf-client.txt" -runAsSudo
 
 #Step6 : Start Iperf Server on VM1 
