@@ -40,13 +40,6 @@ def DetectDist():
 
 def RunTest():
 	UpdateState("TestRunning")
-	YumPackageInstall("nmap")
-	output = Run("cat /etc/yum.repos.d/rhui-load-balancers")
-	outputlist = re.split("\n", output)
-	logger.info("CDS server name:" + outputlist[0])
-	output = Run("nmap "+outputlist[0])
-	logger.info("Latency value between test machine and target CDS server" + output) 
-
 	logger.info('-'*30 + str.format("RHUI STRESS TEST START FOR %s %s" % DetectDist()[0:2]) + '-'*30)
 	logger.info('Test Infomation:')
 	logger.info("\tTest package: %s, Test duration: %s(seconds), Test base value: %s(seconds)" % (pkg, duration, timeout))
