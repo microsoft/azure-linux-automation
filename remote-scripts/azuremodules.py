@@ -22,7 +22,7 @@ except ImportError:
     import subprocess as commands
 
 py_ver_str = sys.version
-#print(sys.version)
+print(sys.version)
 
 #THIS LOG WILL COLLECT ALL THE LOGS THAT ARE RUN WHILE THE TEST IS GOING ON...
 RunLog = logging.getLogger("RuntimeLog : ")
@@ -49,26 +49,19 @@ ResultLog.addHandler(WResultLog)
 
 def UpdateRepos(current_distro):
     RunLog.info ("\nUpdating the repositoriy information...")
-    rst, updaterepo_cmd = GetUpdateRepoCmdWithDistroType(current_distro)
-    if rst:
-        RunUpdate(updaterepo_cmd + " update")
+    if (current_distro.find("ubuntu") != -1) or (current_distro.find("debian") != -1): 
+        #method 'RunUpdate': fix deadlock when using stdout=PIPE and/or stderr=PIPE and the child process generates enough output to a pipe
+        RunUpdate("apt-get update")
+    elif (current_distro.find("rhel") != -1) or (current_distro.find("Oracle") != -1) or (current_distro.find('centos') != -1):
+        RunUpdate("yum -y update")
+    elif (current_distro.find("opensuse") != -1) or (current_distro.find("SUSE") != -1) or (current_distro.find("sles") != -1):
+        RunUpdate("zypper --non-interactive --gpg-auto-import-keys update")
     else:
-        RunLog.error("Repo upgradation failed on:"+current_distro)
+        RunLog.info("Repo upgradation failed on:"+current_distro)
         return False
 
     RunLog.info ("Updating the repositoriy information... [done]")
     return True
-
-def GetUpdateRepoCmdWithDistroType(current_distro):
-    if (current_distro.find("ubuntu") != -1) or (current_distro.find("debian") != -1): 
-        return (True, "apt-get")
-    elif (current_distro.find("rhel") != -1) or (current_distro.find("Oracle") != -1) or (current_distro.find('centos') != -1):
-        return (True, "yum -y")
-    elif (current_distro.find("opensuse") != -1) or (current_distro.find("SUSE") != -1) or (current_distro.find("sles") != -1):
-        return (True, "zypper --non-interactive --gpg-auto-import-keys")
-    else:
-        return (False, "")
-
 
 def DownloadUrl(url, destination_folder, output_file=None):
     cmd = "wget -P "+destination_folder+" "+url+ " 2>&1"
