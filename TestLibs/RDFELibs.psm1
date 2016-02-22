@@ -685,7 +685,7 @@ Function GenerateCommand ($Setup, $serviceName, $osImage, $HSData)
 	return $createSetupCommand,  $serviceName, $vmCount
 } 
 
-Function CreateDeployment ($DeploymentCommand, $NewServiceName , $vmCount)
+Function CreateDeployment ($DeploymentCommand, $NewServiceName , $vmCount, [string]$storageaccount="")
 {
 	
 	$FailCounter = 0
@@ -695,7 +695,7 @@ Function CreateDeployment ($DeploymentCommand, $NewServiceName , $vmCount)
 		try
 		{
 			$FailCounter++
-			$out = RunAzureCmd -AzureCmdlet "$DeploymentCommand"
+			$out = RunAzureCmd -AzureCmdlet "$DeploymentCommand" -storageaccount $storageaccount
 			#LogMsg $DeploymentCommand
 			$retValue = $?
 			LogMsg "VM's deployed. Verifying.."
@@ -782,7 +782,7 @@ Function CheckVMsInService($serviceName)
 	return $allVMsReady
 }
 
-Function CreateAllDeployments($setupType, $xmlConfig, $Distro)
+Function CreateAllDeployments($setupType, $xmlConfig, $Distro, [string]$region ="", [string]$storageAccount="")
 {
 
 	$hostedServiceCount = 0
@@ -812,7 +812,14 @@ Function CreateAllDeployments($setupType, $xmlConfig, $Distro)
 
 	$location = $xml.config.Azure.General.Location
 	$AffinityGroup = $xml.config.Azure.General.AffinityGroup
+	$currentStorageAccount = $xmlConfig.config.Azure.General.StorageAccount
 
+    if($region)
+    {
+      $location = $region
+      $AffinityGroup = ""
+      $currentStorageAccount = $storageAccount
+    }
 	foreach ($HS in $setupTypeData.HostedService )
 	{
         foreach ($img in $osImage)
@@ -851,9 +858,9 @@ Function CreateAllDeployments($setupType, $xmlConfig, $Distro)
 					    {
 						    LogMsg "Certificate added successfully."
 						    $DeploymentCommand = GenerateCommand -Setup $Setup -serviceName $serviceName -osImage $img -HSData $HS
-						    Set-AzureSubscription -SubscriptionName $xmlConfig.config.Azure.General.SubscriptionName  -CurrentStorageAccountName $xmlConfig.config.Azure.General.StorageAccount
+						    Set-AzureSubscription -SubscriptionName $xmlConfig.config.Azure.General.SubscriptionName  -CurrentStorageAccountName $currentStorageAccount
 						    $DeploymentStartTime = (Get-Date)
-						    $isDeployed = CreateDeployment -DeploymentCommand $DeploymentCommand[0] -NewServiceName $DeploymentCommand[1] -vmCount $DeploymentCommand[2]
+						    $isDeployed = CreateDeployment -DeploymentCommand $DeploymentCommand[0] -NewServiceName $DeploymentCommand[1] -vmCount $DeploymentCommand[2] -storageaccount $currentStorageAccount
 						    $DeploymentEndTime = (Get-Date)
 						    $DeploymentElapsedTime = $DeploymentEndTime - $DeploymentStartTime
 						    if ( $isDeployed -eq "True" )
@@ -1226,7 +1233,7 @@ Function SetDistroSpecificVariables($detectedDistro)
 	}
 }
 
-Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, $GetDeploymentStatistics = $false)
+Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, $GetDeploymentStatistics = $false, [string]$region ="", [string]$storageAccount="")
 {
 	if( (!$EconomyMode) -or ( $EconomyMode -and ($xmlConfig.config.Azure.Deployment.$setupType.isDeployed -eq "NO")))
 	{
@@ -1239,7 +1246,7 @@ Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFa
 			$i = 0
 			$role = 1
 			$setupTypeData = $xmlConfig.config.Azure.Deployment.$setupType
-			$isAllDeployed = CreateAllDeployments -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro
+			$isAllDeployed = CreateAllDeployments -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro -region $region -storageAccount $storageAccount
 			$isAllVerified = "False"
 			$isAllConnected = "False"
 			if($isAllDeployed[0] -eq "True")
@@ -1338,15 +1345,25 @@ Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFa
 	}
 }
 
-Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, $GetDeploymentStatistics = $false)
+Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, $GetDeploymentStatistics = $false, [string]$region = "", [string]$storageAccount = "")
 {
+    $AzureSetup = $xmlConfig.config.Azure.General
+
 	if ($UseAzureResourceManager)
 	{
-		$retValue = DeployResourceGroups  -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro -getLogsIfFailed $getLogsIfFailed -GetDeploymentStatistics $GetDeploymentStatistics
+        if($storageAccount)
+        {
+		 LogMsg "CurrentStorageAccount  : $($storageAccount)"
+        }
+       $retValue = DeployResourceGroups  -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro -getLogsIfFailed $getLogsIfFailed -GetDeploymentStatistics $GetDeploymentStatistics -region $region -storageAccount $storageAccount 
 	}
 	else
 	{
-		$retValue = DeployManagementServices -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro -getLogsIfFailed $getLogsIfFailed -GetDeploymentStatistics $GetDeploymentStatistics
+        if($storageAccount)
+        {
+         LogMsg "CurrentStorageAccount  : $($storageAccount)"
+       }
+		$retValue = DeployManagementServices -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro -getLogsIfFailed $getLogsIfFailed -GetDeploymentStatistics $GetDeploymentStatistics -region $region -storageAccount $storageAccount 
 	}
 	return $retValue
 }

@@ -1,4 +1,4 @@
-﻿Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro)
+﻿Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro, [string]$region = "", [string]$storageAccount = "")
 {
     $resourceGroupCount = 0
     $xml = $xmlConfig
@@ -27,6 +27,10 @@
 
     $location = $xml.config.Azure.General.Location
     $AffinityGroup = $xml.config.Azure.General.AffinityGroup
+    if($region)
+    {
+      $location = $region;
+    }
 
     foreach ($RG in $setupTypeData.HostedService )
     {
@@ -57,7 +61,7 @@
                 if ($isServiceCreated -eq "True")
                 {
                     $azureDeployJSONFilePath = "$LogDir\$groupName.json"
-                    $DeploymentCommand = GenerateAzureDeployJSONFile -RGName $groupName -osImage $osImage -osVHD $osVHD -RGXMLData $RG -Location $location -azuredeployJSONFilePath $azureDeployJSONFilePath
+                    $DeploymentCommand = GenerateAzureDeployJSONFile -RGName $groupName -osImage $osImage -osVHD $osVHD -RGXMLData $RG -Location $location -azuredeployJSONFilePath $azureDeployJSONFilePath -storageAccount $storageAccount
                     $DeploymentStartTime = (Get-Date)
                     $CreateRGDeployments = CreateResourceGroupDeployment -RGName $groupName -location $location -setupType $setupType -TemplateFile $azureDeployJSONFilePath
                     $DeploymentEndTime = (Get-Date)
@@ -199,11 +203,15 @@ Function CreateResourceGroupDeployment([string]$RGName, $location, $setupType, $
 }
 
 
-Function GenerateAzureDeployJSONFile ($RGName, $osImage, $osVHD, $RGXMLData, $Location, $azuredeployJSONFilePath)
+Function GenerateAzureDeployJSONFile ($RGName, $osImage, $osVHD, $RGXMLData, $Location, $azuredeployJSONFilePath, [string]$storageAccount = "")
 {
 LogMsg "Generating Template : $azuredeployJSONFilePath"
 $jsonFile = $azuredeployJSONFilePath
 $StorageAccountName = $xml.config.Azure.General.ARMStorageAccount
+if($storageAccount)
+{ 
+ $StorageAccountName = $storageAccount
+}
 LogMsg "Getting Storage Account : $StorageAccountName details ..."
 $StorageAccountType = (Get-AzureStorageAccount | where {$_.StorageAccountName -eq "$StorageAccountName"}).AccountType
 if($StorageAccountType -match 'Premium')
@@ -301,29 +309,31 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
 $StorageProfileScriptBlock = {
                 Add-Content -Value "$($indents[4])^storageProfile^: " -Path $jsonFile
                 Add-Content -Value "$($indents[4]){" -Path $jsonFile
-                    Add-Content -Value "$($indents[5])^osDisk^ : " -Path $jsonFile
-                    Add-Content -Value "$($indents[5]){" -Path $jsonFile
-                        if ( $osVHD )
-                        {
-                            if ( $osImage)
-                            {
-                                LogMsg "Overriding ImageName with user provided VHD."
-                            }
-                            LogMsg "Using VHD : $osVHD"
+                     if ($osImage)
+                     {
+                      Add-Content -Value "$($indents[5])^imageReference^ : " -Path $jsonFile
+                      Add-Content -Value "$($indents[5]){" -Path $jsonFile
+                       $publisher = $CurrentTestData.Publisher
+                       $offer = $CurrentTestData.Offer
+                       $sku = $CurrentTestData.Sku
+                       $version = $CurrentTestData.Version
+                       Add-Content -Value "$($indents[6])^publisher^: ^$publisher^," -Path $jsonFile
+                       Add-Content -Value "$($indents[6])^offer^: ^$offer^," -Path $jsonFile
+                       Add-Content -Value "$($indents[6])^sku^: ^$sku^," -Path $jsonFile
+                       Add-Content -Value "$($indents[6])^version^: ^$version^" -Path $jsonFile
+                       Add-Content -Value "$($indents[5])}," -Path $jsonFile
+                     }
+                      Add-Content -Value "$($indents[5])^osDisk^ : " -Path $jsonFile
+                      Add-Content -Value "$($indents[5]){" -Path $jsonFile
+                      if(!$osImage)
+                      {
+
+                            LogMsg "├Using VHD : $osVHD"
                             Add-Content -Value "$($indents[6])^image^: " -Path $jsonFile
                             Add-Content -Value "$($indents[6]){" -Path $jsonFile
                                 Add-Content -Value "$($indents[7])^uri^: ^[concat('http://',variables('StorageAccountName'),'.blob.core.windows.net/vhds/','$osVHD')]^" -Path $jsonFile
                             Add-Content -Value "$($indents[6])}," -Path $jsonFile
                             Add-Content -Value "$($indents[6])^osType^: ^Linux^," -Path $jsonFile
-                        }
-                        else
-                        {
-                            LogMsg "Using ImageName : $osImage"
-                            Add-Content -Value "$($indents[6])^sourceImage^: " -Path $jsonFile
-                            Add-Content -Value "$($indents[6]){" -Path $jsonFile
-                                Add-Content -Value "$($indents[7])^id^: ^[variables('CompliedSourceImageName')]^" -Path $jsonFile
-                            Add-Content -Value "$($indents[6])}," -Path $jsonFile
-                        }
                         Add-Content -Value "$($indents[6])^name^: ^$vmName-OSDisk^," -Path $jsonFile
                         #Add-Content -Value "$($indents[6])^osType^: ^Linux^," -Path $jsonFile
                         Add-Content -Value "$($indents[6])^vhd^: " -Path $jsonFile
@@ -332,6 +342,19 @@ $StorageProfileScriptBlock = {
                         Add-Content -Value "$($indents[6])}," -Path $jsonFile
                         Add-Content -Value "$($indents[6])^caching^: ^ReadWrite^," -Path $jsonFile
                         Add-Content -Value "$($indents[6])^createOption^: ^FromImage^" -Path $jsonFile
+                        }
+                        else
+                        {
+                          LogMsg "├Using ImageName : $osImage"
+                          Add-Content -Value "$($indents[6])^name^: ^$vmName-OSDisk^," -Path $jsonFile
+                          Add-Content -Value "$($indents[6])^createOption^: ^FromImage^," -Path $jsonFile
+                          Add-Content -Value "$($indents[6])^vhd^: " -Path $jsonFile
+                          Add-Content -Value "$($indents[6]){" -Path $jsonFile
+                          Add-Content -Value "$($indents[7])^uri^: ^[concat('http://',variables('StorageAccountName'),'.blob.core.windows.net/vhds/','$vmName-$RGrandomWord-osdisk.vhd')]^" -Path $jsonFile
+                          Add-Content -Value "$($indents[6])}," -Path $jsonFile
+                          Add-Content -Value "$($indents[6])^caching^: ^ReadWrite^" -Path $jsonFile
+
+                        }
                     Add-Content -Value "$($indents[5])}" -Path $jsonFile
                 Add-Content -Value "$($indents[4])}" -Path $jsonFile
 }
@@ -1235,7 +1258,7 @@ Set-Content -Path $jsonFile -Value (Get-Content $jsonFile).Replace("^",'"') -For
     return $createSetupCommand,  $RGName, $vmCount
 } 
 
-Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, $GetDeploymentStatistics = $false)
+Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, $GetDeploymentStatistics = $false, [string]$region = "", [string]$storageAccount = "")
 {
     if( (!$EconomyMode) -or ( $EconomyMode -and ($xmlConfig.config.Azure.Deployment.$setupType.isDeployed -eq "NO")))
     {
@@ -1247,7 +1270,7 @@ Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed
             $i = 0
             $role = 1
             $setupTypeData = $xmlConfig.config.Azure.Deployment.$setupType
-            $isAllDeployed = CreateAllResourceGroupDeployments -setupType $setupType -xmlConfig $xmlConfig -Distro $Distro
+            $isAllDeployed = CreateAllResourceGroupDeployments -setupType $setupType -xmlConfig $xmlConfig -Distro $Distro -region $region -storageAccount $storageAccount
             $isAllVerified = "False"
             $isAllConnected = "False"
             #$isAllDeployed = @("True","ICA-RG-IEndpointSingleHS-U1510-8-10-12-34-9","30")
