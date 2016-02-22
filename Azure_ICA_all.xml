@@ -4953,7 +4953,7 @@
 			<Version>latest</Version>
 			<RunDownload>true</RunDownload>
 			<parameters> 
- 			    <duration>60</duration> 
+ 			    <duration>3600</duration> 
  			    <pkg>gcc</pkg> 
  			    <timeout>100</timeout>			 
             </parameters> 
