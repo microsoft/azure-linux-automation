@@ -9,7 +9,7 @@ import time
         #for error checking
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-e', '--expected', help='specify expected DiskSize in KB', required=True)
+parser.add_argument('-e', '--expected', help='specify expected DiskSize in Byte', required=True)
 args = parser.parse_args()
                 #if no value specified then stop
 expectedDiskSize = args.expected
