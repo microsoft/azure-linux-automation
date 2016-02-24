@@ -108,11 +108,7 @@ function yum_install ()
 {
     package_name=$1
     yum install -y $package_name
-    if [ $? -ne 0 ]; then
-        echo "FAILED: yum_install $package_name"
-        return 1
-    fi
-    echo "SUCCESS: yum_install $package_name"
+    check_exit_status "yum_install $package_name"
 }
 
 function zypper_install ()
