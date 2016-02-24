@@ -46,6 +46,7 @@ res_TotalBytes=(`cat $syslog_file_name | grep "Read "| awk '{print $7}'`)
 res_kernel_version=(`cat $syslog_file_name | grep "Linux.*x86_64.*GNU"| awk '{print $3}'`)
 res_total_cpu_cores=(`cat $syslog_file_name| grep "Number of CPU cores" | awk '{print $5}'`)
 res_LIS_version=(`cat $syslog_file_name| grep "^version:"| awk '{print $2}'`)
+res_Host_version=(`cat $syslog_file_name| grep "Host Build Version" | awk '{print $4}'`)
 
 if [ "x$res_LIS_version" == "x" ]
 then
@@ -56,6 +57,7 @@ echo "" > $csv_file
 echo ",Kernel version,"$res_kernel_version >> $csv_file
 echo ",Total CPU cores,"$res_total_cpu_cores >> $csv_file
 echo ",LIS Version,"$res_LIS_version >> $csv_file
+echo ",Host Version,"$res_Host_version >> $csv_file
 echo "" >> $csv_file
 
 echo "Iteration,StartTime,Threads,FileSize,BlockSize,IOMode,TestType,ReadOperations,WriteOperations,OtherOperations,TotalOperations,ReadBytes,WriteBytes,TotalBytes,Throughput,IOPS,TotalTime(s),TotalEvents,MinLatency(ms),AvgLatency(ms),MaxLatency(ms), 95% PercentileLatency(ms)" >> $csv_file

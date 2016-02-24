@@ -33,6 +33,7 @@ echo "LIS version: --------------------------------------------" >> $LOGFILE
 modinfo hv_vmbus 2>&1 >> $LOGFILE
 echo "----------------------------------------------------------" >> $LOGFILE
 echo "Number of CPU cores" `nproc` >> $LOGFILE
+echo "Host Build Version" `dmesg | grep "Host Build" | sed "s/.*Host Build://"| awk '{print  $1}'| sed "s/;//"`  >> $LOGFILE
 
 iteration=0
 ioruntime=300
