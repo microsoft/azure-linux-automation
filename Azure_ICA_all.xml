@@ -4954,8 +4954,20 @@
 				<remoteXML></remoteXML>
 				<Priority>P0</Priority>
 			</test>			
+
+		<test>
+			<testName>RHUI-CROSS-REGION-MIGRATION</testName>
+			<testScript>SETUP-INSTALL-PACKAGES.py</testScript>
+			<testScriptPs1>RHUI-CROSS-REGION-MIGRATION.ps1</testScriptPs1>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\SETUP-INSTALL-PACKAGES.py,.\remote-scripts\packages.xml</files>
+			<setupType>BVTDeployment</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<TestID></TestID>
+		</test>
 			
-		</testsDefinition>
+	</testsDefinition>
 	<testCycles>
 		<!-- Setup related tests -->
 		<Cycle>
