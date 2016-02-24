@@ -15,11 +15,16 @@ function check_exit_status ()
 {
     exit_status=$?
     message=$1
+
     if [ $exit_status -ne 0 ]; then
         echo "$message: Failed (exit code: $exit_status)" 
-        exit $exit_status 
+        if [ "$2" == "exit" ]
+        then
+            exit $exit_status
+        fi 
+    else
+        echo "$message: Success" 
     fi
-    echo "$message: Success" 
 }
 
 function detect_linux_ditribution_version()
