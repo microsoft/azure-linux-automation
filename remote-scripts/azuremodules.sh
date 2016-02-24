@@ -118,7 +118,7 @@ function zypper_install ()
     check_exit_status "zypper_install $package_name"
 }
 
-function install_package()
+function install_package ()
 {
     local package_name=$1
     ditribution=$(detect_linux_ditribution)
@@ -126,15 +126,15 @@ function install_package()
         oracle|rhel|centos)
             yum_install $package_name
             ;;
-    
+
         ubuntu)
             apt_get_install $package_name
             ;;
-         
+
         suse|opensuse)
             zypper_install $package_name
             ;;
-         
+
         *)
             echo "Unknown ditribution"
             return 1
@@ -219,7 +219,7 @@ function remote_copy ()
        destination_path="."
     elif [ "$cmd" == "put" ]; then
        source_path=$filename
-       destination_path=$user@$host:$remote_path/$filename
+       destination_path=$user@$host:$remote_path/
     fi
 
     echo "sshpass -p $passwd scp -v -o StrictHostKeyChecking=no $source_path $destination_path 2>&1"
