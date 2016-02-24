@@ -309,31 +309,30 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
 $StorageProfileScriptBlock = {
                 Add-Content -Value "$($indents[4])^storageProfile^: " -Path $jsonFile
                 Add-Content -Value "$($indents[4]){" -Path $jsonFile
-                     if (!$osVHD)
-                     {
-                      Add-Content -Value "$($indents[5])^imageReference^ : " -Path $jsonFile
-                      Add-Content -Value "$($indents[5]){" -Path $jsonFile
-                       $publisher = $CurrentTestData.Publisher
-                       $offer = $CurrentTestData.Offer
-                       $sku = $CurrentTestData.Sku
-                       $version = $CurrentTestData.Version
-                       Add-Content -Value "$($indents[6])^publisher^: ^$publisher^," -Path $jsonFile
-                       Add-Content -Value "$($indents[6])^offer^: ^$offer^," -Path $jsonFile
-                       Add-Content -Value "$($indents[6])^sku^: ^$sku^," -Path $jsonFile
-                       Add-Content -Value "$($indents[6])^version^: ^$version^" -Path $jsonFile
-                       Add-Content -Value "$($indents[5])}," -Path $jsonFile
-                     }
-                      Add-Content -Value "$($indents[5])^osDisk^ : " -Path $jsonFile
-                      Add-Content -Value "$($indents[5]){" -Path $jsonFile
-                      if($osVHD)
-                      {
-
-                            LogMsg "├Using VHD : $osVHD"
-                            Add-Content -Value "$($indents[6])^image^: " -Path $jsonFile
-                            Add-Content -Value "$($indents[6]){" -Path $jsonFile
-                                Add-Content -Value "$($indents[7])^uri^: ^[concat('http://',variables('StorageAccountName'),'.blob.core.windows.net/vhds/','$osVHD')]^" -Path $jsonFile
-                            Add-Content -Value "$($indents[6])}," -Path $jsonFile
-                            Add-Content -Value "$($indents[6])^osType^: ^Linux^," -Path $jsonFile
+                if (!$osVHD)
+                {
+                    Add-Content -Value "$($indents[5])^imageReference^ : " -Path $jsonFile
+                    Add-Content -Value "$($indents[5]){" -Path $jsonFile
+                        $publisher = $CurrentTestData.Publisher
+                        $offer = $CurrentTestData.Offer
+                        $sku = $CurrentTestData.Sku
+                        $version = $CurrentTestData.Version
+                        Add-Content -Value "$($indents[6])^publisher^: ^$publisher^," -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^offer^: ^$offer^," -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^sku^: ^$sku^," -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^version^: ^$version^" -Path $jsonFile
+                    Add-Content -Value "$($indents[5])}," -Path $jsonFile
+                }
+                    Add-Content -Value "$($indents[5])^osDisk^ : " -Path $jsonFile
+                    Add-Content -Value "$($indents[5]){" -Path $jsonFile
+                    if($osVHD)
+                    {
+                        LogMsg "├Using VHD : $osVHD"
+                        Add-Content -Value "$($indents[6])^image^: " -Path $jsonFile
+                        Add-Content -Value "$($indents[6]){" -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^uri^: ^[concat('http://',variables('StorageAccountName'),'.blob.core.windows.net/vhds/','$osVHD')]^" -Path $jsonFile
+                        Add-Content -Value "$($indents[6])}," -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^osType^: ^Linux^," -Path $jsonFile
                         Add-Content -Value "$($indents[6])^name^: ^$vmName-OSDisk^," -Path $jsonFile
                         #Add-Content -Value "$($indents[6])^osType^: ^Linux^," -Path $jsonFile
                         Add-Content -Value "$($indents[6])^vhd^: " -Path $jsonFile
@@ -342,19 +341,19 @@ $StorageProfileScriptBlock = {
                         Add-Content -Value "$($indents[6])}," -Path $jsonFile
                         Add-Content -Value "$($indents[6])^caching^: ^ReadWrite^," -Path $jsonFile
                         Add-Content -Value "$($indents[6])^createOption^: ^FromImage^" -Path $jsonFile
-                        }
-                        else
-                        {
-                          LogMsg "├Using ImageName : $osImage"
-                          Add-Content -Value "$($indents[6])^name^: ^$vmName-OSDisk^," -Path $jsonFile
-                          Add-Content -Value "$($indents[6])^createOption^: ^FromImage^," -Path $jsonFile
-                          Add-Content -Value "$($indents[6])^vhd^: " -Path $jsonFile
-                          Add-Content -Value "$($indents[6]){" -Path $jsonFile
-                          Add-Content -Value "$($indents[7])^uri^: ^[concat('http://',variables('StorageAccountName'),'.blob.core.windows.net/vhds/','$vmName-$RGrandomWord-osdisk.vhd')]^" -Path $jsonFile
-                          Add-Content -Value "$($indents[6])}," -Path $jsonFile
-                          Add-Content -Value "$($indents[6])^caching^: ^ReadWrite^" -Path $jsonFile
+                    }
+                    else
+                    {
+                        LogMsg "├Using ImageName : $osImage"
+                        Add-Content -Value "$($indents[6])^name^: ^$vmName-OSDisk^," -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^createOption^: ^FromImage^," -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^vhd^: " -Path $jsonFile
+                        Add-Content -Value "$($indents[6]){" -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^uri^: ^[concat('http://',variables('StorageAccountName'),'.blob.core.windows.net/vhds/','$vmName-$RGrandomWord-osdisk.vhd')]^" -Path $jsonFile
+                        Add-Content -Value "$($indents[6])}," -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^caching^: ^ReadWrite^" -Path $jsonFile
 
-                        }
+                    }
                     Add-Content -Value "$($indents[5])}" -Path $jsonFile
                 Add-Content -Value "$($indents[4])}" -Path $jsonFile
 }
