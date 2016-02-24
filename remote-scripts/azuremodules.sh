@@ -6,6 +6,11 @@
 #
 #
 
+function get_host_version ()
+{
+    dmesg | grep "Host Build" | sed "s/.*Host Build://"| awk '{print  $1}'| sed "s/;//"
+}
+
 function check_exit_status ()
 {
     exit_status=$?
