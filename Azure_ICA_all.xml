@@ -5029,6 +5029,7 @@
 				<remoteXML></remoteXML>
 				<Priority>P0</Priority>
 			</test>			
+
 			<test>
 				<testName>ICA-PERF-MEMCACHED-BENCHMARK-TEST</testName>
 				<testScript></testScript>
@@ -5055,7 +5056,22 @@
 				<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 				<Priority>P0</Priority>
 			</test>			
-		</testsDefinition>
+
+
+		<test>
+			<testName>RHUI-CROSS-REGION-MIGRATION</testName>
+			<testScript>SETUP-INSTALL-PACKAGES.py</testScript>
+			<testScriptPs1>RHUI-CROSS-REGION-MIGRATION.ps1</testScriptPs1>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\SETUP-INSTALL-PACKAGES.py,.\remote-scripts\packages.xml</files>
+			<setupType>BVTDeployment</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<TestID></TestID>
+		</test>
+			
+	</testsDefinition>
+
 	<testCycles>
 		<!-- Setup related tests -->
 		<Cycle>
