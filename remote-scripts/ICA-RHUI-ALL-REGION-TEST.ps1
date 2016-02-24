@@ -41,8 +41,6 @@ $index = $VMRegion.Count
 #Test Starts Here..
 while($index -gt 0)
 {   
-    $deployedServiceName = $null
-    $deployedResourceGroupName = $null
     $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig  -region $VMRegion[$index-1] -storageAccount $VMStorageAccount[$index-1]
     
     if($isDeployed)
@@ -75,27 +73,19 @@ while($index -gt 0)
 
           
           LogMsg "Executing : $($currentTestData.testScript)"
-		  RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "$python_cmd $($currentTestData.testScript)" -runAsSudo
-		  RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "mv Runtime.log $($currentTestData.testScript).log" -runAsSudo
-		  RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/state.txt, /home/$user/Summary.log, /home/$user/$($currentTestData.testScript).log" -downloadTo $LogDir\$hs1vm1Hostname -port $hs1vm1sshport -username $user -password $password
-		  $testResult = Get-Content $LogDir\$hs1vm1Hostname\Summary.log
-		  $testStatus = Get-Content $LogDir\$hs1vm1Hostname\state.txt
-		  LogMsg "Test result : $testResult"
-          if ( !$UseAzureResourceManager )
-          {
-                $deployedServiceName = $isDeployed[0]
-          }
-          else
-          {
-                $deployedResourceGroupName = $isDeployed
-          }
+          RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "$python_cmd $($currentTestData.testScript)" -runAsSudo
+          RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "mv Runtime.log $($currentTestData.testScript).log" -runAsSudo
+          RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/state.txt, /home/$user/Summary.log, /home/$user/$($currentTestData.testScript).log" -downloadTo $LogDir\$hs1vm1Hostname -port $hs1vm1sshport -username $user -password $password
+          $testResult = Get-Content $LogDir\$hs1vm1Hostname\Summary.log
+          $testStatus = Get-Content $LogDir\$hs1vm1Hostname\state.txt
+          LogMsg "Test result : $testResult"
         }
         else
-	    {
-			LogMsg "The Distro is not Redhat, skip the test!"
-			$testResult = 'PASS'
-			$testStatus = 'TestCompleted'
-            break;
+        {
+        LogMsg "The Distro is not Redhat, skip the test!"
+        $testResult = 'PASS'
+        $testStatus = 'TestCompleted'
+          break;
         }
        }
        catch
@@ -119,7 +109,7 @@ while($index -gt 0)
        $resultArr += $testResult
     }
     $result = GetFinalResultHeader -resultarr $resultArr
-    DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $deployedServiceName -ResourceGroups $deployedResourceGroupName
+    DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed-ResourceGroups $isDeployed
 }
 
 return $result
