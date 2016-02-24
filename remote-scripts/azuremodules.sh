@@ -115,11 +115,7 @@ function zypper_install ()
 {
     package_name=$1
     zypper --non-interactive in $package_name
-    if [ $? -ne 0 ]; then
-        echo "FAILED: zypper_install $package_name"
-        return 1
-    fi
-    echo "SUCCESS: zypper_install $package_name"
+    check_exit_status "zypper_install $package_name"
 }
 
 function install_package()
