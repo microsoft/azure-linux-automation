@@ -82,6 +82,13 @@ function updaterepos()
     esac
 }
 
+function install_rpm ()
+{
+    package_name=$1
+    rpm -ivh --nodeps  $package_name
+    check_exit_status "install_rpm $package_name"
+}
+
 function apt_get_install ()
 {
     package_name=$1
