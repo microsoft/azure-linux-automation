@@ -89,6 +89,14 @@ function install_rpm ()
     check_exit_status "install_rpm $package_name"
 }
 
+function install_deb ()
+{
+    package_name=$1
+    dpkg -i  $package_name
+    apt-get install -f
+    check_exit_status "install_deb $package_name"
+}
+
 function apt_get_install ()
 {
     package_name=$1
