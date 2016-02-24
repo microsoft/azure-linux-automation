@@ -101,11 +101,7 @@ function apt_get_install ()
 {
     package_name=$1
     apt-get install -y  --force-yes $package_name
-    if [ $? -ne 0 ]; then
-        echo "FAILED: apt_get_install $package_name"
-        return 1
-    fi
-    echo "SUCCESS: apt_get_install $package_name"
+    check_exit_status "apt_get_install $package_name"
 }
 
 function yum_install ()
