@@ -82,9 +82,9 @@ while($index -gt 0)
         }
         else
         {
-        LogMsg "The Distro is not Redhat, skip the test!"
-        $testResult = 'PASS'
-        $testStatus = 'TestCompleted'
+          LogMsg "The Distro is not Redhat, skip the test!"
+          $testResult = 'PASS'
+          $testStatus = 'TestCompleted'
           break;
         }
        }
@@ -97,7 +97,7 @@ while($index -gt 0)
        {
           if (!$testResult)
           {
-  		    $testResult = "Aborted"
+           $testResult = "Aborted"
           }
           $resultArr += $testResult
           $index = $index - 1;
@@ -109,7 +109,7 @@ while($index -gt 0)
        $resultArr += $testResult
     }
     $result = GetFinalResultHeader -resultarr $resultArr
-    DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed-ResourceGroups $isDeployed
+    DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed -ResourceGroups $isDeployed
 }
 
 return $result
