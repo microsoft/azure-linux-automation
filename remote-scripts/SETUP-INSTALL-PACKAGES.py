@@ -12,7 +12,7 @@ import zipfile
 
 current_distro        = "unknown"
 distro_version        = "unknown"
-sudo_password        = "rdPa$$w0rd"
+sudo_password        = ""
 startup_file = ""
 
 rpm_links = {}

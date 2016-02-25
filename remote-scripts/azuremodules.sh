@@ -6,15 +6,25 @@
 #
 #
 
+function get_host_version ()
+{
+    dmesg | grep "Host Build" | sed "s/.*Host Build://"| awk '{print  $1}'| sed "s/;//"
+}
+
 function check_exit_status ()
 {
     exit_status=$?
     message=$1
+
     if [ $exit_status -ne 0 ]; then
         echo "$message: Failed (exit code: $exit_status)" 
-        exit $exit_status 
+        if [ "$2" == "exit" ]
+        then
+            exit $exit_status
+        fi 
+    else
+        echo "$message: Success" 
     fi
-    echo "$message: Success" 
 }
 
 function detect_linux_ditribution_version()
@@ -72,40 +82,43 @@ function updaterepos()
     esac
 }
 
+function install_rpm ()
+{
+    package_name=$1
+    rpm -ivh --nodeps  $package_name
+    check_exit_status "install_rpm $package_name"
+}
+
+function install_deb ()
+{
+    package_name=$1
+    dpkg -i  $package_name
+    apt-get install -f
+    check_exit_status "install_deb $package_name"
+}
+
 function apt_get_install ()
 {
     package_name=$1
     apt-get install -y  --force-yes $package_name
-    if [ $? -ne 0 ]; then
-        echo "FAILED: apt_get_install $package_name"
-        return 1
-    fi
-    echo "SUCCESS: apt_get_install $package_name"
+    check_exit_status "apt_get_install $package_name"
 }
 
 function yum_install ()
 {
     package_name=$1
     yum install -y $package_name
-    if [ $? -ne 0 ]; then
-        echo "FAILED: yum_install $package_name"
-        return 1
-    fi
-    echo "SUCCESS: yum_install $package_name"
+    check_exit_status "yum_install $package_name"
 }
 
 function zypper_install ()
 {
     package_name=$1
     zypper --non-interactive in $package_name
-    if [ $? -ne 0 ]; then
-        echo "FAILED: zypper_install $package_name"
-        return 1
-    fi
-    echo "SUCCESS: zypper_install $package_name"
+    check_exit_status "zypper_install $package_name"
 }
 
-function install_package()
+function install_package ()
 {
     local package_name=$1
     ditribution=$(detect_linux_ditribution)
@@ -113,15 +126,15 @@ function install_package()
         oracle|rhel|centos)
             yum_install $package_name
             ;;
-    
+
         ubuntu)
             apt_get_install $package_name
             ;;
-         
+
         suse|opensuse)
             zypper_install $package_name
             ;;
-         
+
         *)
             echo "Unknown ditribution"
             return 1
@@ -206,7 +219,7 @@ function remote_copy ()
        destination_path="."
     elif [ "$cmd" == "put" ]; then
        source_path=$filename
-       destination_path=$user@$host:$remote_path/$filename
+       destination_path=$user@$host:$remote_path/
     fi
 
     echo "sshpass -p $passwd scp -v -o StrictHostKeyChecking=no $source_path $destination_path 2>&1"
