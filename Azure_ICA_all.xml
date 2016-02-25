@@ -4932,6 +4932,33 @@
 		  <SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 		  <TestID>AzureRHUIStress_001</TestID>
 		</test>
+        <test>
+			<testName>ICA-RHUI-ALL-REGION-TEST</testName>
+		    <entrytestScript>start-rhui-stress-test-in-background.py</entrytestScript>
+		    <downloadtestScript>RHUI-STRESS-DOWNLOAD.py</downloadtestScript>
+		    <testScript>ICA-RHUI-ALL-REGION-TEST.py</testScript>
+			<testScriptPs1>ICA-RHUI-ALL-REGION-TEST.ps1</testScriptPs1>
+		  <files>.\remote-scripts\azuremodules.py,.\remote-scripts\RHUI-STRESS-DOWNLOAD.py,.\remote-scripts\start-rhui-stress-test-in-background.py,.\remote-scripts\ICA-RHUI-ALL-REGION-TEST.py</files>
+			<setupType>BVTDeployment</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<ASMRegion>"East US","West US","South Central US","Central US","North Central US","East US 2","North Europe","West Europe","Southeast Asia","East Asia","Japan West","Japan East","Brazil South","Australia Southeast","Australia East","Central India","South India","West India"</ASMRegion>
+			<ARMRegion>"East US","West US","South Central US","Central US","North Central US","East US 2","North Europe","West Europe","Southeast Asia","East Asia","Japan West","Japan East","Brazil South","Australia Southeast","Australia East"</ARMRegion>
+			<ASMStorageAccount>cieastus,ciwestus,ciscentralus,cicentralus,cincentralus,cieastus22,cinortheurope,ciwesteurope,cisoutheastasia,cieastasia,cijapanwest,cijapaneast,cibrazilsouth,ciaustraliasoutheast,ciaustraliaeast,cicentralindia,cisouthindia,ciwestindia</ASMStorageAccount>
+			<ARMStorageAccount>cieastusv2,ciwestusv2,cisouthcentralusv2,cicentralusv2,cinorthcentralusv2,cieastus2v2,cinortheuropev2,ciwesteuropev2,cisoutheastasiav2,cieastasiav2,cijapanwestv2,cijapaneastv2,cibrazilsouthv2,ciaustraliasoutheastv2,ciaustraliaeastv2</ARMStorageAccount>
+			<Publisher>RedHat</Publisher>
+			<Offer>RHEL</Offer>
+			<Sku>7.2</Sku>
+			<Version>latest</Version>
+			<RunDownload>true</RunDownload>
+			<parameters> 
+ 			    <duration>3600</duration> 
+ 			    <pkg>gcc</pkg> 
+ 			    <timeout>100</timeout>			 
+            </parameters> 
+			<TestID></TestID>
+		</test>
 			<test>
 				<testName>ICA-PERF-ZOOKEEPER-TEST</testName>
 				<testScript></testScript>
