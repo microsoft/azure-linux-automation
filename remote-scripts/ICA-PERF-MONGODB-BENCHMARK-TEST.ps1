@@ -169,7 +169,7 @@ if ($isDeployed)
 	}
 	Finally
 	{
-		$metaData = "IOPS"
+		$metaData = "8KB IOPS"
 		if (!$testResult)
 		{
 			$testResult = "Aborted"

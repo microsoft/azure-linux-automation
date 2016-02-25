@@ -5765,6 +5765,9 @@
 			<test>
 				<Name>ICA-PERF-MEMCACHED-BENCHMARK-TEST</Name>
 			</test>			
+			<test>
+				<Name>ICA-PERF-MONGODB-BENCHMARK-TEST</Name>
+			</test>			
 		</Cycle>		
 		
 		<Cycle>
