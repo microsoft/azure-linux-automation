@@ -209,8 +209,14 @@ function remote_copy ()
        shift
     done
 
+    if [[ `which sshpass` == "" ]]
+    then
+        echo "sshpass not installed\n Installing now..." 
+        install_package "sshpass" 
+    fi
+
     if [ "x$host" == "x" ] || [ "x$user" == "x" ] || [ "x$passwd" == "x" ] || [ "x$filename" == "x" ] ; then
-       echo "Usage: -user <username> -passwd <user password> -host <host ipaddress> -filename <filename> -remote_path <location of the file on remote vm> -cmd <put/get>"
+       echo "Usage: remote_copy -user <username> -passwd <user password> -host <host ipaddress> -filename <filename> -remote_path <location of the file on remote vm> -cmd <put/get>"
        exit -1
     fi
 
@@ -222,8 +228,8 @@ function remote_copy ()
        destination_path=$user@$host:$remote_path/
     fi
 
-    echo "sshpass -p $passwd scp -v -o StrictHostKeyChecking=no $source_path $destination_path 2>&1"
-    status=`sshpass -p $passwd scp -v -o StrictHostKeyChecking=no $source_path $destination_path 2>&1`
+    echo "sshpass -p $passwd scp -o StrictHostKeyChecking=no $source_path $destination_path 2>&1"
+    status=`sshpass -p $passwd scp -o StrictHostKeyChecking=no $source_path $destination_path 2>&1`
     echo $status
 }
 
@@ -235,12 +241,18 @@ function remote_exec ()
        shift
     done
     cmd=$@
+    if [[ `which sshpass` == "" ]]
+    then
+        echo "sshpass not installed\n Installing now..." 
+        install_package "sshpass" 
+    fi
+
     if [ "x$host" == "x" ] || [ "x$user" == "x" ] || [ "x$passwd" == "x" ] || [ "x$cmd" == "x" ] ; then
-       echo "Usage: -user <username> -passwd <user password> -host <host ipaddress> <onlycommand>"
+       echo "Usage: remote_exec -user <username> -passwd <user password> -host <host ipaddress> <onlycommand>"
        exit -1
     fi
 
-    echo "sshpass -p $passwd ssh -v -o StrictHostKeyChecking=no $user@$host $cmd 2>&1"
-    status=`sshpass -p $passwd ssh -v -o StrictHostKeyChecking=no $user@$host $cmd 2>&1`
+    echo "sshpass -p $passwd ssh -o StrictHostKeyChecking=no $user@$host $cmd 2>&1"
+    status=`sshpass -p $passwd ssh -o StrictHostKeyChecking=no $user@$host $cmd 2>&1`
     echo $status
 }
