@@ -228,7 +228,6 @@ function remote_copy ()
        destination_path=$user@$host:$remote_path/
     fi
 
-    echo "sshpass -p $passwd scp -o StrictHostKeyChecking=no $source_path $destination_path 2>&1"
     status=`sshpass -p $passwd scp -o StrictHostKeyChecking=no $source_path $destination_path 2>&1`
     echo $status
 }
@@ -252,7 +251,6 @@ function remote_exec ()
        exit -1
     fi
 
-    echo "sshpass -p $passwd ssh -o StrictHostKeyChecking=no $user@$host $cmd 2>&1"
     status=`sshpass -p $passwd ssh -o StrictHostKeyChecking=no $user@$host $cmd 2>&1`
     echo $status
 }
