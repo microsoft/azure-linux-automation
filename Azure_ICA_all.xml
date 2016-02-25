@@ -4997,7 +4997,7 @@
 				<testName>ICA-PERF-MONGODB-BENCHMARK-TEST</testName>
 				<testScript></testScript>
 				<testScriptps1>ICA-PERF-MONGODB-BENCHMARK-TEST.ps1</testScriptps1>
-				<setupType>MediumVM</setupType>
+				<setupType>G5</setupType>
 				<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 				<!--Remote Files will be directly downloaded to test VM.-->
 				<remoteFiles></remoteFiles>
