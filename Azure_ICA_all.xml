@@ -4992,6 +4992,19 @@
 				<remoteXML></remoteXML>
 				<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 				<Priority>P0</Priority>
+			</test>		
+			<test>
+				<testName>ICA-PERF-MONGODB-BENCHMARK-TEST</testName>
+				<testScript></testScript>
+				<testScriptps1>ICA-PERF-MONGODB-BENCHMARK-TEST.ps1</testScriptps1>
+				<setupType>MediumVM</setupType>
+				<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+				<!--Remote Files will be directly downloaded to test VM.-->
+				<remoteFiles></remoteFiles>
+				<!--Remote XML will be downloaded to automation server for analysis-->
+				<remoteXML></remoteXML>
+				<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+				<Priority>P0</Priority>
 			</test>			
 		</testsDefinition>
 	<testCycles>
@@ -5727,6 +5740,12 @@
 			<cycleName>LISA-MEMC-PERF</cycleName>
 			<test>
 				<Name>ICA-PERF-MEMCACHED-BENCHMARK-TEST</Name>
+			</test>			
+		</Cycle>
+		<Cycle>
+			<cycleName>LISA-MONGODB-PERF</cycleName>
+			<test>
+				<Name>ICA-PERF-MONGODB-BENCHMARK-TEST</Name>
 			</test>			
 		</Cycle>
 		<Cycle>
