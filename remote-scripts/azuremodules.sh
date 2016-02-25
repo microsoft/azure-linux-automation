@@ -251,6 +251,6 @@ function remote_exec ()
        exit -1
     fi
 
-    status=`sshpass -p $passwd ssh -o StrictHostKeyChecking=no $user@$host $cmd 2>&1`
+    status=`sshpass -p $passwd ssh -t -o StrictHostKeyChecking=no $user@$host $cmd 2>&1`
     echo $status
 }
