@@ -5,9 +5,16 @@
 # Email	: v-srm@microsoft.com
 #
 
-duration=$1
-filename=$2
-username=$3
+if [[ $# == 3 ]]
+then
+	duration=$1
+	filename=$2
+	username=$3
+else
+	echo "Usage: bash $0 <duration> <filename> <username>"
+	exit -1
+fi
+
 code_path="/home/$username/code/"
 . $code_path/azuremodules.sh
 
