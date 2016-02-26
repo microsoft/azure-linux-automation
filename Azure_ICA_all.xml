@@ -4382,7 +4382,7 @@
 			<testName>ICA-IO-DISK-PERF-TEST-RAID</testName>
 			<testScript>io-test-setup.sh</testScript>
 			<testScriptps1>ICA-IO-DISK-PERF-TEST.ps1</testScriptps1>
-			<files>.\remote-scripts\sysbench-full-io-test.sh,.\remote-scripts\sysbench-log-parser.sh,.\remote-scripts\io-test-setup.sh,.\remote-scripts\keep_cmds_in_startup.sh</files>
+			<files>.\remote-scripts\sysbench-full-io-test.sh,.\remote-scripts\azuremodules.sh,.\remote-scripts\sysbench-log-parser.sh,.\remote-scripts\io-test-setup.sh,.\remote-scripts\keep_cmds_in_startup.sh</files>
 			<setupType>D14DISK32</setupType>
 			<!-- <setupType>DS14DISK32</setupType> -->
 			<TestType></TestType>
@@ -4396,7 +4396,7 @@
 			<testName>ICA-IO-DISK-PERF-TEST-LVM</testName>
 			<testScript>io-test-setup.sh</testScript>
 			<testScriptps1>ICA-IO-DISK-PERF-TEST.ps1</testScriptps1>
-			<files>.\remote-scripts\sysbench-full-io-test.sh,.\remote-scripts\sysbench-log-parser.sh,.\remote-scripts\io-test-setup.sh,.\remote-scripts\keep_cmds_in_startup.sh</files>
+			<files>.\remote-scripts\sysbench-full-io-test.sh,.\remote-scripts\azuremodules.sh,.\remote-scripts\sysbench-log-parser.sh,.\remote-scripts\io-test-setup.sh,.\remote-scripts\keep_cmds_in_startup.sh</files>
 			<setupType>D14DISK32</setupType>
 			<!-- <setupType>DS14DISK32</setupType> -->
 			<TestType></TestType>
