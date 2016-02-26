@@ -4963,7 +4963,7 @@
 				<testName>ICA-PERF-ZOOKEEPER-TEST</testName>
 				<testScript></testScript>
 				<testScriptps1>ICA-PERF-ZOOKEEPER-TEST.ps1</testScriptps1>
-				<setupType>S2C1</setupType>
+				<setupType>M1S1</setupType>
 				<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 				<TestParameters>
 					<param>ZK_VERSION=3.4.6</param>
@@ -4984,7 +4984,7 @@
 				<testName>ICA-PERF-MEMCACHED-BENCHMARK-TEST</testName>
 				<testScript></testScript>
 				<testScriptps1>ICA-PERF-MEMCACHED-BENCHMARK-TEST.ps1</testScriptps1>
-				<setupType>S2C1</setupType>
+				<setupType>M1S1</setupType>
 				<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 				<!--Remote Files will be directly downloaded to test VM.-->
 				<remoteFiles></remoteFiles>
@@ -5781,7 +5781,7 @@
 			<cycleName>DEBUG</cycleName>
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
 			<test>
-				<Name>BVT-VERIFY-VERBOSE-ENABLED-LOGS</Name>
+				<Name>ICA-DOCKER-EXTENSION-TEST</Name>
 			</test>
 		</Cycle>
 	</testCycles>

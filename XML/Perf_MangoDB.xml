@@ -56,10 +56,10 @@
             <files>remote-scripts/ica/performance_md.sh</files>
             <testParams>
                 <param>MONGODB_VERSION=3.2.3</param>
-                <param>nThreads=16</param>
-                <param>fileSizeMB=100</param>
+                <param>nThreads=1000</param>
+                <param>fileSizeMB=100000</param>
                 <param>recSizeKB=8</param>
-                <param>testDurationSeconds=120</param>
+                <param>testDurationSeconds=600</param>
             </testParams>
             <uploadFiles>
                 <file>mdtest.log</file>
