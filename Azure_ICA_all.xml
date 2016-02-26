@@ -5098,7 +5098,7 @@
 			<files></files>
 			<TestParameters>
 				<destStorageAccount>Dest_StorageAccount</destStorageAccount>
-				<destContainerName>Dest_Container</destContainerName>
+				<destContainer>Dest_Container</destContainer>
 				<destLocation>Dest_Location</destLocation>
 			</TestParameters>
 			<setupType>BVTDeployment</setupType>
