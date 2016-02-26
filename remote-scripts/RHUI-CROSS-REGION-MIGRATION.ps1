@@ -162,7 +162,7 @@ if ($isDeployed)
 			$testResult = "Aborted"
 		}
 		$resultArr += $testResult
-#$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
+
 	}   
 }
 
