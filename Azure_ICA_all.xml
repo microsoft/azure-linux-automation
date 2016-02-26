@@ -4993,7 +4993,11 @@
 			<testScript></testScript>
 			<testScriptPs1>RHUI-CROSS-REGION-MIGRATION.ps1</testScriptPs1>
 			<files></files>
-			<TestParameters></TestParameters>
+			<TestParameters>
+				<destStorageAccount>Dest_StorageAccount</destStorageAccount>
+				<destContainerName>Dest_Container</destContainerName>
+				<destLocation>Dest_Location</destLocation>
+			</TestParameters>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
