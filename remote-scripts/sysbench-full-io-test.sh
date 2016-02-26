@@ -21,12 +21,13 @@ FILEIO="--test=fileio --file-total-size=134G --file-extra-flags=dsync --file-fsy
 username=$1
 
 code_path="/home/$username/code"
+. $code_path/azuremodules.sh
 mv $code_path/sysbenchlog/ $code_path/sysbenchlog-$(date +"%m%d%Y-%H%M%S")/
 sleep 5
 mkdir $code_path/sysbenchlog
 LOGDIR="${code_path}/sysbenchlog"
 LOGFILE="${LOGDIR}/sysbench.log.txt"
-
+install_package sysbench
 echo "uname: -------------------------------------------------" > $LOGFILE
 uname -a 2>&1 >> $LOGFILE
 echo "LIS version: --------------------------------------------" >> $LOGFILE
@@ -67,22 +68,22 @@ echo "=== End Preparation  $(date +"%x %r %Z") ===" >> $LOGFILE
 ####################################
 #Trigger run from here
 for testmode in $modes; do
-	Thread=$startThread
-	while [ $Thread -le $maxThread ]
+	io=$startIO
+	while [ $io -le $maxIo ]
 	do
-		io=$startIO
-		while [ $io -le $maxIo ]
+		Thread=$startThread
+		while [ $Thread -le $maxThread ]
 		do
-		iostatfilename="${LOGDIR}/iostat-sysbench-${testmode}-${io}K-${Thread}.txt"
-		nohup iostat -x 5 -t -y > $iostatfilename &
-		echo "-- iteration ${iteration} ----------------------------- ${testmode}, ${io}K, ${Thread} threads, 5 minutes ------------------ $(date +"%x %r %Z") ---" >> $LOGFILE
-		sysbench $FILEIO --file-test-mode=$testmode --file-block-size=${io}"K" --max-requests=0 --max-time=$ioruntime --num-threads=$Thread run >> $LOGFILE
-		iostatPID=`ps -ef | awk '/iostat/ && !/awk/ { print $2 }'`
-		kill -9 $iostatPID
+			iostatfilename="${LOGDIR}/iostat-sysbench-${testmode}-${io}K-${Thread}.txt"
+			nohup iostat -x 5 -t -y > $iostatfilename &
+			echo "-- iteration ${iteration} ----------------------------- ${testmode}, ${io}K, ${Thread} threads, 5 minutes ------------------ $(date +"%x %r %Z") ---" >> $LOGFILE
+			sysbench $FILEIO --file-test-mode=$testmode --file-block-size=${io}"K" --max-requests=0 --max-time=$ioruntime --num-threads=$Thread run >> $LOGFILE
+			iostatPID=`ps -ef | awk '/iostat/ && !/awk/ { print $2 }'`
+			kill -9 $iostatPID
+			Thread=$(( Thread*2 ))
+		done
 		io=$(( io*2 ))
 		iteration=$(( iteration+1 ))
-		done
-	Thread=$(( Thread*2 ))
 	done
 done
 ####################################
