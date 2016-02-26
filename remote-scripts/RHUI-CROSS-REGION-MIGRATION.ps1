@@ -10,8 +10,6 @@ if ($isDeployed)
 
 	try
 	{
-		#Replace packages config file
-		Copy-Item .\remote-scripts\packages-for-migration.xml .\remote-scripts\packages.xml
 		$testServiceData = Get-AzureService -ServiceName $isDeployed
 		$testVMsinService = $testServiceData | Get-AzureVM
 		$hs1vm1Hostname =  $testVMsinService.Name
