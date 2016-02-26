@@ -52,6 +52,10 @@
 			<Data>
 				<!-- You can add your own distro and Image names here -->
 				<Distro>
+					<Name>SSU1510P</Name>
+					<OsImage>b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu_DAILY_BUILD-wily-15_10-amd64-server-20160217.2-en-us-30GB</OsImage>
+				</Distro> 
+				<Distro>
 					<Name>U1410</Name>
 					<OsImage>b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu_DAILY_BUILD-utopic-14_10-amd64-server-20150620-en-us-30GB</OsImage>
 				</Distro> 
@@ -361,7 +365,7 @@
 					</VirtualMachine>
 				</HostedService>
 			</IEndpointSingleHS>
-			
+
 			<NetPerf1HS2VM>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -423,6 +427,68 @@
 					</VirtualMachine>
 				</HostedService>
 			</NetPerf1HS2VM>
+
+			<DBPerf1HS2VM>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<ARMInstanceSize>Standard_D14</ARMInstanceSize>
+						<InstanceSize>Standard_D14</InstanceSize>
+						<!-- <InstanceSize>A9</InstanceSize>
+						<ARMInstanceSize>A9</ARMInstanceSize> -->
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>750</LocalPort>
+							<PublicPort>750</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>UDPtest</Name>
+							<Protocol>udp</Protocol>
+							<LocalPort>990</LocalPort>
+							<PublicPort>990</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<ARMInstanceSize>Standard_D14</ARMInstanceSize>
+						<InstanceSize>Standard_D14</InstanceSize>
+						<!-- <InstanceSize>A9</InstanceSize>
+						<ARMInstanceSize>A9</ARMInstanceSize> -->
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>222</PublicPort>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>1750</LocalPort>
+							<PublicPort>1750</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>UDPtest</Name>
+							<Protocol>udp</Protocol>
+							<LocalPort>1990</LocalPort>
+							<PublicPort>1990</PublicPort>
+							<LoadBalanced>False</LoadBalanced>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</DBPerf1HS2VM>
 
 			<E2ESingleVM>
 				<isDeployed>NO</isDeployed>
@@ -4380,7 +4446,18 @@
 			<TestID>Perf_005</TestID>
 			<Priority>P0</Priority>
 		</test>
-		
+		<test>
+			<testName>ICA-MYSQLDB-PERF-TEST</testName>
+			<testScript>mariadb_perf_client.sh</testScript>
+			<testScriptps1>ICA-MYSQLDB-PERF-TEST.ps1</testScriptps1>
+			<files>.\remote-scripts\mariadb_perf_client.sh,.\remote-scripts\mariadb_perf_server_conf.sh,.\remote-scripts\azuremodules.sh</files>
+			<setupType>DBPerf1HS2VM</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<TestID>Perf_007</TestID>
+			<Priority>P0</Priority>
+		</test>		
 		<test>
 			<testName>ICA-FIO-TEST</testName>
 			<testScript></testScript>
@@ -5534,6 +5611,13 @@
 				<Name>ICA-NETWORK-PERF-TEST</Name>
 			</test>
 		</Cycle>
+		<Cycle>
+			<cycleName>LISA-MARIADB-PERF</cycleName>
+			<test>
+				<Name>ICA-MYSQLDB-PERF-TEST</Name>
+			</test>
+		</Cycle>		
+		
 		<Cycle>
 			<cycleName>IOPERF-RAID</cycleName>
 			<test>
