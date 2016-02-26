@@ -18,8 +18,13 @@ FILEIO="--test=fileio --file-total-size=134G --file-extra-flags=dsync --file-fsy
 #All run config set here
 #
 
-username=$1
-
+if [[ $# == 1 ]]
+then
+	username=$1
+else
+	echo "Usage: bash $0 <vm_loginuser>"
+	exit -1
+fi
 code_path="/home/$username/code"
 . $code_path/azuremodules.sh
 mv $code_path/sysbenchlog/ $code_path/sysbenchlog-$(date +"%m%d%Y-%H%M%S")/
