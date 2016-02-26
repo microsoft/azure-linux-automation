@@ -73,7 +73,7 @@ echo "Host Build Version:" `dmesg | grep "Host Build" | sed "s/.*Host Build://"|
 
 runtime=300
 threads=990
-table_size=10000
+table_size=10000000
 
 echo "Test log created at: ${LOGFILE}"
 echo "===================================== Starting Run $(date +"%x %r %Z") ================================" >> $LOGFILE
