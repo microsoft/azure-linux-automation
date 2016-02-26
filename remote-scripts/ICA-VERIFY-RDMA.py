@@ -14,7 +14,7 @@ distro = args.distro
 def RunTest():
     UpdateState("TestRunning")
     RunLog.info("Distro: " + distro)
-    if(distro == "SLESHPC"):
+    if(distro == "SLES"):
         RunLog.info("Checking RDMA Driver version")
         output = Run("zypper info msft-lis-rdma-kmp-default")
         r = re.search("Version: (\S+)", output)
@@ -57,10 +57,10 @@ def RunTest():
             ResultLog.error('FAIL')
         UpdateState("TestCompleted")
         
-
+	# Funtion is TBD against other distros
     else:
-        RunLog.info("The case is not supported against this distro,skip it")
-        ResultLog.info('PASS')
+        RunLog.info("The verification method is not defined against this distro")
+        ResultLog.error('FAIL')
         UpdateState("TestCompleted")
 		
 RunTest()

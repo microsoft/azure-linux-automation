@@ -18,37 +18,32 @@ if ($isDeployed)
 		RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
 		RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *" -runAsSudo
 
-		#Detect whether the distro is HPC series
-		foreach ($newDistro in $xmlConfig.config.Azure.Deployment.Data.Distro)
+		LogMsg "Executing : $($currentTestData.testScript)"
+		$WaagentConfigFile = '/etc/waagent.conf'
+		if ($detectedDistro -eq "COREOS")
 		{
-			if ($newDistro.Name -eq $Distro)
+			$WaagentConfigFile = '/usr/share/oem/waagent.conf'
+		}
+		$output = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat $WaagentConfigFile" -runAsSudo
+		if($output -match 'OS.UpdateRdmaDriver=y' -and $output -match 'OS.CheckRdmaDriver=y')
+		{
+			RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "$python_cmd $($currentTestData.testScript) -d $detectedDistro" -runAsSudo
+			RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "mv Runtime.log $($currentTestData.testScript).log" -runAsSudo
+			RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/state.txt, /home/$user/Summary.log, /home/$user/$($currentTestData.testScript).log" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
+			$testResult = Get-Content $LogDir\Summary.log
+			$testStatus = Get-Content $LogDir\state.txt
+			LogMsg "Test result : $testResult"
+
+			if ($testStatus -eq "TestCompleted")
 			{
-				if ($UseAzureResourceManager)
-				{
-					$SourceName = $newDistro.OsVHD
-				}
-				else
-				{
-					$SourceName  = $newDistro.OsImage
-				}
+				LogMsg "Test Completed"
 			}
 		}
-		
-		if ($SourceName -match 'hpc')
+		else
 		{
-			$detectedDistro = $detectedDistro + 'HPC'
-		}
-
-		LogMsg "Executing : $($currentTestData.testScript)"		
-		RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "$python_cmd $($currentTestData.testScript) -d $detectedDistro" -runAsSudo
-		RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "mv Runtime.log $($currentTestData.testScript).log" -runAsSudo
-		RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/state.txt, /home/$user/Summary.log, /home/$user/$($currentTestData.testScript).log" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
-		$testResult = Get-Content $LogDir\Summary.log
-		$testStatus = Get-Content $LogDir\state.txt
-		LogMsg "Test result : $testResult"
-
-		if ($testStatus -eq "TestCompleted")
-		{
+			LogMsg "The test is not supported against this distro, skip it"
+			$testResult = 'PASS'
+			LogMsg "Test result : $testResult"
 			LogMsg "Test Completed"
 		}
 	}

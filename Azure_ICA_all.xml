@@ -3285,10 +3285,10 @@
 			<TestID>AzureBVT_027</TestID>
 		</test>
 		<test>
-			<testName>BVT-VERIFY-RDMA</testName>
-			<testScript>BVT-VERIFY-RDMA.py</testScript>
-			<testScriptPs1>BVT-VERIFY-RDMA.ps1</testScriptPs1>
-			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\BVT-VERIFY-RDMA.py</files>
+			<testName>ICA-VERIFY-RDMA</testName>
+			<testScript>ICA-VERIFY-RDMA.py</testScript>
+			<testScriptPs1>ICA-VERIFY-RDMA.ps1</testScriptPs1>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\ICA-VERIFY-RDMA.py</files>
 			<setupType>RdmaVM</setupType>
 			<TestType>
 			</TestType>
@@ -5093,9 +5093,10 @@
 
 		<test>
 			<testName>RHUI-CROSS-REGION-MIGRATION</testName>
-			<testScript>SETUP-INSTALL-PACKAGES.py</testScript>
+			<testScript></testScript>
 			<testScriptPs1>RHUI-CROSS-REGION-MIGRATION.ps1</testScriptPs1>
-			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\SETUP-INSTALL-PACKAGES.py,.\remote-scripts\packages.xml</files>
+			<files></files>
+			<TestParameters></TestParameters>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>

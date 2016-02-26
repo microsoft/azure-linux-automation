@@ -1,7 +1,0 @@
-<!--#This list contains packages tobe installed separate each package name with space or tab or multiple number of spaces.-->
-<setup>
-    <branch>
-    	<packages distro="universal">PrepareRHUI</packages>
-	    <packages distro="rhel">PrepareRHUI</packages>
-    </branch>
-</setup>
