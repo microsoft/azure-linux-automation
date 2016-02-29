@@ -183,7 +183,7 @@ function create_raid_and_mount()
     list=(`fdisk -l | grep 'Disk.*/dev/sd[a-z]' |awk  '{print $2}' | sed s/://| sort| grep -v "/dev/sd[ab]$" `)
 
     lsblk
-
+    install_package mdadm
     echo "--- Raid $deviceName creation started ---"
     (echo y)| mdadm --create $deviceName --level 0 --raid-devices ${#list[@]} ${list[@]}
     check_exit_status "$deviceName Raid creation"

@@ -35,7 +35,6 @@ if ($isDeployed)
 		
 		$KernelVersion = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "uname -a" -runAsSudo 
 		LogMsg "VM1 kernel version:- $KernelVersion"
-		$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "yum install -y lvm2" -runAsSudo 
 		$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "bash /home/$user/code/$($currentTestData.testScript) $user $DiskType" -runAsSudo -runmaxallowedtime 7200
 		$iosetupStatus = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat /home/$user/code/iotest.log.txt | grep 'mount: Success'" -runAsSudo
 		if ($iosetupStatus -imatch 'mount: Success')

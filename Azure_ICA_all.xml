@@ -443,20 +443,6 @@
 							<LocalPort>22</LocalPort>
 							<PublicPort>22</PublicPort>
 						</EndPoints>
-						<EndPoints>
-							<Name>TCPtest</Name>
-							<Protocol>tcp</Protocol>
-							<LocalPort>750</LocalPort>
-							<PublicPort>750</PublicPort>
-							<LoadBalanced>False</LoadBalanced>
-						</EndPoints>
-						<EndPoints>
-							<Name>UDPtest</Name>
-							<Protocol>udp</Protocol>
-							<LocalPort>990</LocalPort>
-							<PublicPort>990</PublicPort>
-							<LoadBalanced>False</LoadBalanced>
-						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
 					<VirtualMachine>
@@ -470,20 +456,6 @@
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
 							<PublicPort>222</PublicPort>
-						</EndPoints>
-						<EndPoints>
-							<Name>TCPtest</Name>
-							<Protocol>tcp</Protocol>
-							<LocalPort>1750</LocalPort>
-							<PublicPort>1750</PublicPort>
-							<LoadBalanced>False</LoadBalanced>
-						</EndPoints>
-						<EndPoints>
-							<Name>UDPtest</Name>
-							<Protocol>udp</Protocol>
-							<LocalPort>1990</LocalPort>
-							<PublicPort>1990</PublicPort>
-							<LoadBalanced>False</LoadBalanced>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
@@ -4410,7 +4382,7 @@
 			<testName>ICA-IO-DISK-PERF-TEST-RAID</testName>
 			<testScript>io-test-setup.sh</testScript>
 			<testScriptps1>ICA-IO-DISK-PERF-TEST.ps1</testScriptps1>
-			<files>.\remote-scripts\sysbench-full-io-test.sh,.\remote-scripts\sysbench-log-parser.sh,.\remote-scripts\io-test-setup.sh,.\remote-scripts\keep_cmds_in_startup.sh</files>
+			<files>.\remote-scripts\sysbench-full-io-test.sh,.\remote-scripts\azuremodules.sh,.\remote-scripts\sysbench-log-parser.sh,.\remote-scripts\io-test-setup.sh,.\remote-scripts\keep_cmds_in_startup.sh</files>
 			<setupType>D14DISK32</setupType>
 			<!-- <setupType>DS14DISK32</setupType> -->
 			<TestType></TestType>
@@ -4424,7 +4396,7 @@
 			<testName>ICA-IO-DISK-PERF-TEST-LVM</testName>
 			<testScript>io-test-setup.sh</testScript>
 			<testScriptps1>ICA-IO-DISK-PERF-TEST.ps1</testScriptps1>
-			<files>.\remote-scripts\sysbench-full-io-test.sh,.\remote-scripts\sysbench-log-parser.sh,.\remote-scripts\io-test-setup.sh,.\remote-scripts\keep_cmds_in_startup.sh</files>
+			<files>.\remote-scripts\sysbench-full-io-test.sh,.\remote-scripts\azuremodules.sh,.\remote-scripts\sysbench-log-parser.sh,.\remote-scripts\io-test-setup.sh,.\remote-scripts\keep_cmds_in_startup.sh</files>
 			<setupType>D14DISK32</setupType>
 			<!-- <setupType>DS14DISK32</setupType> -->
 			<TestType></TestType>
@@ -4438,7 +4410,7 @@
 			<testName>ICA-NETWORK-PERF-TEST</testName>
 			<testScript>NetPerf_setup_startup.sh</testScript>
 			<testScriptps1>ICA-NETWORK-PERF-TEST.ps1</testScriptps1>
-			<files>.\remote-scripts\NetPerf_setup_startup.sh,.\remote-scripts\client_start.sh,.\remote-scripts\server_start.sh,.\remote-scripts\keep_cmds_in_startup.sh,.\remote-scripts\sar-top.sh,.\remote-scripts\generate_csvs.sh</files>
+			<files>.\remote-scripts\NetPerf_setup_startup.sh,.\remote-scripts\client_start.sh,.\remote-scripts\server_start.sh,.\remote-scripts\keep_cmds_in_startup.sh,.\remote-scripts\azuremodules.sh,.\remote-scripts\sar-top.sh,.\remote-scripts\generate_csvs.sh</files>
 			<setupType>NetPerf1HS2VM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>

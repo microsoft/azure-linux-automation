@@ -4,13 +4,25 @@
 # Author: Srikanth M
 # Email	: v-srm@microsoft.com
 #
+
+if [[ $# == 1 ]]
+then
+	username=$1
+else
+	echo "Usage: bash $0 <vm_loginuser>"
+	exit -1
+fi
+
+code_path="/home/$username/code/"
+. $code_path/azuremodules.sh
+
+install_package iperf3
+
 for port_number in `seq 8001 8101`
 do
 iperf3 -s -D -p $port_number
 done
 
-username=$1
-code_path="/home/$username/code/"
 while [ `netstat -natp | grep iperf | grep ESTA | wc -l` -eq 0 ]
 do
 sleep 1
