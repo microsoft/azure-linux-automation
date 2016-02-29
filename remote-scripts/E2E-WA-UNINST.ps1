@@ -37,7 +37,7 @@ if ($isDeployed)
         $errCounter1 = [int]$errCounter1[-1].ToString()
         write-host "`$errCounter1: $errCounter1"
         RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat $($currentTestData.testScript).tmp.log Runtime.log >> $($currentTestData.testScript).log" -runAsSudo
-        RemoteCopy -download -downloadFrom $hs1VIP -files "/home/test/state.txt, /home/test/Summary.log, /home/test/$($currentTestData.testScript).log" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
+        RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/state.txt, /home/$user/Summary.log, /home/$user/$($currentTestData.testScript).log" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
         
         $errCounter+=$errCounter1
         write-host "`$errCounter: $errCounter"

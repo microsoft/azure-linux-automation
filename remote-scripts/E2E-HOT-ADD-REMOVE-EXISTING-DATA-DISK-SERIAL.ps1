@@ -56,6 +56,7 @@ foreach ($newSetupType in $currentTestData.SubtestValues.split(","))
             <#This script doesn't need any file to upload, however, we need to upload at least one file to New deployment in order to cache the key to our server. 
             RemoteCypy function is written to cache the server key. So that RunLinuxCmd function can work well..#>
             RemoteCopy -uploadTo $testVMObject.ip -port $testVMObject.sshPort -files $currentTestData.files -username $testVMObject.user -password $testVMObject.password -upload
+			RunLinuxCmd -username $testVMObject.user -password $testVMObject.password  -ip $testVMObject.ip -port $testVMObject.sshPort -command "chmod +x *.sh"
         
             switch ($hs1vm1.InstanceSize)
             {

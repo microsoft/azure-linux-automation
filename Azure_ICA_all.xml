@@ -1534,6 +1534,26 @@
 				</HostedService>
 			</BVTDeployment>
 
+			<RdmaVM>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state>
+						</state>
+						<InstanceSize>A8</InstanceSize>
+						<ARMInstanceSize>Standard_A8</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk>
+						</DataDisk>
+				  </VirtualMachine>
+				</HostedService>
+			 </RdmaVM>
+
 			<RHUIStressDep>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -3263,6 +3283,19 @@
 			<TestFeature></TestFeature>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_027</TestID>
+		</test>
+		<test>
+			<testName>ICA-VERIFY-RDMA</testName>
+			<testScript>ICA-VERIFY-RDMA.py</testScript>
+			<testScriptPs1>ICA-VERIFY-RDMA.ps1</testScriptPs1>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\ICA-VERIFY-RDMA.py</files>
+			<setupType>RdmaVM</setupType>
+			<TestType>
+			</TestType>
+			<TestFeature>
+			</TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<TestID></TestID>
 		</test>
 		<test>
 			<testName>NETWORK-OUTBOUND-ACCESS-IPERF-DTAP-UDP</testName>
@@ -5029,6 +5062,8 @@
 				<remoteXML></remoteXML>
 				<Priority>P0</Priority>
 			</test>			
+
+
 			<test>
 				<testName>ICA-PERF-MEMCACHED-BENCHMARK-TEST</testName>
 				<testScript></testScript>
@@ -5055,7 +5090,28 @@
 				<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 				<Priority>P0</Priority>
 			</test>			
-		</testsDefinition>
+
+
+
+		<test>
+			<testName>RHUI-CROSS-REGION-MIGRATION</testName>
+			<testScript></testScript>
+			<testScriptPs1>RHUI-CROSS-REGION-MIGRATION.ps1</testScriptPs1>
+			<files></files>
+			<TestParameters>
+				<destStorageAccount>Dest_StorageAccount</destStorageAccount>
+				<destContainer>Dest_Container</destContainer>
+				<destLocation>Dest_Location</destLocation>
+			</TestParameters>
+			<setupType>BVTDeployment</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<TestID></TestID>
+		</test>
+			
+	</testsDefinition>
+
 	<testCycles>
 		<!-- Setup related tests -->
 		<Cycle>
