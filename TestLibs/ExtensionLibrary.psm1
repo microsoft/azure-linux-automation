@@ -25,7 +25,16 @@
 		{
 			LogMsg "Verifying $ExtensionName from Azure Using Get-AzureVM command ..."
 			$vmDetails = Get-AzureVM -ServiceName $ServiceName
- 			if ( ( $vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Status -eq "Success" ) -and ($vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Name -imatch $ExtensionName ))
+			if ($ExtensionName -imatch "DockerExtension")
+			{
+				LogMsg "Verifying docker extension status using `$vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Operation."
+				$extAzureStatus = ( $vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Status -eq "Success" ) -and ($vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Operation -imatch "Enable Docker" )
+			}
+			else
+			{
+				$extAzureStatus = ( $vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Status -eq "Success" ) -and ($vmDetails.ResourceExtensionStatusList.ExtensionSettingStatus.Name -imatch $ExtensionName )
+			}
+ 			if ( $extAzureStatus )
 			{
 				
 				LogMsg "$ExtensionName extension status is SUCCESS in (Get-AzureVM).ResourceExtensionStatusList.ExtensionSettingStatus"

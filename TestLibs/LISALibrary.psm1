@@ -39,42 +39,66 @@ Function ProvisionVMsForLisa($allVMData, $installPackagesOnRoleNames)
 		$out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "/home/$user/disableHostKeyVerification.sh" 
 		$out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "cp /home/$user/.ssh/config /root/.ssh/" 
 		$out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "service sshd restart" 
-
-        if ( $installPackagesOnRoleNames )
-        {
-            if ( $installPackagesOnRoleNames -imatch $vmData.RoleName )
-            {
-		        LogMsg "Executing $scriptName ..."
-		        $provisionJob = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "/root/$scriptName" -RunInBackground
-		        #endregion
-		        while ( (Get-Job -Id $provisionJob).State -eq "Running" )
-		        {
-			        $currentStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "tail -n 1 /root/provisionLinux.log"
-			        LogMsg "Current Package Installation Status : $currentStatus"
-			        WaitFor -seconds 10
-		        }
-		        RemoteCopy -download -downloadFrom $vmData.PublicIP -port $vmData.SSHPort -files "/root/provisionLinux.log" -username "root" -password $password -downloadTo $LogDir
-		        Rename-Item -Path "$LogDir\provisionLinux.log" -NewName "$($vmData.RoleName)-provisionLinux.log" -Force | Out-Null
-            }
-            else
-            {
-                LogMsg "$($vmData.RoleName) is set to NOT install packages. Hence skipping package installation on this VM."
-            }
-        }
-        else
-        {
-		    LogMsg "Executing $scriptName ..."
-		    $provisionJob = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "/root/$scriptName" -RunInBackground
-		    #endregion
-		    while ( (Get-Job -Id $provisionJob).State -eq "Running" )
-		    {
-			    $currentStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "tail -n 1 /root/provisionLinux.log"
-			    LogMsg "Current Package Installation Status : $currentStatus"
-			    WaitFor -seconds 10
-		    }
-		    RemoteCopy -download -downloadFrom $vmData.PublicIP -port $vmData.SSHPort -files "/root/provisionLinux.log" -username "root" -password $password -downloadTo $LogDir
-		    Rename-Item -Path "$LogDir\provisionLinux.log" -NewName "$($vmData.RoleName)-provisionLinux.log" -Force | Out-Null        }        
 		LogMsg "$($vmData.RoleName) preparation finished."
 	}
-	#endregion
+	
+	$packageInstallJobs = @()
+	foreach ( $vmData in $allVMData )
+	{
+		if ( $installPackagesOnRoleNames )
+		{
+			if ( $installPackagesOnRoleNames -imatch $vmData.RoleName )
+			{
+				LogMsg "Executing $scriptName ..."
+				$jobID = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "/root/$scriptName" -RunInBackground
+				$packageInstallObj = New-Object PSObject
+				Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name ID -Value $jobID
+				Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name RoleName -Value $vmData.RoleName
+				Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name PublicIP -Value $vmData.PublicIP
+				Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name SSHPort -Value $vmData.SSHPort
+				$packageInstallJobs += $packageInstallObj
+				#endregion
+			}
+			else
+			{
+				LogMsg "$($vmData.RoleName) is set to NOT install packages. Hence skipping package installation on this VM."
+			}
+		}
+		else
+		{
+			LogMsg "Executing $scriptName ..."
+			$jobID = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "/root/$scriptName" -RunInBackground
+			$packageInstallObj = New-Object PSObject
+			Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name ID -Value $jobID
+			Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name RoleName -Value $vmData.RoleName
+			Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name PublicIP -Value $vmData.PublicIP
+			Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name SSHPort -Value $vmData.SSHPort
+			$packageInstallJobs += $packageInstallObj
+			#endregion
+		}		
+	}
+	
+	$packageInstallJobsRunning = $true
+	while ($packageInstallJobsRunning)
+	{
+		$packageInstallJobsRunning = $false
+		foreach ( $job in $packageInstallJobs )
+		{
+			if ( (Get-Job -Id $($job.ID)).State -eq "Running" )
+			{
+				$currentStatus = RunLinuxCmd -ip $job.PublicIP -port $job.SSHPort -username "root" -password $password -command "tail -n 1 /root/provisionLinux.log"
+				LogMsg "Package Installation Status for $($job.RoleName) : $currentStatus"
+				$packageInstallJobsRunning = $true
+			}
+			else
+			{
+				RemoteCopy -download -downloadFrom $job.PublicIP -port $job.SSHPort -files "/root/provisionLinux.log" -username "root" -password $password -downloadTo $LogDir
+				Rename-Item -Path "$LogDir\provisionLinux.log" -NewName "$($job.RoleName)-provisionLinux.log" -Force | Out-Null
+			}
+		}
+		if ( $packageInstallJobsRunning )
+		{
+			WaitFor -seconds 10
+		}
+	}
 }

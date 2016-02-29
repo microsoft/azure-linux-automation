@@ -5012,7 +5012,7 @@
 				<testName>ICA-PERF-ZOOKEEPER-TEST</testName>
 				<testScript></testScript>
 				<testScriptps1>ICA-PERF-ZOOKEEPER-TEST.ps1</testScriptps1>
-				<setupType>S2C1</setupType>
+				<setupType>M1S1</setupType>
 				<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 				<TestParameters>
 					<param>ZK_VERSION=3.4.6</param>
@@ -5029,7 +5029,32 @@
 				<remoteXML></remoteXML>
 				<Priority>P0</Priority>
 			</test>			
-			
+			<test>
+				<testName>ICA-PERF-MEMCACHED-BENCHMARK-TEST</testName>
+				<testScript></testScript>
+				<testScriptps1>ICA-PERF-MEMCACHED-BENCHMARK-TEST.ps1</testScriptps1>
+				<setupType>M1S1</setupType>
+				<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+				<!--Remote Files will be directly downloaded to test VM.-->
+				<remoteFiles></remoteFiles>
+				<!--Remote XML will be downloaded to automation server for analysis-->
+				<remoteXML></remoteXML>
+				<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+				<Priority>P0</Priority>
+			</test>		
+			<test>
+				<testName>ICA-PERF-MONGODB-BENCHMARK-TEST</testName>
+				<testScript></testScript>
+				<testScriptps1>ICA-PERF-MONGODB-BENCHMARK-TEST.ps1</testScriptps1>
+				<setupType>G5</setupType>
+				<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+				<!--Remote Files will be directly downloaded to test VM.-->
+				<remoteFiles></remoteFiles>
+				<!--Remote XML will be downloaded to automation server for analysis-->
+				<remoteXML></remoteXML>
+				<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+				<Priority>P0</Priority>
+			</test>			
 		</testsDefinition>
 	<testCycles>
 		<!-- Setup related tests -->
@@ -5767,7 +5792,18 @@
 				<Name>ICA-PERF-ZOOKEEPER-TEST</Name>
 			</test>
 		</Cycle>		
-
+		<Cycle>
+			<cycleName>LISA-MEMC-PERF</cycleName>
+			<test>
+				<Name>ICA-PERF-MEMCACHED-BENCHMARK-TEST</Name>
+			</test>			
+		</Cycle>
+		<Cycle>
+			<cycleName>LISA-MONGODB-PERF</cycleName>
+			<test>
+				<Name>ICA-PERF-MONGODB-BENCHMARK-TEST</Name>
+			</test>			
+		</Cycle>
 		<Cycle>
 			<cycleName>LISA-PERF</cycleName>
 			<test>
@@ -5782,6 +5818,12 @@
 			<test>
 				<Name>ICA-PERF-ZOOKEEPER-TEST</Name>
 			</test>
+			<test>
+				<Name>ICA-PERF-MEMCACHED-BENCHMARK-TEST</Name>
+			</test>			
+			<test>
+				<Name>ICA-PERF-MONGODB-BENCHMARK-TEST</Name>
+			</test>			
 		</Cycle>		
 		
 		<Cycle>
@@ -5795,7 +5837,7 @@
 			<cycleName>DEBUG</cycleName>
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
 			<test>
-				<Name>ICA-MYSQLDB-PERF-TEST</Name>
+				<Name>ICA-DOCKER-EXTENSION-TEST</Name>
 			</test>
 		</Cycle>
 	</testCycles>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+ Linux on Hyper-V and Azure Test Code, ver. 1.0.0
+ Copyright (c) Microsoft Corporation
+
+ All rights reserved. 
+ Licensed under the Apache License, Version 2.0 (the ""License"");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0  
+
+ THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS
+ OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
+ ANY IMPLIED WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR
+ PURPOSE, MERCHANTABLITY OR NON-INFRINGEMENT.
+
+ See the Apache Version 2.0 License for specific language governing
+ permissions and limitations under the License.
+-->
+
+<config>
+    <global>
+        <logfileRootDir>TestResults</logfileRootDir>
+        <defaultSnapshot>ICABase</defaultSnapshot>
+        <email>
+            <recipients>
+                <to>myself@mycompany.com</to>
+            </recipients>
+            <sender>myself@mycompany.com</sender>
+            <subject>LIS Performance Test Results</subject>
+            <smtpServer>mysmtphost.mycompany.com</smtpServer>
+        </email>
+
+        <!-- Optional testParams go here -->
+        <testParams>
+            <param>vmCpuNumber=4</param>
+            <param>vmMemory=8GB</param>
+            <param>ISO_OPTIONS=.\TestData\DistroISO\SLEs-12-Server-DVD-x86_64-GM-DVD1.iso,BOOT_IDE_FIRST</param>
+        </testParams>
+    </global>
+
+    <testSuites>
+        <suite>
+            <suiteName>MangoDbBenchmark</suiteName>
+            <suiteTests>
+                <suiteTest>Perf_MC_1Mil-100C</suiteTest>
+            </suiteTests>
+        </suite>
+    </testSuites>
+
+    <testCases>
+         <test>
+            <testName>Perf_MC_1Mil-100C</testName>          
+            <testScript>performance_md.sh</testScript>
+            <files>remote-scripts/ica/performance_mc.sh</files>
+            <testParams>
+                <param>MC_VERSION=1.4.25</param>
+                <param>MC_SERVERS="Server1 Server2"</param>
+                <param>MC_CONCURRENCY=100</param>
+                <param>MC_EXECUTE_NUMBER=10000</param>
+                <param>MC_INITIAL_LOAD=1000</param>
+            </testParams>
+            <uploadFiles>
+                <file>mctest.log</file>
+            </uploadFiles>
+            <timeout>1200</timeout>
+            <OnError>Continue</OnError>
+         </test>
+    </testCases>
+    
+    <VMs>
+        <vm>
+            <role>SUT1</role>
+            <hvServer>LIS-HOST01</hvServer>
+            <vmName>VM-MC-Client</vmName>
+            <os>Linux</os>
+            <ipv4></ipv4>
+            <sshKey>id_rsa.ppk</sshKey>
+            <suite>MangoDbBenchmark</suite>
+            <preStartConfig>
+                <file>.\setupscripts\Config-VM.ps1</file>
+                <file>.\setupscripts\Insert-ISO.ps1</file>
+            </preStartConfig>
+        </vm>
+        <vm>
+            <role>NonSUT1</role>
+            <hvServer>LIS-HOST02</hvServer>
+            <vmName>VM-MC-Server</vmName>
+            <os>Linux</os>
+            <ipv4></ipv4>
+            <sshKey>id_rsa.ppk</sshKey>
+            <preStartConfig>
+                <file>.\setupscripts\Config-VM.ps1</file>
+                <file>.\setupscripts\Insert-ISO.ps1</file>
+            </preStartConfig>
+        </vm>
+    </VMs>
+</config>
