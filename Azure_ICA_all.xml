@@ -3295,7 +3295,7 @@
 			<TestFeature>
 			</TestFeature>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
-			<TestID>AzureBVT_028</TestID>
+			<TestID></TestID>
 		</test>
 		<test>
 			<testName>NETWORK-OUTBOUND-ACCESS-IPERF-DTAP-UDP</testName>
