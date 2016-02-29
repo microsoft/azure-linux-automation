@@ -65,7 +65,7 @@ function updaterepos()
     ditribution=$(detect_linux_ditribution)
     case "$ditribution" in
         oracle|rhel|centos)
-            yum -y update
+            yum makecache
             ;;
     
         ubuntu)
@@ -73,7 +73,7 @@ function updaterepos()
             ;;
          
         suse|opensuse|sles)
-            zypper --non-interactive --gpg-auto-import-keys update
+            zypper refresh
             ;;
          
         *)
