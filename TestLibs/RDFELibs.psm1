@@ -1920,6 +1920,7 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 						{
 							LogWarn "Error in upload, Attempt $retry. Retrying for upload"
 							$retry=$retry+1
+							WaitFor -seconds 10
 						}
 						elseif(($returnCode -ne 0) -and ($retry -eq $maxRetry))
 						{
@@ -1975,6 +1976,7 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 						{
 							LogWarn "Error in upload, Attempt $retry. Retrying for upload"
 							$retry=$retry+1
+							WaitFor -seconds 10
 						}
 						elseif(($returnCode -ne 0) -and ($retry -eq $maxRetry))
 						{
