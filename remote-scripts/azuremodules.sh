@@ -100,7 +100,7 @@ function install_deb ()
 function apt_get_install ()
 {
     package_name=$1
-    apt-get install -y  --force-yes $package_name
+    DEBIAN_FRONTEND=noninteractive apt-get install -y  --force-yes $package_name
     check_exit_status "apt_get_install $package_name"
 }
 
