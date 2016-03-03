@@ -46,6 +46,7 @@ echo "----------------------------------------------------------" >> $LOGFILE
 echo "Number of CPU cores" `nproc` >> $LOGFILE
 echo "Memory" `free -h| grep Mem| awk '{print $2}'` >> $LOGFILE
 echo "Host Build Version" `dmesg | grep "Host Build" | sed "s/.*Host Build://"| awk '{print  $1}'| sed "s/;//"`  >> $LOGFILE
+echo "Data disks attached" `fdisk -l | grep 'Disk.*/dev/sd[a-z]' |awk  '{print $2}' | sed s/://| sort| grep -v "/dev/sd[ab]$"| wc -l`  >> $LOGFILE
 
 iteration=0
 ioruntime=300
