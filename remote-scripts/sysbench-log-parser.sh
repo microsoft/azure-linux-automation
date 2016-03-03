@@ -74,9 +74,11 @@ do
 done
 
 sed -i  -e  "s/rndrd/Random read/" $csv_file
-sed -i  -e  "s/seqrd/Sequential read/" $csv_file
-sed -i  -e  "s/seqrewr/Sequential write/" $csv_file
+sed -i  -e  "s/rndrw/Random read write/" $csv_file
 sed -i  -e  "s/rndwr/Random write/" $csv_file
+sed -i  -e  "s/seqrd/Sequential read/" $csv_file
+sed -i  -e  "s/seqrewr/Sequential read write/" $csv_file
+sed -i  -e  "s/seqwr/Sequential write/" $csv_file
 
 echo "Output csv file: $csv_file created successfully." >> $syslog_file_name
 echo "LOGPARSER COMPLETED." >> $syslog_file_name
