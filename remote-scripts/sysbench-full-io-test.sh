@@ -54,6 +54,7 @@ maxIo=8
 
 #All possible values for file-test-mode are rndrd rndwr rndrw seqrd seqrewr
 modes='rndrd rndwr rndrw seqrd seqrewr'
+#modes='rndrd rndwr rndrw seqrd seqwr seqrewr'
 
 startThread=1
 startIO=1
