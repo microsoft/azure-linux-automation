@@ -32,7 +32,12 @@ sleep 5
 mkdir $code_path/sysbenchlog
 LOGDIR="${code_path}/sysbenchlog"
 LOGFILE="${LOGDIR}/sysbench.log.txt"
-install_package sysbench
+
+if [[ `which sysbench` == "" ]]
+then
+	install_package sysbench
+fi
+
 echo "uname: -------------------------------------------------" > $LOGFILE
 uname -a 2>&1 >> $LOGFILE
 echo "LIS version: --------------------------------------------" >> $LOGFILE
@@ -88,8 +93,8 @@ for testmode in $modes; do
 			Thread=$(( Thread*2 ))
 		done
 		io=$(( io*2 ))
-		iteration=$(( iteration+1 ))
 	done
+	iteration=$(( iteration+1 ))
 done
 ####################################
 echo "===================================== Completed Run $(date +"%x %r %Z") script generated 2/9/2015 4:24:44 PM ================================" >> $LOGFILE
