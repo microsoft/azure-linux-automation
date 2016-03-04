@@ -270,6 +270,7 @@ function set_user_password {
         sudo_password=$3
     else
         echo "Usage: user user_password sudo_password"
+        return -1
     fi
 
     hash=$(openssl passwd -1 $user_password)
