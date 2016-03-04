@@ -3285,6 +3285,19 @@
 			<TestID>AzureBVT_027</TestID>
 		</test>
 		<test>
+	      <testName>ICA-PASSWD-POLICY-TEST</testName>
+	      <testScript>ICA-PASSWD-POLICY-TEST.py</testScript>
+	      <testScriptPs1>ICA-PASSWD-POLICY-TEST.ps1</testScriptPs1>
+	      <files>.\remote-scripts\ICA-PASSWD-POLICY-TEST.py,.\remote-scripts\azuremodules.py</files>
+	      <setupType>BVTDeployment</setupType>
+	      <TestType>
+	      </TestType>
+	      <TestFeature>
+	      </TestFeature>
+	      <SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+	      <TestID></TestID>
+	    </test>
+		<test>
 			<testName>ICA-VERIFY-RDMA</testName>
 			<testScript>ICA-VERIFY-RDMA.py</testScript>
 			<testScriptPs1>ICA-VERIFY-RDMA.ps1</testScriptPs1>
