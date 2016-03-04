@@ -32,7 +32,12 @@ sleep 5
 mkdir $code_path/sysbenchlog
 LOGDIR="${code_path}/sysbenchlog"
 LOGFILE="${LOGDIR}/sysbench.log.txt"
-install_package sysbench
+
+if [[ `which sysbench` == "" ]]
+then
+	install_package sysbench
+fi
+
 echo "uname: -------------------------------------------------" > $LOGFILE
 uname -a 2>&1 >> $LOGFILE
 echo "LIS version: --------------------------------------------" >> $LOGFILE
@@ -41,6 +46,7 @@ echo "----------------------------------------------------------" >> $LOGFILE
 echo "Number of CPU cores" `nproc` >> $LOGFILE
 echo "Memory" `free -h| grep Mem| awk '{print $2}'` >> $LOGFILE
 echo "Host Build Version" `dmesg | grep "Host Build" | sed "s/.*Host Build://"| awk '{print  $1}'| sed "s/;//"`  >> $LOGFILE
+echo "Data disks attached" `fdisk -l | grep 'Disk.*/dev/sd[a-z]' |awk  '{print $2}' | sed s/://| sort| grep -v "/dev/sd[ab]$"| wc -l`  >> $LOGFILE
 
 iteration=0
 ioruntime=300
@@ -49,6 +55,7 @@ maxIo=8
 
 #All possible values for file-test-mode are rndrd rndwr rndrw seqrd seqrewr
 modes='rndrd rndwr rndrw seqrd seqrewr'
+#modes='rndrd rndwr rndrw seqrd seqwr seqrewr'
 
 startThread=1
 startIO=1
@@ -88,8 +95,8 @@ for testmode in $modes; do
 			Thread=$(( Thread*2 ))
 		done
 		io=$(( io*2 ))
-		iteration=$(( iteration+1 ))
 	done
+	iteration=$(( iteration+1 ))
 done
 ####################################
 echo "===================================== Completed Run $(date +"%x %r %Z") script generated 2/9/2015 4:24:44 PM ================================" >> $LOGFILE
