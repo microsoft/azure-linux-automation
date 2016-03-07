@@ -275,7 +275,14 @@ Function SetSubscription ($subscriptionID, $subscriptionName, $certificateThumbp
 	}
 	else
 	{
-		$myCert = Get-Item cert:\CurrentUser\My\$certificateThumbprint
+		try
+		{
+			$myCert = Get-Item Cert:\CurrentUser\My\$CertThumbprint
+		}
+		catch
+		{
+			$myCert = Get-Item Cert:\LocalMachine\My\$CertThumbprint
+		}
 
 		# For Azure Powershell Version >= 0.8.8, Environment is used in Set-AzureSubscription for replacing ManagementEndpoint
 		if (IsEnvironmentSupported)
