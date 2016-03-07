@@ -260,3 +260,38 @@ function remote_exec ()
     status=`sshpass -p $passwd ssh -t -o StrictHostKeyChecking=no $user@$host $cmd 2>&1`
     echo $status
 }
+
+function set_user_password {
+    # This routine can set root or any user's password. 
+    if [[ $# == 3 ]]
+    then
+        user=$1
+        user_password=$2
+        sudo_password=$3
+    else
+        echo "Usage: user user_password sudo_password"
+        return -1
+    fi
+
+    hash=$(openssl passwd -1 $user_password)
+
+    string=`echo $sudo_password | sudo -S cat /etc/shadow | grep $user`
+
+    if [ "x$string" == "x" ]
+    then
+        echo "$user not found in /etc/shadow"
+    return -1
+    fi
+
+    IFS=':' read -r -a array <<< "$string"
+    line="${array[0]}:$hash:${array[2]}:${array[3]}:${array[4]}:${array[5]}:${array[6]}:${array[7]}:${array[8]}"
+
+    echo $sudo_password | sudo -S sed -i "s#^${array[0]}.*#$line#" /etc/shadow
+
+    if [ `echo $sudo_password | sudo -S cat /etc/shadow| grep $line|wc -l` != "" ]
+    then
+        echo "Password set succesfully"
+    else
+        echo "failed to set password"
+    fi
+}
