@@ -275,15 +275,16 @@ Function SetSubscription ($subscriptionID, $subscriptionName, $certificateThumbp
 	}
 	else
 	{
-		try
+		$myCert = $null
+		$myCert = Get-Item Cert:\CurrentUser\My\$certificateThumbprint -ErrorAction SilentlyContinue
+		if ( $myCert.Thumbprint -ne $certificateThumbprint )
 		{
-			$myCert = Get-Item cert:\CurrentUser\My\$certificateThumbprint
+			$myCert = Get-Item Cert:\LocalMachine\My\$certificateThumbprint -ErrorAction SilentlyContinue
 		}
-		catch
+		if ( $myCert.Thumbprint -ne $certificateThumbprint )
 		{
-			$myCert = Get-Item cert:\LocalMachine\My\$certificateThumbprint
+			Throw "Unable to load certificate from `"Cert:\LocalMachine\`" and `"Cert:\CurrentUser\`""
 		}
-
 		# For Azure Powershell Version >= 0.8.8, Environment is used in Set-AzureSubscription for replacing ManagementEndpoint
 		if (IsEnvironmentSupported)
 		{
