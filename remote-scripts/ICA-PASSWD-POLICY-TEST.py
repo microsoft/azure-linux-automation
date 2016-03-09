@@ -29,6 +29,15 @@ allowed_max_len_passwd = 72
 def DetectDist():
 	return [x.strip() for x in platform.linux_distribution()]
 
+def DetectSLESServicePatch():
+	patchlevel = None
+	if os.path.exists('/etc/SuSE-release'):
+		with open('/etc/SuSE-release','r') as f:
+			for x in f.readlines():
+				if x.startswith('PATCHLEVEL'):
+					patchlevel = x.split('=')[1].strip()
+	return patchlevel
+
 def GenRandomPassword(pcomplexity,plength=6):
 	passwd_length = int(plength)
 	nums = range(0,10)
@@ -62,21 +71,19 @@ def RunTest():
 	# define test matrix
 	test_matrix_password = OrderedDict()
 	test_matrix_password['pwd_too_short'] = ('123', False)
-	test_matrix_password['pwd_too_long'] = ('123456123456123456123456123456123456123456123456123456123456123456123456123456', False)
 	test_matrix_password['pwd_only_lowercase'] = ('abcdef', False)
 	test_matrix_password['pwd_only_uppercase'] = ('HELLOTEST', False)
 	test_matrix_password['pwd_only_number'] = ('123456', False)
 	test_matrix_password['pwd_random_2_rules'] = (GenRandomPassword(2), False)
 	test_matrix_password['pwd_random_3_rules'] = (GenRandomPassword(3), True)
 	test_matrix_password['pwd_random_4_rules'] = (GenRandomPassword(4), True)
-	test_matrix_password['pwd_too_long_random_4_rules'] = (GenRandomPassword(4,allowed_max_len_passwd+10), False)
 
 	dist, ver, _ = DetectDist()
 	failure = 0
 	if dist.upper() == "COREOS":
 		RunLog.info('CoreOS is not supported in automation by now. Still in investigation.')
 		return
-	if dist == "SUSE Linux Enterprise Server" and ver == "12":
+	if dist == "SUSE Linux Enterprise Server" and ver == "12" and DetectSLESServicePatch() == '1':
 		for t,p in test_matrix_password.items():
 			RunLog.info('Part: %s' % t)
 			if(ChangePwd(p[0]) == p[1]):
