@@ -5,16 +5,14 @@ from azuremodules import *
 def RunTest(command):
     UpdateState("TestRunning")
     RunLog.info("Checking resource disc...")
+    mountpoint = GetResourceDiskMountPoint()
+    RunLog.info('Mount point is %s' % mountpoint)
     osdisk = GetOSDisk()
-    if (IsUbuntu()) :
-        mntresource = "/dev/sdb1 on /mnt"
-    elif (osdisk == 'sdb') :
-        mntresource = "/dev/sda1 on /mnt/resource"
+    if (osdisk == 'sdb') :
+        mntresource = "/dev/sda1 on " + mountpoint
     else :
-        mntresource = "/dev/sdb1 on /mnt/resource"
-    temp = Run(command)
-    timeout = 0
-    output = temp
+        mntresource = "/dev/sdb1 on " + mountpoint
+    output = Run(command)
     if (mntresource in output) :
         RunLog.info('Resource disk is mounted successfully.')
         if ("ext4" in output) :
@@ -25,10 +23,9 @@ def RunTest(command):
             RunLog.info('Unknown filesystem detected for resource disk')
             ResultLog.info("FAIL")
         ResultLog.info('PASS')
-        UpdateState("TestCompleted")
     else :
         RunLog.error('Resource Disk mount check failed. Mount out put is: %s', output)
         ResultLog.error('FAIL')
-        UpdateState("TestCompleted")
+    UpdateState("TestCompleted")
 
 RunTest("mount")

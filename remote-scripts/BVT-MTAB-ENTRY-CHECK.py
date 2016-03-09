@@ -4,31 +4,25 @@ from azuremodules import *
 
 def RunTest(command):
     UpdateState("TestRunning")
+    mountpoint = GetResourceDiskMountPoint()
+    RunLog.info('Mount point is %s' % mountpoint)
+    osdisk = GetOSDisk()
     RunLog.info("Checking for resource disk entry in /etc/mtab.")
     output = Run(command)
-    if (IsUbuntu()) :
-        mntresource1 = "/dev/sdb1 /mnt"
-        mntresource2 = "/dev/sda1 /mnt"
+    if (osdisk == 'sdb') :
+        mntresource = "/dev/sda1 " + mountpoint
     else :
-        mntresource1 = "/dev/sdb1 /mnt/resource"
-        # There's rare cases that the resource disk is the first disk, it's acceptable as device names are not persistent on Linux
-        mntresource2 = "/dev/sda1 /mnt/resource"
+        mntresource = "/dev/sdb1 " + mountpoint
 
-    if (mntresource1 in output) or (mntresource2 in output) :
+    if mntresource in output:
         RunLog.info('Resource disk entry is present.')
         ResultLog.info('PASS')
-        str_out = output.splitlines()
-        #len_out = len(str_out)
-        for each in str_out :
-            #print(each)
-            if (mntresource1 in each) or (mntresource2 in each) :
+        for each in output.splitlines():
+            if mntresource in each:
                 RunLog.info("%s", each)
-
-        UpdateState("TestCompleted")
-
-    else :
+    else:
         RunLog.error('Resource disk entry is not present.')
         ResultLog.error('FAIL')
-        UpdateState("TestCompleted")
+    UpdateState("TestCompleted")
 
 RunTest("cat /etc/mtab")
