@@ -87,7 +87,7 @@ done
 echo "" >> $csv_file-tmp
 echo ",Max IOPS of ,each BlockSize," >> $csv_file-tmp
 modes='rndrd rndwr rndrw seqrd seqwr seqrewr'
-block_sizes='1Kb 2Kb 4Kb 8Kb'
+block_sizes='1Kb 2Kb 4Kb 8Kb 16Kb 32Kb'
 echo ",Test Mode,Block Size,Max IOPS," >> $csv_file-tmp
 for testmode in $modes 
 do
