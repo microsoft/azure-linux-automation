@@ -5133,7 +5133,20 @@
 			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 		</test>
-			
+		
+		<test>
+			<testName>ICA-VERIFY-BILLING-TAG</testName>
+			<testScript>ICA-VERIFY-BILLING-TAG.py</testScript>
+			<testScriptPs1>ICA-VERIFY-BILLING-TAG.ps1</testScriptPs1>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\ICA-VERIFY-BILLING-TAG.py,.\remote-scripts\BillingTags.xml</files>
+			<setupType>BVTDeployment</setupType>
+			<TestType>
+			</TestType>
+			<TestFeature>
+			</TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<TestID></TestID>
+		</test>			
 	</testsDefinition>
 
 	<testCycles>
