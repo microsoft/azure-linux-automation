@@ -155,11 +155,6 @@ def IsUbuntu():
         tmp=Run(cmd)
         return ("Ubuntu" in tmp)
 
-def IsDebian():
-    cmd = "cat /etc/issue"
-    tmp=Run(cmd)
-    return ("Debian" in tmp)
-
 def ParseWalaConf2Dict(walaconfpath):
     d = None
     if os.path.exists(walaconfpath):
