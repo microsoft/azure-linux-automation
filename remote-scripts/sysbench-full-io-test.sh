@@ -36,6 +36,13 @@ LOGFILE="${LOGDIR}/sysbench.log.txt"
 if [[ `which sysbench` == "" ]]
 then
 	install_package sysbench
+	check_exit_status "Sysbench package installation" exit
+fi
+
+if [[ `which iostat` == "" ]]
+then
+	install_package sysstat
+	check_exit_status "Sysstat package installation"
 fi
 
 echo "uname: -------------------------------------------------" > $LOGFILE
