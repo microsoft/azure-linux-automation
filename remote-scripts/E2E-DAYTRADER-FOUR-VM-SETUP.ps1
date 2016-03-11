@@ -53,7 +53,7 @@ if ($isDeployed)
 		#$ipinfo = "#all the IPs should be Internal ips `n"
 		#$ipinfo = "#all the IPs should be Internal ips `n<back_endVM_ip>$beip</back_endVM_ip>`n<front_endVM_ips>$fe1ip $fe2ip $fe3ip</front_endVM_ips>" 
 		#$ipinfo > 'Daytrader_install.xml'
-		"#all the IPs should be Internal ips `n<back_endVM_ip>$beip</back_endVM_ip>`n<front_endVM_ips>$fe1ip $fe2ip $fe3ip</front_endVM_ips>`n<front_endVM_username>test</front_endVM_username>`n<front_endVM_password>Redhat.Redhat.777</front_endVM_password>" > 'Daytrader_install.XML'
+		"#all the IPs should be Internal ips `n<back_endVM_ip>$beip</back_endVM_ip>`n<front_endVM_ips>$fe1ip $fe2ip $fe3ip</front_endVM_ips>`n<front_endVM_username>$user</front_endVM_username>`n<front_endVM_password>$password</front_endVM_password>" > 'Daytrader_install.XML'
 		$out = RemoteCopy -uploadTo $hs1VIP -port $hs1bvmsshport -files "Daytrader_install.XML" -username $user -password $password -upload 2>&1 | Out-Null
 		
 		
