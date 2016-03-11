@@ -36,6 +36,13 @@ LOGFILE="${LOGDIR}/sysbench.log.txt"
 if [[ `which sysbench` == "" ]]
 then
 	install_package sysbench
+	check_exit_status "Sysbench package installation" exit
+fi
+
+if [[ `which iostat` == "" ]]
+then
+	install_package sysstat
+	check_exit_status "Sysstat package installation"
 fi
 
 echo "uname: -------------------------------------------------" > $LOGFILE
@@ -51,14 +58,14 @@ echo "Data disks attached" `fdisk -l | grep 'Disk.*/dev/sd[a-z]' |awk  '{print $
 iteration=0
 ioruntime=300
 maxThread=1024
-maxIo=8
+maxIo=32
 
-#All possible values for file-test-mode are rndrd rndwr rndrw seqrd seqrewr
+#All possible values for file-test-mode are rndrd rndwr rndrw seqrd seqwr seqrewr
 modes='rndrd rndwr rndrw seqrd seqrewr'
 #modes='rndrd rndwr rndrw seqrd seqwr seqrewr'
 
 startThread=1
-startIO=1
+startIO=4
 ####################################
 
 echo "Test log created at: ${LOGFILE}"
