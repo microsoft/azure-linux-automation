@@ -3,12 +3,10 @@
 <config>
   <global>
     <platform>Azure</platform>
-
-    <emailList>v-kusa@microsoft.com</emailList>
-
-    <emailSender>v-kusa@microsoft.com</emailSender>
+    <emailList></emailList>
+    <emailSender></emailSender>
     <emailSubject>Automated test run on Azure</emailSubject>
-    <smtpServer>smtphost.redmond.corp.microsoft.com</smtpServer>
+    <smtpServer></smtpServer>
     <params>
       <param>LIS_TARBALL=hv-rhel6.3-july9-2012.tar</param>
     </params>
@@ -39,19 +37,19 @@
   <Azure>
 
     <General>
-      <SubscriptionID>4ea2a462-adfb-47f2-913a-d560e94e8065</SubscriptionID>
-      <SubscriptionName>WindowsAzureEndPoint-preview</SubscriptionName>
-      <CertificateThumbprint>C093FA5CD3AAE057CB7C4E04532B2E16E07C26CA</CertificateThumbprint>
-      <ManagementEndpoint>https://umapi-previewstandby.core.windows-int.net</ManagementEndpoint>
-      <ManagementPortalUrl>https://management-preview.core.windows-int.net</ManagementPortalUrl>
-      <StorageAccount>ostcstorage</StorageAccount>
-      <Location>West US</Location>
+      <SubscriptionID></SubscriptionID>
+      <SubscriptionName></SubscriptionName>
+      <CertificateThumbprint></CertificateThumbprint>
+      <ManagementEndpoint></ManagementEndpoint>
+      <ManagementPortalUrl></ManagementPortalUrl>
+      <StorageAccount></StorageAccount>
+      <Location></Location>
       <!-- <AffinityGroup>affinityuswest</AffinityGroup> -->
     </General>
 
     <CSUpload>
       <!-- Note : Please fill the subscription Id , Thumbprint and Service management link accordingly.Following details are for Production Cluster-->
-      <Subscription>"SubscriptionID=4ea2a462-adfb-47f2-913a-d560e94e8065;CertificateThumbprint=c093fa5cd3aae057cb7c4e04532b2e16e07c26ca;ServiceManagementEndpoint=https://umapi-previewstandby.core.windows-int.net"</Subscription>
+      <Subscription>"SubscriptionID=<SubscriptionID>;CertificateThumbprint=<CertificateThumbprint>;ServiceManagementEndpoint=<ServiceManagementEndpoint>"</Subscription>
       <!--
       <DestinationURL>http://linuxautostoreeastus2.blob.core.windows.net/vhds</DestinationURL> 
       -->
@@ -171,46 +169,46 @@
           </A9>
         </VMsizes>
 
-        <UserName>test</UserName>
-        <Password>"Redhat.Redhat.777"</Password>
+        <UserName></UserName>
+        <Password></Password>
         <sshKey>myPrivateKey.ppk</sshKey>
         <WaagentVersion>$CommitBranch:master$|$LastCommitDate:2013-02-20 15:51:16 -0800$|$LastCommitHash:797c97b556e1672c6efa7febf28d0575d54999dd$</WaagentVersion>
         <DTAP>
-          <IP>131.107.220.167</IP>
+          <IP></IP>
           <SshPort></SshPort>
-          <user>test</user>
-          <password>Redhat.Redhat.777</password>
+          <user></user>
+          <password></password>
           <tcpPort>750</tcpPort>
           <udpPort>990</udpPort>
         </DTAP>
         <DTAPBkup>
-          <IP>168.61.65.46</IP>
+          <IP></IP>
         </DTAPBkup>
         <dnsServer>
-          <IP>192.168.3.120</IP>
-          <Hostname>ubuntudns</Hostname>
-          <Username>root</Username>
-          <Password>redhat</Password>
+          <IP></IP>
+          <Hostname></Hostname>
+          <Username></Username>
+          <Password></Password>
         </dnsServer>
         <mysqlServer>
-          <IP>192.168.3.127</IP>
-          <Hostname>ubuntumysqlserver</Hostname>
-          <Username>root</Username>
-          <Password>redhat</Password>
-          <MysqlUsername>test</MysqlUsername>
-          <MysqlPassword>redhat</MysqlPassword>
+          <IP></IP>
+          <Hostname></Hostname>
+          <Username></Username>
+          <Password></Password>
+          <MysqlUsername></MysqlUsername>
+          <MysqlPassword></MysqlPassword>
         </mysqlServer>
         <nfsServer>
-          <IP>192.168.3.125</IP>
-          <Hostname>ubuntunfsserver</Hostname>
-          <Username>root</Username>
-          <Password>redhat</Password>
+          <IP></IP>
+          <Hostname></Hostname>
+          <Username></Username>
+          <Password></Password>
         </nfsServer>
         <ExternalPingServer>
-          <IP>137.135.10.230</IP>
-          <Url>externalpingserverdonotdelete.cloudapp.net</Url>
-          <Username>test</Username>
-          <Password>"Delt@!>Delt@@!LOA"</Password>
+          <IP></IP>
+          <Url></Url>
+          <Username></Username>
+          <Password></Password>
           <SSH>22</SSH>
           <UDPport>750</UDPport>
         </ExternalPingServer>
@@ -1153,10 +1151,10 @@
   </Azure>
   <VMs>
     <vm>
-      <hvServer>LISINTER620-4</hvServer>
-      <vmName>VhdUpload</vmName>
-      <ipv4>10.200.51.232</ipv4>
-      <Password>redhat</Password>
+      <hvServer></hvServer>
+      <vmName></vmName>
+      <ipv4></ipv4>
+      <Password></Password>
       <LIS_TARBALL>hv-rhel6.3-july9-2012.tar</LIS_TARBALL>
       <sshKey>rhel5_id_rsa.ppk</sshKey>
     </vm>
@@ -2350,22 +2348,7 @@
 		<!--ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM -->
 		<SubtestValues>ExtraSmallVM,SmallVM</SubtestValues>
 		<ExistingDisks>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_0.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_1.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_2.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_3.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_4.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_5.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_6.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_7.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_8.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_9.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_10.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_11.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_12.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_13.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_14.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_15.vhd</MediaLink>
+			<MediaLink></MediaLink>
 		</ExistingDisks>
 		<Priority>P0</Priority>
     </test>
@@ -2381,22 +2364,7 @@
 		<!--ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM -->
 		<SubtestValues>SmallVM,MediumVM</SubtestValues>
 		<ExistingDisks>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_0.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_1.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_2.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_3.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_4.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_5.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_6.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_7.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_8.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_9.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_10.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_11.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_12.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_13.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_14.vhd</MediaLink>
-			<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_15.vhd</MediaLink>
+			<MediaLink></MediaLink>
 		</ExistingDisks>
 		<Priority>P0</Priority>
     </test>	

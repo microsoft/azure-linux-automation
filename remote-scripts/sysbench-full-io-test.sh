@@ -100,10 +100,10 @@ for testmode in $modes; do
 			iostatPID=`ps -ef | awk '/iostat/ && !/awk/ { print $2 }'`
 			kill -9 $iostatPID
 			Thread=$(( Thread*2 ))
+			iteration=$(( iteration+1 ))
 		done
 		io=$(( io*2 ))
 	done
-	iteration=$(( iteration+1 ))
 done
 ####################################
 echo "===================================== Completed Run $(date +"%x %r %Z") script generated 2/9/2015 4:24:44 PM ================================" >> $LOGFILE

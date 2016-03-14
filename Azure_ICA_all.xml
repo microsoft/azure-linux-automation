@@ -110,7 +110,7 @@
 						<RAM>114688</RAM>
 					</A9>
 				</VMsizes>
-				<UserName>linuxuser</UserName>
+				<UserName></UserName>
 				<Password>"Your_preferred_password"</Password>
 				<sshKey>myPrivateKey.ppk</sshKey>
 				<sshPublicKey>myCert.cer</sshPublicKey>
