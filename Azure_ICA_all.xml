@@ -5146,7 +5146,46 @@
 			</TestFeature>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID></TestID>
-		</test>			
+		</test>
+	
+		<!-- LVM Functional test definations -->
+		<test>
+			<testName>ICA-LVM-EXTEND-FUNCTIONAL-TEST</testName>
+			<testScript>lvm_extend_shrink_test.sh</testScript>
+			<testScriptps1>ICA-LVM-FUNCTIONAL-TEST.ps1</testScriptps1>
+			<files>.\remote-scripts\azuremodules.sh,.\remote-scripts\lvm_extend_shrink_test.sh</files>
+			<setupType>LargeVM</setupType>
+			<TestType></TestType>
+			<FunctionType>Extend</FunctionType>
+			<DiskSize>512</DiskSize>
+			<LunNumber>0</LunNumber>
+			<Cache>None</Cache>
+			<!-- <Cache>ReadOnly</Cache>
+			<Cache>ReadWrire</Cache> -->
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<TestID>fun_001</TestID>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-LVM-SHRINK-FUNCTIONAL-TEST</testName>
+			<testScript>lvm_extend_shrink_test.sh</testScript>
+			<testScriptps1>ICA-LVM-FUNCTIONAL-TEST.ps1</testScriptps1>
+			<files>.\remote-scripts\azuremodules.sh,.\remote-scripts\lvm_extend_shrink_test.sh</files>
+			<setupType>LargeVM</setupType>
+			<TestType></TestType>
+			<FunctionType>Shrink</FunctionType>
+			<DiskSize>512</DiskSize>
+			<LunNumber>0</LunNumber>
+			<Cache>None</Cache>
+			<!-- <Cache>ReadOnly</Cache>
+			<Cache>ReadWrire</Cache> -->
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<TestID>fun_002</TestID>
+			<Priority>P0</Priority>
+		</test>
+		
 	</testsDefinition>
 
 	<testCycles>
@@ -5923,6 +5962,21 @@
 			<cycleName>RHUI-Stress</cycleName>
 			<test>
 				<Name>RHUI-STRESS-DOWNLOAD</Name>
+			</test>
+		</Cycle>
+		
+		<!-- LVM Functional test cycles -->
+		<Cycle>
+			<cycleName>LVM-EXTEND</cycleName>
+			<test>
+				<Name>ICA-LVM-EXTEND-FUNCTIONAL-TEST</Name>
+			</test>
+		</Cycle>
+		
+		<Cycle>
+			<cycleName>LVM-SHRINK</cycleName>
+			<test>
+				<Name>ICA-LVM-SHRINK-FUNCTIONAL-TEST</Name>
 			</test>
 		</Cycle>
 
