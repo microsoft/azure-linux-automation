@@ -740,6 +740,8 @@ Function CheckVMsInService($serviceName)
             if($DeployedVMs -eq $null)
             {
                 Write-Host "No Deployment found in service."
+                $remainigSeconds = 1800
+                $VMStatuString = "service: $serviceName, vm provision-failed"
                 break
             }
 			$Recheck = 0
@@ -774,7 +776,8 @@ Function CheckVMsInService($serviceName)
 			Write-Host "." -NoNewline
 			#Write-Host $VMStatus -NoNewline
 			sleep 1
-		}   
+		}
+		Write-Progress -Id 500 -Activity "Checking Deployed VM in Service : $serviceName. Seconds Remaining : $remainigSeconds" -Status "$VMStatuString" -Completed   
 	}
 	catch
 	{
