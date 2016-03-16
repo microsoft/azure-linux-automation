@@ -83,7 +83,7 @@ def RunTest():
 	if dist.upper() == "COREOS":
 		RunLog.info('CoreOS is not supported in automation by now. Still in investigation.')
 		return
-	if dist == "SUSE Linux Enterprise Server" and ver == "12" and DetectSLESServicePatch() == '1':
+	if (dist == "SUSE Linux Enterprise Server" and ver == "12" and DetectSLESServicePatch() == '1') or dist == "Red Hat Enterprise Linux Server":
 		for t,p in test_matrix_password.items():
 			RunLog.info('Part: %s' % t)
 			if(ChangePwd(p[0]) == p[1]):
