@@ -155,6 +155,37 @@ def IsUbuntu():
         tmp=Run(cmd)
         return ("Ubuntu" in tmp)
 
+def ParseWalaConf2Dict(walaconfpath):
+    d = None
+    if os.path.exists(walaconfpath):
+        d={}
+        lines = GetFileContentsByLines(walaconfpath)
+        configs_list = [x.strip() for x in lines if not x.startswith('#') and not x.startswith('\n')]
+        for x in configs_list:
+            k,v=x.split('=')
+            d.setdefault(k,v)
+    else:
+        RunLog.error("%s is not exists, please check." % walaconfpath)
+    return d
+
+def GetWalaConfPath():
+    if os.path.exists("/etc/lsb-release") and int(Run("cat /etc/lsb-release | grep -i coreos | wc -l")) > 0:
+        return "/usr/share/oem/waagent.conf"
+    else:
+        return "/etc/waagent.conf"
+
+def GetResourceDiskMountPoint():
+    walacfg_path = GetWalaConfPath()
+    walacfg_dict = ParseWalaConf2Dict(walacfg_path)
+
+    if walacfg_dict['ResourceDisk.Format'] == 'y':
+        RunLog.info("ResourceDisk handled by waagent.")
+        return walacfg_dict['ResourceDisk.MountPoint']
+
+    if walacfg_dict['ResourceDisk.Format'] == 'n':
+        RunLog.info('ResourceDisk handled by cloud-init.')
+        return '/mnt'
+
 def Run(cmd):
         proc=subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         proc.wait()
@@ -790,10 +821,7 @@ def ConfigureHostsFile(hosts_filepath):
         return 1
 
 def GetOSDisk():
-    if(IsUbuntu()):
-        resourceDiskPartition = JustRun("grep -i '/mnt' /etc/mtab | awk '{print $1;}' | tr -d '\n'")
-    else:
-        resourceDiskPartition = JustRun("grep -i '/mnt/resource' /etc/mtab | awk '{print $1;}' | tr -d '\n'")
+    resourceDiskPartition = JustRun("grep -i '%s' /etc/mtab | awk '{print $1;}' | tr -d '\n'" % GetResourceDiskMountPoint())
     if 'sda' in resourceDiskPartition:
         return 'sdb'
     else :
