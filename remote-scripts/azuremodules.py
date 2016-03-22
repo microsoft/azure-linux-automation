@@ -178,13 +178,12 @@ def GetResourceDiskMountPoint():
     walacfg_path = GetWalaConfPath()
     walacfg_dict = ParseWalaConf2Dict(walacfg_path)
 
-    if walacfg_dict['ResourceDisk.Format'] == 'y':
-        RunLog.info("ResourceDisk handled by waagent.")
-        return walacfg_dict['ResourceDisk.MountPoint']
-
-    if walacfg_dict['ResourceDisk.Format'] == 'n':
+    if os.path.exists('/var/log/cloud-init.log') and os.path.islink('/var/lib/cloud/instance'):
         RunLog.info('ResourceDisk handled by cloud-init.')
         return '/mnt'
+    else:
+        RunLog.info("ResourceDisk handled by waagent.")
+        return walacfg_dict['ResourceDisk.MountPoint']
 
 def Run(cmd):
         proc=subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
