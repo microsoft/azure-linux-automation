@@ -40,7 +40,7 @@ if ($isDeployed)
 		LogMsg "VM is ready for netperf test"
 		LogMsg "VM1 kernel version:- $KernelVersionVM1"
 		LogMsg "VM2 kernel version:- $KernelVersionVM2"
-		$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "bash /home/$user/code/$($currentTestData.testScript) $user $password $hs1vm2IP" -runAsSudo -runMaxAllowedTime 900
+		$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "bash /home/$user/code/$($currentTestData.testScript) $user $password $hs1vm2IP" -runAsSudo -runMaxAllowedTime 1900
 		$out_tail = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "tail /home/$user/code/mysql_perf_log/mysql_perf_sysbench.log" -runAsSudo
 		
 		RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/code/mysql_perf_log/mysql_perf_sysbench.log" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password
