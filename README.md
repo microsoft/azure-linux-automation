@@ -172,9 +172,11 @@ Before starting Automation, make sure that you have completed steps in chapter [
         
 #### Command to Start any of the Automation Cycle
 Run test in ASM mode
+
         .\AzureAutomationManager.ps1 -xmlConfigFile .\Azure_ICA_ALL.xml -runtests -email –Distro <DistroName> -cycleName <TestCycleToExecute> 
         
 Run test in ARM mode
+
         .\AzureAutomationManager.ps1 -xmlConfigFile .\Azure_ICA_ALL.xml -runtests -email –Distro <DistroName> -cycleName <TestCycleToExecute> -UseAzureResourceManager
 
 #### More Information
