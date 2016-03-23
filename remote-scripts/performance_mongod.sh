@@ -261,7 +261,7 @@ ConfigUbuntu()
     javaInstalled=`which java`
     if [ ! $javaInstalled ]; then
         LogMsg "Installing Java"
-
+        apt-get update
         apt-get -y install default-jdk
         if [ $? -ne 0 ]; then
             LogMsg "Error: Unable to install java"
@@ -269,6 +269,7 @@ ConfigUbuntu()
             exit 1
         fi
     fi
+	ssh root@${MD_SERVER} "apt-get update"
 	ssh root@${MD_SERVER} "apt-get -y install default-jdk"
     #
     # Figure out where Java is installed so we can configure a JAVA_HOME variable
