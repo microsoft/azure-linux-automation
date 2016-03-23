@@ -275,8 +275,16 @@ Function SetSubscription ($subscriptionID, $subscriptionName, $certificateThumbp
 	}
 	else
 	{
-		$myCert = Get-Item cert:\CurrentUser\My\$certificateThumbprint
-
+		$myCert = $null
+		$myCert = Get-Item Cert:\CurrentUser\My\$certificateThumbprint -ErrorAction SilentlyContinue
+		if ( $myCert.Thumbprint -ne $certificateThumbprint )
+		{
+			$myCert = Get-Item Cert:\LocalMachine\My\$certificateThumbprint -ErrorAction SilentlyContinue
+		}
+		if ( $myCert.Thumbprint -ne $certificateThumbprint )
+		{
+			Throw "Unable to load certificate from `"Cert:\LocalMachine\`" and `"Cert:\CurrentUser\`""
+		}
 		# For Azure Powershell Version >= 0.8.8, Environment is used in Set-AzureSubscription for replacing ManagementEndpoint
 		if (IsEnvironmentSupported)
 		{
@@ -1926,6 +1934,7 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 						{
 							LogWarn "Error in upload, Attempt $retry. Retrying for upload"
 							$retry=$retry+1
+							WaitFor -seconds 10
 						}
 						elseif(($returnCode -ne 0) -and ($retry -eq $maxRetry))
 						{
@@ -1981,6 +1990,7 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 						{
 							LogWarn "Error in upload, Attempt $retry. Retrying for upload"
 							$retry=$retry+1
+							WaitFor -seconds 10
 						}
 						elseif(($returnCode -ne 0) -and ($retry -eq $maxRetry))
 						{
@@ -2103,14 +2113,28 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 	while ( ($returnCode -ne 0) -and ($attempts -lt $maxRetryCount) -and $notExceededTimeLimit)
 	{
 		$attempts += 1
-		$runLinuxCmdJob = Start-Job -ScriptBlock `
-		{ `
-			$username = $args[1]; $password = $args[2]; $ip = $args[3]; $port = $args[4]; $jcommand = $args[5]; `
-			cd $args[0]; `
-			#Write-Host ".\tools\plink.exe -t -C -v -pw $password -P $port $username@$ip $jcommand";`
-			.\tools\plink.exe -t -C -v -pw $password -P $port $username@$ip $jcommand;`
-		} `
-		-ArgumentList $currentDir, $username, $password, $ip, $port, $linuxCommand
+		if ( $detectedDistro -imatch "DEBIAN" )
+		{
+			$runLinuxCmdJob = Start-Job -ScriptBlock `
+			{ `
+				$username = $args[1]; $password = $args[2]; $ip = $args[3]; $port = $args[4]; $jcommand = $args[5]; `
+				cd $args[0]; `
+				#Write-Host ".\tools\plink.exe -t -C -v -pw $password -P $port $username@$ip $jcommand";`
+				.\tools\plink.exe -C -v -pw $password -P $port $username@$ip $jcommand;`
+			} `
+			-ArgumentList $currentDir, $username, $password, $ip, $port, $linuxCommand
+		}
+		else
+		{
+			$runLinuxCmdJob = Start-Job -ScriptBlock `
+			{ `
+				$username = $args[1]; $password = $args[2]; $ip = $args[3]; $port = $args[4]; $jcommand = $args[5]; `
+				cd $args[0]; `
+				#Write-Host ".\tools\plink.exe -t -C -v -pw $password -P $port $username@$ip $jcommand";`
+				.\tools\plink.exe -t -C -v -pw $password -P $port $username@$ip $jcommand;`
+			} `
+			-ArgumentList $currentDir, $username, $password, $ip, $port, $linuxCommand
+		}
 		$RunLinuxCmdOutput = ""
 		$debugOutput = ""
 		$LinuxExitCode = ""

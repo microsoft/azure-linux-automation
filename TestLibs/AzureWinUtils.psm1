@@ -633,7 +633,14 @@ Function RunAzureCmd ($AzureCmdlet, $maxWaitTimeSeconds = 600, [string]$storagea
     LogMsg "$AzureCmdlet"
     $jobStartTime = Get-Date 
     $CertThumbprint = $xmlConfig.config.Azure.General.CertificateThumbprint
-    $myCert = Get-Item cert:\CurrentUser\My\$CertThumbprint
+    try
+    {
+        $myCert = Get-Item Cert:\CurrentUser\My\$CertThumbprint
+    }
+    catch
+    {
+        $myCert = Get-Item Cert:\LocalMachine\My\$CertThumbprint
+    }
     if(!$storageaccount)
     {
       $storageaccount = $xmlConfig.config.Azure.General.StorageAccount
