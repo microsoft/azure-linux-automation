@@ -5114,6 +5114,19 @@
 				<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 				<Priority>P0</Priority>
 			</test>			
+			<test>
+				<testName>ICA-PERF-MONGODB-BENCHMARK-TEST-2VM</testName>
+				<testScript></testScript>
+				<testScriptps1>ICA-PERF-MONGODB-BENCHMARK-TEST-2VM.ps1</testScriptps1>
+				<setupType>M1S1</setupType>
+				<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+				<!--Remote Files will be directly downloaded to test VM.-->
+				<remoteFiles></remoteFiles>
+				<!--Remote XML will be downloaded to automation server for analysis-->
+				<remoteXML></remoteXML>
+				<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+				<Priority>P0</Priority>
+			</test>			
 
 
 
@@ -5934,6 +5947,12 @@
 			<cycleName>LISA-MONGODB-PERF</cycleName>
 			<test>
 				<Name>ICA-PERF-MONGODB-BENCHMARK-TEST</Name>
+			</test>			
+		</Cycle>
+		<Cycle>
+			<cycleName>LISA-MONGODB2VM-PERF</cycleName>
+			<test>
+				<Name>ICA-PERF-MONGODB-BENCHMARK-TEST-2VM </Name>
 			</test>			
 		</Cycle>
 		<Cycle>
