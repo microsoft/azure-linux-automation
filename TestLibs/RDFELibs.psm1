@@ -736,7 +736,6 @@ Function CheckVMsInService($serviceName)
 {
 	try
 	{
-		$DeployedVMs = RetryOperation -operation { Get-AzureVM -ServiceName $serviceName } -retryInterval 1 -maxRetryCount 10 -NoLogsPlease
 		$allVMsReady = "False"
 		$isTimedOut = "False"
 		$VMCheckStarted = Get-Date
@@ -746,6 +745,13 @@ Function CheckVMsInService($serviceName)
 			$VMStatus = @()
 	#$DeployedVMs = Get-AzureService -ServiceName $serviceName  | Get-AzureVM 
 			$DeployedVMs = RetryOperation -operation { Get-AzureVM -ServiceName $serviceName } -retryInterval 1 -maxRetryCount 10 -NoLogsPlease
+            if($DeployedVMs -eq $null)
+            {
+                Write-Host "No Deployment found in service."
+                $remainigSeconds = 1800
+                $VMStatuString = "service: $serviceName, vm provision-failed"
+                break
+            }
 			$Recheck = 0
 			$VMStatuString = ""
 			foreach ( $VM in $DeployedVMs )
@@ -778,8 +784,8 @@ Function CheckVMsInService($serviceName)
 			Write-Host "." -NoNewline
 			#Write-Host $VMStatus -NoNewline
 			sleep 1
-		}   
-		Write-Progress -Id 500 -Activity "Checking Deployed VM in Service : $serviceName. Seconds Remaining : $remainigSeconds" -Status "$VMStatuString" -Completed
+		}
+		Write-Progress -Id 500 -Activity "Checking Deployed VM in Service : $serviceName. Seconds Remaining : $remainigSeconds" -Status "$VMStatuString" -Completed   
 	}
 	catch
 	{
@@ -5336,7 +5342,9 @@ Function StartIperfServerOnRemoteVM($remoteVM, $intermediateVM, $expectedServerI
 	$CommandOutput = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand $NewremoteVMcmd -runAsSudo -RunInBackGround
 	LogMsg "Checking if server started successfully or not ..."
 	$isServerStarted = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "ps -ef | grep iperf -s | grep -v grep | wc -l" -runAsSudo
-	$isServerStarted = [int]$isServerStarted.Split("`n")[1]
+    $outlist = $isServerStarted.Split("`n")
+    $index_value_seek = $outlist.IndexOf("OutputStart") + 1
+	$isServerStarted = [int]$outlist[$index_value_seek]
 	LogMsg "Total iperf server running instances : $($isServerStarted)"
 	if($isServerStarted -ge $expectedServerInstances)
 	{

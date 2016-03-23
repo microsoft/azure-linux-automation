@@ -154,16 +154,30 @@ Before starting Automation, make sure that you have completed steps in chapter [
         1.	BVT
         2.	NETWORK
         3.	VNET
-        4.	E2E-DISK
-        5.	E2E-TIMESYNC
-        6.	E2E-TIMESYNC-KERNBANCH
-        7.	WORDPRESS1VM
-        8.	WORDPRESS4VM
-        9.	DAYTRADER1VM
-        10.	DAYTRADER4VM
+        4.	E2E-1
+        5.  E2E-DISK
+        6.	E2E-TIMESYNC
+        7.	E2E-TIMESYNC-KERNBANCH
+        8.	WORDPRESS1VM
+        9.	WORDPRESS4VM
+        10.	DAYTRADER1VM
+        11.	DAYTRADER4VM
+        12. NETPERF
+        13. IOPERF-RAID
+        14. IOPERF-LVM
 
+#### Supported Azure Mode
+        1. AzureServiceManagement, if the value is present in the SupportedExecutionModes tag of the case definition
+        2. AzureResourceManager, if the value is present in the SupportedExecutionModes tag of the case definition
+        
 #### Command to Start any of the Automation Cycle
+Run test in ASM mode
+
         .\AzureAutomationManager.ps1 -xmlConfigFile .\Azure_ICA_ALL.xml -runtests -email –Distro <DistroName> -cycleName <TestCycleToExecute> 
         
+Run test in ARM mode
+
+        .\AzureAutomationManager.ps1 -xmlConfigFile .\Azure_ICA_ALL.xml -runtests -email –Distro <DistroName> -cycleName <TestCycleToExecute> -UseAzureResourceManager
+
 #### More Information
 For more details, please refer to the documents [here](https://github.com/Azure/azure-linux-automation/tree/master/Documentation).

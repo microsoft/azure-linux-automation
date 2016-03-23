@@ -110,7 +110,7 @@
 						<RAM>114688</RAM>
 					</A9>
 				</VMsizes>
-				<UserName>linuxuser</UserName>
+				<UserName></UserName>
 				<Password>"Your_preferred_password"</Password>
 				<sshKey>myPrivateKey.ppk</sshKey>
 				<sshPublicKey>myCert.cer</sshPublicKey>
@@ -3285,6 +3285,30 @@
 			<TestID>AzureBVT_027</TestID>
 		</test>
 		<test>
+			<testName>BVT-VERIFY-RHUI-RPM-SOURCE</testName>
+			<testScript>BVT-VERIFY-RHUI-RPM-SOURCE.sh</testScript>
+			<testScriptPs1>BVT-VERIFY-RHUI-RPM-SOURCE.ps1</testScriptPs1>
+			<files>.\remote-scripts\rhui-rpm-source-check.sh,.\remote-scripts\BVT-VERIFY-RHUI-RPM-SOURCE.sh</files>
+			<setupType>BVTDeployment</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<TestID>AzureBVT_028</TestID>
+    	</test>
+		<test>
+	      <testName>ICA-PASSWD-POLICY-TEST</testName>
+	      <testScript>ICA-PASSWD-POLICY-TEST.py</testScript>
+	      <testScriptPs1>ICA-PASSWD-POLICY-TEST.ps1</testScriptPs1>
+	      <files>.\remote-scripts\ICA-PASSWD-POLICY-TEST.py,.\remote-scripts\azuremodules.py</files>
+	      <setupType>BVTDeployment</setupType>
+	      <TestType>
+	      </TestType>
+	      <TestFeature>
+	      </TestFeature>
+	      <SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+	      <TestID></TestID>
+	    </test>
+		<test>
 			<testName>ICA-VERIFY-RDMA</testName>
 			<testScript>ICA-VERIFY-RDMA.py</testScript>
 			<testScriptPs1>ICA-VERIFY-RDMA.ps1</testScriptPs1>
@@ -5109,7 +5133,59 @@
 			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 		</test>
-			
+		
+		<test>
+			<testName>ICA-VERIFY-BILLING-TAG</testName>
+			<testScript>ICA-VERIFY-BILLING-TAG.py</testScript>
+			<testScriptPs1>ICA-VERIFY-BILLING-TAG.ps1</testScriptPs1>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\ICA-VERIFY-BILLING-TAG.py,.\remote-scripts\BillingTags.xml</files>
+			<setupType>BVTDeployment</setupType>
+			<TestType>
+			</TestType>
+			<TestFeature>
+			</TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<TestID></TestID>
+		</test>
+	
+		<!-- LVM Functional test definations -->
+		<test>
+			<testName>ICA-LVM-EXTEND-FUNCTIONAL-TEST</testName>
+			<testScript>lvm_extend_shrink_test.sh</testScript>
+			<testScriptps1>ICA-LVM-FUNCTIONAL-TEST.ps1</testScriptps1>
+			<files>.\remote-scripts\azuremodules.sh,.\remote-scripts\lvm_extend_shrink_test.sh</files>
+			<setupType>LargeVM</setupType>
+			<TestType></TestType>
+			<FunctionType>Extend</FunctionType>
+			<DiskSize>512</DiskSize>
+			<LunNumber>0</LunNumber>
+			<Cache>None</Cache>
+			<!-- <Cache>ReadOnly</Cache>
+			<Cache>ReadWrire</Cache> -->
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<TestID>fun_001</TestID>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-LVM-SHRINK-FUNCTIONAL-TEST</testName>
+			<testScript>lvm_extend_shrink_test.sh</testScript>
+			<testScriptps1>ICA-LVM-FUNCTIONAL-TEST.ps1</testScriptps1>
+			<files>.\remote-scripts\azuremodules.sh,.\remote-scripts\lvm_extend_shrink_test.sh</files>
+			<setupType>LargeVM</setupType>
+			<TestType></TestType>
+			<FunctionType>Shrink</FunctionType>
+			<DiskSize>512</DiskSize>
+			<LunNumber>0</LunNumber>
+			<Cache>None</Cache>
+			<!-- <Cache>ReadOnly</Cache>
+			<Cache>ReadWrire</Cache> -->
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<TestID>fun_002</TestID>
+			<Priority>P0</Priority>
+		</test>
+		
 	</testsDefinition>
 
 	<testCycles>
@@ -5886,6 +5962,21 @@
 			<cycleName>RHUI-Stress</cycleName>
 			<test>
 				<Name>RHUI-STRESS-DOWNLOAD</Name>
+			</test>
+		</Cycle>
+		
+		<!-- LVM Functional test cycles -->
+		<Cycle>
+			<cycleName>LVM-EXTEND</cycleName>
+			<test>
+				<Name>ICA-LVM-EXTEND-FUNCTIONAL-TEST</Name>
+			</test>
+		</Cycle>
+		
+		<Cycle>
+			<cycleName>LVM-SHRINK</cycleName>
+			<test>
+				<Name>ICA-LVM-SHRINK-FUNCTIONAL-TEST</Name>
 			</test>
 		</Cycle>
 

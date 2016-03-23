@@ -56,7 +56,7 @@ then
 fi
 
 echo "" > $csv_file-tmp
-echo ",VM,Properties," >> $csv_file-tmp
+echo ",VM Properties," >> $csv_file-tmp
 echo ",Kernel version,"$res_kernel_version >> $csv_file-tmp
 echo ",Total CPU cores,"$res_total_cpu_cores >> $csv_file-tmp
 echo ",Memory,"$res_total_memory >> $csv_file-tmp
@@ -75,8 +75,8 @@ do
 	((count++))
 done
 
-echo ",Max IOPS of ,each mode," >> $csv_file-tmp
-echo ",Test Mode,Max IOPS," >> $csv_file-tmp
+echo ",Max IOPS of each mode," >> $csv_file-tmp
+echo ",Test Mode Max IOPS," >> $csv_file-tmp
 modes='rndrd rndwr rndrw seqrd seqwr seqrewr'
 for testmode in $modes 
 do
@@ -85,15 +85,15 @@ do
 done
 
 echo "" >> $csv_file-tmp
-echo ",Max IOPS of ,each BlockSize," >> $csv_file-tmp
+echo ",Max IOPS of each BlockSize," >> $csv_file-tmp
 modes='rndrd rndwr rndrw seqrd seqwr seqrewr'
-block_sizes='1Kb 2Kb 4Kb 8Kb'
+block_sizes='1K 2K 4K 8K 16K 32K'
 echo ",Test Mode,Block Size,Max IOPS," >> $csv_file-tmp
 for testmode in $modes 
 do
 	for block in $block_sizes 
 	do
-		max_iops=`cat $csv_file | grep $testmode | grep $block | sed 's/.*\/sec,//'| sed  's/,.*$//'| sed "s/\\..*//"| sort -g|tail -1`
+		max_iops=`cat $csv_file | grep $testmode | grep " $block" | sed 's/.*\/sec,//'| sed  's/,.*$//'| sed "s/\\..*//"| sort -g|tail -1`
 		echo ",$testmode,$block,$max_iops," >> $csv_file-tmp
 	done
 done
