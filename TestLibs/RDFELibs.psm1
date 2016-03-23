@@ -2113,14 +2113,28 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 	while ( ($returnCode -ne 0) -and ($attempts -lt $maxRetryCount) -and $notExceededTimeLimit)
 	{
 		$attempts += 1
-		$runLinuxCmdJob = Start-Job -ScriptBlock `
-		{ `
-			$username = $args[1]; $password = $args[2]; $ip = $args[3]; $port = $args[4]; $jcommand = $args[5]; `
-			cd $args[0]; `
-			#Write-Host ".\tools\plink.exe -t -C -v -pw $password -P $port $username@$ip $jcommand";`
-			.\tools\plink.exe -t -C -v -pw $password -P $port $username@$ip $jcommand;`
-		} `
-		-ArgumentList $currentDir, $username, $password, $ip, $port, $linuxCommand
+		if ( $detectedDistro -imatch "DEBIAN" )
+		{
+			$runLinuxCmdJob = Start-Job -ScriptBlock `
+			{ `
+				$username = $args[1]; $password = $args[2]; $ip = $args[3]; $port = $args[4]; $jcommand = $args[5]; `
+				cd $args[0]; `
+				#Write-Host ".\tools\plink.exe -t -C -v -pw $password -P $port $username@$ip $jcommand";`
+				.\tools\plink.exe -C -v -pw $password -P $port $username@$ip $jcommand;`
+			} `
+			-ArgumentList $currentDir, $username, $password, $ip, $port, $linuxCommand
+		}
+		else
+		{
+			$runLinuxCmdJob = Start-Job -ScriptBlock `
+			{ `
+				$username = $args[1]; $password = $args[2]; $ip = $args[3]; $port = $args[4]; $jcommand = $args[5]; `
+				cd $args[0]; `
+				#Write-Host ".\tools\plink.exe -t -C -v -pw $password -P $port $username@$ip $jcommand";`
+				.\tools\plink.exe -t -C -v -pw $password -P $port $username@$ip $jcommand;`
+			} `
+			-ArgumentList $currentDir, $username, $password, $ip, $port, $linuxCommand
+		}
 		$RunLinuxCmdOutput = ""
 		$debugOutput = ""
 		$LinuxExitCode = ""
