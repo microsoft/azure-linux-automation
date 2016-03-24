@@ -5965,6 +5965,12 @@
 			</test>
 		</Cycle>
 		
+		<Cycle>
+			<cycleName>RHUI-Latency</cycleName>
+			<test>
+				<Name>ICA-RHUI-ALL-REGION-TEST</Name>
+			</test>
+		</Cycle>
 		<!-- LVM Functional test cycles -->
 		<Cycle>
 			<cycleName>LVM-EXTEND</cycleName>
