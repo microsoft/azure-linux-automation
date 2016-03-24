@@ -5966,6 +5966,13 @@
 		</Cycle>
 		
 		<Cycle>
+			<cycleName>RHUI-Migration</cycleName>
+			<test>
+				<Name>RHUI-CROSS-REGION-MIGRATION</Name>
+			</test>
+		</Cycle>
+		
+		<Cycle>
 			<cycleName>RHUI-Latency</cycleName>
 			<test>
 				<Name>ICA-RHUI-ALL-REGION-TEST</Name>
