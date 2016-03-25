@@ -279,10 +279,11 @@ def AptgetPackageInstall(package,dbpasswd = "root"):
 	# We Haven't installed mysql-secure_installation for Ubuntu Distro
 	if (package == 'mysql-server'):
 		RunLog.info( "apt-get function package:" + package) 		
-		cmds = ("export DEBIAN_FRONTEND=noninteractive","echo mysql-server mysql-server/root_password select " + dbpasswd + " | debconf-set-selections", "echo mysql-server mysql-server/root_password_again select " + dbpasswd  + "| debconf-set-selections", "apt-get install -y  --force-yes mysql-server")
+		cmds = ("export DEBIAN_FRONTEND=noninteractive","echo mysql-server mysql-server/root_password select " + dbpasswd + " | debconf-set-selections", "echo mysql-server mysql-server/root_password_again select " + dbpasswd  + "| debconf-set-selections", "apt-get install -y mysql-server")
 		output = ExecMultiCmdsLocalSudo(cmds)
 	else:
-		output = Run("apt-get install -y  --force-yes "+package)
+		cmds = ("export DEBIAN_FRONTEND=noninteractive", "apt-get install -y "+package)
+		output = ExecMultiCmdsLocalSudo(cmds)
 	
 	outputlist = re.split("\n", output)	
  
