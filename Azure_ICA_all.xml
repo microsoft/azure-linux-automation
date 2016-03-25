@@ -5215,6 +5215,12 @@
 				<Name>ICA-DEPLOYMENT-ALL-SIZES-LOOP-TEST</Name>
 			</test>
 		</Cycle>
+		<Cycle>
+			<cycleName>REBOOT</cycleName>
+			<test>
+				<Name>ICA-VM-REBOOT-TEST</Name>
+			</test>
+		</Cycle>
 
 		<!-- BVT tests -->
 		<Cycle>
