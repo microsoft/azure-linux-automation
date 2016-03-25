@@ -5208,9 +5208,6 @@
 				<Name>BVT-VERIFY-NO-ERROR-IN-LOGS</Name>
 			</test>
 			<test>
-				<Name>BVT-VERIFY-RHUI-DOWNLOAD</Name>
-			</test>
-			<test>
 				<Name>BVT-VERIFY-BASH-HISTORY</Name>
 			</test>
 			<test>
