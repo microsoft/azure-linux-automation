@@ -5966,14 +5966,14 @@
 		</Cycle>
 		
 		<Cycle>
-			<cycleName>RHUI-Migration</cycleName>
+			<cycleName>RHUI-MIGRATION</cycleName>
 			<test>
 				<Name>RHUI-CROSS-REGION-MIGRATION</Name>
 			</test>
 		</Cycle>
 		
 		<Cycle>
-			<cycleName>RHUI-Latency</cycleName>
+			<cycleName>RHUI-ALL-REGION</cycleName>
 			<test>
 				<Name>ICA-RHUI-ALL-REGION-TEST</Name>
 			</test>
