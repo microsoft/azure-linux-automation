@@ -5980,7 +5980,7 @@
 		<Cycle>
 			<cycleName>RHUI-ALL-REGION</cycleName>
 			<test>
-				<Name>ICA-RHUI-ALL-REGION-TEST</Name>
+				<Name>RHUI-ALL-REGION-TEST</Name>
 			</test>
 		</Cycle>
 		<!-- LVM Functional test cycles -->
