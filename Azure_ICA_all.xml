@@ -5057,7 +5057,7 @@
 			<Offer>RHEL</Offer>
 			<Sku>7.2</Sku>
 			<Version>latest</Version>
-			<RunDownload>true</RunDownload>
+			<RunStress>true</RunStress>
 			<parameters> 
  			    <duration>3600</duration> 
  			    <pkg>gcc</pkg> 
