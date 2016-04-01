@@ -87,9 +87,17 @@ gen_csv(){
 logs_folder=$1
 for number_of_connections in 1 2 4 8 16 32 64 128 256 512 1024 2000 3000 4000 5000 6000
 do
+	echo "Converting $number_of_connections logs.."
 	gen_csv $logs_folder/$number_of_connections/$number_of_connections-sar.log $number_of_connections&
 done
 wait
+
+mkdir -p $logs_folder/csv_files/
+for number_of_connections  in 1 2 4 8 16 32 64 128 256 512 1024 2000 3000 4000 5000 6000
+do
+	mv $logs_folder/$number_of_connections/$number_of_connections-sar.csv $logs_folder/csv_files/
+done
+
 logs_folder=`echo $logs_folder| sed 's/\/$//'`
-tar -cvf $logs_folder.tar $logs_folder/
+tar -czf $logs_folder.tar.gz $logs_folder/
 echo "completed!"
