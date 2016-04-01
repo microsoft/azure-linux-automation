@@ -17,7 +17,11 @@ fi
 code_path="/home/$username/code/"
 . $code_path/azuremodules.sh
 
-install_package iperf3
+if [[ `which iperf3` == "" ]]
+then
+    echo "iperf3 not installed\n Installing now..." 
+    install_package "iperf3" 
+fi
 
 echo "Sleeping 5 mins to get the server ready.."
 sleep 300
@@ -46,7 +50,16 @@ done
 echo ""
 exit 0
 
-vm_bus_ver=`modinfo hv_vmbus| grep ^version| awk '{print $2}'`
-logs_dir=logs-`hostname`-`uname -r`-$vm_bus_ver/
+logs_dir=logs-`hostname`-`uname -r`-`get_lis_version`/
+
+output_file=$code_path/$logs_dir/"VM_properties.csv"
+echo "" > $output_file
+echo ",OS type,"`detect_linux_ditribution`-`detect_linux_ditribution_version` >> $output_file
+echo ",Kernel version,"`uname -r` >> $output_file
+echo ",Total CPU cores,"`nproc` >> $output_file
+echo ",Memory,"`free -h| grep Mem| awk '{print $2}'`  >> $output_file
+echo ",LIS Version,"`get_lis_version` >> $output_file
+echo ",Host Version,"`get_host_version` >> $output_file
+echo "" >> $output_file
+
 bash $code_path/generate_csvs.sh $code_path/$logs_dir
-tar -cvf $logs_dir.tar $logs_dir/

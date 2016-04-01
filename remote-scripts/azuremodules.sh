@@ -11,7 +11,7 @@ function get_lis_version ()
     lis_version=`modinfo hv_vmbus | grep "^version:"| awk '{print $2}'`
     if [ "$lis_version" == "" ]
     then
-        lis_version="Default LIS"
+        lis_version="Default_LIS"
     fi
     echo $lis_version
 }
