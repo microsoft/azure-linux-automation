@@ -38,8 +38,17 @@ capture_connections(){
 	done
 }
 
-install_package iperf3
-install_package sysstat
+if [[ `which iperf3` == "" ]]
+then
+    echo "iperf3 not installed\n Installing now..." 
+    install_package "iperf3" 
+fi
+
+if [[ `which sar` == "" ]]
+then
+    echo "iperf3 not installed\n Installing now..." 
+    install_package "sysstat" 
+fi
 
 vm_bus_ver=`modinfo hv_vmbus| grep ^version| awk '{print $2}'`
 
