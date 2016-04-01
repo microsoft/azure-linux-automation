@@ -41,19 +41,7 @@ gen_csv(){
 	rx_sum=0
 	tx_sum=0
 
-	res_kernel_version=(`cat $input_file | grep "Linux.*x86_64.*GNU"| awk '{print $3}'`)
-	res_total_cpu_cores=(`cat $input_file | grep "Number of CPU cores" | awk '{print $5}'`)
-	res_LIS_version=(`cat $input_file | grep "^version:"| awk '{print $2}'`)
-	res_Host_version=(`cat $input_file | grep "Host Build Version" | awk '{print $4}'`)
-	res_total_memory=(`cat $input_file |grep "^Memory" | awk '{print $2}'`)
-	
 	echo "" > $output_file
-	echo ",Kernel version,"$res_kernel_version >> $output_file
-	echo ",Total CPU cores,"$res_total_cpu_cores >> $output_file
-	echo ",Memory,"$res_total_memory >> $output_file
-	echo ",LIS Version,"$res_LIS_version >> $output_file
-	echo ",Host Version,"$res_Host_version >> $output_file
-	echo "" >> $output_file
 
 	echo Rx Throughput,Units,TxThroughput,Units,Total,Units,,Time,ActiveConnection,,Time,CPU Usage >> $output_file
 
@@ -100,4 +88,4 @@ done
 
 logs_folder=`echo $logs_folder| sed 's/\/$//'`
 tar -czf $logs_folder.tar.gz $logs_folder/
-echo "completed!"
+echo "Completed!"
