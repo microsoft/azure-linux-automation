@@ -305,3 +305,26 @@ function set_user_password {
         echo "failed to set password"
     fi
 }
+
+function collect_VM_properties ()
+{
+# This routine give the information in .csv format.
+# Anyone can expand this with useful details.
+# Better if it can collect details without su permission.
+
+    local output_file=$1
+
+    if [ "x$output_file" == "x" ]
+    then
+        output_file="VM_properties.csv"
+    fi
+
+    echo "" > $output_file
+    echo ",OS type,"`detect_linux_ditribution`-`detect_linux_ditribution_version` >> $output_file
+    echo ",Kernel version,"`uname -r` >> $output_file
+    echo ",Total CPU cores,"`nproc` >> $output_file
+    echo ",Memory,"`free -h| grep Mem| awk '{print $2}'`  >> $output_file
+    echo ",LIS Version,"`get_lis_version` >> $output_file
+    echo ",Host Version,"`get_host_version` >> $output_file
+    echo ",Data disks attached,"`lsblk | grep "^sd" | awk '{print $1}' | sort | grep -v "sd[ab]$" | wc -l`  >> $output_file
+}
