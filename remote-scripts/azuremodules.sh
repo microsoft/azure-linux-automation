@@ -6,6 +6,16 @@
 #
 #
 
+function get_lis_version ()
+{
+    lis_version=`modinfo hv_vmbus | grep "^version:"| awk '{print $2}'`
+    if [ "$lis_version" == "" ]
+    then
+        lis_version="Default LIS"
+    fi
+    echo $lis_version
+}
+
 function get_host_version ()
 {
     dmesg | grep "Host Build" | sed "s/.*Host Build://"| awk '{print  $1}'| sed "s/;//"
