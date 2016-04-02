@@ -308,7 +308,7 @@ function set_user_password {
 
 function collect_VM_properties ()
 {
-# This routine give the information in .csv format.
+# This routine collects the information in .csv format.
 # Anyone can expand this with useful details.
 # Better if it can collect details without su permission.
 
