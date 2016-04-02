@@ -52,7 +52,7 @@ fi
 
 vm_bus_ver=`modinfo hv_vmbus| grep ^version| awk '{print $2}'`
 
-logs_dir=$code_path/logs-`hostname`-`uname -r`-$vm_bus_ver/$filename
+logs_dir=$code_path/logs-`hostname`-`uname -r`-`get_lis_version`/$filename
 filename=$logs_dir/$filename
 mkdir -p  $logs_dir
 
