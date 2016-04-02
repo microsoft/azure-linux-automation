@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # This script converts Network performance output files into csv files.
-# Author: Srikanth M
+# Author: Srikanth Myakam
 # Email	: v-srm@microsoft.com
 #
 format_bites(){
@@ -40,8 +40,6 @@ gen_csv(){
 	sum=0
 	rx_sum=0
 	tx_sum=0
-
-	echo "" > $output_file
 
 	echo Rx Throughput,Units,TxThroughput,Units,Total,Units,,Time,ActiveConnection,,Time,CPU Usage >> $output_file
 
