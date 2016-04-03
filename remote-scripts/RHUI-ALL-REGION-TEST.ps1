@@ -62,7 +62,7 @@ while($index -gt 0)
           WaitForRHUIInstall -vmuser $user -vmpassword $password -vmvip $hs1VIP -vmport $hs1vm1sshport
           RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload
           RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *" -runAsSudo
-          if($currentTestData.RunDownload)
+          if($currentTestData.RunStress -eq $true)
           {
             RetryStartTest -vmuser $user -vmpassword $password -vmvip $hs1VIP -vmport $hs1vm1sshport
             sleep $currentTestData.parameters.duration

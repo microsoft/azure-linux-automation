@@ -3263,17 +3263,6 @@
 			<TestID>AzureBVT_025</TestID>
 		</test>
 		<test>
-			<testName>BVT-VERIFY-RHUI-DOWNLOAD</testName>
-			<testScript>BVT-VERIFY-RHUI-DOWNLOAD.sh</testScript>
-			<testScriptPs1>BVT-VERIFY-RHUI-DOWNLOAD.ps1</testScriptPs1>
-			<files>.\remote-scripts\package-download-test.sh,.\remote-scripts\BVT-VERIFY-RHUI-DOWNLOAD.sh</files>
-			<setupType>BVTDeployment</setupType>
-			<TestType></TestType>
-			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
-			<TestID>AzureBVT_026</TestID>
-		</test>
-		<test>
 			<testName>BVT-VERIFY-BASH-HISTORY</testName>
 			<testScript>BVT-VERIFY-BASH-HISTORY.py</testScript>
 			<testScriptPs1>BVT-VERIFY-BASH-HISTORY.ps1</testScriptPs1>
@@ -3284,17 +3273,6 @@
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>AzureBVT_027</TestID>
 		</test>
-		<test>
-			<testName>BVT-VERIFY-RHUI-RPM-SOURCE</testName>
-			<testScript>BVT-VERIFY-RHUI-RPM-SOURCE.sh</testScript>
-			<testScriptPs1>BVT-VERIFY-RHUI-RPM-SOURCE.ps1</testScriptPs1>
-			<files>.\remote-scripts\rhui-rpm-source-check.sh,.\remote-scripts\BVT-VERIFY-RHUI-RPM-SOURCE.sh</files>
-			<setupType>BVTDeployment</setupType>
-			<TestType></TestType>
-			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
-			<TestID>AzureBVT_028</TestID>
-    	</test>
 		<test>
 	      <testName>ICA-PASSWD-POLICY-TEST</testName>
 	      <testScript>ICA-PASSWD-POLICY-TEST.py</testScript>
@@ -5020,31 +4998,53 @@
 			<remoteXML>https://raw.githubusercontent.com/LIS/lis-test/master/WS2012R2/lisa/xml/Perf_AB.xml</remoteXML>
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<Priority>P0</Priority>
-		</test>			
+		</test>
 		<test>
-		  <testName>RHUI-STRESS-DOWNLOAD</testName>
-		  <entrytestScript>start-rhui-stress-test-in-background.py</entrytestScript>
-		  <testScript>RHUI-STRESS-DOWNLOAD.py</testScript>
-		  <testScriptPs1>RHUI-STRESS-DOWNLOAD.ps1</testScriptPs1>
-		  <files>.\remote-scripts\azuremodules.py,.\remote-scripts\RHUI-STRESS-DOWNLOAD.py,.\remote-scripts\start-rhui-stress-test-in-background.py</files>
-		  <setupType>RHUIStressDep</setupType>
-		  <parameters>
-			<duration>1800</duration>
-			<pkg>gcc</pkg>
-			<timeout>100</timeout>			
-          </parameters>
-		  <TestType></TestType>
-		  <TestFeature></TestFeature>
-		  <SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
-		  <TestID>AzureRHUIStress_001</TestID>
+			<testName>RHUI-BVT-VERIFY-RPM-DOWNLOAD</testName>
+			<testScript>RHUI-BVT-VERIFY-RPM-DOWNLOAD.sh</testScript>
+			<testScriptPs1>RHUI-BVT-VERIFY-RPM-DOWNLOAD.ps1</testScriptPs1>
+			<files>.\remote-scripts\package-download-test.sh,.\remote-scripts\RHUI-BVT-VERIFY-RPM-DOWNLOAD.sh</files>
+			<setupType>BVTDeployment</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<TestID>AzureBVT_026</TestID>
+		</test>        
+		<test>
+			<testName>RHUI-BVT-VERIFY-RPM-SOURCE</testName>
+			<testScript>RHUI-BVT-VERIFY-RPM-SOURCE.sh</testScript>
+			<testScriptPs1>RHUI-BVT-VERIFY-RPM-SOURCE.ps1</testScriptPs1>
+			<files>.\remote-scripts\rhui-rpm-source-check.sh,.\remote-scripts\RHUI-BVT-VERIFY-RPM-SOURCE.sh</files>
+			<setupType>BVTDeployment</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<TestID>AzureBVT_028</TestID>
+		</test>
+		<test>
+			<testName>RHUI-STRESS-DOWNLOAD</testName>
+			<entrytestScript>start-rhui-stress-test-in-background.py</entrytestScript>
+			<testScript>RHUI-STRESS-DOWNLOAD.py</testScript>
+			<testScriptPs1>RHUI-STRESS-DOWNLOAD.ps1</testScriptPs1>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\RHUI-STRESS-DOWNLOAD.py,.\remote-scripts\start-rhui-stress-test-in-background.py</files>
+			<setupType>RHUIStressDep</setupType>
+			<parameters>
+				<duration>1800</duration>
+				<pkg>gcc</pkg>
+				<timeout>100</timeout>			
+        	</parameters>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<TestID>AzureRHUIStress_001</TestID>
 		</test>
         <test>
-			<testName>ICA-RHUI-ALL-REGION-TEST</testName>
-		    <entrytestScript>start-rhui-stress-test-in-background.py</entrytestScript>
-		    <downloadtestScript>RHUI-STRESS-DOWNLOAD.py</downloadtestScript>
-		    <testScript>ICA-RHUI-ALL-REGION-TEST.py</testScript>
-			<testScriptPs1>ICA-RHUI-ALL-REGION-TEST.ps1</testScriptPs1>
-		  <files>.\remote-scripts\azuremodules.py,.\remote-scripts\RHUI-STRESS-DOWNLOAD.py,.\remote-scripts\start-rhui-stress-test-in-background.py,.\remote-scripts\ICA-RHUI-ALL-REGION-TEST.py</files>
+			<testName>RHUI-ALL-REGION-TEST</testName>
+			<entrytestScript>start-rhui-stress-test-in-background.py</entrytestScript>
+			<downloadtestScript>RHUI-STRESS-DOWNLOAD.py</downloadtestScript>
+			<testScript>RHUI-ALL-REGION-TEST.py</testScript>
+			<testScriptPs1>RHUI-ALL-REGION-TEST.ps1</testScriptPs1>
+			<files>.\remote-scripts\azuremodules.py,.\remote-scripts\RHUI-STRESS-DOWNLOAD.py,.\remote-scripts\start-rhui-stress-test-in-background.py,.\remote-scripts\RHUI-ALL-REGION-TEST.py</files>
 			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -5057,7 +5057,7 @@
 			<Offer>RHEL</Offer>
 			<Sku>7.2</Sku>
 			<Version>latest</Version>
-			<RunDownload>true</RunDownload>
+			<RunStress>true</RunStress>
 			<parameters> 
  			    <duration>3600</duration> 
  			    <pkg>gcc</pkg> 
@@ -5127,9 +5127,6 @@
 				<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 				<Priority>P0</Priority>
 			</test>			
-
-
-
 		<test>
 			<testName>RHUI-CROSS-REGION-MIGRATION</testName>
 			<testScript></testScript>
@@ -5146,7 +5143,56 @@
 			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
 			<TestID></TestID>
 		</test>
-		
+        
+		<test>
+			<testName>ICA-PERF-ZOOKEEPER-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-ZOOKEEPER-TEST.ps1</testScriptps1>
+			<setupType>M1S1</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<TestParameters>
+				<param>ZK_VERSION=3.4.6</param>
+				<param>ZK_TIMEOUT=1000000</param>
+				<param>ZK_ZNODE_SIZE=100</param>
+				<param>ZK_ZNODE_COUNT=100</param>
+				<param>ZK_FORCE=true</param>
+				<param>ZK_SYNCHRONOUS=true</param>
+				<param>ZK_VERBOSE=false</param>				
+			</TestParameters>
+			<!--Remote Files will be directly downloaded to test VM.-->
+			<remoteFiles>https://raw.githubusercontent.com/phunt/zk-smoketest/master/zkclient.py,https://raw.githubusercontent.com/phunt/zk-smoketest/master/zk-latencies.py,https://github.com/phunt/zk-smoketest/raw/master/lib.linux-x86_64-2.6/libzookeeper_mt.so.2,https://github.com/phunt/zk-smoketest/raw/master/lib.linux-x86_64-2.6/zookeeper.so</remoteFiles>
+			<!--Remote XML will be downloaded to automation server for analysis-->
+			<remoteXML></remoteXML>
+			<Priority>P0</Priority>
+		</test>			
+
+		<test>
+			<testName>ICA-PERF-MEMCACHED-BENCHMARK-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-MEMCACHED-BENCHMARK-TEST.ps1</testScriptps1>
+			<setupType>M1S1</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<!--Remote Files will be directly downloaded to test VM.-->
+			<remoteFiles></remoteFiles>
+			<!--Remote XML will be downloaded to automation server for analysis-->
+			<remoteXML></remoteXML>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<Priority>P0</Priority>
+		</test>		
+		<test>
+			<testName>ICA-PERF-MONGODB-BENCHMARK-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-MONGODB-BENCHMARK-TEST.ps1</testScriptps1>
+			<setupType>G5</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<!--Remote Files will be directly downloaded to test VM.-->
+			<remoteFiles></remoteFiles>
+			<!--Remote XML will be downloaded to automation server for analysis-->
+			<remoteXML></remoteXML>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<Priority>P0</Priority>
+		</test>			
+	
 		<test>
 			<testName>ICA-VERIFY-BILLING-TAG</testName>
 			<testScript>ICA-VERIFY-BILLING-TAG.py</testScript>
@@ -5227,9 +5273,6 @@
 			<cycleName>BVT</cycleName>
 			<test>
 				<Name>BVT-VERIFY-NO-ERROR-IN-LOGS</Name>
-			</test>
-			<test>
-				<Name>BVT-VERIFY-RHUI-DOWNLOAD</Name>
 			</test>
 			<test>
 				<Name>BVT-VERIFY-BASH-HISTORY</Name>
@@ -5981,8 +6024,18 @@
 			<test>
 				<Name>ICA-PERF-MONGODB-BENCHMARK-TEST</Name>
 			</test>			
-		</Cycle>		
+		</Cycle>
 		
+		<Cycle>
+			<cycleName>RHUI-BVT</cycleName>
+			<test>
+				<Name>RHUI-BVT-VERIFY-RPM-DOWNLOAD</Name>
+			</test>
+			<test>
+				<Name>RHUI-BVT-VERIFY-RPM-SOURCE</Name>
+			</test>
+        </Cycle>	
+        
 		<Cycle>
 			<cycleName>RHUI-Stress</cycleName>
 			<test>
@@ -5990,6 +6043,19 @@
 			</test>
 		</Cycle>
 		
+		<Cycle>
+			<cycleName>RHUI-MIGRATION</cycleName>
+			<test>
+				<Name>RHUI-CROSS-REGION-MIGRATION</Name>
+			</test>
+		</Cycle>
+		
+		<Cycle>
+			<cycleName>RHUI-ALL-REGION</cycleName>
+			<test>
+				<Name>RHUI-ALL-REGION-TEST</Name>
+			</test>
+		</Cycle>
 		<!-- LVM Functional test cycles -->
 		<Cycle>
 			<cycleName>LVM-EXTEND</cycleName>
