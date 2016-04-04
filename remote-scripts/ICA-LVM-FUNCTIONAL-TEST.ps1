@@ -28,6 +28,7 @@ if ($isDeployed)
 		$hs1vm1sshport = $allVMData.SSHPort
 		
 		$FunctionType = $currentTestData.FunctionType
+		$DiskParam = $currentTestData.DiskParam
 		$DiskSize = $currentTestData.DiskSize
 		$LunNumber = $currentTestData.LunNumber
 		$Cache = $currentTestData.Cache
@@ -38,86 +39,71 @@ if ($isDeployed)
 		$KernelVersion = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "uname -a" -runAsSudo 
 		LogMsg "VM1 kernel version:- $KernelVersion"
 		LogMsg "LVM functional $FunctionType test started with $Cache cache"
-		if ($FunctionType -imatch "Extend")
+		
+		if ($DiskParam -imatch "datadisk")
 		{
-			LogMsg "Start Iozone test"
-			$iozoneJob = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "iozone -a -z -g 256m -k 16 -Vazure >> /home/$user/iozone_output.txt " -runAsSudo -RunInBackground
-			$iozoneStatus = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "pgrep iozone 2>/dev/null" -runAsSudo
-			if ($iozoneStatus)
-			{	
-				LogMsg "iozone is RUNNING.."
-				LogMsg "Attach new data disk for extend logical volume"
-				LogMsg "Get-AzureVM -ServiceName $ServiceName | Add-AzureDataDisk -CreateNew -DiskSizeInGB $DiskSize -LUN $LunNumber -HostCaching $Cache -DiskLabel $ServiceName-Disk-$lunNumber | Update-AzureVM -Verbose"
-				$temp = RetryOperation -operation { Get-AzureVM -ServiceName $ServiceName | Add-AzureDataDisk -CreateNew -DiskSizeInGB $DiskSize -LUN $LunNumber -HostCaching $Cache -DiskLabel "$ServiceName-Disk-$LunNumber" | Update-AzureVM } -description "Attaching $DiskSize GB disk to LUN : $LunNumber with caching : $Cache." -maxRetryCount 10 -retryInterval 5
-				if ( $temp.OperationStatus -eq "Succeeded" )
-				{
-					LogMsg "Disk attached Successfully.."
-					LogMsg "Start $FunctionType logical volume test here"
-					LogMsg "Executing $($currentTestData.testScript)"
-					$testJob = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "bash /home/$user/$($currentTestData.testScript) $user $FunctionType >> lvmFunctionTest.txt" -runAsSudo -RunInBackground
-					#region MONITOR TEST
-					while ( (Get-Job -Id $testJob).State -eq "Running" )
-					{
-						$lvmTestInfo = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "egrep ': Success|: Failed|please wait' /home/$user/lvmFunctionTest.txt | tail -1 " -runAsSudo -ignoreLinuxExitCode
-						LogMsg "Current Test Staus : $lvmTestInfo"
-						WaitFor -seconds 10
-					}
-				}
-				else{
-					LogErr "Attach Disk Failed.."
-					$testResult = "Aborted"
-				}
-			}
-			else
-			{
-				LogErr "iozone test Failed.."
-				$testResult = "Aborted"
-			}
-		}
-		elseif ($FunctionType -imatch "Shrink")
-		{
-			LogMsg "Attach new data disk for extend logical volume"
-			LogMsg "Get-AzureVM -ServiceName $ServiceName | Add-AzureDataDisk -CreateNew -DiskSizeInGB $DiskSize -LUN $LunNumber -HostCaching $Cache -DiskLabel $ServiceName-Disk-$lunNumber | Update-AzureVM -Verbose"
 			$temp = RetryOperation -operation { Get-AzureVM -ServiceName $ServiceName | Add-AzureDataDisk -CreateNew -DiskSizeInGB $DiskSize -LUN $LunNumber -HostCaching $Cache -DiskLabel "$ServiceName-Disk-$LunNumber" | Update-AzureVM } -description "Attaching $DiskSize GB disk to LUN : $LunNumber with caching : $Cache." -maxRetryCount 10 -retryInterval 5
 			if ( $temp.OperationStatus -eq "Succeeded" )
 			{
 				LogMsg "Disk attached Successfully.."
-				LogMsg "Start $FunctionType logical volume test here"
-				$testJob = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "bash /home/$user/$($currentTestData.testScript) $user $FunctionType >> lvmFunctionTest.txt" -runAsSudo -RunInBackground
-				#region MONITOR TEST
-				$IsDeattach = $true
-				while ( (Get-Job -Id $testJob).State -eq "Running" )
-				{
-					$lvmTestInfo = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "egrep ': Success|: Failed|please wait' /home/$user/lvmFunctionTest.txt | tail -1 " -runAsSudo -ignoreLinuxExitCode
-					LogMsg "Current Test Staus : $lvmTestInfo"
-					if($IsDeattach)
-					{
-						LogMsg "Detach the data disk from VM"
-						$DeattachInfo = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "grep 'Deattach the data disk' /home/$user/lvmFunctionTest.txt" -runAsSudo -ignoreLinuxExitCode
-						if ($DeattachInfo -imatch "Deattach the data disk")
-						{
-							$temp = RetryOperation -operation { Get-AzureVM -ServiceName $ServiceName | Remove-AzureDataDisk -DeleteVHD -LUN $LunNumber | Update-AzureVM –Verbose } -description "Removing disk from LUN : $LunNumber." -maxRetryCount 10 -retryInterval 5
-							if ( $temp.OperationStatus -eq "Succeeded" )
-							{
-								LogMsg "Data disk deattached Successfully.."
-								$IsDeattach = $false
-							}
-							else
-							{
-								LogMsg "Data disk deattach Failed.."
-								$testResult = "FAIL"
-							}
-						}			
-					}
-					WaitFor -seconds 10
-				}
+				$LunNumber=$LunNumber+1
 			}
 		}
-		else
+		
+		$testJob = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "bash /home/$user/$($currentTestData.testScript) $user $DiskParam $FunctionType >> lvmFunctionTest.txt" -runAsSudo -RunInBackground
+		#region MONITOR TEST
+		$IsAttach = $true
+		$IsDeattach = $true
+		while ( (Get-Job -Id $testJob).State -eq "Running" )
 		{
-			LogErr "Provide proper funtional test type like Extend or Shrink"
+			$lvmTestInfo = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "egrep ': Success|: Failed|please wait' /home/$user/lvmFunctionTest.txt | tail -1 " -runAsSudo -ignoreLinuxExitCode
+			LogMsg "Current Test Staus : $lvmTestInfo"
+			
+			if($IsAttach)
+			{
+				LogMsg "Attach the data disk to VM"
+				$AttachInfo = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "grep -i 'Now Attach data disk for LVM test' /home/$user/lvmFunctionTest.txt" -runAsSudo -ignoreLinuxExitCode
+				if ($AttachInfo -imatch "Now Attach data disk for LVM test")
+				{
+					$temp = RetryOperation -operation { Get-AzureVM -ServiceName $ServiceName | Add-AzureDataDisk -CreateNew -DiskSizeInGB $DiskSize -LUN $LunNumber -HostCaching $Cache -DiskLabel "$ServiceName-Disk-$LunNumber" | Update-AzureVM } -description "Attaching $DiskSize GB disk to LUN : $LunNumber with caching : $Cache." -maxRetryCount 10 -retryInterval 5
+					if ( $temp.OperationStatus -eq "Succeeded" )
+					{
+						LogMsg "Data disk attached Successfully.."
+						$IsAttach = $false
+					}
+					else
+					{
+						LogMsg "Data disk attach Failed.."
+						$testResult = "FAIL"
+					}
+				}
+			}
+			if($FunctionType -imatch "Shrink")
+			{
+				if($IsDeattach)
+				{
+					LogMsg "Detach the data disk from VM"
+					$DeattachInfo = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "grep -i 'Now Deattach the data disk' /home/$user/lvmFunctionTest.txt" -runAsSudo -ignoreLinuxExitCode
+					if ($DeattachInfo -imatch "Now Deattach the data disk")
+					{
+						$temp = RetryOperation -operation { Get-AzureVM -ServiceName $ServiceName | Remove-AzureDataDisk -DeleteVHD -LUN $LunNumber | Update-AzureVM –Verbose } -description "Removing disk from LUN : $LunNumber." -maxRetryCount 10 -retryInterval 5
+						if ( $temp.OperationStatus -eq "Succeeded" )
+						{
+							LogMsg "Data disk deattached Successfully.."
+							$IsDeattach = $false
+						}
+						else
+						{
+							LogMsg "Data disk deattach Failed.."
+							$testResult = "FAIL"
+						}
+					}
+				}
+			}
+			WaitFor -seconds 10
 		}
-		$lvmTesStatus = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "grep 'LVM functionlal test completed' /home/$user/lvmFunctionTest.txt" -runAsSudo -ignoreLinuxExitCode
+		
+		$lvmTesStatus = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "grep -i 'LVM functionlal test completed' /home/$user/lvmFunctionTest.txt" -runAsSudo -ignoreLinuxExitCode
 		if ($lvmTesStatus -imatch "LVM functionlal test completed")
 		{
 			LogMsg "LVM $FunctionType test COMPLETED.."
