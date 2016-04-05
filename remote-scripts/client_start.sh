@@ -17,7 +17,11 @@ fi
 code_path="/home/$username/code/"
 . $code_path/azuremodules.sh
 
-install_package iperf3
+if [[ `which iperf3` == "" ]]
+then
+    echo "iperf3 not installed\n Installing now..." 
+    install_package "iperf3" 
+fi
 
 echo "Sleeping 5 mins to get the server ready.."
 sleep 300
@@ -43,10 +47,9 @@ do
 	echo "$connections_count iperf clients are connected to server"
 	sleep $(($duration+10))
 done
-echo ""
-exit 0
 
-vm_bus_ver=`modinfo hv_vmbus| grep ^version| awk '{print $2}'`
-logs_dir=logs-`hostname`-`uname -r`-$vm_bus_ver/
+logs_dir=logs-`hostname`-`uname -r`-`get_lis_version`/
+
+collect_VM_properties $code_path/$logs_dir/VM_properties.csv
+
 bash $code_path/generate_csvs.sh $code_path/$logs_dir
-tar -cvf $logs_dir.tar $logs_dir/

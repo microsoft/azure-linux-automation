@@ -2,9 +2,9 @@
 # MariaDB performance using sysbench client.
 # Packages needed: sysbench bc
 # usage::-
-# nohup bash sysbench-mariadb-perf-test.sh vm_loginuser  mariadb_server &
+# nohup bash sysbench-mariadb-perf-test.sh <vm_loginuser> <vm_loginpasswd> <mariadb_server IP> &
 # or
-#./sysbench-mariadb-perf-test.sh vm_loginuser  mariadb_server &
+#./sysbench-mariadb-perf-test.sh <vm_loginuser> <vm_loginpasswd> <mariadb_server IP> &
 #
 # Author: Srikanth Myakam
 # Email	: v-srm@microsoft.com
