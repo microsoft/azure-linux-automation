@@ -200,6 +200,7 @@ try
         $summaryAll = GetTestSummary -testCycle $testCycle -StartTime $testStartTime -xmlFileName $logDirFilename -distro $Distro -testSuiteResultDetails $testSuiteResultDetails
         $PlainTextSummary += $summaryAll[0]
         $HtmlTextSummary += $summaryAll[1]
+        Set-Content -Value $HtmlTextSummary -Path .\report\testSummary.html -Force | Out-Null
         # Remove HTML tags from platin text summary.
         $PlainTextSummary = $PlainTextSummary.Replace("<br />", "`r`n")
         $PlainTextSummary = $PlainTextSummary.Replace("<pre>", "")
