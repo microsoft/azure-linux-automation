@@ -5155,6 +5155,8 @@
 			<setupType>LargeVM</setupType>
 			<TestType></TestType>
 			<FunctionType>Extend</FunctionType>
+			<!-- <DiskParam>rootdisk</DiskParam> -->
+			<DiskParam>datadisk</DiskParam>
 			<DiskSize>512</DiskSize>
 			<LunNumber>0</LunNumber>
 			<Cache>None</Cache>
@@ -5173,6 +5175,8 @@
 			<setupType>LargeVM</setupType>
 			<TestType></TestType>
 			<FunctionType>Shrink</FunctionType>
+			<!-- <DiskParam>rootdisk</DiskParam> -->
+			<DiskParam>datadisk</DiskParam>
 			<DiskSize>512</DiskSize>
 			<LunNumber>0</LunNumber>
 			<Cache>None</Cache>
