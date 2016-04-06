@@ -97,7 +97,7 @@ def DetectDistro():
             matchObj = re.match( r'^VERSION_ID=(.*)', line, re.M|re.I)
             version = matchObj.group(1)
 
-    if(distribution == "ol"):
+    if(distribution.strip() == "ol"):
         distribution = 'Oracle'
 
     if(distribution == 'unknown'):

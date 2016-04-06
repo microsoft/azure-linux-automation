@@ -2071,8 +2071,19 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 	}
 }
 
+Function WrapperCommandsToFile([string] $username,[string] $password,[string] $ip,[string] $command, [int] $port)
+{
+	$command | out-file -encoding ASCII -filepath runtest.sh
+	RemoteCopy -upload -uploadTo $ip -username $username -port $port -password $password -files '.\runtest.sh'
+	del runtest.sh
+}
+
 Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string] $command, [int] $port, [switch]$runAsSudo, [Boolean]$WriteHostOnly, [Boolean]$NoLogsPlease, [switch]$ignoreLinuxExitCode, [int]$runMaxAllowedTime = 300, [switch]$RunInBackGround)
 {
+	if ($detectedDistro -ne "COREOS" )
+	{
+		WrapperCommandsToFile $username $password $ip $command $port
+	}
 	$randomFileName = [System.IO.Path]::GetRandomFileName()
 	$maxRetryCount = 10
 	$currentDir = $PWD.Path
@@ -2088,7 +2099,8 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 		}
 		else
 		{
-			$linuxCommand = "`"echo $plainTextPassword | sudo -S $command && echo AZURE-LINUX-EXIT-CODE-`$? || echo AZURE-LINUX-EXIT-CODE-`$?`""
+              
+			$linuxCommand = "`"echo $plainTextPassword | sudo -S bash -c `'bash runtest.sh ; echo AZURE-LINUX-EXIT-CODE-`$?`' `""
 			$logCommand = "`"echo $plainTextPassword | sudo -S $command`""
 		}
 	}
@@ -2101,20 +2113,23 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 		}
 		else
 		{
-			$linuxCommand = "`"$command && echo AZURE-LINUX-EXIT-CODE-`$? || echo AZURE-LINUX-EXIT-CODE-`$?`""
+			$linuxCommand = "`"bash -c `'bash runtest.sh ; echo AZURE-LINUX-EXIT-CODE-`$?`' `""
 			$logCommand = "`"$command`""
 		}
 	}
 	LogMsg ".\tools\plink.exe -t -pw $password -P $port $username@$ip $logCommand"
 	$returnCode = 1
-	$attempts = 0
+	$attemptswt = 0
+	$attemptswot = 0
 	$notExceededTimeLimit = $true
 	$isBackGroundProcessStarted = $false
-	while ( ($returnCode -ne 0) -and ($attempts -lt $maxRetryCount) -and $notExceededTimeLimit)
+    
+	while ( ($returnCode -ne 0) -and ($attemptswt -lt $maxRetryCount -or $attemptswot -lt $maxRetryCount) -and $notExceededTimeLimit)
 	{
-		$attempts += 1
-		if ( $detectedDistro -imatch "DEBIAN" )
+		if ($runwithoutt -or $attemptswt -eq $maxRetryCount)
 		{
+			Set-Variable -Name runwithoutt -Value true -Scope Global
+			$attemptswot +=1
 			$runLinuxCmdJob = Start-Job -ScriptBlock `
 			{ `
 				$username = $args[1]; $password = $args[2]; $ip = $args[3]; $port = $args[4]; $jcommand = $args[5]; `
@@ -2126,6 +2141,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 		}
 		else
 		{
+			$attemptswt += 1
 			$runLinuxCmdJob = Start-Job -ScriptBlock `
 			{ `
 				$username = $args[1]; $password = $args[2]; $ip = $args[3]; $port = $args[4]; $jcommand = $args[5]; `
@@ -2170,7 +2186,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 					}
 					$debugOutput += "$debugString`n"
 				}
-				Write-Progress -Activity "Attempt : $attempts : Initiating command in Background Mode : $logCommand on $ip : $port" -Status "Timeout in $($RunMaxAllowedTime - $RunElaplsedTime) seconds.." -Id 87678 -PercentComplete (($RunElaplsedTime/$RunMaxAllowedTime)*100) -CurrentOperation "SSH ACTIVITY : $debugString"
+				Write-Progress -Activity "Attempt : $attemptswot+$attemptswt : Initiating command in Background Mode : $logCommand on $ip : $port" -Status "Timeout in $($RunMaxAllowedTime - $RunElaplsedTime) seconds.." -Id 87678 -PercentComplete (($RunElaplsedTime/$RunMaxAllowedTime)*100) -CurrentOperation "SSH ACTIVITY : $debugString"
 				$RunCurrentTime = Get-Date
 				$RunDiffTime = $RunCurrentTime - $RunStartTime
 				$RunElaplsedTime =  $RunDiffTime.TotalSeconds
@@ -2213,7 +2229,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 				}
 				$debugOutput += "$debugString`n"
 			}
-			Write-Progress -Activity "Attempt : $attempts : Executing $logCommand on $ip : $port" -Status $runLinuxCmdJob.State -Id 87678 -SecondsRemaining ($RunMaxAllowedTime - $RunElaplsedTime) -Completed
+			Write-Progress -Activity "Attempt : $attemptswot+$attemptswt : Executing $logCommand on $ip : $port" -Status $runLinuxCmdJob.State -Id 87678 -SecondsRemaining ($RunMaxAllowedTime - $RunElaplsedTime) -Completed
 			if ( $isBackGroundProcessStarted -and !$isBackGroundProcessTerminated )
 			{
 				LogMsg "$command is running in background with ID $($runLinuxCmdJob.Id) ..."
@@ -2288,7 +2304,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 					}
 					$debugOutput += "$debugString`n"
 				}
-				Write-Progress -Activity "Attempt : $attempts : Executing $logCommand on $ip : $port" -Status "Timeout in $($RunMaxAllowedTime - $RunElaplsedTime) seconds.." -Id 87678 -PercentComplete (($RunElaplsedTime/$RunMaxAllowedTime)*100) -CurrentOperation "SSH ACTIVITY : $debugString"
+				Write-Progress -Activity "Attempt : $attemptswot+$attemptswt : Executing $logCommand on $ip : $port" -Status "Timeout in $($RunMaxAllowedTime - $RunElaplsedTime) seconds.." -Id 87678 -PercentComplete (($RunElaplsedTime/$RunMaxAllowedTime)*100) -CurrentOperation "SSH ACTIVITY : $debugString"
 				$RunCurrentTime = Get-Date
 				$RunDiffTime = $RunCurrentTime - $RunStartTime
 				$RunElaplsedTime =  $RunDiffTime.TotalSeconds
@@ -2328,7 +2344,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 				}
 				$debugOutput += "$debugString`n"
 			}
-			Write-Progress -Activity "Attempt : $attempts : Executing $logCommand on $ip : $port" -Status $runLinuxCmdJob.State -Id 87678 -SecondsRemaining ($RunMaxAllowedTime - $RunElaplsedTime) -Completed
+			Write-Progress -Activity "Attempt : $attemptswot+$attemptswt : Executing $logCommand on $ip : $port" -Status $runLinuxCmdJob.State -Id 87678 -SecondsRemaining ($RunMaxAllowedTime - $RunElaplsedTime) -Completed
 			Remove-Job $runLinuxCmdJob 
 			Remove-Item $LogDir\$randomFileName -Force | Out-Null
 			if ($LinuxExitCode -imatch "AZURE-LINUX-EXIT-CODE-0") 
@@ -2364,7 +2380,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 						Throw "Tmeout while executing command : $command"
 					}
 					LogErr "Linux machine returned exit code : $($LinuxExitCode.Split("-")[4])"
-					if ($attempts -eq $maxRetryCount)
+					if ($attemptswt -eq $maxRetryCount -and $attemptswot -eq $maxRetryCount)
 					{
 						Throw "Failed to execute : $command."
 					}
