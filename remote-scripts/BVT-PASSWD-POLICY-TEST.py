@@ -52,7 +52,10 @@ def GenRandomPassword(pcomplexity,plength=6):
 	# filling 
 	while passwd_length-len(newpass):
 		index = pcomplexity-1
-		newpass+=str(random.choice(random_rules[random.randint(0,index)]))
+		new_char = str(random.choice(random_rules[random.randint(0,index)]))
+		# fix issue of the random password which does not contain enough DIFFERENT characters
+		if new_char not in newpass:
+			newpass += new_char
 	return newpass
 
 def ResetPassword(currentpassword,):
