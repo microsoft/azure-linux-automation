@@ -498,7 +498,14 @@ Function GenerateCommand ($Setup, $serviceName, $osImage, $HSData)
 	{
 		$vmCount = $vmCount + 1
 		$VnetName = $HS.VnetName
-		$instanceSize = $newVM.InstanceSize
+        if ( $OverrideVMSize )
+        {
+            $instanceSize = $OverrideVMSize
+        }
+        else
+        {
+		    $instanceSize = $newVM.InstanceSize
+        }
 		$SubnetName = $newVM.SubnetName
 		$DnsServerIP = $HS.DnsServerIP
 #...............................................
