@@ -96,7 +96,7 @@ def RunTest():
 			RunLog.info('')
 	# will adjust automation of other distro in future
 	else:
-		RunLog.info('Will adjust automation of other distro acordding to their characteristic in future, now mark with PASS')
+		RunLog.info('Will adjust automation of other distro according to their characteristic in future, now mark with PASS')
 	
 	if not failure:
 		ResultLog.info('PASS') 
