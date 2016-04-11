@@ -97,7 +97,7 @@ def DetectDistro():
             matchObj = re.match( r'^VERSION_ID=(.*)', line, re.M|re.I)
             version = matchObj.group(1)
 
-    if(distribution == "ol"):
+    if(distribution.strip() == "ol"):
         distribution = 'Oracle'
 
     if(distribution == 'unknown'):
@@ -162,8 +162,11 @@ def ParseWalaConf2Dict(walaconfpath):
         lines = GetFileContentsByLines(walaconfpath)
         configs_list = [x.strip() for x in lines if not x.startswith('#') and not x.startswith('\n')]
         for x in configs_list:
-            k,v=x.split('=')
-            d.setdefault(k,v)
+            try:
+                k,v=x.split('=')
+                d.setdefault(k,v)
+            except Exception as e:
+                pass
     else:
         RunLog.error("%s is not exists, please check." % walaconfpath)
     return d

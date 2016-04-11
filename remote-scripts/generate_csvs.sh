@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # This script converts Network performance output files into csv files.
-# Author: Srikanth M
+# Author: Srikanth Myakam
 # Email	: v-srm@microsoft.com
 #
 format_bites(){
@@ -41,20 +41,6 @@ gen_csv(){
 	rx_sum=0
 	tx_sum=0
 
-	res_kernel_version=(`cat $input_file | grep "Linux.*x86_64.*GNU"| awk '{print $3}'`)
-	res_total_cpu_cores=(`cat $input_file | grep "Number of CPU cores" | awk '{print $5}'`)
-	res_LIS_version=(`cat $input_file | grep "^version:"| awk '{print $2}'`)
-	res_Host_version=(`cat $input_file | grep "Host Build Version" | awk '{print $4}'`)
-	res_total_memory=(`cat $input_file |grep "^Memory" | awk '{print $2}'`)
-	
-	echo "" > $output_file
-	echo ",Kernel version,"$res_kernel_version >> $output_file
-	echo ",Total CPU cores,"$res_total_cpu_cores >> $output_file
-	echo ",Memory,"$res_total_memory >> $output_file
-	echo ",LIS Version,"$res_LIS_version >> $output_file
-	echo ",Host Version,"$res_Host_version >> $output_file
-	echo "" >> $output_file
-
 	echo Rx Throughput,Units,TxThroughput,Units,Total,Units,,Time,ActiveConnection,,Time,CPU Usage >> $output_file
 
 	for i in `seq 1 $length`;
@@ -87,9 +73,17 @@ gen_csv(){
 logs_folder=$1
 for number_of_connections in 1 2 4 8 16 32 64 128 256 512 1024 2000 3000 4000 5000 6000
 do
+	echo "Converting $number_of_connections logs.."
 	gen_csv $logs_folder/$number_of_connections/$number_of_connections-sar.log $number_of_connections&
 done
 wait
+
+mkdir -p $logs_folder/csv_files/
+for number_of_connections  in 1 2 4 8 16 32 64 128 256 512 1024 2000 3000 4000 5000 6000
+do
+	mv $logs_folder/$number_of_connections/$number_of_connections-sar.csv $logs_folder/csv_files/
+done
+
 logs_folder=`echo $logs_folder| sed 's/\/$//'`
-tar -cvf $logs_folder.tar $logs_folder/
-echo "completed!"
+tar -czf $logs_folder.tar.gz $logs_folder/
+echo "Completed!"

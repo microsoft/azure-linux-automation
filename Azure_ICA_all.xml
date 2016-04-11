@@ -3274,17 +3274,17 @@
 			<TestID>AzureBVT_027</TestID>
 		</test>
 		<test>
-	      <testName>ICA-PASSWD-POLICY-TEST</testName>
-	      <testScript>ICA-PASSWD-POLICY-TEST.py</testScript>
-	      <testScriptPs1>ICA-PASSWD-POLICY-TEST.ps1</testScriptPs1>
-	      <files>.\remote-scripts\ICA-PASSWD-POLICY-TEST.py,.\remote-scripts\azuremodules.py</files>
+	      <testName>BVT-PASSWD-POLICY-TEST</testName>
+	      <testScript>BVT-PASSWD-POLICY-TEST.py</testScript>
+	      <testScriptPs1>BVT-PASSWD-POLICY-TEST.ps1</testScriptPs1>
+	      <files>.\remote-scripts\BVT-PASSWD-POLICY-TEST.py,.\remote-scripts\azuremodules.py</files>
 	      <setupType>BVTDeployment</setupType>
 	      <TestType>
 	      </TestType>
 	      <TestFeature>
 	      </TestFeature>
 	      <SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
-	      <TestID></TestID>
+	      <TestID>AzureBVT_029</TestID>
 	    </test>
 		<test>
 			<testName>ICA-VERIFY-RDMA</testName>
@@ -5216,6 +5216,8 @@
 			<setupType>LargeVM</setupType>
 			<TestType></TestType>
 			<FunctionType>Extend</FunctionType>
+			<!-- <DiskParam>rootdisk</DiskParam> -->
+			<DiskParam>datadisk</DiskParam>
 			<DiskSize>512</DiskSize>
 			<LunNumber>0</LunNumber>
 			<Cache>None</Cache>
@@ -5234,6 +5236,8 @@
 			<setupType>LargeVM</setupType>
 			<TestType></TestType>
 			<FunctionType>Shrink</FunctionType>
+			<!-- <DiskParam>rootdisk</DiskParam> -->
+			<DiskParam>datadisk</DiskParam>
 			<DiskSize>512</DiskSize>
 			<LunNumber>0</LunNumber>
 			<Cache>None</Cache>
