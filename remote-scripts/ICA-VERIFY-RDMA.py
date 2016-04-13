@@ -19,22 +19,17 @@ def RunTest():
         if(distro == "SLES"):
             output = Run("zypper info msft-lis-rdma-kmp-default")
             r = re.search("Version: (\S+)", output)
-            if r is not None:
-                RDMAVersion = r.groups()[0]
-                RunLog.info("Verify RDMA Driver version: " + RDMAVersion)
-                RDMA = True
-            else:
-                RunLog.error("Failed to verify RDMA Driver")
-                RDMA = False
         if(distro == "CENTOS"):
-            RDMAVersion = Run("rpm -q microsoft-hyper-v-rdma")
-            r = re.match('microsoft-hyper-v-rdma-\d+.*',RDMAVersion)
-            if r is not None:
-                RunLog.info("Verify RDMA Driver version: " + RDMAVersion)
-                RDMA = True
-            else:
-                RunLog.error("Failed to verify RDMA Driver")
-                RDMA = False
+            output = Run("rpm -q microsoft-hyper-v-rdma")
+            r = re.search("microsoft-hyper-v-rdma-(\d.*)", output)
+        if r is not None:
+            RDMAVersion = r.groups()[0]
+            RunLog.info("Verify RDMA Driver version: " + RDMAVersion)
+            RDMA = True
+        else:
+            RunLog.error("Failed to verify RDMA Driver")
+            RDMA = False
+
         RunLog.info("Checking NDdriver version")
         if os.path.isfile("/var/lib/hyperv/.kvp_pool_0"):
             with open("/var/lib/hyperv/.kvp_pool_0", "r") as f:
