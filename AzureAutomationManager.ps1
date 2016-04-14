@@ -124,7 +124,14 @@ try
         Switch-AzureMode -Name AzureServiceManagement
         Set-Variable -Name UseAzureResourceManager -Value $false -Scope Global
         LogMsg "Setting Azure Subscription ..."
-        $out = SetSubscription -subscriptionID $AzureSetup.SubscriptionID -subscriptionName $AzureSetup.SubscriptionName -certificateThumbprint $AzureSetup.CertificateThumbprint -managementEndpoint $AzureSetup.ManagementEndpoint -storageAccount $AzureSetup.StorageAccount
+		if($AzureSetup.Environment)
+		{
+			$out = SetSubscription -subscriptionID $AzureSetup.SubscriptionID -subscriptionName $AzureSetup.SubscriptionName -certificateThumbprint $AzureSetup.CertificateThumbprint -managementEndpoint $AzureSetup.ManagementEndpoint -storageAccount $AzureSetup.StorageAccount -environment $AzureSetup.Environment		
+		}
+		else
+		{
+			$out = SetSubscription -subscriptionID $AzureSetup.SubscriptionID -subscriptionName $AzureSetup.SubscriptionName -certificateThumbprint $AzureSetup.CertificateThumbprint -managementEndpoint $AzureSetup.ManagementEndpoint -storageAccount $AzureSetup.StorageAccount		
+		}
         $currentSubscription = Get-AzureSubscription -SubscriptionId $AzureSetup.SubscriptionID -ExtendedDetails
         LogMsg "SubscriptionName       : $($currentSubscription.SubscriptionName)"
         LogMsg "SubscriptionId         : $($currentSubscription.SubscriptionID)"
