@@ -34,6 +34,7 @@
 			<SubscriptionName>Your_Azure_Subscription_Name</SubscriptionName>
 			<CertificateThumbprint>Certificate_Associated_with_your_Azure_Subscription</CertificateThumbprint>
 			<ManagementEndpoint>https://management.core.windows.net</ManagementEndpoint>
+			<Environment>AzureCloud</Environment>
 			<StorageAccount>Preferred_Stoarage_Account</StorageAccount>
 			<ARMStorageAccount>Preferred_ARM_Stoarage_Account</ARMStorageAccount>
 			<!--<Location>"Preferred_Location"</Location>-->
