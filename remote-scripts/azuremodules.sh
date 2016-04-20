@@ -141,7 +141,7 @@ function install_package ()
             apt_get_install $package_name
             ;;
 
-        suse|opensuse)
+        suse|opensuse|sles)
             zypper_install $package_name
             ;;
 
