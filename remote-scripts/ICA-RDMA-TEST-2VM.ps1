@@ -207,7 +207,7 @@ if ($isDeployed)
 		#region MONITOR TEST
 		while ( (Get-Job -Id $testJob).State -eq "Running" )
 		{
-			$currentStatus = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "tail -n 1 /root/rdmaConsole.txtq"
+			$currentStatus = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "tail -n 1 /root/rdmaConsole.txt"
 			LogMsg "Current Test Staus : $currentStatus"
 			WaitFor -seconds 10
 		}

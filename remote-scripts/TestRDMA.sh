@@ -218,19 +218,21 @@ else
     exit 10
 fi
 
-if [ ! ${master} ]; then
-	errMsg="Please add/provide value for master in constants.sh. master=<Master VM hostname>"
-    LogMsg "${errMsg}"
-    echo "${errMsg}" >> ~/summary.log
-	UpdateTestState $ICA_TESTABORTED
-	exit 1
-fi
-if [ ! ${slaves} ]; then
-	errMsg="Please add/provide value for slaves in constants.sh. slaves=<hostname1,hostname2,hostname3>"
-    LogMsg "${errMsg}"
-    echo "${errMsg}" >> ~/summary.log
-	UpdateTestState $ICA_TESTABORTED
-	exit 1
+if [ ${installLocal} != "yes" ]; then
+	if [ ! ${master} ]; then
+		errMsg="Please add/provide value for master in constants.sh. master=<Master VM hostname>"
+		LogMsg "${errMsg}"
+		echo "${errMsg}" >> ~/summary.log
+		UpdateTestState $ICA_TESTABORTED
+		exit 1
+	fi
+	if [ ! ${slaves} ]; then
+		errMsg="Please add/provide value for slaves in constants.sh. slaves=<hostname1,hostname2,hostname3>"
+		LogMsg "${errMsg}"
+		echo "${errMsg}" >> ~/summary.log
+		UpdateTestState $ICA_TESTABORTED
+		exit 1
+	fi
 fi
 
 if [ "${rdmaPrepare}" != "yes" ] && [ "${rdmaPrepare}" != "no" ]; then
@@ -253,27 +255,39 @@ slavesArr=`echo ${slaves} | tr ',' ' '`
 if [ "${rdmaPrepare}" == "yes" ]; then
 
 	# master VM preparation for RDMA tests...
-	ssh root@${slave} test -e rdmaPrepared
-	if [ $? -ne 0 ]; then 
-		LogMsg "Info : Running config on master : '${master}'"
-		PrepareForRDMA "${master}"
-	else
-		LogMsg "${master} is already prepared for RDMA tests." 
-	fi
-
-	# slave VMs preparation for RDMA tests...
-	for slave in $slavesArr
-	do
-		ssh root@${slave} test -e rdmaPrepared
+	
+	if [ ${installLocal} == "yes" ]; then
+		localVM=`hostname`
+		ssh root@${localVM} test -e rdmaPrepared
 		if [ $? -ne 0 ]; then 
-			LogMsg "Info : Running config on slave '${slave}'"
-			PrepareForRDMA "${slave}"
-			LogMsg "Info : mounting ${master}:/mirror NFS directory to /mirror on '${slave}'"
-			ssh root@${slave} mount ${master}:/mirror /mirror
+			LogMsg "Info : Running config on current machine : '${localVM}'"
+			PrepareForRDMA "${localVM}"
 		else
-			LogMsg "${slave} is already prepared for RDMA tests." 
+			LogMsg "${localVM} is already prepared for RDMA tests." 
 		fi
-	done
+	else
+		ssh root@${master} test -e rdmaPrepared
+		if [ $? -ne 0 ]; then 
+			LogMsg "Info : Running config on master : '${master}'"
+			PrepareForRDMA "${master}"
+		else
+			LogMsg "${master} is already prepared for RDMA tests." 
+		fi
+
+		# slave VMs preparation for RDMA tests...
+		for slave in $slavesArr
+		do
+			ssh root@${slave} test -e rdmaPrepared
+			if [ $? -ne 0 ]; then 
+				LogMsg "Info : Running config on slave '${slave}'"
+				PrepareForRDMA "${slave}"
+				LogMsg "Info : mounting ${master}:/mirror NFS directory to /mirror on '${slave}'"
+				ssh root@${slave} mount ${master}:/mirror /mirror
+			else
+				LogMsg "${slave} is already prepared for RDMA tests." 
+			fi
+		done
+	fi
 else
 	LogMsg "Info : Skipping RDMA preparation. (Source : constants.sh)"
 fi
