@@ -14,10 +14,14 @@ distro = args.distro
 def RunTest():
     UpdateState("TestRunning")
     RunLog.info("Distro: " + distro)
-    if(distro == "SLES"):
+    if(distro == "SLES" or distro == "CENTOS"):
         RunLog.info("Checking RDMA Driver version")
-        output = Run("zypper info msft-lis-rdma-kmp-default")
-        r = re.search("Version: (\S+)", output)
+        if(distro == "SLES"):
+            output = Run("zypper info msft-lis-rdma-kmp-default")
+            r = re.search("Version: (\S+)", output)
+        if(distro == "CENTOS"):
+            output = Run("rpm -q microsoft-hyper-v-rdma")
+            r = re.search("microsoft-hyper-v-rdma-(\d.*)", output)
         if r is not None:
             RDMAVersion = r.groups()[0]
             RunLog.info("Verify RDMA Driver version: " + RDMAVersion)
