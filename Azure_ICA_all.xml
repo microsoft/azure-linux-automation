@@ -5249,7 +5249,25 @@
 			<TestID>fun_002</TestID>
 			<Priority>P0</Priority>
 		</test>
-		
+		<test>
+			<testName>ICA-RDMA-TEST-2VM</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-RDMA-TEST-2VM.ps1</testScriptps1>
+			<setupType>M1S1</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<remoteFiles></remoteFiles>
+			<Priority>P0</Priority>
+		</test>			
+		<test>
+			<testName>ICA-RDMA-TEST-16VM</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-RDMA-TEST-16VM.ps1</testScriptps1>
+			<setupType>M1S15</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<remoteFiles></remoteFiles>
+			<Priority>P0</Priority>		
 	</testsDefinition>
 
 	<testCycles>
