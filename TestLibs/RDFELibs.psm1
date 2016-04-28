@@ -498,7 +498,14 @@ Function GenerateCommand ($Setup, $serviceName, $osImage, $HSData)
 	{
 		$vmCount = $vmCount + 1
 		$VnetName = $HS.VnetName
-		$instanceSize = $newVM.InstanceSize
+        if ( $OverrideVMSize )
+        {
+            $instanceSize = $OverrideVMSize
+        }
+        else
+        {
+		    $instanceSize = $newVM.InstanceSize
+        }
 		$SubnetName = $newVM.SubnetName
 		$DnsServerIP = $HS.DnsServerIP
 #...............................................
@@ -693,7 +700,7 @@ Function GenerateCommand ($Setup, $serviceName, $osImage, $HSData)
 	return $createSetupCommand,  $serviceName, $vmCount
 } 
 
-Function CreateDeployment ($DeploymentCommand, $NewServiceName , $vmCount, [string]$storageaccount="")
+Function CreateDeployment ($DeploymentCommand, $NewServiceName , $vmCount, [string]$storageaccount="", $timeOutSeconds)
 {
 	
 	$FailCounter = 0
@@ -703,7 +710,7 @@ Function CreateDeployment ($DeploymentCommand, $NewServiceName , $vmCount, [stri
 		try
 		{
 			$FailCounter++
-			$out = RunAzureCmd -AzureCmdlet "$DeploymentCommand" -storageaccount $storageaccount
+			$out = RunAzureCmd -AzureCmdlet "$DeploymentCommand" -storageaccount $storageaccount -maxWaitTimeSeconds $timeOutSeconds
 			#LogMsg $DeploymentCommand
 			$retValue = $?
 			LogMsg "VM's deployed. Verifying.."
@@ -796,7 +803,7 @@ Function CheckVMsInService($serviceName)
 	return $allVMsReady
 }
 
-Function CreateAllDeployments($setupType, $xmlConfig, $Distro, [string]$region ="", [string]$storageAccount="")
+Function CreateAllDeployments($setupType, $xmlConfig, $Distro, [string]$region ="", [string]$storageAccount="", $timeOutSeconds)
 {
 
 	$hostedServiceCount = 0
@@ -874,7 +881,7 @@ Function CreateAllDeployments($setupType, $xmlConfig, $Distro, [string]$region =
 						    $DeploymentCommand = GenerateCommand -Setup $Setup -serviceName $serviceName -osImage $img -HSData $HS
 						    Set-AzureSubscription -SubscriptionName $xmlConfig.config.Azure.General.SubscriptionName  -CurrentStorageAccountName $currentStorageAccount
 						    $DeploymentStartTime = (Get-Date)
-						    $isDeployed = CreateDeployment -DeploymentCommand $DeploymentCommand[0] -NewServiceName $DeploymentCommand[1] -vmCount $DeploymentCommand[2] -storageaccount $currentStorageAccount
+						    $isDeployed = CreateDeployment -DeploymentCommand $DeploymentCommand[0] -NewServiceName $DeploymentCommand[1] -vmCount $DeploymentCommand[2] -storageaccount $currentStorageAccount -timeOutSeconds $timeOutSeconds
 						    $DeploymentEndTime = (Get-Date)
 						    $DeploymentElapsedTime = $DeploymentEndTime - $DeploymentStartTime
 						    if ( $isDeployed -eq "True" )
@@ -1247,7 +1254,7 @@ Function SetDistroSpecificVariables($detectedDistro)
 	}
 }
 
-Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, $GetDeploymentStatistics = $false, [string]$region ="", [string]$storageAccount="")
+Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, $GetDeploymentStatistics = $false, [string]$region ="", [string]$storageAccount="",[int]$timeOutSeconds)
 {
 	if( (!$EconomyMode) -or ( $EconomyMode -and ($xmlConfig.config.Azure.Deployment.$setupType.isDeployed -eq "NO")))
 	{
@@ -1260,7 +1267,7 @@ Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFa
 			$i = 0
 			$role = 1
 			$setupTypeData = $xmlConfig.config.Azure.Deployment.$setupType
-			$isAllDeployed = CreateAllDeployments -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro -region $region -storageAccount $storageAccount
+			$isAllDeployed = CreateAllDeployments -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro -region $region -storageAccount $storageAccount -timeOutSeconds $timeOutSeconds
 			$isAllVerified = "False"
 			$isAllConnected = "False"
 			if($isAllDeployed[0] -eq "True")
@@ -1359,7 +1366,7 @@ Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFa
 	}
 }
 
-Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, $GetDeploymentStatistics = $false, [string]$region = "", [string]$storageAccount = "")
+Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, $GetDeploymentStatistics = $false, [string]$region = "", [string]$storageAccount = "", [int]$timeOutSeconds = 600)
 {
     $AzureSetup = $xmlConfig.config.Azure.General
 
@@ -1377,7 +1384,7 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, 
         {
          LogMsg "CurrentStorageAccount  : $($storageAccount)"
        }
-		$retValue = DeployManagementServices -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro -getLogsIfFailed $getLogsIfFailed -GetDeploymentStatistics $GetDeploymentStatistics -region $region -storageAccount $storageAccount 
+		$retValue = DeployManagementServices -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro -getLogsIfFailed $getLogsIfFailed -GetDeploymentStatistics $GetDeploymentStatistics -region $region -storageAccount $storageAccount -timeOutSeconds $timeOutSeconds
 	}
 	return $retValue
 }
@@ -1951,7 +1958,15 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 					LogMsg "Removing compressed file : $tarFileName"
 					Remove-Item -Path $tarFileName -Force 2>&1 | Out-Null
 					LogMsg "Decompressing files in VM ..."
-					$out = RunLinuxCmd -username $username -password $password -ip $uploadTo -port $port -command "tar -xf $tarFileName" -runAsSudo
+					if ( $username -eq "root" )
+					{
+						$out = RunLinuxCmd -username $username -password $password -ip $uploadTo -port $port -command "tar -xf $tarFileName"
+					}
+					else
+					{
+						$out = RunLinuxCmd -username $username -password $password -ip $uploadTo -port $port -command "tar -xf $tarFileName" -runAsSudo
+					}
+					
 				}
 				else
 				{

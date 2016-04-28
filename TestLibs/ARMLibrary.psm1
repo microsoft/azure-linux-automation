@@ -728,7 +728,15 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
 foreach ( $newVM in $RGXMLData.VirtualMachine)
 {
     $VnetName = $RGXMLData.VnetName
-    $instanceSize = $newVM.ARMInstanceSize
+    if ( $OverrideVMSize )
+    {
+        $instanceSize = $OverrideVMSize
+    }
+    else
+    {
+		$instanceSize = $newVM.ARMInstanceSize
+    }
+    
     $ExistingSubnet = $newVM.ARMSubnetName
     $DnsServerIP = $RGXMLData.DnsServerIP
     if($newVM.RoleName)
@@ -925,7 +933,14 @@ if ( $numberOfVMs -eq 1)
     $newVM = $RGXMLData.VirtualMachine    
     $vmCount = $vmCount + 1
     $VnetName = $RGXMLData.VnetName
-    $instanceSize = $newVM.ARMInstanceSize
+    if ( $OverrideVMSize )
+    {
+        $instanceSize = $OverrideVMSize
+    }
+    else
+    {
+		$instanceSize = $newVM.ARMInstanceSize
+    }
     $SubnetName = $newVM.ARMSubnetName
     $DnsServerIP = $RGXMLData.DnsServerIP
     $NIC = "NIC" + "-$vmName"
