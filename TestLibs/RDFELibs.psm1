@@ -254,7 +254,7 @@ Function InstallPackages ($VMIpAddress, $VMSshPort, $VMUserName, $VMPassword)
 
 Function IsEnvironmentSupported()
 {
-	$version = (Get-Module -Name "Azure").Version
+	$version = (Get-Module -ListAvailable Azure).Version
 	If ($version.Major -GT 0 -OR
 		$version.Minor -GT 8 -OR
 		(($version.Minor -EQ 8) -And ($version.Build -GE 8)))

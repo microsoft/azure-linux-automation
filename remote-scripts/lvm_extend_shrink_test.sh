@@ -43,7 +43,14 @@ lvm_setup () {
 	check_exit_status "Logical Volume $LV_FULLNAME create" exit
 	lvs $LV_FULLNAME
 
-	time mkfs.ext4 $LV_FULLNAME
+	if grep -q "SUSE Linux Enterprise Server 11" /etc/*-release
+	then
+		echo "Formatting $LV_FULLNAME with ext3 FS"
+		time mkfs.ext3 $LV_FULLNAME
+	else
+		echo "Formatting $LV_FULLNAME with ext4 FS"
+		time mkfs.ext4 $LV_FULLNAME
+	fi
 	check_exit_status "Logical Volume $LV_FULLNAME format" exit
 
 	mount -o barrier=0 $LV_FULLNAME $mountdir
@@ -119,9 +126,9 @@ lvm_shrink_setup () {
 iozone_test () {
 	echo "Running iozone test on $diskparam"
 	if [ "$diskparam" == "rootdisk" ]; then
-		iozone -a -z -g 256m -k 16 -Vazure >> /home/$username/iozone_output.txt &
+		iozone -a -z -g 10g -k 16 -Vazure >> /home/$username/iozone_output.txt &
 	else
-		(cd $mountdir && iozone -a -z -g 256m -k 16 -Vazure >> /home/$username/iozone_output.txt &)
+		(cd $mountdir && iozone -a -z -g 10g -k 16 -Vazure >> /home/$username/iozone_output.txt &)
 	fi
 	sleep 30
 	pgrep iozone
@@ -171,7 +178,7 @@ while [ $i -eq $j ]
 do
 	echo "data disk is not exist, please wait"
 	j=`fdisk -l | grep 'Disk.*/dev/sd[a-z]' | wc -l`
-	sleep 10
+	sleep 30
 done
 echo "Data disk is attached successfully for LVM functional test"
 DATA_DISK=`fdisk -l | grep 'Disk.*/dev/sd[a-z]' |awk  '{print $2}' | sed s/://| sort| grep -v "/dev/sd[ab]$"| tail -1`
@@ -195,11 +202,14 @@ elif [ "$testparam" == "Shrink" ]; then
 	lvm_shrink_setup
 
 	#Now Deattach the data disk.
+	i=`fdisk -l | grep 'Disk.*/dev/sd[a-z]' | wc -l`
+	j=$i
 	echo "Now Deattach the data disk using powershell"
-	while [ -b $DATA_DISK ]
+	while [ $i -eq $j ]
 	do
 		echo "data disk $DATA_DISK is still exist, please wait"
-		sleep 10
+		j=`fdisk -l | grep 'Disk.*/dev/sd[a-z]' | wc -l`
+		sleep 30
 	done
 	echo "data disk $DATA_DISK is removed successfully"
 else
@@ -210,11 +220,19 @@ fi
 #Make sure IOZone test is still running after LVM test
 pgrep iozone
 check_exit_status "Make sure IOZone test is still running after LVM test" exit
-
+count=0
 #Wait till IOZone finished successfully
 while [ `pgrep iozone` ]
 do
 	echo "iozone test is still running, please wait"
+	count=$((count+1))
+	if [ $count -gt 30 ]; then
+		echo -e "\niozone test complete.\n" >> /home/$username/iozone_output.txt
+		echo "Loop count exceeded maximum limit"
+		killall iozone
+		break
+	fi
+	echo $count
 	sleep 60
 done
 
