@@ -5268,6 +5268,7 @@
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<remoteFiles></remoteFiles>
 			<Priority>P0</Priority>		
+		</test>
 	</testsDefinition>
 
 	<testCycles>
