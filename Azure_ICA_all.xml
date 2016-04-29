@@ -54,15 +54,18 @@
 				<!-- You can add your own distro and Image names here -->
 				<Distro>
 					<Name>SSU1510P</Name>
-					<OsImage>b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu_DAILY_BUILD-wily-15_10-amd64-server-20160217.2-en-us-30GB</OsImage>
+					<OsImage>b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu_DAILY_BUILD-wily-15_10-amd64-server-20160217.2-en-us-30GB</OsImage> <OsVHD></OsVHD> <!-- To run the tests in ASM mode, you need to provide the ImageName name. You can get the available ImageNames by executing Get-AzureVMImage command.-->
+					<OsVHD></OsVHD> <!-- To run the tests in ARM mode, you need to provide the VHD name, which should be uploaded to "vhds" container of your storage account.-->
 				</Distro> 
 				<Distro>
 					<Name>U1410</Name>
 					<OsImage>b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu_DAILY_BUILD-utopic-14_10-amd64-server-20150620-en-us-30GB</OsImage>
+					<OsVHD></OsVHD>
 				</Distro> 
 				<Distro>
 					<Name>Ubuntu1404Daily</Name>
 					<OsImage>b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu_DAILY_BUILD-utopic-14_10-amd64-server-20140720-en-us-30GB</OsImage>
+					<OsVHD></OsVHD>
 				</Distro>
 
 				<Distro>
