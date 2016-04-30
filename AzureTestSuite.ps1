@@ -17,7 +17,6 @@ Import-Module .\TestLibs\PerfTest\PerfTest.psm1 -Force
 Function CollectLogs()
 {}
 
-$allVMData = GetAllDeployementData -DeployedServices "ICA-HS-BVTDeployment-SSU1604CI-4-29-18-32-28"
 Function AddReproVMDetailsToHtmlReport()
 {
 	$reproVMHtmlText = $null
