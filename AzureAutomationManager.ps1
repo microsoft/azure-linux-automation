@@ -78,6 +78,7 @@ try
     $testDir = $testResults + "\" + $fname + "-" + $testStartTime.ToString("yyyyMMdd-HHmmss")
 
     mkdir $testDir -ErrorAction SilentlyContinue | out-null
+    Set-Content -Value "" -Path .\report\testSummary.html -Force | Out-Null
 
     if ($logFilename)
     {
