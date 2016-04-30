@@ -217,8 +217,11 @@ try
 }
 catch
 {
+    $line = $_.InvocationInfo.ScriptLineNumber
+    $script_name = ($_.InvocationInfo.ScriptName).Replace($PWD,".")
     $ErrorMessage =  $_.Exception.Message
-    LogMsg "EXCEPTION : $ErrorMessage"   
+    LogErr "EXCEPTION : $ErrorMessage"
+    LogErr "Source : Line $line in script $script_name."   
 }
 Finally
 {
