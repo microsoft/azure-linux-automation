@@ -42,6 +42,7 @@ try
     # Work flow starts here
     # Creating TestResults directory
     $testResults = "TestResults"
+    
     if (! (test-path $testResults))
     {
         mkdir $testResults | out-null
@@ -87,6 +88,7 @@ try
 
     $logFile = $testDir + "\" + $logfile
     Set-Variable -Name logfile -Value $logFile -Scope Global
+    Set-Content -Path .\report\lastLogDirectory.txt -Value $testDir
     Set-Variable -Name Distro -Value $Distro -Scope Global
     Set-Variable -Name onCloud -Value $onCloud -Scope Global
     Set-Variable -Name xmlConfig -Value $xmlConfig -Scope Global

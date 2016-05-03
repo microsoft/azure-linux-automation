@@ -19,19 +19,19 @@ Function CollectLogs()
 
 Function AddReproVMDetailsToHtmlReport()
 {
-	$reproVMHtmlText = $null
+	$reproVMHtmlText += "<br><font size=`"2`"><em>Repro VMs: </em></font>"
 	if ( $UserAzureResourceManager )
 	{
 		foreach ( $vm in $allVMData )
 		{
-			$reproVMHtmlText = "<br><font size=`"2`">ResourceGroup : $($vm.ResourceGroup), IP : $($vm.PublicIP), SSH : $($vm.SSHPort)</font>"
+			$reproVMHtmlText += "<br><font size=`"2`">ResourceGroup : $($vm.ResourceGroup), IP : $($vm.PublicIP), SSH : $($vm.SSHPort)</font>"
 		}					   
 	}
 	else
 	{
 		foreach ( $vm in $allVMData )
 		{
-			$reproVMHtmlText = "<br><font size=`"2`">ServiceName : $($vm.ServiceName), IP : $($vm.PublicIP), SSH : $($vm.SSHPort)</font>"
+			$reproVMHtmlText += "<br><font size=`"2`">ServiceName : $($vm.ServiceName), IP : $($vm.PublicIP), SSH : $($vm.SSHPort)</font>"
 		}		
 	}   
 	return $reproVMHtmlText
@@ -280,6 +280,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 						LogMsg "Starting multiple tests : $($currentTestData.testName)"
 						$startTime = [Datetime]::Now.ToUniversalTime()
 						$testResult = Invoke-Expression $command
+						$tempHtmlText = ($testResult[1]).Substring(0,((($testResult[1]).Length)-6))
 						$executionCount += 1
 						$testResult = RefineTestResult2 -testResult $testResult
 						$testRunDuration = GetStopWatchElapasedTime $stopWatch "mm"
@@ -300,7 +301,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 						$testSuiteResultDetails.totalPassTc = $testSuiteResultDetails.totalPassTc +1
 						$testResultRow = "<span style='color:green;font-weight:bolder'>PASS</span>"
 						FinishLogTestCase $testcase
-						$testCycle.htmlSummary += "<tr><td><font size=`"3`">$executionCount</font></td><td>$(($testResult[1]).Replace('		  ','').Replace(' <br />',''))</td><td>$testRunDuration min</td><td>$testResultRow</td></tr>"
+						$testCycle.htmlSummary += "<tr><td><font size=`"3`">$executionCount</font></td><td>$tempHtmlText</td><td>$testRunDuration min</td><td>$testResultRow</td></tr>"
 					}
 					elseif($testResult[0] -imatch "FAIL")
 					{
@@ -308,7 +309,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 						$caseLog = Get-Content -Raw $testCaseLogFile
 						$testResultRow = "<span style='color:red;font-weight:bolder'>FAIL</span>"
 						FinishLogTestCase $testcase "FAIL" "$($test.Name) failed." $caseLog
-						$testCycle.htmlSummary += "<tr><td><font size=`"3`">$executionCount</font></td><td>$(($testResult[1]).Replace('		  ','').Replace(' <br />',''))$(AddReproVMDetailsToHtmlReport)</td><td>$testRunDuration min</td><td>$testResultRow</td></tr>"
+						$testCycle.htmlSummary += "<tr><td><font size=`"3`">$executionCount</font></td><td>$tempHtmlText$(AddReproVMDetailsToHtmlReport)</td><td>$testRunDuration min</td><td>$testResultRow</td></tr>"
 					}
 					elseif($testResult[0] -imatch "ABORTED")
 					{
@@ -316,7 +317,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 						$caseLog = Get-Content -Raw $testCaseLogFile
 						$testResultRow = "<span style='background-color:yellow;font-weight:bolder'>ABORT</span>"
 						FinishLogTestCase $testcase "ERROR" "$($test.Name) is aborted." $caseLog
-						$testCycle.htmlSummary += "<tr><td><font size=`"3`">$executionCount</font></td><td>$(($testResult[1]).Replace('		  ','').Replace(' <br />',''))$(AddReproVMDetailsToHtmlReport)</td><td>$testRunDuration min</td><td>$testResultRow</td></tr>"
+						$testCycle.htmlSummary += "<tr><td><font size=`"3`">$executionCount</font></td><td>$tempHtmlText$(AddReproVMDetailsToHtmlReport)</td><td>$testRunDuration min</td><td>$testResultRow</td></tr>"
 					}
 					
 				} 
