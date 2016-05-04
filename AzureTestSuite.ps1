@@ -279,9 +279,9 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 						LogMsg "Starting multiple tests : $($currentTestData.testName)"
 						$startTime = [Datetime]::Now.ToUniversalTime()
 						$testResult = Invoke-Expression $command
+						$testResult = RefineTestResult2 -testResult $testResult
 						$tempHtmlText = ($testResult[1]).Substring(0,((($testResult[1]).Length)-6))
 						$executionCount += 1
-						$testResult = RefineTestResult2 -testResult $testResult
 						$testRunDuration = GetStopWatchElapasedTime $stopWatch "mm"
 						$testRunDuration = $testRunDuration.ToString()
 						$testCycle.emailSummary += "$($currentTestData.testName) Execution Time: $testRunDuration minutes<br />"
