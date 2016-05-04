@@ -231,7 +231,6 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 						$testRunDuration = GetStopWatchElapasedTime $stopWatch "mm"
 						$testCycle.emailSummary += "$($currentTestData.testName) Execution Time: $testRunDuration minutes<br />"
 						$testCycle.emailSummary += "	$($currentTestData.testName) : $testResult <br />"
-						
 						$testResultRow = ""
 						LogMsg "~~~~~~~~~~~~~~~TEST END : $($currentTestData.testName)~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 					}
