@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Settings>
+  <PortalURL>https://ms.portal.azure.com</PortalURL>
+  <LoginUserName>lilideng@outlook.com</LoginUserName>
+  <LoginPassword>denglili2013</LoginPassword>
+  <UserName>azureuser</UserName>
+  <Password>P@ssw0rd01</Password>
+  <ImageLabel>Ubuntu Server 14.04 LTS</ImageLabel>
+  <Size>A1 Standard</Size>
+  <Location>West US</Location>
+</Settings>
