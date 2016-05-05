@@ -5269,6 +5269,23 @@
 			<remoteFiles></remoteFiles>
 			<Priority>P0</Priority>		
 		</test>
+		<test>
+			<testName>UI-AzurePortalTest-CreateARMVM</testName>
+			<testScript></testScript>
+			<testScriptps1>UI-AzurePortalTest-CreateARMVM.ps1</testScriptps1>
+			<Parameters>
+				<ImageLabel>Ubuntu Server 14.04 LTS</ImageLabel>
+				<VMsize>A0 Standard</VMsize>
+			</Parameters>			
+			<files></files>
+			<setupType></setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<TestID>UI_001</TestID>
+			<Priority>P0</Priority>
+		</test>
+		
 	</testsDefinition>
 
 	<testCycles>
@@ -5285,6 +5302,12 @@
 				<Name>ICA-DEPLOYMENT-ALL-SIZES-LOOP-TEST</Name>
 			</test>
 		</Cycle>
+		<Cycle>
+			<cycleName>UITEST</cycleName>
+			<test>
+				<Name>UI-AzurePortalTest-CreateARMVM</Name>
+			</test>
+		</Cycle>		
 		<Cycle>
 			<cycleName>REBOOT</cycleName>
 			<test>
