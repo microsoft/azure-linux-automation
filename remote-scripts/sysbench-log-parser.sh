@@ -85,7 +85,6 @@ do
 	then
 		echo ",$testmode,$max_iops," >> $csv_file-tmp
 	fi
-	
 done
 
 echo "" >> $csv_file-tmp
