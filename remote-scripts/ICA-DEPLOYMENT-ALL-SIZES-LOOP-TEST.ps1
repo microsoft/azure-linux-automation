@@ -72,7 +72,7 @@ else
 		$VMSizes = $StandardSizes
 	}
 }
-
+LogMsg "test VM sizes: $VMSizes"
 $NumberOfSizes = $VMSizes.Count
 $DeploymentCount = $currentTestData.DeploymentCount
 #Test Starts Here..
