@@ -1784,6 +1784,86 @@
 					</VirtualMachine>
 				</HostedService>
 			</D5V2>
+			<DS1V2>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS1_v2</InstanceSize>
+						<ARMInstanceSize>Standard_DS1_v2</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+					</VirtualMachine>
+				</HostedService>
+			</DS1V2>
+			<DS2V2>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS2_v2</InstanceSize>
+						<ARMInstanceSize>Standard_DS2_v2</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+					</VirtualMachine>
+				</HostedService>
+			</DS2V2>
+			<DS3V2>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS3_v2</InstanceSize>
+						<ARMInstanceSize>Standard_DS3_v2</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+					</VirtualMachine>
+				</HostedService>
+			</DS3V2>
+			<DS4V2>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS4_v2</InstanceSize>
+						<ARMInstanceSize>Standard_DS4_v2</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+					</VirtualMachine>
+				</HostedService>
+			</DS4V2>
+			<DS5V2>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS5_v2</InstanceSize>
+						<ARMInstanceSize>Standard_DS5_v2</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+					</VirtualMachine>
+				</HostedService>
+			</DS5V2>
 			<D11V2>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -1848,12 +1928,77 @@
 					</VirtualMachine>
 				</HostedService>
 			</D14V2>
+			<DS11V2>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS11_v2</InstanceSize>
+						<ARMInstanceSize>Standard_DS11_v2</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+					</VirtualMachine>
+				</HostedService>
+			</DS11V2>
+			<DS12V2>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS12_v2</InstanceSize>
+						<ARMInstanceSize>Standard_DS12_v2</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+					</VirtualMachine>
+				</HostedService>
+			</DS12V2>
+			<DS13V2>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS13_v2</InstanceSize>
+						<ARMInstanceSize>Standard_DS13_v2</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+					</VirtualMachine>
+				</HostedService>
+			</DS13V2>
+			<DS14V2>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS14_v2</InstanceSize>
+						<ARMInstanceSize>Standard_DS14_v2</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+					</VirtualMachine>
+				</HostedService>
+			</DS14V2>
 			<D1>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Standard_D1</InstanceSize>
+						<ARMInstanceSize>Standard_D1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1870,6 +2015,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Standard_D2</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1886,6 +2032,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Standard_D3</InstanceSize>
+						<ARMInstanceSize>Standard_D3</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1902,6 +2049,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Standard_D4</InstanceSize>
+						<ARMInstanceSize>Standard_D4</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1918,6 +2066,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Standard_D11</InstanceSize>
+						<ARMInstanceSize>Standard_D11</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1934,6 +2083,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Standard_D12</InstanceSize>
+						<ARMInstanceSize>Standard_D12</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1950,6 +2100,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Standard_D13</InstanceSize>
+						<ARMInstanceSize>Standard_D13</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1966,6 +2117,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Standard_D14</InstanceSize>
+						<ARMInstanceSize>Standard_D14</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1976,12 +2128,149 @@
 					</VirtualMachine>
 				</HostedService>
 			</D14>
+			<DS1>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS1</InstanceSize>
+						<ARMInstanceSize>Standard_DS1</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</DS1>
+			<DS2>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS2</InstanceSize>
+						<ARMInstanceSize>Standard_DS2</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</DS2>
+			<DS3>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS3</InstanceSize>
+						<ARMInstanceSize>Standard_DS3</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</DS3>
+			<DS4>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS4</InstanceSize>
+						<ARMInstanceSize>Standard_DS4</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</DS4>
+			<DS11>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS11</InstanceSize>
+						<ARMInstanceSize>Standard_DS11</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</DS11>
+			<DS12>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS12</InstanceSize>
+						<ARMInstanceSize>Standard_DS12</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</DS12>
+			<DS13>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS13</InstanceSize>
+						<ARMInstanceSize>Standard_DS13</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</DS13>
+			<DS14>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS14</InstanceSize>
+						<ARMInstanceSize>Standard_DS14</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</DS14>
 			<G1>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Standard_G1</InstanceSize>
+						<ARMInstanceSize>Standard_G1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -1998,6 +2287,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Standard_G2</InstanceSize>
+						<ARMInstanceSize>Standard_G2</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -2014,6 +2304,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Standard_G3</InstanceSize>
+						<ARMInstanceSize>Standard_G3</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -2030,6 +2321,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Standard_G4</InstanceSize>
+						<ARMInstanceSize>Standard_G4</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -2046,6 +2338,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Standard_G5</InstanceSize>
+						<ARMInstanceSize>Standard_G5</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -2056,6 +2349,91 @@
 					</VirtualMachine>
 				</HostedService>
 			</G5>
+			<GS1>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_GS1</InstanceSize>
+						<ARMInstanceSize>Standard_GS1</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</GS1>
+			<GS2>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_GS2</InstanceSize>
+						<ARMInstanceSize>Standard_GS2</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</GS2>
+			<GS3>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_GS3</InstanceSize>
+						<ARMInstanceSize>Standard_GS3</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</GS3>
+			<GS4>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_GS4</InstanceSize>
+						<ARMInstanceSize>Standard_GS4</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</GS4>
+			<GS5>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_GS5</InstanceSize>
+						<ARMInstanceSize>Standard_GS5</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</GS5>
 
 			<BasicA0>
 				<isDeployed>NO</isDeployed>
@@ -2148,7 +2526,7 @@
 				<HostedService>
 					<VirtualMachine>
 						<state></state>
-						<InstanceSize>A0</InstanceSize>
+						<InstanceSize>ExtraSmall</InstanceSize>
 						<ARMInstanceSize>Standard_A0</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -2165,7 +2543,7 @@
 				<HostedService>
 					<VirtualMachine>
 						<state></state>
-						<InstanceSize>A1</InstanceSize>
+						<InstanceSize>Small</InstanceSize>
 						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -2182,7 +2560,7 @@
 				<HostedService>
 					<VirtualMachine>
 						<state></state>
-						<InstanceSize>A2</InstanceSize>
+						<InstanceSize>Medium</InstanceSize>
 						<ARMInstanceSize>Standard_A2</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -2199,7 +2577,7 @@
 				<HostedService>
 					<VirtualMachine>
 						<state></state>
-						<InstanceSize>A3</InstanceSize>
+						<InstanceSize>Large</InstanceSize>
 						<ARMInstanceSize>Standard_A3</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -2216,7 +2594,7 @@
 				<HostedService>
 					<VirtualMachine>
 						<state></state>
-						<InstanceSize>A4</InstanceSize>
+						<InstanceSize>ExtraLarge</InstanceSize>
 						<ARMInstanceSize>Standard_A4</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -2278,13 +2656,14 @@
 						<DataDisk></DataDisk>
 					</VirtualMachine>
 				</HostedService>
-			</A7>			
+			</A7>
 			<A8>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>A8</InstanceSize>
+						<ARMInstanceSize>Standard_A8</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -2301,6 +2680,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>A9</InstanceSize>
+						<ARMInstanceSize>Standard_A9</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -2317,6 +2697,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>A10</InstanceSize>
+						<ARMInstanceSize>Standard_A10</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -2333,6 +2714,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>A11</InstanceSize>
+						<ARMInstanceSize>Standard_A11</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -4778,9 +5160,8 @@
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
-			<!-- <SubtestValues>ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM</SubtestValues> -->
-			<SubtestValues>ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM,A5,A6,A7,A8,A9,A10,A11,D1,D2,D3,D4,D11,D12,D13,D14,G1,G2,G3,G4,G5</SubtestValues>
-			<ARMSubtestValues>BasicA0,BasicA1,BasicA2,BasicA3,BasicA4,A0,A1,A2,A3,A4,A5,A6,A7,D1V2,D2V2,D3V2,D4V2,D11V2,D12V2,D13V2,D14V2</ARMSubtestValues>
+			<!-- SubSubtestValues will be set from environment variable -->
+			<SubtestValues></SubtestValues>
 			<DeploymentCount>250</DeploymentCount>
 			<TestID>Reboot_01</TestID>
 		</test>

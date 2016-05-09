@@ -3,14 +3,76 @@ Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""
 $resultArr = @()
-if ( $UseAzureResourceManager )
+$VMSizes = @()
+$StandardSizes = @()
+$XioSizes = @()
+
+if($currentTestData.SubtestValues)
 {
-    $VMSizes = ($currentTestData.ARMSubtestValues).Split(",")
+	$VMSizes = ($currentTestData.SubtestValues).Split(",")
 }
+# Get all supported sizes in this region
 else
 {
-    $VMSizes = ($currentTestData.SubtestValues).Split(",")
+	if ( $UseAzureResourceManager )
+	{
+		$StorAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
+		$AccountDetail =  Get-AzureStorageAccount | where {$_.Name -eq $StorAccount}
+		$Location = $AccountDetail.PrimaryLocation
+		$AccountType = $AccountDetail.AccountType
+		$SupportSizes = (Get-AzureVMSize -Location $location).Name
+	}
+	else
+	{
+		$StorAccount = $xmlConfig.config.Azure.General.StorageAccount
+		$Location = (Get-AzureStorageAccount -StorageAccountName $StorAccount).GeoPrimaryLocation
+		$AccountType = (Get-AzureStorageAccount -StorageAccountName $StorAccount).AccountType
+		$SupportSizes = (Get-AzureLocation | where {$_.Name -eq $location}).VirtualMachineRoleSizes
+	}
+	foreach($size in $SupportSizes)
+	{
+		if($size -match 'DS' -or $size -match 'GS')
+		{
+			$XioSizes += $size.Replace('Standard','').Replace('_','')
+		}
+		else
+		{
+			if($size -eq 'ExtraSmall')
+			{
+				$StandardSizes += 'A0'
+			}
+			elseif($size -eq 'Small')
+			{
+				$StandardSizes += 'A1'
+			}
+			elseif($size -eq 'Medium')
+			{
+				$StandardSizes += 'A2'
+			}
+			elseif($size -eq 'Large')
+			{
+				$StandardSizes += 'A3'
+			}
+			elseif($size -eq 'ExtraLarge')
+			{
+				$StandardSizes += 'A4'
+			}
+			else
+			{
+				$StandardSizes += $size.Replace('Standard','').Replace('_','')	
+			}
+		}
+	}
+	if($AccountType -match 'Premium')
+	{
+		$VMSizes = $XioSizes
+	}
+	else
+	{
+		$VMSizes = $StandardSizes
+	}
 }
+
 $NumberOfSizes = $VMSizes.Count
 $DeploymentCount = $currentTestData.DeploymentCount
 #Test Starts Here..
