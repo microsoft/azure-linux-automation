@@ -204,6 +204,7 @@ $DeploymentCount = $currentTestData.DeploymentCount
         }
         if ($UseAzureResourceManager )
         {
+			$count = 1
             LogMsg "Attempt`tVMSize`tresult"
             foreach ( $value in $allDeploymentStatistics )
             {
@@ -211,10 +212,14 @@ $DeploymentCount = $currentTestData.DeploymentCount
                 $bootTimes += $value.BootTime
                 $ProvisionTimes += $value.ProvisionTime
                 LogMsg "$($value.attempt)`t$($value.VMSize)`t$($value.result)"
+				$metaData = "DeploymentCount : $count/$DeploymentCount TestSize: $($value.VMSize)`t"
+				$resultSummary +=  CreateResultSummary -testResult $($value.result) -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+				$count += 1
             }
         }
         else
         {
+			$count = 1
             LogMsg "Attempt`tVMSize`tresult`tDeployment Time`tBoot Time`tProvision Time"
             $deploymentTimes=@()
             $bootTimes=@()
@@ -225,6 +230,9 @@ $DeploymentCount = $currentTestData.DeploymentCount
                 $bootTimes += $value.BootTime
                 $ProvisionTimes += $value.ProvisionTime
                 LogMsg "$($value.attempt)`t$($value.VMSize)`t$($value.result)`t$($value.DeploymentTime)`t$($value.BootTime)`t$($value.ProvisionTime)"
+				$metaData = "DeploymentCount : $count/$DeploymentCount TestSize: $($value.VMSize)`tProvisionTime: $($value.ProvisionTime)`t"
+				$resultSummary +=  CreateResultSummary -testResult $($value.result) -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+				$count += 1
             }
             $DT = $deploymentTimes | Measure-Object -Minimum -Maximum -Average
             $BT = $bootTimes | Measure-Object -Minimum -Maximum -Average
@@ -246,7 +254,6 @@ $DeploymentCount = $currentTestData.DeploymentCount
             $testResult = "Aborted"
         }
         $resultArr += $testResult
-        $resultSummary +=  CreateResultSummary -testResult $testResult -metaData "DeploymentCount : $count/$DeploymentCount" -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
     }   
 $result = GetFinalResultHeader -resultarr $resultArr
 
