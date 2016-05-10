@@ -7,7 +7,7 @@ $VMSizes = @()
 $StandardSizes = @()
 $XioSizes = @()
 
-if($currentTestData.SubtestValues)
+if($currentTestData.SubtestValuesSpecified -eq 'True')
 {
 	$VMSizes = ($currentTestData.SubtestValues).Split(",")
 }
@@ -159,6 +159,8 @@ $DeploymentCount = $currentTestData.DeploymentCount
                         }
                     }
                 }
+				$DeploymentStatistics.result = $deployResult
+				$allDeploymentStatistics += $DeploymentStatistics
                 DoTestCleanUp -result $deployResult -testName $currentTestData.testName -deployedServices $deployedServiceName -ResourceGroups $deployedResourceGroupName
             }
             else
