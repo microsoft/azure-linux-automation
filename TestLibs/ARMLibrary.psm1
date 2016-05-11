@@ -1367,7 +1367,7 @@ Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed
     }
     if ( $GetDeploymentStatistics )
     {
-        return $retValue, $DeploymentElapsedTime, $VMBooTime, $VMProvisionTime
+        return $retValue, $DeploymentElapsedTime
     }
     else
     {
