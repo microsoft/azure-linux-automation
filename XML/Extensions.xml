@@ -58,8 +58,8 @@
 			<Name>Docker</Name>
 			<OfficialName>DockerExtension</OfficialName>
 			<Publisher>Microsoft.Azure.Extensions</Publisher>
-			<Version>1.*</Version>
-			<LatestVersion>1.0</LatestVersion>			
+			<Version>1.1.1602270800</Version>
+			<LatestVersion>1.1.1602270800</LatestVersion>			
 		</Extension>
 	</Extensions>
 	
