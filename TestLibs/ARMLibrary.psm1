@@ -1247,7 +1247,7 @@ if ( $CurrentTestData.ProvisionTimeExtensions)
                     {
                     Add-Content -Value "$($indents[5])," -Path $jsonFile
                     }
-                    if(!$extnConfig.HasChildNodes)
+                    if($extnConfig.ChildNodes.Count -eq 1 -and $extnConfig.ChildNodes[0].NodeType -eq 'Text')
                     {
                     Add-Content -Value "$($indents[5])^$($extnConfig.Name)^ : ^$($extnConfig.'#text')^" -Path $jsonFile
                     LogMsg "Added $extension Extension : Private Configuration : $($extnConfig.Name) = $( ( ( $extnConfig.'#text' -replace "\w","*") -replace "\W","*" ) )"
