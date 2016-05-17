@@ -3,14 +3,76 @@ Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""
 $resultArr = @()
-if ( $UseAzureResourceManager )
+$VMSizes = @()
+$StandardSizes = @()
+$XioSizes = @()
+
+if($currentTestData.SubtestValuesSpecified -eq 'True')
 {
-    $VMSizes = ($currentTestData.ARMSubtestValues).Split(",")
+	$VMSizes = ($currentTestData.SubtestValues).Split(",")
 }
+# Get all supported sizes in this region
 else
 {
-    $VMSizes = ($currentTestData.SubtestValues).Split(",")
+	if ( $UseAzureResourceManager )
+	{
+		$StorAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
+		$AccountDetail =  Get-AzureStorageAccount | where {$_.Name -eq $StorAccount}
+		$Location = $AccountDetail.PrimaryLocation
+		$AccountType = $AccountDetail.AccountType
+		$SupportSizes = (Get-AzureVMSize -Location $location).Name
+	}
+	else
+	{
+		$StorAccount = $xmlConfig.config.Azure.General.StorageAccount
+		$Location = (Get-AzureStorageAccount -StorageAccountName $StorAccount).GeoPrimaryLocation
+		$AccountType = (Get-AzureStorageAccount -StorageAccountName $StorAccount).AccountType
+		$SupportSizes = (Get-AzureLocation | where {$_.Name -eq $location}).VirtualMachineRoleSizes
+	}
+	foreach($size in $SupportSizes)
+	{
+		if($size -match 'DS' -or $size -match 'GS')
+		{
+			$XioSizes += $size.Replace('Standard','').Replace('_','')
+		}
+		else
+		{
+			if($size -eq 'ExtraSmall')
+			{
+				$StandardSizes += 'A0'
+			}
+			elseif($size -eq 'Small')
+			{
+				$StandardSizes += 'A1'
+			}
+			elseif($size -eq 'Medium')
+			{
+				$StandardSizes += 'A2'
+			}
+			elseif($size -eq 'Large')
+			{
+				$StandardSizes += 'A3'
+			}
+			elseif($size -eq 'ExtraLarge')
+			{
+				$StandardSizes += 'A4'
+			}
+			else
+			{
+				$StandardSizes += $size.Replace('Standard','').Replace('_','')	
+			}
+		}
+	}
+	if($AccountType -match 'Premium')
+	{
+		$VMSizes = $XioSizes
+	}
+	else
+	{
+		$VMSizes = $StandardSizes
+	}
 }
+LogMsg "test VM sizes: $VMSizes"
 $NumberOfSizes = $VMSizes.Count
 $DeploymentCount = $currentTestData.DeploymentCount
 #Test Starts Here..
@@ -29,9 +91,9 @@ $DeploymentCount = $currentTestData.DeploymentCount
             Add-Member -InputObject $DeploymentStatistics -MemberType NoteProperty -Name attempt -Value $attempt -Force
             Add-Member -InputObject $DeploymentStatistics -MemberType NoteProperty -Name VMSize -Value $VMSize -Force
             Add-Member -InputObject $DeploymentStatistics -MemberType NoteProperty -Name result -Value $result -Force
+            Add-Member -InputObject $DeploymentStatistics -MemberType NoteProperty -Name DeploymentTime -Value $DeploymentTime -Force 
             if ( !$UseAzureResourceManager )
             {
-                Add-Member -InputObject $DeploymentStatistics -MemberType NoteProperty -Name DeploymentTime -Value $DeploymentTime -Force 
                 Add-Member -InputObject $DeploymentStatistics -MemberType NoteProperty -Name BootTime -Value $BootTime -Force
                 Add-Member -InputObject $DeploymentStatistics -MemberType NoteProperty -Name ProvisionTime -Value $ProvisionTime -Force
             }
@@ -45,7 +107,7 @@ $DeploymentCount = $currentTestData.DeploymentCount
             $DeploymentStatistics = CreateDeploymentResultObject
             #Create A VM here and Wait for the VM to come up.
             LogMsg "ATTEMPT : $count/$DeploymentCount : Deploying $($VMSizes[$VMSizeNumber]) VM.."
-            $isDeployed = DeployVMS -setupType $($VMSizes[$VMSizeNumber]) -Distro $Distro -xmlConfig $xmlConfig -GetDeploymentStatistics (!$UseAzureResourceManager)
+            $isDeployed = DeployVMS -setupType $($VMSizes[$VMSizeNumber]) -Distro $Distro -xmlConfig $xmlConfig -GetDeploymentStatistics $True
             $DeploymentStatistics.VMSize = $($VMSizes[$VMSizeNumber])
             $DeploymentStatistics.attempt = $count
             if ( !$UseAzureResourceManager )
@@ -57,7 +119,8 @@ $DeploymentCount = $currentTestData.DeploymentCount
             }
             else
             {
-                $deployedResourceGroupName = $isDeployed
+                $deployedResourceGroupName = $isDeployed[0]
+                $DeploymentStatistics.DeploymentTime = $isDeployed[1].TotalSeconds
             }
             if ($deployedServiceName -or $deployedResourceGroupName)
             {
@@ -65,6 +128,7 @@ $DeploymentCount = $currentTestData.DeploymentCount
                 {
                         $successCount += 1
                         LogMsg "ATTEMPT : $count/$DeploymentCount : Deploying $($VMSizes[$VMSizeNumber]) VM.. SUCCESS"
+                        LogMsg "deployment Time = $($DeploymentStatistics.DeploymentTime)"
                         $deployResult = "PASS"
                 }
                 else
@@ -73,7 +137,7 @@ $DeploymentCount = $currentTestData.DeploymentCount
                     {
                         $successCount += 1
                         LogMsg "ATTEMPT : $count/$DeploymentCount : Deploying $($VMSizes[$VMSizeNumber]) VM.. SUCCESS"
-                        LogMsg "Deplyment Time = $($DeploymentStatistics.DeploymentTime)"
+                        LogMsg "deployment Time = $($DeploymentStatistics.DeploymentTime)"
                         LogMsg "Boot Time = $($DeploymentStatistics.BootTime)"
                         LogMsg "Provision Time = $($DeploymentStatistics.ProvisionTime)"
                         $deployResult = "PASS"
@@ -83,7 +147,7 @@ $DeploymentCount = $currentTestData.DeploymentCount
                         $failCount += 1
                         LogErr "ATTEMPT : $count/$DeploymentCount : Deploying $($VMSizes[$VMSizeNumber]) VM.. FAIL due to exceeding boot time."
 
-                        LogMsg "Deplyment Time/Timeout  = $($DeploymentStatistics.DeploymentTime)"
+                        LogMsg "deployment Time/Timeout  = $($DeploymentStatistics.DeploymentTime)"
                         LogMsg "Boot Time/Timeout = $($DeploymentStatistics.BootTime)"
                         LogMsg "Provision Time/Timeout= $($DeploymentStatistics.ProvisionTime)"
                         $deployResult = "FAIL"
@@ -97,6 +161,8 @@ $DeploymentCount = $currentTestData.DeploymentCount
                         }
                     }
                 }
+				$DeploymentStatistics.result = $deployResult
+				$allDeploymentStatistics += $DeploymentStatistics
                 DoTestCleanUp -result $deployResult -testName $currentTestData.testName -deployedServices $deployedServiceName -ResourceGroups $deployedResourceGroupName
             }
             else
@@ -106,7 +172,7 @@ $DeploymentCount = $currentTestData.DeploymentCount
                 $deployResult = "FAIL"
                 LogErr "ATTEMPT : $count/$DeploymentCount : Deploying $($VMSizes[$VMSizeNumber]) VM.. FAIL"
                 $DeploymentStatistics.result = $deployResult
-                LogMsg "Deplyment Time/Timeout  = $($DeploymentStatistics.DeploymentTime)"
+                LogMsg "deployment Time/Timeout  = $($DeploymentStatistics.DeploymentTime)"
                 LogMsg "Boot Time/Timeout = $($DeploymentStatistics.BootTime)"
                 LogMsg "Provision Time/Timeout= $($DeploymentStatistics.ProvisionTime)"
                 LogMsg "[PASS/FAIL/REMAINING] : $successCount/$failCount/$($DeploymentCount-$count)"
@@ -140,17 +206,23 @@ $DeploymentCount = $currentTestData.DeploymentCount
         }
         if ($UseAzureResourceManager )
         {
-            LogMsg "Attempt`tVMSize`tresult"
+			$count = 1
+            LogMsg "Attempt`tVMSize`tresult`tDeployment Time"
+			$deploymentTimes=@()
             foreach ( $value in $allDeploymentStatistics )
             {
-                $deploymentTimes += $value.DeploymentTime
-                $bootTimes += $value.BootTime
-                $ProvisionTimes += $value.ProvisionTime
-                LogMsg "$($value.attempt)`t$($value.VMSize)`t$($value.result)"
+				$deploymentTimes += $value.DeploymentTime
+                LogMsg "$($value.attempt)`t$($value.VMSize)`t$($value.result)`t$($value.DeploymentTime)"
+				$metaData = "$count/$DeploymentCount`tTestSize: $($value.VMSize)`tDeploymentTime: $($value.DeploymentTime)`t"
+				$resultSummary +=  CreateResultSummary -testResult $($value.result) -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName "DeploymentCount"
+				$count += 1
             }
+			$DT = $deploymentTimes | Measure-Object -Minimum -Maximum -Average
+			LogMsg "Deployment Time - [MIN/AVG/MAX] - $($DT.Minimum)/$($DT.Average)/$($DT.Maximum)"
         }
         else
         {
+			$count = 1
             LogMsg "Attempt`tVMSize`tresult`tDeployment Time`tBoot Time`tProvision Time"
             $deploymentTimes=@()
             $bootTimes=@()
@@ -161,6 +233,9 @@ $DeploymentCount = $currentTestData.DeploymentCount
                 $bootTimes += $value.BootTime
                 $ProvisionTimes += $value.ProvisionTime
                 LogMsg "$($value.attempt)`t$($value.VMSize)`t$($value.result)`t$($value.DeploymentTime)`t$($value.BootTime)`t$($value.ProvisionTime)"
+				$metaData = "$count/$DeploymentCount`tTestSize: $($value.VMSize)`tProvisionTime: $($value.ProvisionTime)`t"
+				$resultSummary +=  CreateResultSummary -testResult $($value.result) -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName "DeploymentCount"
+				$count += 1
             }
             $DT = $deploymentTimes | Measure-Object -Minimum -Maximum -Average
             $BT = $bootTimes | Measure-Object -Minimum -Maximum -Average
@@ -182,7 +257,6 @@ $DeploymentCount = $currentTestData.DeploymentCount
             $testResult = "Aborted"
         }
         $resultArr += $testResult
-        $resultSummary +=  CreateResultSummary -testResult $testResult -metaData "DeploymentCount : $count/$DeploymentCount" -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
     }   
 $result = GetFinalResultHeader -resultarr $resultArr
 
