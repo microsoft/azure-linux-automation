@@ -1247,8 +1247,30 @@ if ( $CurrentTestData.ProvisionTimeExtensions)
                     {
                     Add-Content -Value "$($indents[5])," -Path $jsonFile
                     }
+                    if(!$extnConfig.HasChildNodes)
+                    {
                     Add-Content -Value "$($indents[5])^$($extnConfig.Name)^ : ^$($extnConfig.'#text')^" -Path $jsonFile
                     LogMsg "Added $extension Extension : Private Configuration : $($extnConfig.Name) = $( ( ( $extnConfig.'#text' -replace "\w","*") -replace "\W","*" ) )"
+                    }
+                    else
+                    {
+                    Add-Content -Value "$($indents[5])^$($extnConfig.Name)^ :" -Path $jsonFile
+                        Add-Content -Value "$($indents[6]){" -Path $jsonFile
+                        $index = 0
+                        foreach($childNode in $extnConfig.ChildNodes) 
+                        {
+                           $index++
+                           if($index -lt $extnConfig.ChildNodes.Count)
+                           {
+                            Add-Content -Value "$($indents[7])^$($childNode.Name)^ : ^$($childNode.'#text')^," -Path $jsonFile
+                           }
+                           if($index -eq $extnConfig.ChildNodes.Count)
+                           { 
+                            Add-Content -Value "$($indents[7])^$($childNode.Name)^ : ^$($childNode.'#text')^" -Path $jsonFile
+                           }
+                        }
+                        Add-Content -Value "$($indents[6])}" -Path $jsonFile
+                     }
                     $isConfigAdded = $true
                 } 
                 Add-Content -Value "$($indents[4])}" -Path $jsonFile
