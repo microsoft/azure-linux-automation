@@ -58,8 +58,15 @@
 			<Name>Docker</Name>
 			<OfficialName>DockerExtension</OfficialName>
 			<Publisher>Microsoft.Azure.Extensions</Publisher>
+			<PrivateConfiguration>
+				<login>
+				       <username>shostc</username>
+				       <password>@WSX1qaz</password>
+				       <email>shostc@outlook.com</email>
+				</login>
+			</PrivateConfiguration>	
 			<Version>1.*</Version>
-			<LatestVersion>1.0</LatestVersion>			
+			<LatestVersion>1.1</LatestVersion>			
 		</Extension>
 	</Extensions>
 	
