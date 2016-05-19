@@ -16,8 +16,8 @@ if ($isDeployed)
 		LogMsg "Trying to restart $($AllVMData.RoleName)..."
 		if ( $UseAzureResourceManager )
 		{
-			$restartVM = Restart-AzureVM -ResourceGroupName $AllVMData.ResourceGroupName -Name $AllVMData.RoleName -Verbose
-			if ( $restartVM.Status -eq "Succeeded" )
+			$restartVM = Restart-AzureRmVM -ResourceGroupName $AllVMData.ResourceGroupName -Name $AllVMData.RoleName -Verbose
+			if ( ![string]::IsNullOrEmpty($restartVM.StatusCode) -and $restartVM.StatusCode.ToString() -eq "OK" )
 			{
 				$isSSHOpened = isAllSSHPortsEnabledRG -AllVMDataObject $AllVMData
 				if ( $isSSHOpened -eq "True" )
@@ -33,7 +33,7 @@ if ($isDeployed)
 			else
 			{
 				$isRestarted = $false
-				LogErr "Restart Failed. Operation ID : $($restartVM.TrackingOperationId)"
+				LogErr "Restart Failed. Operation ID : $($restartVM.RequestId)"
 			}
 		}
 		else
