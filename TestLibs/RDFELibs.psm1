@@ -6543,10 +6543,10 @@ Function GetStorageAccountKey ($xmlConfig)
 		$StorageAccounts = Get-AzureRmStorageAccount
 		foreach ($SA in $StorageAccounts)
 		{
-			if ( $SA.Name -eq $storageAccountName )
+			if ( $SA.StorageAccountName -eq $storageAccountName )
 			{
 				LogMsg "Getting $storageAccountName storage account key..."
-				$storageAccountKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $SA.ResourceGroupName -Name $SA.Name).Key1
+				$storageAccountKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $SA.ResourceGroupName -Name $SA.StorageAccountName).Key1
 			}
 		}
 	}
