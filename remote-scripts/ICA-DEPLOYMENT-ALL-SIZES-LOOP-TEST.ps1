@@ -17,10 +17,10 @@ else
 	if ( $UseAzureResourceManager )
 	{
 		$StorAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
-		$AccountDetail =  Get-AzureStorageAccount | where {$_.Name -eq $StorAccount}
+		$AccountDetail =  Get-AzureRmStorageAccount | where {$_.StorageAccountName -eq $StorAccount}
 		$Location = $AccountDetail.PrimaryLocation
-		$AccountType = $AccountDetail.AccountType
-		$SupportSizes = (Get-AzureVMSize -Location $location).Name
+		$AccountType = $AccountDetail.Sku.Tier.ToString()
+		$SupportSizes = (Get-AzureRmVMSize -Location $location).Name
 	}
 	else
 	{
