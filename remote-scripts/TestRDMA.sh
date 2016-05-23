@@ -218,7 +218,7 @@ else
     exit 10
 fi
 
-if [ ${installLocal} != "yes" ]; then
+if [ "${installLocal}" != "yes" ]; then
 	if [ ! ${master} ]; then
 		errMsg="Please add/provide value for master in constants.sh. master=<Master VM hostname>"
 		LogMsg "${errMsg}"
@@ -294,8 +294,14 @@ fi
 
 if [ "${rdmaRun}" == "yes" ]
 then
-	LogMsg "Executing test command : /opt/intel/impi/5.1.3.181/bin64/mpirun -hosts ${master},${slaves} -ppn 1 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 /opt/intel/impi/5.1.3.181/bin64/IMB-MPI1 pingpong > pingPongTestOut.txt 2>&1"
-	/opt/intel/impi/5.1.3.181/bin64/mpirun -hosts ${master},${slaves} -ppn 1 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 /opt/intel/impi/5.1.3.181/bin64/IMB-MPI1 pingpong > pingPongTestOut.txt 2>&1
+	mpirunPath=`find / -name mpirun`
+	imb_mpi1Path=`find / -name IMB-MPI1`
+	
+	LogMsg "Executing test command : ${mpirunPath} -hosts ${master},${slaves} -ppn 1 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 ${imb_mpi1Path} pingpong > pingPongTestOut.txt 2>&1"
+	
+	#MPI-pingpong inter node
+	$mpirunPath -hosts ${master},${slaves} -ppn 1 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 $imb_mpi1Path pingpong > pingPongTestInterNodeTestOut.txt 2>&1
+	
 	testExitCode=$?
 	if [ $testExitCode -ne 0 ]
 	then

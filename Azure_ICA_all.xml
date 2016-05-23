@@ -6467,7 +6467,18 @@
 				<Name>RHUI-BVT-VERIFY-RPM-SOURCE</Name>
 			</test>
         </Cycle>	
-        
+		<Cycle>
+			<cycleName>RDMA2VM</cycleName>
+			<test>
+				<Name>ICA-RDMA-TEST-2VM</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>RDMA16VM</cycleName>
+			<test>
+				<Name>ICA-RDMA-TEST-16VM</Name>
+			</test>			
+		</Cycle>        
 		<Cycle>
 			<cycleName>RHUI-Stress</cycleName>
 			<test>
