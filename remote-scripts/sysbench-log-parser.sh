@@ -81,7 +81,10 @@ modes='rndrd rndwr rndrw seqrd seqwr seqrewr'
 for testmode in $modes 
 do
 	max_iops=`cat $csv_file | grep $testmode | sed 's/.*\/sec,//'| sed  's/,.*$//'| sed "s/\\..*//"| sort -g|tail -1`
-	echo ",$testmode,$max_iops," >> $csv_file-tmp
+	if  [ "x$max_iops" != "x" ]
+	then
+		echo ",$testmode,$max_iops," >> $csv_file-tmp
+	fi
 done
 
 echo "" >> $csv_file-tmp
@@ -94,7 +97,10 @@ do
 	for block in $block_sizes 
 	do
 		max_iops=`cat $csv_file | grep $testmode | grep " $block" | sed 's/.*\/sec,//'| sed  's/,.*$//'| sed "s/\\..*//"| sort -g|tail -1`
-		echo ",$testmode,$block,$max_iops," >> $csv_file-tmp
+		if  [ "x$max_iops" != "x" ]
+		then
+			echo ",$testmode,$block,$max_iops," >> $csv_file-tmp
+		fi
 	done
 done
 
