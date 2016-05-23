@@ -1,4 +1,4 @@
-﻿#author - vhisav@microsoft.com
+#author - vhisav@microsoft.com
 Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""
@@ -23,7 +23,7 @@ if ($isDeployed)
 			}
 			elseif (( $vmData.RoleName -imatch "Client" ) -or ( $vmData.RoleName -imatch "slave" ))
 			{
-				$clientMachines = $vmData
+				$clientMachines += $vmData
 				$noSlave = $fase
 				if ( $slaveHostnames )
 				{
@@ -56,7 +56,8 @@ if ($isDeployed)
 			LogMsg "CLIENT VM #$i details :"
 			LogMsg "  RoleName : $($clientVMData.RoleName)"
 			LogMsg "  Public IP : $($clientVMData.PublicIP)"
-			LogMsg "  SSH Port : $($clientVMData.SSHPort)"		
+			LogMsg "  SSH Port : $($clientVMData.SSHPort)"
+			$i += 1		
 		}
 		#
 		# PROVISION VMS FOR LISA WILL ENABLE ROOT USER AND WILL MAKE ENABLE PASSWORDLESS AUTHENTICATION ACROSS ALL VMS IN SAME HOSTED SERVICE.	
@@ -66,31 +67,9 @@ if ($isDeployed)
 
 		#endregion
 
+		#region Verfiy 
+
 		#region Provision VMs for RDMA tests
-
-		#region Generate constants.sh
-
-		LogMsg "Generating constansts.sh ..."
-		$constantsFile = ".\$LogDir\constants.sh"
-
-		Set-Content -Value "master=`"$($serverVMData.RoleName)`"" -Path $constantsFile
-		LogMsg "master=$($serverVMData.RoleName) added to constansts.sh"
-
-
-		Add-Content -Value "slaves=`"$slaveHostnames`"" -Path $constantsFile
-		LogMsg "slaves=$slaveHostnames added to constansts.sh"
-
-		Add-Content -Value "rdmaPrepare=`"yes`"" -Path $constantsFile
-		LogMsg "rdmaPrepare=yes added to constansts.sh"
-
-		Add-Content -Value "rdmaRun=`"no`"" -Path $constantsFile
-		LogMsg "rdmaRun=no added to constansts.sh"
-
-		Add-Content -Value "installLocal=`"yes`"" -Path $constantsFile
-		LogMsg "installLocal=yes added to constansts.sh"
-
-		LogMsg "constanst.sh created successfully..."
-		#endregion		
 
 		#region Generate etc-hosts.txt file
 		$hostsFile = ".\$LogDir\etc-hosts.txt"
@@ -111,202 +90,245 @@ if ($isDeployed)
 		#region Install LIS-RDMA drivers..
 
 		$osRelease = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "cat /etc/*release*"
-		if ( $osRelease -imatch "CentOS Linux release 7.1.")
+		$modinfo_hv_vmbus = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "modinfo hv_vmbus"
+		if (!( $modinfo_hv_vmbus -imatch "microsoft-hyper-v-rdma" ))
 		{
-			$LIS4folder = "RHEL71"
-		}
-		if ( $osRelease -imatch "CentOS Linux release 7.0.")
-		{
-			$LIS4folder = "RHEL70"
-		}
-		if ( $osRelease -imatch "CentOS Linux release 6.5")
-		{
-			$LIS4folder = "RHEL65"
-		}
-		
-		$lisRDMAFileUrl = "https://ciwestus.blob.core.windows.net/linuxbinaries/lis-4.0.11-RDMA.tar"
-		Set-Content -Value "tar -xf lis-4.0.11-RDMA.tar" -Path "$LogDir\InstallLIS.sh"
-		Add-Content -Value "chmod +x $LIS4folder/install.sh" -Path "$LogDir\InstallLIS.sh"
-		Add-Content -Value "cd $LIS4folder" -Path "$LogDir\InstallLIS.sh"
-		Add-Content -Value "./install.sh > /root/LIS4InstallStatus.txt 2>&1" -Path "$LogDir\InstallLIS.sh"
-		$LIS4IntallCommand = "./InstallLIS.sh"
-		$LIS4InstallJobs = @()
-		foreach ( $vm in $allVMData )
-		{   
-			#Install LIS4 RDMA drivers...
-			LogMsg "Setting contents of /etc/security/limits.conf..."
-			$out = .\tools\dos2unix.exe ".\$LogDir\limits.conf" 2>&1
-			LogMsg $out
-			RemoteCopy -uploadTo $vm.PublicIP -port $vm.SSHPort -files ".\$LogDir\limits.conf,.\$LogDir\InstallLIS.sh" -username "root" -password $password -upload
-			$out = RunLinuxCmd -ip $vm.PublicIP -port $vm.SSHPort -username "root" -password $password -command "cat limits.conf >> /etc/security/limits.conf"
+			
+			#region Generate constants.sh
 
-			LogMsg "Downlaoding LIS-RDMA drivers in $($vm.RoleName)..."
-			$out = RunLinuxCmd -ip $vm.PublicIP -port $vm.SSHPort -username "root" -password $password -command "wget $lisRDMAFileUrl"
-			$out = RunLinuxCmd -ip $vm.PublicIP -port $vm.SSHPort -username "root" -password $password -command "chmod +x InstallLIS.sh"
-			LogMsg "Executing $LIS4IntallCommand ..."
-			$jobID = RunLinuxCmd -ip $vm.PublicIP -port $vm.SSHPort -username "root" -password $password -command "$LIS4IntallCommand" -RunInBackground
-			$LIS4InstallObj = New-Object PSObject
-			Add-member -InputObject $LIS4InstallObj -MemberType NoteProperty -Name ID -Value $jobID
-			Add-member -InputObject $LIS4InstallObj -MemberType NoteProperty -Name RoleName -Value $vm.RoleName
-			Add-member -InputObject $LIS4InstallObj -MemberType NoteProperty -Name PublicIP -Value $vm.PublicIP
-			Add-member -InputObject $LIS4InstallObj -MemberType NoteProperty -Name SSHPort -Value $vm.SSHPort
-			$LIS4InstallJobs += $LIS4InstallObj
-		}
+			LogMsg "Generating constansts.sh ..."
+			$constantsFile = ".\$LogDir\constants.sh"
 
-		#Monitor LIS installation...
-		$LIS4InstallJobsRunning = $true
-		$lisInstallErrorCount = 0
-		while ($LIS4InstallJobsRunning)
-		{
-			$LIS4InstallJobsRunning = $false
-			foreach ( $job in $LIS4InstallJobs )
+			Set-Content -Value "master=`"$($serverVMData.RoleName)`"" -Path $constantsFile
+			LogMsg "master=$($serverVMData.RoleName) added to constansts.sh"
+
+
+			Add-Content -Value "slaves=`"$slaveHostnames`"" -Path $constantsFile
+			LogMsg "slaves=$slaveHostnames added to constansts.sh"
+
+			Add-Content -Value "rdmaPrepare=`"yes`"" -Path $constantsFile
+			LogMsg "rdmaPrepare=yes added to constansts.sh"
+
+			Add-Content -Value "rdmaRun=`"no`"" -Path $constantsFile
+			LogMsg "rdmaRun=no added to constansts.sh"
+
+			Add-Content -Value "installLocal=`"yes`"" -Path $constantsFile
+			LogMsg "installLocal=yes added to constansts.sh"
+
+			LogMsg "constanst.sh created successfully..."
+			#endregion
+			if ( $osRelease -imatch "CentOS Linux release 7.1.")
 			{
-				if ( (Get-Job -Id $($job.ID)).State -eq "Running" )
+				$LIS4folder = "RHEL71"
+			}
+			if ( $osRelease -imatch "CentOS Linux release 7.0.")
+			{
+				$LIS4folder = "RHEL70"
+			}
+			if ( $osRelease -imatch "CentOS Linux release 6.5")
+			{
+				$LIS4folder = "RHEL65"
+			}
+		
+			$lisRDMAFileUrl = "https://ciwestus.blob.core.windows.net/linuxbinaries/lis-4.0.11-RDMA.tar"
+			Set-Content -Value "tar -xf lis-4.0.11-RDMA.tar" -Path "$LogDir\InstallLIS.sh"
+			Add-Content -Value "chmod +x $LIS4folder/install.sh" -Path "$LogDir\InstallLIS.sh"
+			Add-Content -Value "cd $LIS4folder" -Path "$LogDir\InstallLIS.sh"
+			Add-Content -Value "./install.sh > /root/LIS4InstallStatus.txt 2>&1" -Path "$LogDir\InstallLIS.sh"
+			$LIS4IntallCommand = "./InstallLIS.sh"
+			$LIS4InstallJobs = @()
+			foreach ( $vm in $allVMData )
+			{   
+				#Install LIS4 RDMA drivers...
+				LogMsg "Setting contents of /etc/security/limits.conf..."
+				$out = .\tools\dos2unix.exe ".\$LogDir\limits.conf" 2>&1
+				LogMsg $out
+				RemoteCopy -uploadTo $vm.PublicIP -port $vm.SSHPort -files ".\$LogDir\limits.conf,.\$LogDir\InstallLIS.sh" -username "root" -password $password -upload
+				$out = RunLinuxCmd -ip $vm.PublicIP -port $vm.SSHPort -username "root" -password $password -command "cat limits.conf >> /etc/security/limits.conf"
+
+				LogMsg "Downlaoding LIS-RDMA drivers in $($vm.RoleName)..."
+				$out = RunLinuxCmd -ip $vm.PublicIP -port $vm.SSHPort -username "root" -password $password -command "wget $lisRDMAFileUrl"
+				$out = RunLinuxCmd -ip $vm.PublicIP -port $vm.SSHPort -username "root" -password $password -command "chmod +x InstallLIS.sh"
+				LogMsg "Executing $LIS4IntallCommand ..."
+				$jobID = RunLinuxCmd -ip $vm.PublicIP -port $vm.SSHPort -username "root" -password $password -command "$LIS4IntallCommand" -RunInBackground
+				$LIS4InstallObj = New-Object PSObject
+				Add-member -InputObject $LIS4InstallObj -MemberType NoteProperty -Name ID -Value $jobID
+				Add-member -InputObject $LIS4InstallObj -MemberType NoteProperty -Name RoleName -Value $vm.RoleName
+				Add-member -InputObject $LIS4InstallObj -MemberType NoteProperty -Name PublicIP -Value $vm.PublicIP
+				Add-member -InputObject $LIS4InstallObj -MemberType NoteProperty -Name SSHPort -Value $vm.SSHPort
+				$LIS4InstallJobs += $LIS4InstallObj
+			}
+
+			#Monitor LIS installation...
+			$LIS4InstallJobsRunning = $true
+			$lisInstallErrorCount = 0
+			while ($LIS4InstallJobsRunning)
+			{
+				$LIS4InstallJobsRunning = $false
+				foreach ( $job in $LIS4InstallJobs )
 				{
-					LogMsg "lis-4.0.11-RDMA Installation Status for $($job.RoleName) : Running"
-					$LIS4InstallJobsRunning = $true
-				}
-				else
-				{
-					$jobOut = Receive-Job -ID $($job.ID)
-					$LIS4out = RunLinuxCmd -ip $job.PublicIP -port $job.SSHPort -username "root" -password $password -command "cat LIS4InstallStatus.txt"
-					if ( $LIS4out -imatch "Please reboot your system")
+					if ( (Get-Job -Id $($job.ID)).State -eq "Running" )
 					{
-						LogMsg "lis-4.0.11-RDMA installed successfully for $($job.RoleName)"
+						LogMsg "lis-4.0.11-RDMA Installation Status for $($job.RoleName) : Running"
+						$LIS4InstallJobsRunning = $true
 					}
 					else
 					{
-						#LogErr "LIS-rdma installation failed $($job.RoleName)"
-						#$lisInstallErrorCount += 1
+						$jobOut = Receive-Job -ID $($job.ID)
+						$LIS4out = RunLinuxCmd -ip $job.PublicIP -port $job.SSHPort -username "root" -password $password -command "cat LIS4InstallStatus.txt"
+						if ( $LIS4out -imatch "Please reboot your system")
+						{
+							LogMsg "lis-4.0.11-RDMA installed successfully for $($job.RoleName)"
+						}
+						else
+						{
+							#LogErr "LIS-rdma installation failed $($job.RoleName)"
+							#$lisInstallErrorCount += 1
+						}
 					}
-				}
 
+				}
+				if ( $LIS4InstallJobsRunning )
+				{
+					WaitFor -seconds 10
+				}
+				#else
+				#{
+				#	if ( $lisInstallErrorCount -ne 0 )
+				#	{
+				#		Throw "LIS-rdma installation failed for some VMs.Aborting Test."
+				#	}
+				#}
 			}
-			if ( $LIS4InstallJobsRunning )
-			{
-				WaitFor -seconds 10
-			}
-			#else
-			#{
-			#	if ( $lisInstallErrorCount -ne 0 )
-			#	{
-			#		Throw "LIS-rdma installation failed for some VMs.Aborting Test."
-			#	}
-			#}
-		}
 		
-		$isRestarted = RestartAllDeployments -allVMData $allVMData
-		if ( ! $isRestarted )
-		{
-			Throw "Failed to restart deployments in $isDeployed. Aborting Test."
-		}
-		#endregion
-
-		#region Prepare VMs for test
-		$packageInstallJobs = @()
-		Set-Content -Value "/root/TestRDMA.sh &> prepareForRDMAConsole.txt" -Path "$LogDir\PrepareForRDMA.sh"
-		$packageIntallCommand = "/root/PrepareForRDMA.sh"
-		foreach ( $vm in $allVMData )
-		{   
-			#Install Intel and IBM MPI libraries...
-			RemoteCopy -uploadTo $vm.PublicIP -port $vm.SSHPort -files "$constantsFile,$hostsFile,.\remote-scripts\TestRDMA.sh,.\$LogDir\PrepareForRDMA.sh" -username "root" -password $password -upload
-			$jobID = RunLinuxCmd -ip $vm.PublicIP -port $vm.SSHPort -username "root" -password $password -command "chmod +x PrepareForRDMA.sh"
-			LogMsg "Executing $packageIntallCommand ..."
-
-			$jobID = RunLinuxCmd -ip $vm.PublicIP -port $vm.SSHPort -username "root" -password $password -command "$packageIntallCommand" -RunInBackground
-			$packageInstallObj = New-Object PSObject
-			Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name ID -Value $jobID
-			Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name RoleName -Value $vm.RoleName
-			Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name PublicIP -Value $vm.PublicIP
-			Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name SSHPort -Value $vm.SSHPort
-			$packageInstallJobs += $packageInstallObj
-		}
-
-		$packageInstallJobsRunning = $true
-		$packageInstallErrorCount = 0
-		while ($packageInstallJobsRunning)
-		{
-			$packageInstallJobsRunning = $false
-			foreach ( $job in $packageInstallJobs )
+			$isRestarted = RestartAllDeployments -allVMData $allVMData
+			if ( ! $isRestarted )
 			{
-				if ( (Get-Job -Id $($job.ID)).State -eq "Running" )
+				Throw "Failed to restart deployments in $isDeployed. Aborting Test."
+			}
+			#region Prepare VMs for test
+			$packageInstallJobs = @()
+			Set-Content -Value "/root/TestRDMA.sh &> prepareForRDMAConsole.txt" -Path "$LogDir\PrepareForRDMA.sh"
+			$packageIntallCommand = "/root/PrepareForRDMA.sh"
+			foreach ( $vm in $allVMData )
+			{   
+				#Install Intel and IBM MPI libraries...
+				RemoteCopy -uploadTo $vm.PublicIP -port $vm.SSHPort -files "$constantsFile,$hostsFile,.\remote-scripts\TestRDMA.sh,.\$LogDir\PrepareForRDMA.sh" -username "root" -password $password -upload
+				$jobID = RunLinuxCmd -ip $vm.PublicIP -port $vm.SSHPort -username "root" -password $password -command "chmod +x PrepareForRDMA.sh"
+				LogMsg "Executing $packageIntallCommand ..."
+
+				$jobID = RunLinuxCmd -ip $vm.PublicIP -port $vm.SSHPort -username "root" -password $password -command "$packageIntallCommand" -RunInBackground
+				$packageInstallObj = New-Object PSObject
+				Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name ID -Value $jobID
+				Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name RoleName -Value $vm.RoleName
+				Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name PublicIP -Value $vm.PublicIP
+				Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name SSHPort -Value $vm.SSHPort
+				$packageInstallJobs += $packageInstallObj
+			}
+
+			$packageInstallJobsRunning = $true
+			$packageInstallErrorCount = 0
+			while ($packageInstallJobsRunning)
+			{
+				$packageInstallJobsRunning = $false
+				foreach ( $job in $packageInstallJobs )
 				{
-					LogMsg "RDMA preparation Status for $($job.RoleName) : Running"
-					$packageInstallJobsRunning = $true
-				}
-				else
-				{
-					$jobOut = Receive-Job -ID $($job.ID) 
-					if ( $jobOut -imatch "Please reboot your system")
+					if ( (Get-Job -Id $($job.ID)).State -eq "Running" )
 					{
-						LogMsg "RDMA preparation completed for $($job.RoleName)"
+						LogMsg "RDMA preparation Status for $($job.RoleName) : Running"
+						$packageInstallJobsRunning = $true
 					}
 					else
 					{
-						#LogErr "RDMA preparation failed $($job.RoleName)"
-						#$packageInstallErrorCount += 1
+						$jobOut = Receive-Job -ID $($job.ID) 
+						if ( $jobOut -imatch "Please reboot your system")
+						{
+							LogMsg "RDMA preparation completed for $($job.RoleName)"
+						}
+						else
+						{
+							#LogErr "RDMA preparation failed $($job.RoleName)"
+							#$packageInstallErrorCount += 1
+						}
 					}
+
 				}
-
+				if ( $packageInstallJobsRunning )
+				{
+					WaitFor -seconds 10
+				}
+				#else
+				#{
+				#	if ( $packageInstallErrorCount -ne 0 )
+				#	{
+				#		Throw "RDMA preparation failed for some VMs.Aborting Test."
+				#	}
+				#}
 			}
-			if ( $packageInstallJobsRunning )
-			{
-				WaitFor -seconds 10
-			}
-			#else
-			#{
-			#	if ( $packageInstallErrorCount -ne 0 )
-			#	{
-			#		Throw "RDMA preparation failed for some VMs.Aborting Test."
-			#	}
-			#}
-		}
 		
+			#endregion
+		}
+		else
+		{
+			LogMsg "RDMA LIS Drivers are already installed."
+			LogMsg $modinfo_hv_vmbus
+			LogMsg "Generating constansts.sh ..."
+			$constantsFile = ".\$LogDir\constants.sh"
+
+			Set-Content -Value "master=`"$($serverVMData.RoleName)`"" -Path $constantsFile
+			LogMsg "master=$($serverVMData.RoleName) added to constansts.sh"
+
+
+			Add-Content -Value "slaves=`"$slaveHostnames`"" -Path $constantsFile
+			LogMsg "slaves=$slaveHostnames added to constansts.sh"
+
+			Add-Content -Value "rdmaPrepare=`"no`"" -Path $constantsFile
+			LogMsg "rdmaPrepare=no added to constansts.sh"
+
+			Add-Content -Value "rdmaRun=`"yes`"" -Path $constantsFile
+			LogMsg "rdmaRun=yes added to constansts.sh"
+
+			LogMsg "constanst.sh created successfully..."
+		}
 		#endregion
-
-		Set-Content -Value "master=`"$($serverVMData.RoleName)`"" -Path $constantsFile
-		LogMsg "master=$($serverVMData.RoleName) added to constansts.sh"
-
-
-		Add-Content -Value "slaves=`"$slaveHostnames`"" -Path $constantsFile
-		LogMsg "slaves=$slaveHostnames added to constansts.sh"
-
-		Add-Content -Value "rdmaPrepare=`"no`"" -Path $constantsFile
-		LogMsg "rdmaPrepare=no added to constansts.sh"
-
-		Add-Content -Value "rdmaRun=`"yes`"" -Path $constantsFile
-		LogMsg "rdmaRun=yes added to constansts.sh"
-
-		Add-Content -Value "installLocal=`"no`"" -Path $constantsFile
-		LogMsg "installLocal=no added to constansts.sh"
-
-		LogMsg "constanst.sh created successfully..."
 
 		Set-Content -Value "/root/TestRDMA.sh &> rdmaConsole.txt" -Path "$LogDir\StartRDMA.sh"
 
-		#region EXECUTE TEST
 		RemoteCopy -uploadTo $serverVMData.PublicIP -port $serverVMData.SSHPort -files "$constantsFile,$LogDir\StartRDMA.sh" -username "root" -password $password -upload
 		$out = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "chmod +x *.sh"
-		$testJob = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "/root/StartRDMA.sh" -RunInBackground
-		#endregion
 
-		#region MONITOR TEST
-		while ( (Get-Job -Id $testJob).State -eq "Running" )
+		if ( $modinfo_hv_vmbus -imatch "microsoft-hyper-v-rdma" )
 		{
-			$currentStatus = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "tail -n 1 /root/rdmaConsole.txt"
-			LogMsg "Current Test Staus : $currentStatus"
-			WaitFor -seconds 10
+			$testOut = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "/root/StartRDMA.sh"
+		}
+		else
+		{
+			#region EXECUTE TEST
+			$testJob = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "/root/StartRDMA.sh" -RunInBackground
+			#endregion
+
+			#region MONITOR TEST
+			while ( (Get-Job -Id $testJob).State -eq "Running" )
+			{
+				$currentStatus = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "tail -n 1 /root/rdmaConsole.txt"
+				LogMsg "Current Test Staus : $currentStatus"
+				WaitFor -seconds 10
+			}
 		}
 		
 		RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/rdmaConsole.txt"
 		RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/summary.log"
+		RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/pingPongTestInterNodeTestOut.txt"
 		$finalStatus = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "cat /root/state.txt"
 		$rdmaSummary = Get-Content -Path "$LogDir\summary.log" -ErrorAction SilentlyContinue
 		
 		if ($finalStatus -imatch "TestCompleted")
 		{
-			LogMsg "Test finished successfully. Please check $LogDir\rdmaConsole.txt for detailed results."
+			LogMsg "Test finished successfully."
+			$pingPongInterNodeTestOut =  ( Get-Content -Path "$LogDir\pingPongTestInterNodeTestOut.txt" | Out-String )
+			LogMsg $pingPongInterNodeTestOut
 		}
+
 		else
 		{
 			LogErr "Test did not finished successfully. Please check $LogDir\rdmaConsole.txt for detailed results."
@@ -345,7 +367,7 @@ if ($isDeployed)
 	}
 	Finally
 	{
-		$metaData = "Status"
+		$metaData = "PingPong"
 		if (!$testResult)
 		{
 			$testResult = "Aborted"
