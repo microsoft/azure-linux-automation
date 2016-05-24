@@ -1450,7 +1450,7 @@ Function CreateRGDeploymentWithTempParameters([string]$RGName, $TemplateFile, $T
         {
             $FailCounter++
             LogMsg "Creating Deployment using $TemplateFile $TemplateParameterFile..."
-            $createRGDeployment = New-AzureResourceGroupDeployment -Name $ResourceGroupDeploymentName -ResourceGroupName $RGName -TemplateFile $TemplateFile -TemplateParameterFile $TemplateParameterFile -Verbose
+            $createRGDeployment = New-AzureRmResourceGroupDeployment -Name $ResourceGroupDeploymentName -ResourceGroupName $RGName -TemplateFile $TemplateFile -TemplateParameterFile $TemplateParameterFile -Verbose
             $operationStatus = $createRGDeployment.ProvisioningState
             if ($operationStatus  -eq "Succeeded")
             {
