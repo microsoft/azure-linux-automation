@@ -160,7 +160,7 @@ def ParseWalaConf2Dict(walaconfpath):
     if os.path.exists(walaconfpath):
         d={}
         lines = GetFileContentsByLines(walaconfpath)
-        configs_list = [x.strip() for x in lines if not x.startswith('#') and not x.startswith('\n')]
+        configs_list = [x.strip().split()[0] for x in lines if not x.startswith('#') and not x.startswith('\n')]
         for x in configs_list:
             try:
                 k,v=x.split('=')
