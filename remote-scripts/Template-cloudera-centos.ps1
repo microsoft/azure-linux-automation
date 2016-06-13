@@ -30,12 +30,12 @@ try
 	if($env:GetRandomValue -eq $True)
 	{
 		$AllowedValue =  Get-Content ..\azure-quickstart-templates\cloudera-on-centos\azuredeploy.json -Raw | ConvertFrom-Json
-		$jsonfile.parameters.location.value = $AllowedValue.parameters.location.allowedValues | Get-Random
+		#$jsonfile.parameters.location.value = $AllowedValue.parameters.location.allowedValues | Get-Random
 		$jsonfile.parameters.tshirtSize.value = $AllowedValue.parameters.tshirtSize.allowedValues | Get-Random
 	}
 	else
 	{
-		$jsonfile.parameters.location.value = $location.Replace('"','').Replace(' ','').ToLower()	
+		#$jsonfile.parameters.location.value = $location.Replace('"','').Replace(' ','').ToLower()	
 		$jsonfile.parameters.vmSize.value = $parameters.vmSize
 		if($env:RoleInstanceSize)
 		{
