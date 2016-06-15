@@ -2437,7 +2437,27 @@
 					</VirtualMachine>
 				</HostedService>
 			</GS5>
-
+			<GS5DISK1>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_GS5</InstanceSize>
+						<ARMInstanceSize>Standard_GS5</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk>
+							<LUN>0</LUN>
+							<DiskSizeInGB>1023</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>						
+					</VirtualMachine>
+				</HostedService>
+			</GS5DISK1>
 			<BasicA0>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -5883,7 +5903,19 @@
 			<TestID>UI_001</TestID>
 			<Priority>P0</Priority>
 		</test>
-		
+		<test>
+			<testName>ICA-PERF-ORION-BENCHMARK-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-ORION-BENCHMARK-TEST.ps1</testScriptps1>
+			<setupType>GS5DISK1</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<TestParameters>
+				<param>orionBinaryURL="http://konkasoft.blob.core.windows.net/linuxbinaries/orion_x86_64"</param>
+			</TestParameters>
+			<remoteFiles></remoteFiles>
+			<Priority>P0</Priority>
+		</test>			
 	</testsDefinition>
 
 	<testCycles>
@@ -6646,9 +6678,16 @@
 		<Cycle>
 			<cycleName>LISA-MONGODB2VM-PERF</cycleName>
 			<test>
-				<Name>ICA-PERF-MONGODB-BENCHMARK-TEST-2VM </Name>
+				<Name>ICA-PERF-MONGODB-BENCHMARK-TEST-2VM</Name>
 			</test>			
 		</Cycle>
+		<Cycle>
+			<cycleName>LISA-ORION-PERF</cycleName>
+			<test>
+				<Name>ICA-PERF-ORION-BENCHMARK-TEST</Name>
+			</test>			
+		</Cycle>
+
 		<Cycle>
 			<cycleName>LISA-PERF</cycleName>
 			<test>
