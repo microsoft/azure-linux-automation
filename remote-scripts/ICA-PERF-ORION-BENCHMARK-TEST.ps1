@@ -56,7 +56,7 @@ if ($isDeployed)
 		#region EXECUTE TEST
 		Set-Content -Value "./perf_orion.sh &> orionConsoleLogs.txt" -Path "$LogDir\StartOrionTest.sh"
 		RemoteCopy -uploadTo $clientVMData.PublicIP -port $clientVMData.SSHPort -files "$constantsFile,.\$orionLunFilePath,.\remote-scripts\perf_orion.sh,.\$LogDir\StartOrionTest.sh" -username $user -password $password -upload
-		$out = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username $user -password $password -command "chmod +x *.sh"
+		$out = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username $user -password $password -command "chmod +x *.sh" -runAsSudo
 		$testJob = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username $user -password $password -command "./StartOrionTest.sh" -RunInBackground -runAsSudo
 		#endregion
 
