@@ -65,7 +65,7 @@ if ($isDeployed)
 		{
 			$currentStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username $user -password $password -command "tail -n 1 orionTest.log"
 			LogMsg "Current Test Staus : $currentStatus"
-			WaitFor -seconds 10
+			WaitFor -seconds 20
 		}
 		$finalStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username $user -password $password -command "cat state.txt"
 		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username $user -password $password -download -downloadTo $LogDir -files "orionTest.log"
