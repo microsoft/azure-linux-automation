@@ -5916,6 +5916,18 @@
 			<remoteFiles></remoteFiles>
 			<Priority>P0</Priority>
 		</test>			
+		<test>
+			<testName>ICA-PERF-NTTTCP-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-NTTTCP-TEST.ps1</testScriptps1>
+			<setupType>M1S1</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<TestParameters>
+				<param>connections=(1 2 4 8 16 32 64 128 256 512 1024)</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>					
 	</testsDefinition>
 
 	<testCycles>
@@ -6766,6 +6778,18 @@
 			</test>
 		</Cycle>
 
+		<Cycle>
+			<cycleName>PERF-ORION</cycleName>
+			<test>
+				<Name>ICA-PERF-ORION-BENCHMARK-TEST</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>PERF-NTTTCP</cycleName>
+			<test>
+				<Name>ICA-PERF-NTTTCP-TEST</Name>
+			</test>
+		</Cycle>
 		<Cycle>
 			<cycleName>DEBUG</cycleName>
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
