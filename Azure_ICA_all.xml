@@ -3223,7 +3223,42 @@
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
 				</HostedService>
-			</M1S1>			
+			</M1S1>	
+			<M1S1D1>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_GS5</InstanceSize>
+						<ARMInstanceSize>Standard_GS5</ARMInstanceSize>
+						<RoleName>server-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12122</PublicPort>
+						</EndPoints>
+						<DataDisk>
+							<LUN>0</LUN>
+							<DiskSizeInGB>1023</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_GS5</InstanceSize>
+						<ARMInstanceSize>Standard_GS5</ARMInstanceSize>
+						<RoleName>client-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12222</PublicPort>
+						</EndPoints>
+					</VirtualMachine>					
+				</HostedService>
+			</M1S1D1>			
+			
 			<M1S5>
 				<!-- This setup type defines One Master and Three slave machines. Hence name is M(aster)1S(lave)3. -->
 				<isDeployed>NO</isDeployed>
@@ -5509,8 +5544,22 @@
 				<remoteXML></remoteXML>
 				<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 				<Priority>P0</Priority>
-			</test>			
-		<test>
+			</test>	
+			<test>
+				<testName>ICA-PERF-MIDDLEWARE-MONGODB-BENCHMARK-TEST-2VM</testName>
+				<testScript></testScript>
+				<testScriptps1>ICA-PERF-MIDDLEWARE-MONGODB-BENCHMARK-TEST-2VM.ps1</testScriptps1>
+				<setupType>M1S1D1</setupType>
+				<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+				<!--Remote Files will be directly downloaded to test VM.-->
+				<remoteFiles></remoteFiles>
+				<!--Remote XML will be downloaded to automation server for analysis-->
+				<remoteXML></remoteXML>
+				<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+				<Priority>P0</Priority>
+			</test>				
+			
+			<test>
 			<testName>RHUI-CROSS-REGION-MIGRATION</testName>
 			<testScript></testScript>
 			<testScriptPs1>RHUI-CROSS-REGION-MIGRATION.ps1</testScriptPs1>
@@ -6430,7 +6479,13 @@
 		<Cycle>
 			<cycleName>LISA-MONGODB2VM-PERF</cycleName>
 			<test>
-				<Name>ICA-PERF-MONGODB-BENCHMARK-TEST-2VM </Name>
+				<Name>ICA-PERF-MONGODB-BENCHMARK-TEST-2VM</Name>
+			</test>			
+		</Cycle>
+		<Cycle>
+			<cycleName>LISA-MIDDLEWARE-MONGODB2VM-PERF</cycleName>
+			<test>
+				<Name>ICA-PERF-MIDDLEWARE-MONGODB-BENCHMARK-TEST-2VM</Name>
 			</test>			
 		</Cycle>
 		<Cycle>
