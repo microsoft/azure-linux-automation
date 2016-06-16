@@ -59,7 +59,7 @@ ConfigUbuntu1604()
 {
     LogMsg "Running ConfigUbuntu..."
 	apt-get update
-	apt-get -y install libaio1
+	apt-get -y install libaio1 sysstat
 }
 
 if [ -e ${CONSTANTS_FILE} ]; then
@@ -85,7 +85,11 @@ UpdateTestState "TestRunning"
 testType="oltp"
 LogMsg "Running $testType test.."
 dateTime="$(date +"%m-%d-%Y-%H-%M-%S")"
+iostat -x -d 1 4000 2>&1 > "orion-${testType}-${dateTime}.iostat.diskio.log"  &
+vmstat 1 4000 2>&1 > "orion-${testType}-${dateTime}.vmstat.memory.cpu.log"  &
 ./orion_x86_64 -run oltp -testname orion
+pkill -f iostat
+pkill -f vmstat
 mv *_iops.csv "orion-${testType}-${dateTime}-iops.csv"
 mv *_lat.csv "orion-${testType}-${dateTime}-lat.csv"
 mv *_mbps.csv "orion-${testType}-${dateTime}-mbps.csv"
@@ -96,7 +100,11 @@ LogMsg "$testType test finished."
 testType="dss"
 LogMsg "Running $testType test.."
 dateTime="$(date +"%m-%d-%Y-%H-%M-%S")"
+iostat -x -d 1 4000 2>&1 > "orion-${testType}-${dateTime}.iostat.diskio.log"  &
+vmstat 1 4000 2>&1 > "orion-${testType}-${dateTime}.vmstat.memory.cpu.log"  &
 ./orion_x86_64 -run dss -testname orion
+pkill -f iostat
+pkill -f vmstat
 mv *_iops.csv "orion-${testType}-${dateTime}-iops.csv"
 mv *_lat.csv "orion-${testType}-${dateTime}-lat.csv"
 mv *_mbps.csv "orion-${testType}-${dateTime}-mbps.csv"
@@ -107,7 +115,11 @@ LogMsg "$testType test finished."
 testType="simple"
 LogMsg "Running $testType test.."
 dateTime="$(date +"%m-%d-%Y-%H-%M-%S")"
+iostat -x -d 1 4000 2>&1 > "orion-${testType}-${dateTime}.iostat.diskio.log"  &
+vmstat 1 4000 2>&1 > "orion-${testType}-${dateTime}.vmstat.memory.cpu.log"  &
 ./orion_x86_64 -run simple -testname orion
+pkill -f iostat
+pkill -f vmstat
 mv *_iops.csv "orion-${testType}-${dateTime}-iops.csv"
 mv *_lat.csv "orion-${testType}-${dateTime}-lat.csv"
 mv *_mbps.csv "orion-${testType}-${dateTime}-mbps.csv"
@@ -118,7 +130,11 @@ LogMsg "$testType test finished."
 testType="normal#1"
 LogMsg "Running $testType test iteration #1.."
 dateTime="$(date +"%m-%d-%Y-%H-%M-%S")"
+iostat -x -d 1 4000 2>&1 > "orion-${testType}-${dateTime}.iostat.diskio.log"  &
+vmstat 1 4000 2>&1 > "orion-${testType}-${dateTime}.vmstat.memory.cpu.log"  &
 ./orion_x86_64 -run normal -testname orion
+pkill -f iostat
+pkill -f vmstat
 mv *_iops.csv "orion-${testType}-${dateTime}-iops.csv"
 mv *_lat.csv "orion-${testType}-${dateTime}-lat.csv"
 mv *_mbps.csv "orion-${testType}-${dateTime}-mbps.csv"
@@ -131,7 +147,11 @@ LogMsg "$testType test finished."
 testType="normal#2"
 LogMsg "Running $testType test iteration #2.."
 dateTime="$(date +"%m-%d-%Y-%H-%M-%S")"
+iostat -x -d 1 4000 2>&1 > "orion-${testType}-${dateTime}.iostat.diskio.log"  &
+vmstat 1 4000 2>&1 > "orion-${testType}-${dateTime}.vmstat.memory.cpu.log"  &
 ./orion_x86_64 -run normal -testname orion
+pkill -f iostat
+pkill -f vmstat
 mv *_iops.csv "orion-${testType}-${dateTime}-iops.csv"
 mv *_lat.csv "orion-${testType}-${dateTime}-lat.csv"
 mv *_mbps.csv "orion-${testType}-${dateTime}-mbps.csv"
@@ -142,7 +162,11 @@ LogMsg "$testType test finished."
 testType="normal#3"
 LogMsg "Running $testType test iteration #3.."
 dateTime="$(date +"%m-%d-%Y-%H-%M-%S")"
+iostat -x -d 1 4000 2>&1 > "orion-${testType}-${dateTime}.iostat.diskio.log"  &
+vmstat 1 4000 2>&1 > "orion-${testType}-${dateTime}.vmstat.memory.cpu.log"  &
 ./orion_x86_64 -run normal -testname orion
+pkill -f iostat
+pkill -f vmstat
 mv *_iops.csv "orion-${testType}-${dateTime}-iops.csv"
 mv *_lat.csv "orion-${testType}-${dateTime}-lat.csv"
 mv *_mbps.csv "orion-${testType}-${dateTime}-mbps.csv"
@@ -155,7 +179,11 @@ LogMsg "$testType test finished."
 testType="oltpWrite100"
 LogMsg "Running $testType test.."
 dateTime="$(date +"%m-%d-%Y-%H-%M-%S")"
+iostat -x -d 1 4000 2>&1 > "orion-${testType}-${dateTime}.iostat.diskio.log"  &
+vmstat 1 4000 2>&1 > "orion-${testType}-${dateTime}.vmstat.memory.cpu.log"  &
 ./orion_x86_64 -run oltp -testname orion -write 100
+pkill -f iostat
+pkill -f vmstat
 mv *_iops.csv "orion-${testType}-${dateTime}-iops.csv"
 mv *_lat.csv "orion-${testType}-${dateTime}-lat.csv"
 mv *_mbps.csv "orion-${testType}-${dateTime}-mbps.csv"
@@ -166,7 +194,11 @@ LogMsg "$testType test finished."
 testType="dssWrite100"
 LogMsg "Running $testType test.."
 dateTime="$(date +"%m-%d-%Y-%H-%M-%S")"
+iostat -x -d 1 4000 2>&1 > "orion-${testType}-${dateTime}.iostat.diskio.log"  &
+vmstat 1 4000 2>&1 > "orion-${testType}-${dateTime}.vmstat.memory.cpu.log"  &
 ./orion_x86_64 -run dss -testname orion -write 100
+pkill -f iostat
+pkill -f vmstat
 mv *_iops.csv "orion-${testType}-${dateTime}-iops.csv"
 mv *_lat.csv "orion-${testType}-${dateTime}-lat.csv"
 mv *_mbps.csv "orion-${testType}-${dateTime}-mbps.csv"
@@ -177,7 +209,11 @@ LogMsg "$testType test finished."
 testType="advancedWrite100Basic"
 LogMsg "Running $testType test.."
 dateTime="$(date +"%m-%d-%Y-%H-%M-%S")"
+iostat -x -d 1 4000 2>&1 > "orion-${testType}-${dateTime}.iostat.diskio.log"  &
+vmstat 1 4000 2>&1 > "orion-${testType}-${dateTime}.vmstat.memory.cpu.log"  &
 ./orion_x86_64 -run advanced -size_small 8 -size_large 1024 -type rand -simulate concat -write 100 -duration 60 -matrix basic
+pkill -f iostat
+pkill -f vmstat
 mv *_iops.csv "orion-${testType}-${dateTime}-iops.csv"
 mv *_lat.csv "orion-${testType}-${dateTime}-lat.csv"
 mv *_mbps.csv "orion-${testType}-${dateTime}-mbps.csv"
@@ -188,7 +224,11 @@ LogMsg "$testType test finished."
 testType="advancedWrite100Detailed#1"
 LogMsg "Running $testType test iteration #1.."
 dateTime="$(date +"%m-%d-%Y-%H-%M-%S")"
+iostat -x -d 1 4000 2>&1 > "orion-${testType}-${dateTime}.iostat.diskio.log"  &
+vmstat 1 4000 2>&1 > "orion-${testType}-${dateTime}.vmstat.memory.cpu.log"  &
 ./orion_x86_64 -run advanced -size_small 8 -size_large 1024 -type rand -simulate concat -write 100 -duration 60 -matrix detailed
+pkill -f iostat
+pkill -f vmstat
 mv *_iops.csv "orion-${testType}-${dateTime}-iops.csv"
 mv *_lat.csv "orion-${testType}-${dateTime}-lat.csv"
 mv *_mbps.csv "orion-${testType}-${dateTime}-mbps.csv"
@@ -200,7 +240,11 @@ LogMsg "$testType test finished."
 testType="advancedWrite100Detailed#2"
 LogMsg "Running $testType test iteration #2.."
 dateTime="$(date +"%m-%d-%Y-%H-%M-%S")"
+iostat -x -d 1 4000 2>&1 > "orion-${testType}-${dateTime}.iostat.diskio.log"  &
+vmstat 1 4000 2>&1 > "orion-${testType}-${dateTime}.vmstat.memory.cpu.log"  &
 ./orion_x86_64 -run advanced -size_small 8 -size_large 1024 -type rand -simulate concat -write 100 -duration 60 -matrix detailed
+pkill -f iostat
+pkill -f vmstat
 mv *_iops.csv "orion-${testType}-${dateTime}-iops.csv"
 mv *_lat.csv "orion-${testType}-${dateTime}-lat.csv"
 mv *_mbps.csv "orion-${testType}-${dateTime}-mbps.csv"
@@ -211,7 +255,11 @@ LogMsg "$testType test finished."
 testType="advancedWrite100Detailed#3"
 LogMsg "Running $testType test iteration #3.."
 dateTime="$(date +"%m-%d-%Y-%H-%M-%S")"
+iostat -x -d 1 4000 2>&1 > "orion-${testType}-${dateTime}.iostat.diskio.log"  &
+vmstat 1 4000 2>&1 > "orion-${testType}-${dateTime}.vmstat.memory.cpu.log"  &
 ./orion_x86_64 -run advanced -size_small 8 -size_large 1024 -type rand -simulate concat -write 100 -duration 60 -matrix detailed
+pkill -f iostat
+pkill -f vmstat
 mv *_iops.csv "orion-${testType}-${dateTime}-iops.csv"
 mv *_lat.csv "orion-${testType}-${dateTime}-lat.csv"
 mv *_mbps.csv "orion-${testType}-${dateTime}-mbps.csv"
@@ -223,7 +271,11 @@ LogMsg "$testType test finished."
 testType="oltpWrite50"
 LogMsg "Running $testType test.."
 dateTime="$(date +"%m-%d-%Y-%H-%M-%S")"
+iostat -x -d 1 4000 2>&1 > "orion-${testType}-${dateTime}.iostat.diskio.log"  &
+vmstat 1 4000 2>&1 > "orion-${testType}-${dateTime}.vmstat.memory.cpu.log"  &
 ./orion_x86_64 -run oltp -testname orion -write 50 
+pkill -f iostat
+pkill -f vmstat
 mv *_iops.csv "orion-${testType}-${dateTime}-iops.csv"
 mv *_lat.csv "orion-${testType}-${dateTime}-lat.csv"
 mv *_mbps.csv "orion-${testType}-${dateTime}-mbps.csv"
@@ -234,7 +286,11 @@ LogMsg "$testType test finished."
 testType="dssWrite50"
 LogMsg "Running $testType test.."
 dateTime="$(date +"%m-%d-%Y-%H-%M-%S")"
+iostat -x -d 1 4000 2>&1 > "orion-${testType}-${dateTime}.iostat.diskio.log"  &
+vmstat 1 4000 2>&1 > "orion-${testType}-${dateTime}.vmstat.memory.cpu.log"  &
 ./orion_x86_64 -run dss -testname orion -write 50
+pkill -f iostat
+pkill -f vmstat
 mv *_iops.csv "orion-${testType}-${dateTime}-iops.csv"
 mv *_lat.csv "orion-${testType}-${dateTime}-lat.csv"
 mv *_mbps.csv "orion-${testType}-${dateTime}-mbps.csv"
@@ -245,7 +301,11 @@ LogMsg "$testType test finished."
 testType="advancedWrite50Basic"
 LogMsg "Running $testType test.."
 dateTime="$(date +"%m-%d-%Y-%H-%M-%S")"
+iostat -x -d 1 4000 2>&1 > "orion-${testType}-${dateTime}.iostat.diskio.log"  &
+vmstat 1 4000 2>&1 > "orion-${testType}-${dateTime}.vmstat.memory.cpu.log"  &
 ./orion_x86_64 -run advanced -size_small 8 -size_large 1024 -type rand -simulate concat -write 50 -duration 60 -matrix basic
+pkill -f iostat
+pkill -f vmstat
 mv *_iops.csv "orion-${testType}-${dateTime}-iops.csv"
 mv *_lat.csv "orion-${testType}-${dateTime}-lat.csv"
 mv *_mbps.csv "orion-${testType}-${dateTime}-mbps.csv"
@@ -256,7 +316,11 @@ LogMsg "$testType test finished."
 testType="advancedWrite50Detailed#1"
 LogMsg "Running $testType test iteration #1.."
 dateTime="$(date +"%m-%d-%Y-%H-%M-%S")"
+iostat -x -d 1 4000 2>&1 > "orion-${testType}-${dateTime}.iostat.diskio.log"  &
+vmstat 1 4000 2>&1 > "orion-${testType}-${dateTime}.vmstat.memory.cpu.log"  &
 ./orion_x86_64 -run advanced -size_small 8 -size_large 1024 -type rand -simulate concat -write 50 -duration 60 -matrix detailed
+pkill -f iostat
+pkill -f vmstat
 mv *_iops.csv "orion-${testType}-${dateTime}-iops.csv"
 mv *_lat.csv "orion-${testType}-${dateTime}-lat.csv"
 mv *_mbps.csv "orion-${testType}-${dateTime}-mbps.csv"
@@ -268,7 +332,11 @@ LogMsg "$testType test finished."
 testType="advancedWrite50Detailed#2"
 LogMsg "Running $testType test iteration #2.."
 dateTime="$(date +"%m-%d-%Y-%H-%M-%S")"
+iostat -x -d 1 4000 2>&1 > "orion-${testType}-${dateTime}.iostat.diskio.log"  &
+vmstat 1 4000 2>&1 > "orion-${testType}-${dateTime}.vmstat.memory.cpu.log"  &
 ./orion_x86_64 -run advanced -size_small 8 -size_large 1024 -type rand -simulate concat -write 50 -duration 60 -matrix detailed
+pkill -f iostat
+pkill -f vmstat
 mv *_iops.csv "orion-${testType}-${dateTime}-iops.csv"
 mv *_lat.csv "orion-${testType}-${dateTime}-lat.csv"
 mv *_mbps.csv "orion-${testType}-${dateTime}-mbps.csv"
@@ -279,7 +347,11 @@ LogMsg "$testType test finished."
 testType="advancedWrite50Detailed#3"
 LogMsg "Running $testType test iteration #3.."
 dateTime="$(date +"%m-%d-%Y-%H-%M-%S")"
+iostat -x -d 1 4000 2>&1 > "orion-${testType}-${dateTime}.iostat.diskio.log"  &
+vmstat 1 4000 2>&1 > "orion-${testType}-${dateTime}.vmstat.memory.cpu.log"  &
 ./orion_x86_64 -run advanced -size_small 8 -size_large 1024 -type rand -simulate concat -write 50 -duration 60 -matrix detailed
+pkill -f iostat
+pkill -f vmstat
 mv *_iops.csv "orion-${testType}-${dateTime}-iops.csv"
 mv *_lat.csv "orion-${testType}-${dateTime}-lat.csv"
 mv *_mbps.csv "orion-${testType}-${dateTime}-mbps.csv"
