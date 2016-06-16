@@ -84,65 +84,284 @@ if ($isDeployed)
 		LogMsg "Analysing '$testType' log files.."
 		$oltpResultContents = Get-Content -Path "$LogDir\$((Get-ChildItem -Path $LogDir | where { ( $_.Name -imatch "-summary.txt") -and ( $_.Name -imatch "-$testType-") }).Name )"
 		$oltpResult = ($oltpResultContents | where { $_ -imatch  "Maximum Small IOPS" })
-		$resultSummary +=  CreateResultSummary -testResult $oltpResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
-		$oltpResult = ($oltpResultContents | where { $_ -imatch  "Minimum Small Latency"})
-		$resultSummary +=  CreateResultSummary -testResult $oltpResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		if ( $oltpResult )
+		{
+			$resultSummary +=  CreateResultSummary -testResult $oltpResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$oltpResult = ($oltpResultContents | where { $_ -imatch  "Minimum Small Latency"})
+			$resultSummary +=  CreateResultSummary -testResult $oltpResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+		else
+		{
+			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
 
 		$testType = "dss"
 		LogMsg "Analysing '$testType' log files.."
 		$dssResultContents =  Get-Content -Path "$LogDir\$((Get-ChildItem -Path $LogDir | where { ( $_.Name -imatch "-summary.txt") -and ( $_.Name -imatch "-$testType-") }).Name )"
 		$dssResult = ($dssResultContents | where { $_ -imatch  "Maximum Large MBPS" })
-		$resultSummary +=  CreateResultSummary -testResult $dssResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		if ( $dssResult )
+		{
+			$resultSummary +=  CreateResultSummary -testResult $dssResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+		else
+		{
+			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+
 
 		$testType = "simple"
 		LogMsg "Analysing '$testType' log files.."
 		$simpleResultContents = Get-Content -Path "$LogDir\$((Get-ChildItem -Path $LogDir | where { ( $_.Name -imatch "-summary.txt") -and ( $_.Name -imatch "-$testType-") }).Name )"
 		$simpleResult = ($simpleResultContents | where { $_ -imatch  "Maximum Large MBPS" })
-		$resultSummary +=  CreateResultSummary -testResult $simpleResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
-		$simpleResult = ($simpleResultContents | where { $_ -imatch  "Maximum Small IOPS" })
-		$resultSummary +=  CreateResultSummary -testResult $simpleResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
-		$simpleResult = ($simpleResultContents | where { $_ -imatch  "Minimum Small Latency" })
-		$resultSummary +=  CreateResultSummary -testResult $simpleResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		if ( $simpleResult )
+		{
+			$resultSummary +=  CreateResultSummary -testResult $simpleResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$simpleResult = ($simpleResultContents | where { $_ -imatch  "Maximum Small IOPS" })
+			$resultSummary +=  CreateResultSummary -testResult $simpleResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$simpleResult = ($simpleResultContents | where { $_ -imatch  "Minimum Small Latency" })
+			$resultSummary +=  CreateResultSummary -testResult $simpleResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+		else
+		{
+			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+
 
 		$testType = "normal#1"
 		LogMsg "Analysing '$testType' log files.."
 		$normal1ResultContents = Get-Content -Path "$LogDir\$((Get-ChildItem -Path $LogDir | where { ( $_.Name -imatch "-summary.txt") -and ( $_.Name -imatch "-$testType-") }).Name )"
 		$normal1Result = ($normal1ResultContents | where { $_ -imatch  "Maximum Large MBPS" })
-		$resultSummary +=  CreateResultSummary -testResult $normal1Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
-		$normal1Result = ($normal1ResultContents | where { $_ -imatch  "Maximum Small IOPS" })
-		$resultSummary +=  CreateResultSummary -testResult $normal1Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
-		$normal1Result = ($normal1ResultContents | where { $_ -imatch  "Minimum Small Latency" })
-		$resultSummary +=  CreateResultSummary -testResult $normal1Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		if ( $normal1Result )
+		{
+			$resultSummary +=  CreateResultSummary -testResult $normal1Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$normal1Result = ($normal1ResultContents | where { $_ -imatch  "Maximum Small IOPS" })
+			$resultSummary +=  CreateResultSummary -testResult $normal1Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$normal1Result = ($normal1ResultContents | where { $_ -imatch  "Minimum Small Latency" })
+			$resultSummary +=  CreateResultSummary -testResult $normal1Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+		else
+		{
+			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
 
 		$testType = "normal#2"
 		LogMsg "Analysing '$testType' log files.."
 		$normal2ResultContents = Get-Content -Path "$LogDir\$((Get-ChildItem -Path $LogDir | where { ( $_.Name -imatch "-summary.txt") -and ( $_.Name -imatch "-$testType-") }).Name )"
 		$normal2Result = ($normal2ResultContents | where { $_ -imatch  "Maximum Large MBPS" })
-		$resultSummary +=  CreateResultSummary -testResult $normal2Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
-		$normal2Result = ($normal2ResultContents | where { $_ -imatch  "Maximum Small IOPS" })
-		$resultSummary +=  CreateResultSummary -testResult $normal2Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
-		$normal2Result = ($normal2ResultContents | where { $_ -imatch  "Minimum Small Latency" })
-		$resultSummary +=  CreateResultSummary -testResult $normal2Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
-		
+		if ( $normal2Result )
+		{
+			$resultSummary +=  CreateResultSummary -testResult $normal2Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$normal2Result = ($normal2ResultContents | where { $_ -imatch  "Maximum Small IOPS" })
+			$resultSummary +=  CreateResultSummary -testResult $normal2Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$normal2Result = ($normal2ResultContents | where { $_ -imatch  "Minimum Small Latency" })
+			$resultSummary +=  CreateResultSummary -testResult $normal2Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+		else
+		{
+			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+
 		$testType = "normal#3"
 		LogMsg "Analysing '$testType' log files.."
 		$normal3ResultContents = Get-Content -Path "$LogDir\$((Get-ChildItem -Path $LogDir | where { ( $_.Name -imatch "-summary.txt") -and ( $_.Name -imatch "-$testType-") }).Name )"
 		$normal3Result = ($normal3ResultContents | where { $_ -imatch  "Maximum Large MBPS" })
-		$resultSummary +=  CreateResultSummary -testResult $normal3Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
-		$normal3Result = ($normal3ResultContents | where { $_ -imatch  "Maximum Small IOPS" })
-		$resultSummary +=  CreateResultSummary -testResult $normal3Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
-		$normal3Result = ($normal3ResultContents | where { $_ -imatch  "Minimum Small Latency" })
-		$resultSummary +=  CreateResultSummary -testResult $normal3Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		if ( $normal3Result )
+		{
+			$resultSummary +=  CreateResultSummary -testResult $normal3Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$normal3Result = ($normal3ResultContents | where { $_ -imatch  "Maximum Small IOPS" })
+			$resultSummary +=  CreateResultSummary -testResult $normal3Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$normal3Result = ($normal3ResultContents | where { $_ -imatch  "Minimum Small Latency" })
+			$resultSummary +=  CreateResultSummary -testResult $normal3Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+		else
+		{
+			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+
 		
 
 		$testType = "oltpWrite100"
 		LogMsg "Analysing '$testType' log files.."
 		$oltpWrite100ResultContents = Get-Content -Path "$LogDir\$((Get-ChildItem -Path $LogDir | where { ( $_.Name -imatch "-summary.txt") -and ( $_.Name -imatch "-$testType-") }).Name )"
-
 		$oltpWrite100Result = ($oltpWrite100ResultContents | where { $_ -imatch  "Maximum Small IOPS" })
-		$resultSummary +=  CreateResultSummary -testResult $oltpWrite100Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
-		$oltpWrite100Result = ($oltpWrite100ResultContents | where { $_ -imatch  "Minimum Small Latency" })
-		$resultSummary +=  CreateResultSummary -testResult $oltpWrite100Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		if ( $oltpWrite100Result )
+		{
+			$resultSummary +=  CreateResultSummary -testResult $oltpWrite100Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$oltpWrite100Result = ($oltpWrite100ResultContents | where { $_ -imatch  "Minimum Small Latency" })
+			$resultSummary +=  CreateResultSummary -testResult $oltpWrite100Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+		else
+		{
+			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+
+
+		$testType = "dssWrite100"
+		LogMsg "Analysing '$testType' log files.."
+		$dssWrite100ResultContents = Get-Content -Path "$LogDir\$((Get-ChildItem -Path $LogDir | where { ( $_.Name -imatch "-summary.txt") -and ( $_.Name -imatch "-$testType-") }).Name )"
+		$dssWrite100Result = ($dssWrite100ResultContents | where { $_ -imatch  "Maximum Large MBPS" })
+		if ( $dssWrite100Result )
+		{
+			$resultSummary +=  CreateResultSummary -testResult $dssWrite100Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+		else
+		{
+			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+
+
+		$testType = "advancedWrite100Basic"
+		LogMsg "Analysing '$testType' log files.."
+		$advancedWrite100BasicResultContents = Get-Content -Path "$LogDir\$((Get-ChildItem -Path $LogDir | where { ( $_.Name -imatch "-summary.txt") -and ( $_.Name -imatch "-$testType-") }).Name )"
+		$advancedWrite100BasicResult = ($advancedWrite100BasicResultContents | where { $_ -imatch  "Maximum Large MBPS" })
+		if ( $advancedWrite100BasicResult )
+		{
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite100BasicResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$advancedWrite100BasicResult = ($advancedWrite100BasicResultContents | where { $_ -imatch  "Maximum Small IOPS" })
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite100BasicResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$advancedWrite100BasicResult = ($advancedWrite100BasicResultContents | where { $_ -imatch  "Minimum Small Latency" })
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite100BasicResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+		else
+		{
+			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+
+
+		$testType = "advancedWrite100Detailed#1"
+		LogMsg "Analysing '$testType' log files.."
+		$advancedWrite100Detailed1ResultContents = Get-Content -Path "$LogDir\$((Get-ChildItem -Path $LogDir | where { ( $_.Name -imatch "-summary.txt") -and ( $_.Name -imatch "-$testType-") }).Name )"
+		$advancedWrite100Detailed1Result = ($advancedWrite100Detailed1ResultContents | where { $_ -imatch  "Maximum Large MBPS" })
+		if ( $advancedWrite100Detailed1Result )
+		{
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite100Detailed1Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$advancedWrite100Detailed1Result = ($advancedWrite100Detailed1ResultContents | where { $_ -imatch  "Maximum Small IOPS" })
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite100Detailed1Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$advancedWrite100Detailed1Result = ($advancedWrite100Detailed1ResultContents | where { $_ -imatch  "Minimum Small Latency" })
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite100Detailed1Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+		else
+		{
+			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+
+
+		$testType = "advancedWrite100Detailed#2"
+		LogMsg "Analysing '$testType' log files.."
+		$advancedWrite100Detailed2ResultContents = Get-Content -Path "$LogDir\$((Get-ChildItem -Path $LogDir | where { ( $_.Name -imatch "-summary.txt") -and ( $_.Name -imatch "-$testType-") }).Name )"
+		$advancedWrite100Detailed2Result = ($advancedWrite100Detailed2ResultContents | where { $_ -imatch  "Maximum Large MBPS" })
+		if ( $advancedWrite100Detailed2Result )
+		{
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite100Detailed2Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$advancedWrite100Detailed2Result = ($advancedWrite100Detailed2ResultContents | where { $_ -imatch  "Maximum Small IOPS" })
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite100Detailed2Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$advancedWrite100Detailed2Result = ($advancedWrite100Detailed2ResultContents | where { $_ -imatch  "Minimum Small Latency" })
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite100Detailed2Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+		else
+		{
+			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+
+
+		$testType = "advancedWrite100Detailed#3"
+		LogMsg "Analysing '$testType' log files.."
+		$advancedWrite100Detailed3ResultContents = Get-Content -Path "$LogDir\$((Get-ChildItem -Path $LogDir | where { ( $_.Name -imatch "-summary.txt") -and ( $_.Name -imatch "-$testType-") }).Name )"
+		$advancedWrite100Detailed3Result = ($advancedWrite100Detailed3ResultContents | where { $_ -imatch  "Maximum Large MBPS" })
+		if ( $advancedWrite100Detailed3Result )
+		{
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite100Detailed3Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$advancedWrite100Detailed3Result = ($advancedWrite100Detailed3ResultContents | where { $_ -imatch  "Maximum Small IOPS" })
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite100Detailed3Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$advancedWrite100Detailed3Result = ($advancedWrite100Detailed3ResultContents | where { $_ -imatch  "Minimum Small Latency" })
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite100Detailed3Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+		else
+		{
+			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+
+
+		$testType = "oltpWrite50"
+		LogMsg "Analysing '$testType' log files.."
+		$oltpWrite50ResultContents = Get-Content -Path "$LogDir\$((Get-ChildItem -Path $LogDir | where { ( $_.Name -imatch "-summary.txt") -and ( $_.Name -imatch "-$testType-") }).Name )"
+		$oltpWrite50Result = ($oltpWrite50ResultContents | where { $_ -imatch  "Maximum Small IOPS" })
+		if ( $oltpWrite50Result )
+		{
+			$resultSummary +=  CreateResultSummary -testResult $oltpWrite50Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$oltpWrite50Result = ($oltpWrite50ResultContents | where { $_ -imatch  "Minimum Small Latency" })
+			$resultSummary +=  CreateResultSummary -testResult $oltpWrite50Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+		else
+		{
+			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+
+
+		$testType = "dssWrite50"
+		LogMsg "Analysing '$testType' log files.."
+		$dssWrite50ResultContents = Get-Content -Path "$LogDir\$((Get-ChildItem -Path $LogDir | where { ( $_.Name -imatch "-summary.txt") -and ( $_.Name -imatch "-$testType-") }).Name )"
+		$dssWrite50Result = ($dssWrite50ResultContents | where { $_ -imatch  "Maximum Large MBPS" })
+		if ( $dssWrite50Result )
+		{
+			$resultSummary +=  CreateResultSummary -testResult $dssWrite50Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+		else
+		{
+			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+
+		$testType = "advancedWrite50Detailed#1"
+		LogMsg "Analysing '$testType' log files.."
+		$advancedWrite50Detailed1ResultContents = Get-Content -Path "$LogDir\$((Get-ChildItem -Path $LogDir | where { ( $_.Name -imatch "-summary.txt") -and ( $_.Name -imatch "-$testType-") }).Name )"
+		$advancedWrite50Detailed1Result = ($advancedWrite50Detailed1ResultContents | where { $_ -imatch  "Maximum Large MBPS" })
+		if ( $advancedWrite50Detailed1Result )
+		{
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite50Detailed1Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$advancedWrite50Detailed1Result = ($advancedWrite50Detailed1ResultContents | where { $_ -imatch  "Maximum Small IOPS" })
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite50Detailed1Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$advancedWrite50Detailed1Result = ($advancedWrite50Detailed1ResultContents | where { $_ -imatch  "Minimum Small Latency" })
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite50Detailed1Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+		else
+		{
+			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+
+
+		$testType = "advancedWrite50Detailed#2"
+		LogMsg "Analysing '$testType' log files.."
+		$advancedWrite50Detailed2ResultContents = Get-Content -Path "$LogDir\$((Get-ChildItem -Path $LogDir | where { ( $_.Name -imatch "-summary.txt") -and ( $_.Name -imatch "-$testType-") }).Name )"
+		$advancedWrite50Detailed2Result = ($advancedWrite50Detailed2ResultContents | where { $_ -imatch  "Maximum Large MBPS" })
+		if ( $advancedWrite50Detailed2Result )
+		{
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite50Detailed2Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$advancedWrite50Detailed2Result = ($advancedWrite50Detailed2ResultContents | where { $_ -imatch  "Maximum Small IOPS" })
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite50Detailed2Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$advancedWrite50Detailed2Result = ($advancedWrite50Detailed2ResultContents | where { $_ -imatch  "Minimum Small Latency" })
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite50Detailed2Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+		else
+		{
+			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+
+		$testType = "advancedWrite50Detailed#3"
+		LogMsg "Analysing '$testType' log files.."
+		$advancedWrite50Detailed3ResultContents = Get-Content -Path "$LogDir\$((Get-ChildItem -Path $LogDir | where { ( $_.Name -imatch "-summary.txt") -and ( $_.Name -imatch "-$testType-") }).Name )"
+		$advancedWrite50Detailed3Result = ($advancedWrite50Detailed3ResultContents | where { $_ -imatch  "Maximum Large MBPS" })
+		if ( $advancedWrite50Detailed3Result )
+		{
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite50Detailed3Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$advancedWrite50Detailed3Result = ($advancedWrite50Detailed3ResultContents | where { $_ -imatch  "Maximum Small IOPS" })
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite50Detailed3Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$advancedWrite50Detailed3Result = ($advancedWrite50Detailed3ResultContents | where { $_ -imatch  "Minimum Small Latency" })
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite50Detailed3Result -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+		else
+		{
+			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
 
 		LogMsg "Analysis complete!"
 
