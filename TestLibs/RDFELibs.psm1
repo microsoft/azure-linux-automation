@@ -2486,16 +2486,22 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 									$isVMLogsCollected = $true								}
 								else
 								{
-									LogMsg "Cleaning up deployed test virtual machines."
-									$isClened = DeleteService -serviceName $hsDetails.ServiceName
-						
-									if ($isClened -contains "False")
+                                	if ( $keepReproInact )
+                                	{
+										LogMsg "Skipping cleanup due to 'keepReproInact' flag is set."
+                                    }
+                                    else
 									{
-										LogMsg "CleanUP unsuccessful for $($hsDetails.ServiceName).. Please delete the services manually."
-									}
-									else
-									{
-										LogMsg "CleanUP Successful for $($hsDetails.ServiceName).."
+										LogMsg "Cleaning up deployed test virtual machines."
+										$isClened = DeleteService -serviceName $hsDetails.ServiceName
+										if ($isClened -contains "False")
+										{
+											LogMsg "CleanUP unsuccessful for $($hsDetails.ServiceName).. Please delete the services manually."
+										}
+										else
+										{
+											LogMsg "CleanUP Successful for $($hsDetails.ServiceName).."
+										}
 									}
 								}
 							}
@@ -2567,16 +2573,23 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 							}
 							else
 							{
-								LogMsg "Cleaning up deployed test virtual machines."
-								$isClened = DeleteResourceGroup -RGName $group
-								if (!$isClened)
-								{
-									LogMsg "CleanUP unsuccessful for $group.. Please delete the services manually."
-								}
-								else
-								{
-									LogMsg "CleanUP Successful for $group.."
-								}
+                                if ( $keepReproInact )
+                                {
+									LogMsg "Skipping cleanup due to 'keepReproInact' flag is set."
+                                }
+                                else
+                                {
+									LogMsg "Cleaning up deployed test virtual machines."
+									$isClened = DeleteResourceGroup -RGName $group
+									if (!$isClened)
+									{
+										LogMsg "CleanUP unsuccessful for $group.. Please delete the services manually."
+									}
+								    else
+									{
+										LogMsg "CleanUP Successful for $group.."
+									}
+                                }
 							}
 						}
 					}

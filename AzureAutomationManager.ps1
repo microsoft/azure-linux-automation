@@ -104,9 +104,15 @@ try
     else
     {
         Set-Variable -Name EconomyMode -Value $false -Scope Global
-        Set-Variable -Name keepReproInact -Value $false -Scope Global
+        if($keepReproInact)
+        {
+            Set-Variable -Name keepReproInact -Value $true -Scope Global
+        }
+        else
+        {
+            Set-Variable -Name keepReproInact -Value $false -Scope Global
+        }
     }
-
     $AzureSetup = $xmlConfig.config.Azure.General
     LogMsg  ("Info : AzureAutomationManager.ps1 - LIS on Azure Automation")
     LogMsg  ("Info : Created test results directory:", $testDir)
@@ -149,6 +155,10 @@ try
         else
         {
 	        LogMsg "*************AZURE SERVICE MANAGEMENT MODE****************"
+        }
+        if($keepReproInact)
+        {
+            LogMsg "PLEASE NOTE: keepReproInact is set. VMs will not be deleted after test is finished even if, test gets PASS."
         }
     }
     if($upload)
