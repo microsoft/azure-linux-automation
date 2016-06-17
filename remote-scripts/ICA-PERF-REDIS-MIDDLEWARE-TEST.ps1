@@ -102,6 +102,7 @@ if ($isDeployed)
 			$connResult = $null
 			$testType = $null
 			$testTypeResult = $null
+			$clientTxt = Get-Content -Path "$LogDir\$($file.Name)"
 			foreach ( $line in $clientTxt ) 
 			{ 
 				if ( $line -imatch "SET:")
@@ -137,7 +138,7 @@ if ($isDeployed)
 			}
 			else
 			{
-				$resultSummary +=  CreateResultSummary -testResult "EROR: No result matching strings found. Possible Test Error." -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+				$resultSummary +=  CreateResultSummary -testResult "ERROR: No result matching strings found. Possible Test Error." -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 			}
 			LogMsg "Analysed $($file.Name) for number of requests."
 		}
