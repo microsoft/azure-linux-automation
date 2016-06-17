@@ -2439,7 +2439,7 @@
 				<HostedService>
 					<VirtualMachine>
 						<state></state>
-						<InstanceSize>Standard_GS1</InstanceSize>
+						<InstanceSize>Standard_GS5</InstanceSize>
 						<ARMInstanceSize>Standard_GS5</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
