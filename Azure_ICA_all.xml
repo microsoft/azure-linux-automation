@@ -5928,6 +5928,20 @@
 			</TestParameters>
 			<Priority>P0</Priority>
 		</test>					
+		<test>
+			<testName>ICA-PERF-REDIS-MIDDLEWARE-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-REDIS-MIDDLEWARE-TEST.ps1</testScriptps1>
+			<setupType>M1S1</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<TestParameters>
+				<param>test_pipeline_collection=(1 8 16 32 64 128)</param>
+				<param>redisVersion=2.8.17</param>
+				<param>redis_test_suites="get,set"</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>			
 	</testsDefinition>
 
 	<testCycles>
@@ -6790,6 +6804,12 @@
 				<Name>ICA-PERF-NTTTCP-TEST</Name>
 			</test>
 		</Cycle>
+		<Cycle>
+			<cycleName>PERF-REDIS-M</cycleName>
+			<test>
+				<Name>ICA-PERF-REDIS-MIDDLEWARE-TEST</Name>
+			</test>			
+		</Cycle>		
 		<Cycle>
 			<cycleName>DEBUG</cycleName>
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
