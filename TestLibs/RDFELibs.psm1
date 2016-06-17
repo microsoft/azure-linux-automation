@@ -2109,8 +2109,8 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 		$plainTextPassword = $password.Replace('"','');
 		if ( $detectedDistro -eq "COREOS" )
 		{
-			$linuxCommand = "`"export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/usr/share/oem/python/bin:/opt/bin && echo $plainTextPassword | sudo -S env `"PATH=`$PATH`" $command && echo AZURE-LINUX-EXIT-CODE-`$? || echo AZURE-LINUX-EXIT-CODE-`$?`""
-			$logCommand = "`"export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/usr/share/oem/python/bin:/opt/bin && echo $plainTextPassword | sudo -S env `"PATH=`$PATH`" $command`""
+			$linuxCommand = "`"export PATH=/usr/share/oem/python/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/opt/bin && echo $plainTextPassword | sudo -S env `"PATH=`$PATH`" $command && echo AZURE-LINUX-EXIT-CODE-`$? || echo AZURE-LINUX-EXIT-CODE-`$?`""
+			$logCommand = "`"export PATH=/usr/share/oem/python/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/opt/bin && echo $plainTextPassword | sudo -S env `"PATH=`$PATH`" $command`""
 		}
 		else
 		{
@@ -2123,8 +2123,8 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 	{
 		if ( $detectedDistro -eq "COREOS" )
 		{
-			$linuxCommand = "`"export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/usr/share/oem/python/bin:/opt/bin && $command && echo AZURE-LINUX-EXIT-CODE-`$? || echo AZURE-LINUX-EXIT-CODE-`$?`""
-			$logCommand = "`"export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/usr/share/oem/python/bin:/opt/bin && $command`""		
+			$linuxCommand = "`"export PATH=/usr/share/oem/python/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/opt/bin && $command && echo AZURE-LINUX-EXIT-CODE-`$? || echo AZURE-LINUX-EXIT-CODE-`$?`""
+			$logCommand = "`"export PATH=/usr/share/oem/python/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/opt/bin && $command`""		
 		}
 		else
 		{
