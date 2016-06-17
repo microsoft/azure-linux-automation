@@ -26,7 +26,7 @@
 # performance_mongodb.sh
 #
 # Description:
-#    Install and configure mongodb so the mongoperf benchmark can
+#    Install and configure mongodb so the ycsb benchmark can
 #    be run.  This script needs to be run on single VM.
 #
 #    mongo perf needs Java runtime is also installed.

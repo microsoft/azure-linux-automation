@@ -6484,7 +6484,7 @@
 			</test>			
 		</Cycle>
 		<Cycle>
-			<cycleName>LISA-MIDDLEWARE-MONGODB2VM-PERF</cycleName>
+			<cycleName>PERF-MONGODB-M</cycleName>
 			<test>
 				<Name>ICA-PERF-MIDDLEWARE-MONGODB-BENCHMARK-TEST-2VM</Name>
 			</test>			
