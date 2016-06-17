@@ -5559,7 +5559,23 @@
 				<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 				<Priority>P0</Priority>
 			</test>				
-			
+			<test>
+				<testName>ICA-PERF-FIO-BENCHMARK-TEST</testName>
+				<testScript></testScript>
+				<testScriptps1>ICA-PERF-FIO-BENCHMARK-TEST.ps1</testScriptps1>
+				<setupType>GS5DISK1</setupType>
+				<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+				<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+				<TestParameters>
+					<param>startIOdepth=1</param>
+					<param>maxIOdepth=1024</param>
+					<param>startIOsize=8</param>
+					<param>maxIOsize=8</param>
+					<param>ioruntime=300</param>
+				</TestParameters>
+				<remoteFiles></remoteFiles>
+				<Priority>P0</Priority>
+			</test>	
 			<test>
 			<testName>RHUI-CROSS-REGION-MIGRATION</testName>
 			<testScript></testScript>
@@ -6489,6 +6505,13 @@
 				<Name>ICA-PERF-MIDDLEWARE-MONGODB-BENCHMARK-TEST-2VM</Name>
 			</test>			
 		</Cycle>
+		<Cycle>
+			<cycleName>PERF-FIO-M</cycleName>
+			<test>
+				<Name>ICA-PERF-FIO-BENCHMARK-TEST</Name>
+			</test>			
+		</Cycle>
+		
 		<Cycle>
 			<cycleName>LISA-PERF</cycleName>
 			<test>

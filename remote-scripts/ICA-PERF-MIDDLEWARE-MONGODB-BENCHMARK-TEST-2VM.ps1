@@ -51,12 +51,6 @@ if ($isDeployed)
 		
 		#endregion
 		
-		#region Geting Test Data from remote XML file
-		#$mdXMLURL = $($currentTestData.remoteXML)
-		#LogMsg "Downloading apache test XML : $mdXMLURL ..."
-		#$mdXMLFileName = $($mdXMLURL.Split("/")[$mdXMLURL.Split("/").Count-1])
-		#$out = Invoke-WebRequest -Uri $mdXMLURL -OutFile "$LogDir\$mdXMLFileName"
-		
 		$mdXMLData = [xml](Get-Content -Path ".\XML\Perf_Middleware_MangoDB_2VM.xml") 
 
 		LogMsg "Generating constansts.sh ..."
@@ -158,8 +152,6 @@ if ($isDeployed)
 		}
 		elseif ( $finalStatus -imatch "TestRunning")
 		{
-			LogMsg "Powershell backgroud job for test is completed but VM is reporting that test is still running. Please check $LogDir\mdConsoleLogs.txt"
-			LogMsg "Contests of state.txt : $finalStatus"
 			$testResult = "PASS"
 		}
 		LogMsg "Test result : $testResult"
