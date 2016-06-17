@@ -65,7 +65,7 @@ if ($isDeployed)
 		while ( (Get-Job -Id $testJob).State -eq "Running" )
 		{
 			$currentStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "tail -n 1 /root/FioConsoleLogs.txt"
-			$currentfioStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "tail -n 1 /root/FIOLog/fio-test.log.txt"
+			$currentfioStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "tail -n 1 /root/FIOLog/fio-test.log.txt" -ignoreLinuxExitCode
 			LogMsg "Current Test Staus : $currentStatus `n$currentfioStatus"
 			WaitFor -seconds 20
 		}
