@@ -2434,6 +2434,27 @@
 					</VirtualMachine>
 				</HostedService>
 			</GS5>
+			<GS5DISK1>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_GS1</InstanceSize>
+						<ARMInstanceSize>Standard_GS5</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk>
+							<LUN>0</LUN>
+							<DiskSizeInGB>1023</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>						
+					</VirtualMachine>
+				</HostedService>
+			</GS5DISK1>
 
 			<BasicA0>
 				<isDeployed>NO</isDeployed>
