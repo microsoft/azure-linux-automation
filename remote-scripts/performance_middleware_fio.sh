@@ -430,6 +430,7 @@ HOMEDIR=$HOME
 mv $HOMEDIR/FIOLog/ $HOMEDIR/FIOLog-$(date +"%m%d%Y-%H%M%S")/
 mkdir -p $HOMEDIR/FIOLog
 LOGDIR="${HOMEDIR}/FIOLog"
+touch ${LOGDIR}/fio-test.log.txt
 #mdVolume="/dev/md1"
 #vggroup="vg1"
 mountDir="/sdc1mnt/fio"
