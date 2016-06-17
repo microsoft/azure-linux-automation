@@ -3224,7 +3224,7 @@
 					</VirtualMachine>					
 				</HostedService>
 			</M1S1>	
-			<M1S1D1>
+			<M1D1S1>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
 					<VirtualMachine>
@@ -3257,7 +3257,7 @@
 						</EndPoints>
 					</VirtualMachine>					
 				</HostedService>
-			</M1S1D1>			
+			</M1D1S1>			
 			
 			<M1S5>
 				<!-- This setup type defines One Master and Three slave machines. Hence name is M(aster)1S(lave)3. -->
@@ -5549,12 +5549,13 @@
 				<testName>ICA-PERF-MIDDLEWARE-MONGODB-BENCHMARK-TEST-2VM</testName>
 				<testScript></testScript>
 				<testScriptps1>ICA-PERF-MIDDLEWARE-MONGODB-BENCHMARK-TEST-2VM.ps1</testScriptps1>
-				<setupType>M1S1D1</setupType>
+				<setupType>M1D1S1</setupType>
 				<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 				<!--Remote Files will be directly downloaded to test VM.-->
 				<remoteFiles></remoteFiles>
 				<!--Remote XML will be downloaded to automation server for analysis-->
 				<remoteXML></remoteXML>
+				<threads>1,2,4,16,32,64,128,256,512,1024</threads>
 				<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 				<Priority>P0</Priority>
 			</test>				

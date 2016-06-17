@@ -3,6 +3,7 @@ Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""
 $resultArr = @()
+$threads=$currentTestData.threads
 
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
@@ -85,10 +86,8 @@ if ($isDeployed)
 			LogMsg "$mdParam added to workloadAzure"
 		}		
 		LogMsg "workloadAzure file created successfully..."
-
 		#endregion
 
-		
 		#region EXECUTE TEST
 		Set-Content -Value "/root/performance_middleware_mongod.sh &> mongodConsoleLogs.txt" -Path "$LogDir\StartMONGODTest.sh"
 		$out = RemoteCopy -uploadTo $clientVMData.PublicIP -port $clientVMData.SSHPort -files ".\$constantsFile,.\remote-scripts\performance_middleware_mongod.sh,.\remote-scripts\run-ycsb.sh,.\$LogDir\StartMONGODTest.sh,.\$LogDir\workloadAzure" -username "root" -password $password -upload  2>&1 | Out-Null
@@ -111,6 +110,30 @@ if ($isDeployed)
 		$finalStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "cat /root/state.txt"
 		$mdSummary = Get-Content -Path "$LogDir\summary.log" -ErrorAction SilentlyContinue
         
+		if ($finalStatus -imatch "TestCompleted")
+		{
+			foreach ($thread in $threads.Split(","))
+			{
+				$threadStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "cat /root/benchmark/mongodb/logs/$thread/$thread.ycsb.run.log | grep 'OVERALL], Throughput'" -ignoreLinuxExitCode
+				if (($threadStatus -imatch 'OVERALL') -and ($threadStatus -imatch 'Throughput'))
+				{
+					$overallThroghput = $threadStatus.Trim().Split()[2].Trim()
+					$metaData = "$thread threads:  overallThroghput"
+					$resultSummary +=  CreateResultSummary -testResult $overallThroghput -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
+				}
+				else
+				{
+					$resultSummary +=  CreateResultSummary -testResult "ERROR: Result not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+				}
+			} 
+		}
+		else
+		{
+			$overallThroghput = ""
+		 }
+		#endregion
+		
+		
 		if (!$mdSummary)
 		{
 			LogMsg "summary.log file is empty."
@@ -130,8 +153,8 @@ if ($isDeployed)
 		{
 			LogMsg "Test Completed. Result : $finalStatus."
 			$testResult = "PASS"
-			$out = RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir\$($clientVMData.RoleName) -files "/root/client-benchmark.tar.gz"  2>&1 | Out-Null
-			$out = RemoteCopy -downloadFrom $clientVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir\$($serverVMData.RoleName) -files "/root/server-benchmark.tar.gz"  2>&1 | Out-Null
+			$out = RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/client-benchmark.tar.gz"  2>&1 | Out-Null
+			$out = RemoteCopy -downloadFrom $clientVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/server-benchmark.tar.gz"  2>&1 | Out-Null
 		}
 		elseif ( $finalStatus -imatch "TestRunning")
 		{
@@ -149,12 +172,12 @@ if ($isDeployed)
 	}
 	Finally
 	{
+		$metaData = ""
 		if (!$testResult)
 		{
 			$testResult = "Aborted"
 		}
 		$resultArr += $testResult
-		$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
 	}   
 }
 
@@ -170,5 +193,4 @@ $result = GetFinalResultHeader -resultarr $resultArr
 #DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed -ResourceGroups $isDeployed
 
 #Return the result and summery to the test suite script..
-#return $result
 return $result, $resultSummary
