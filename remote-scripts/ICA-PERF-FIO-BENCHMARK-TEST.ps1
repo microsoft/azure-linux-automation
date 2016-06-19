@@ -71,11 +71,9 @@ if ($isDeployed)
 		}
 		
 		$finalStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "cat /root/state.txt"
-		
-        $finalStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "cat /root/state.txt"
-		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "FioConsoleLogs.txt"
+		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "FioConsoleLogs.txt,state.txt,summary.log"
         
-		## add here code for display resuls
+		## add here code for display results
         
 		if ( $finalStatus -imatch "TestFailed")
 		{
@@ -91,6 +89,7 @@ if ($isDeployed)
 		{
 			LogMsg "Test Completed."
 			$testResult = "PASS"
+			RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "FIOTest-*.tar.gz"
 		}
 		elseif ( $finalStatus -imatch "TestRunning")
 		{
