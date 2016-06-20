@@ -68,7 +68,12 @@ if ($isDeployed)
 				Add-Content -Value "$mdParam" -Path $constantsFile
 				LogMsg "$mdParam added to constansts.sh"
 			}
-		}		
+		}
+		foreach ($testParam in $currentTestData.TestParameters.param )
+		{
+			Add-Content -Value "$testParam" -Path $constantsFile
+			LogMsg "$testParam added to constansts.sh"
+		}
 		LogMsg "constanst.sh created successfully..."
 
 		LogMsg "Generating MongoDB workload file ..."
@@ -83,7 +88,7 @@ if ($isDeployed)
 		#endregion
 
 		#region EXECUTE TEST
-		Set-Content -Value "/root/performance_middleware_mongod.sh &> mongodConsoleLogs.txt" -Path "$LogDir\StartMONGODTest.sh"
+		Set-Content -Value "/root/performance_middleware_mongod.sh &> mongodClientConsoleLogs.txt" -Path "$LogDir\StartMONGODTest.sh"
 		$out = RemoteCopy -uploadTo $clientVMData.PublicIP -port $clientVMData.SSHPort -files ".\$constantsFile,.\remote-scripts\performance_middleware_mongod.sh,.\remote-scripts\run-ycsb.sh,.\$LogDir\StartMONGODTest.sh,.\$LogDir\workloadAzure" -username "root" -password $password -upload  2>&1 | Out-Null
 		$out = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "chmod +x *.sh"
 		$testJob = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "/root/StartMONGODTest.sh" -RunInBackground
@@ -92,20 +97,27 @@ if ($isDeployed)
 		#region MONITOR TEST
 		while ( (Get-Job -Id $testJob).State -eq "Running" )
 		{
-			$currentStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "tail -n 1 /root/mongodConsoleLogs.txt"
-			$testEndStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "cat /root/mongodConsoleLogs.txt | grep 'TEST END' | tail -1"
-			$testStartStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "cat /root/mongodConsoleLogs.txt | grep 'TEST RUNNING' | tail -1"
+			$currentStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "tail -n 1 /root/mongodClientConsoleLogs.txt"
+			$testEndStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "cat /root/mongodClientConsoleLogs.txt | grep 'TEST END' | tail -1"
+			if($testEndStatus -imatch "TEST END")
+			{
+				$testStartStatus = "TEST START WITH NEXT THREAD"
+			}
+			$testStartStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "cat /root/mongodClientConsoleLogs.txt | grep 'TEST RUNNING' | tail -1"
 			LogMsg "Current Test Staus : $testEndStatus $testStartStatus `n $currentStatus"
 			WaitFor -seconds 10
 		}
 		
-		$out = RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/mongodConsoleLogs.txt"  2>&1 | Out-Null
+		$out = RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/mongodClientConsoleLogs.txt"  2>&1 | Out-Null
 		$out = RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/summary.log,/root/state.txt"  2>&1 | Out-Null
 		$finalStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "cat /root/state.txt"
 		$mdSummary = Get-Content -Path "$LogDir\summary.log" -ErrorAction SilentlyContinue
-        
+
 		if ($finalStatus -imatch "TestCompleted")
 		{
+			$threads = $currentTestData.TestParameters.param
+			$threads = $threads.Replace("test_threads_collection=",'').Replace("(","").Replace(")","").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace(" ",",")
+
 			foreach ($thread in $threads.Split(","))
 			{
 				$threadStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "cat /root/benchmark/mongodb/logs/$thread/$thread.ycsb.run.log | grep 'OVERALL], Throughput'" -ignoreLinuxExitCode
@@ -113,7 +125,7 @@ if ($isDeployed)
 				{
 					$overallThroghput = $threadStatus.Trim().Split()[2].Trim()
 					$metaData = "$thread threads:  overallThroghput"
-					$resultSummary +=  CreateResultSummary -testResult $overallThroghput -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
+					$resultSummary +=  CreateResultSummary -testResult $overallThroghput -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 				}
 				else
 				{
@@ -147,8 +159,14 @@ if ($isDeployed)
 		{
 			LogMsg "Test Completed. Result : $finalStatus."
 			$testResult = "PASS"
-			$out = RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/client-benchmark.tar.gz"  2>&1 | Out-Null
-			$out = RemoteCopy -downloadFrom $clientVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/server-benchmark.tar.gz"  2>&1 | Out-Null
+			foreach ($thread in $threads.Split(","))
+			{	
+				mkdir $LogDir\$($clientVMData.RoleName)\$($thread) -Force| out-null
+				RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir\$($clientVMData.RoleName)\$($thread) -files "/root/benchmark/mongodb/logs/$($thread)/*"  2>&1 | Out-Null
+				mkdir  $LogDir\$($serverVMData.RoleName)\$($thread) -Force| out-null
+				RemoteCopy -downloadFrom $clientVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir\$($serverVMData.RoleName)\$($thread) -files "/root/benchmark/mongodb/logs/$($thread)/*"  2>&1 | Out-Null
+			}
+			RemoteCopy -downloadFrom $clientVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/mongodServerConsole.txt"  2>&1 | Out-Null
 		}
 		elseif ( $finalStatus -imatch "TestRunning")
 		{

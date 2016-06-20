@@ -39,7 +39,7 @@
 #     3. Unpackage the Mongo archive
 #     4. Move the mongo directory to /usr/bin/
 #     5. Update the ~/.bashrc file with mongodb specific exports
-#     8. Start mongoperf test
+#     8. Start ycsb test
 #######################################################################
 
 
@@ -464,12 +464,7 @@ LogMsg "Using the asynchronous driver to run the test on /root/run-ycsb.sh ${MD_
 LogMsg "ycsb benchmark test run: Success"
 
 chmod +x /root/run-ycsb.sh
-/root/run-ycsb.sh ${MD_SERVER}  #2>&1 >> /root/mongodConsoleLogs.txt
-
-#Server logs
-ssh root@${MD_SERVER} "tar -cvf server-benchmark.tar.gz /root/benchmark/ *.txt"
-#Client logs
-tar -cvf client-benchmark.tar.gz /root/benchmark/ *.txt *.log
+/root/run-ycsb.sh
 
 #
 # If we made it here, everything worked.
