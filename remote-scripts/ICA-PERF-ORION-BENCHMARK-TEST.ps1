@@ -4,12 +4,12 @@ $result = ""
 $testResult = ""
 $resultArr = @()
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
+
 if ($isDeployed)
 {
 	try
 	{
 		$clientVMData = $allVMData
-
 		#region Get the info about the disks
 		$fdiskOutput = RunLinuxCmd -username $user -password $password -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -command "$fdisk -l" -runAsSudo
 		$allDetectedDisks = GetNewPhysicalDiskNames -FdiskOutputBeforeAddingDisk "Disk /dev/sda`nDisk /dev/sdb" -FdiskOutputAfterAddingDisk $fdiskOutput
@@ -73,12 +73,20 @@ if ($isDeployed)
 		
 		#region Analyse results..
 		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username $user -password $password -download -downloadTo $LogDir -files "orion-*"
-		$orionLogFiles = Get-ChildItem -Path $LogDir | Select Name | where {$_ -imatch "orion-"}
-		foreach ( $file in $orionLogFiles )
-		{
-			LogMsg "$($file.Name) downloaded."
-		}
+
 		$resultSummary = $null
+		#
+		#THIS FUNCTION WILL CREATE A NEW FOLDER FOR EACH TEST TYPE AND IT WILL PLACE RELATED LOG FILES IN THAT FOLDER.
+		#
+		Function SortOrionLogs($testType)
+		{
+			mkdir -Path "$LogDir\$testType" -Force | Out-Null
+			foreach ( $file in (Get-ChildItem -Path $LogDir | where { ( $_.Name -imatch "orion-") -and ( $_.Name -imatch "-$testType-")} ) )
+			{
+				Move-Item -Path "$LogDir\$($file.Name)" -Destination "$LogDir\$testType" -Force | Out-Null
+				LogMsg "$($file.Name) downloaded and moved to folder $testType"
+			}
+		}
 
 		$testType = "oltp"
 		LogMsg "Analysing '$testType' log files.."
@@ -94,6 +102,7 @@ if ($isDeployed)
 		{
 			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 		}
+		SortOrionLogs -testType $testType
 
 		$testType = "dss"
 		LogMsg "Analysing '$testType' log files.."
@@ -107,7 +116,7 @@ if ($isDeployed)
 		{
 			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 		}
-
+		SortOrionLogs -testType $testType
 
 		$testType = "simple"
 		LogMsg "Analysing '$testType' log files.."
@@ -125,7 +134,7 @@ if ($isDeployed)
 		{
 			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 		}
-
+		SortOrionLogs -testType $testType
 
 		$testType = "normal#1"
 		LogMsg "Analysing '$testType' log files.."
@@ -143,6 +152,7 @@ if ($isDeployed)
 		{
 			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 		}
+		SortOrionLogs -testType $testType
 
 		$testType = "normal#2"
 		LogMsg "Analysing '$testType' log files.."
@@ -160,6 +170,7 @@ if ($isDeployed)
 		{
 			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 		}
+		SortOrionLogs -testType $testType
 
 		$testType = "normal#3"
 		LogMsg "Analysing '$testType' log files.."
@@ -177,7 +188,7 @@ if ($isDeployed)
 		{
 			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 		}
-
+		SortOrionLogs -testType $testType
 		
 
 		$testType = "oltpWrite100"
@@ -194,6 +205,7 @@ if ($isDeployed)
 		{
 			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 		}
+		SortOrionLogs -testType $testType
 
 
 		$testType = "dssWrite100"
@@ -208,6 +220,7 @@ if ($isDeployed)
 		{
 			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 		}
+		SortOrionLogs -testType $testType
 
 
 		$testType = "advancedWrite100Basic"
@@ -226,6 +239,7 @@ if ($isDeployed)
 		{
 			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 		}
+		SortOrionLogs -testType $testType
 
 
 		$testType = "advancedWrite100Detailed#1"
@@ -244,6 +258,7 @@ if ($isDeployed)
 		{
 			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 		}
+		SortOrionLogs -testType $testType
 
 
 		$testType = "advancedWrite100Detailed#2"
@@ -262,6 +277,7 @@ if ($isDeployed)
 		{
 			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 		}
+		SortOrionLogs -testType $testType
 
 
 		$testType = "advancedWrite100Detailed#3"
@@ -280,6 +296,7 @@ if ($isDeployed)
 		{
 			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 		}
+		SortOrionLogs -testType $testType
 
 
 		$testType = "oltpWrite50"
@@ -296,6 +313,7 @@ if ($isDeployed)
 		{
 			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 		}
+		SortOrionLogs -testType $testType
 
 
 		$testType = "dssWrite50"
@@ -310,6 +328,28 @@ if ($isDeployed)
 		{
 			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 		}
+		SortOrionLogs -testType $testType
+
+		$testType = "advancedWrite50Basic"
+		LogMsg "Analysing '$testType' log files.."
+		$advancedWrite50BasicResultContents = Get-Content -Path "$LogDir\$((Get-ChildItem -Path $LogDir | where { ( $_.Name -imatch "-summary.txt") -and ( $_.Name -imatch "-$testType-") }).Name )"
+		$advancedWrite50BasicResult = ($advancedWrite50BasicResultContents | where { $_ -imatch  "Maximum Large MBPS" })
+		if ( $advancedWrite50BasicResult )
+		{
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite50BasicResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$advancedWrite50BasicResult = ($advancedWrite50BasicResultContents | where { $_ -imatch  "Maximum Large MBPS" })
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite50BasicResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$advancedWrite50BasicResult = ($advancedWrite50BasicResultContents | where { $_ -imatch  "Maximum Small IOPS" })
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite50BasicResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+			$advancedWrite50BasicResult = ($advancedWrite50BasicResultContents | where { $_ -imatch  "Minimum Small Latency" })
+			$resultSummary +=  CreateResultSummary -testResult $advancedWrite50BasicResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+		else
+		{
+			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+		}
+		SortOrionLogs -testType $testType
+
 
 		$testType = "advancedWrite50Detailed#1"
 		LogMsg "Analysing '$testType' log files.."
@@ -327,6 +367,7 @@ if ($isDeployed)
 		{
 			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 		}
+		SortOrionLogs -testType $testType
 
 
 		$testType = "advancedWrite50Detailed#2"
@@ -345,6 +386,7 @@ if ($isDeployed)
 		{
 			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 		}
+		SortOrionLogs -testType $testType
 
 		$testType = "advancedWrite50Detailed#3"
 		LogMsg "Analysing '$testType' log files.."
@@ -362,6 +404,7 @@ if ($isDeployed)
 		{
 			$resultSummary +=  CreateResultSummary -testResult "ERROR: Result Strings not found. Possible test error." -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 		}
+		SortOrionLogs -testType $testType
 
 		LogMsg "Analysis complete!"
 

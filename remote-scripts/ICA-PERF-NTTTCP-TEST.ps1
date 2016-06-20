@@ -101,10 +101,9 @@ if ($isDeployed)
 				$resultSummary +=  CreateResultSummary -testResult "EROR: No result matching strings found. Possible Test Error." -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 			}
 		}
-		$ntttcpSupportLogFiles = Get-ChildItem -Path $LogDir | Select Name | where {( $_ -imatch "sar.netio.log") -or ( $_ -imatch "iostat.diskio.log") -or ( $_ -imatch "vmstat.memory.cpu.log")}
-		foreach ( $file in $ntttcpSupportLogFiles )
+		$ntttcpLogFiles = Get-ChildItem -Path $LogDir | Select Name | where {( $_ -imatch "ntttcp-server") -or ( $_ -imatch "ntttcp-client")}
+		foreach ( $file in $ntttcpLogFiles )
 		{
-			LogMsg "$($file.Name) downloaded."
 			$fileName = $($file.Name)
 			$connFolder = $fileName.Split("-")[$fileName.Split("-").count-1].Split(".")[0]
 			mkdir -Path "$LogDir\$connFolder" -Force | Out-Null

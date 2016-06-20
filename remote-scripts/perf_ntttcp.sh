@@ -126,7 +126,7 @@ do
 	ssh ${client} "vmstat 1 900"       2>&1 > ntttcp-client-logs-test#${i}-connections-${currenttest}.vmstat.memory.cpu.log &
 
 	LogMsg "Starting ntttcp with ${currenttest} connections..."
-	ssh ${client} "./ntttcp -s${server} -n${currenttest} > ntttcp-client-logs-test#${i}-connections-${currenttest}.txt"
+	ssh ${client} "./ntttcp -s${server} -n${currenttest} > ntttcp-client-logs-test#${i}-connections-${currenttest}.ConsoleResult.txt"
 	
 	ssh ${client} pkill -f sar 2>&1 > /dev/null
 	ssh ${client} pkill -f iostat 2>&1 > /dev/null

@@ -4,7 +4,6 @@ $result = ""
 $testResult = ""
 $resultArr = @()
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
-
 if ($isDeployed)
 {
 	try
@@ -41,7 +40,6 @@ if ($isDeployed)
 		LogMsg "  RoleName : $($serverVMData.RoleName)"
 		LogMsg "  Public IP : $($serverVMData.PublicIP)"
 		LogMsg "  SSH Port : $($serverVMData.SSHPort)"
-
 
 		#
 		# PROVISION VMS FOR LISA WILL ENABLE ROOT USER AND WILL MAKE ENABLE PASSWORDLESS AUTHENTICATION ACROSS ALL VMS IN SAME HOSTED SERVICE.	
@@ -89,11 +87,6 @@ if ($isDeployed)
 		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "redis-client-pipelines-*"
 		
 		$testSummary = $null
-		$redisLogFiles = Get-ChildItem -Path $LogDir | Select Name | where { ( $_ -imatch "redis-server-pipelines") -or ( $_ -imatch "redis-client-pipelines") }
-		foreach ( $file in $redisLogFiles )
-		{
-			LogMsg "$($file.Name) downloaded."
-		}
 
 		$redisClientLogFiles = Get-ChildItem -Path $LogDir | Select Name | where {($_ -imatch "redis-client-pipelines") -and ( $_ -imatch "set.get.log")}
 		$resultSummary = $null
@@ -103,6 +96,12 @@ if ($isDeployed)
 			$testType = $null
 			$testTypeResult = $null
 			$clientTxt = Get-Content -Path "$LogDir\$($file.Name)"
+			$fileName = $file.Name
+			$connFolder = $fileName.Split("-")[$fileName.Split("-").Count-1].Split(".")[0]
+			mkdir "$LogDir\$connFolder" -Force | Out-Null
+			Move-Item "$LogDir\$fileName" -Destination "$LogDir\$connFolder" -Force 
+			LogMsg "$($file.Name) downloaded and moved to '$connFolder'"
+
 			foreach ( $line in $clientTxt ) 
 			{ 
 				if ( $line -imatch "SET:")
@@ -141,6 +140,16 @@ if ($isDeployed)
 				$resultSummary +=  CreateResultSummary -testResult "ERROR: No result matching strings found. Possible Test Error." -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 			}
 			LogMsg "Analysed $($file.Name) for number of requests."
+		}
+
+		$redisLogFiles = Get-ChildItem -Path $LogDir | Select Name | where { ( $_ -imatch "redis-server-pipelines") -or ( $_ -imatch "redis-client-pipelines") }
+		foreach ( $file in $redisLogFiles )
+		{
+			$fileName = $file.Name
+			$connFolder = $fileName.Split("-")[$fileName.Split("-").Count-1].Split(".")[0]
+			mkdir "$LogDir\$connFolder" -Force | Out-Null
+			Move-Item "$LogDir\$fileName" -Destination "$LogDir\$connFolder" -Force 
+			LogMsg "$($file.Name) downloaded and moved to '$connFolder'"
 		}
 
 		#endregion
