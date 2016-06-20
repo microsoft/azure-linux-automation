@@ -33,6 +33,9 @@
 #
 #     1. Install a fio
 #     2. Start fio benchmark test on given disk
+#
+# Author: Sivakanth
+# Email: v-sirebb@microsoft.com
 #######################################################################
 
 
@@ -46,10 +49,6 @@ ICA_TESTFAILED="TestFailed"        # Error occurred during the test
 
 CONSTANTS_FILE="constants.sh"
 SUMMARY_LOG=~/summary.log
-
-#MONGODB_VERSION="2.4.0"
-#MONGODB_ARCHIVE="mongodb-linux-x86_64-${MONGODB_VERSION}.tgz"
-#MONGODB_URL="http://fastdl.mongodb.org/linux/${MONGODB_ARCHIVE}"
 
 #######################################################################
 #
@@ -128,7 +127,8 @@ set -x
 
 RunFIO()
 {
-	FILEIO="--size=16G --direct=1 --ioengine=libaio --filename=fiodata --overwrite=1  "
+	testfilesize=${testfilesize}
+	FILEIO="--size=$testfilesize --direct=1 --ioengine=libaio --filename=fiodata --overwrite=1  "
 
 	####################################
 	#All run config set here
@@ -138,11 +138,15 @@ RunFIO()
 	
 	mkdir -p  $HOMEDIR/FIOLog/jsonLog
 	mkdir -p  $HOMEDIR/FIOLog/iostatLog
+	mkdir -p  $HOMEDIR/FIOLog/sarLog
+	mkdir -p  $HOMEDIR/FIOLog/vmstatLog
 	mkdir -p  $HOMEDIR/FIOLog/blktraceLog
 
 	#LOGDIR="${HOMEDIR}/FIOLog"
 	JSONFILELOG="${LOGDIR}/jsonLog"
 	IOSTATLOGDIR="${LOGDIR}/iostatLog"
+	VMSTATLOGDIR="${LOGDIR}/vmstatLog"
+	SAROGDIR="${LOGDIR}/sarLog"
 	BLKTRACELOGDIR="${LOGDIR}/blktraceLog"
 	LOGFILE="${LOGDIR}/fio-test.log.txt"	
 
@@ -157,16 +161,13 @@ RunFIO()
 	#
 
 	#All possible values for file-test-mode are randread randwrite read write
-	modes='read write'
+	
 	iteration=0
-	startIOdepth=${startIOdepth}
-	startIOsize=${startIOsize}
 	numjobs=1
-
-	#Max run config
+	testmodes=${testmodes}
+	ioSize=${ioSizes}
+	ioDepth=${ioDepths}
 	ioruntime=${ioruntime}
-	maxIOdepth=${maxIOdepth}
-	maxIOsize=${maxIOsize}
 
 	####################################
 	echo "Test log created at: ${LOGFILE}"
@@ -197,44 +198,35 @@ RunFIO()
 
 	####################################
 	#Trigger run from here
-	for testmode in $modes; do
-		iosize=$startIOsize
-		while [ $iosize -le $maxIOsize ]
-		do
-			IOdepth=$startIOdepth			
-			while [ $IOdepth -le $maxIOdepth ]
-			do
-				if [ $IOdepth -ge 8 ]
+	for testmode in $testmodes; do
+		for ioSize in $ioSizes; do
+			for ioDepth in $ioDepths; do
+				if [ $ioDepth -ge 8 ]
 				then
 					numjobs=8
 				else
-					numjobs=$IOdepth
+					numjobs=$ioDepth
 				fi
-				iostatfilename="${IOSTATLOGDIR}/iostat-fio-${testmode}-${iosize}K-${IOdepth}td.txt"
-				nohup iostat -x 5 -t -y > $iostatfilename &
-							
-				#LogMsg "-- iteration ${iteration} ----------------------------- ${testmode} test, ${iosize}K bs, ${IOdepth} threads, ${numjobs} jobs, 5 minutes ------------------ $(date +"%x %r %Z") ---"
-				echo "-- iteration ${iteration} ----------------------------- ${testmode} test, ${iosize}K bs, ${IOdepth} threads, ${numjobs} jobs, 5 minutes ------------------ $(date +"%x %r %Z") ---" >> $LOGFILE
-				jsonfilename="${JSONFILELOG}/fio-result-${testmode}-${iosize}K-${IOdepth}td.json"
-				fio $FILEIO --readwrite=$testmode --bs=${iosize}K --runtime=$ioruntime --iodepth=$IOdepth --numjobs=$numjobs --output-format=json --output=$jsonfilename --name="iteration"${iteration} >> $LOGFILE
-				#fio $FILEIO --readwrite=$testmode --bs=${iosize}K --runtime=$ioruntime --iodepth=$IOdepth --numjobs=$numjobs --name="iteration"${iteration} --group_reporting >> $LOGFILE
-				iostatPID=`ps -ef | awk '/iostat/ && !/awk/ { print $2 }'`
-				kill -9 $iostatPID
-				IOdepth=$(( IOdepth*2 ))		
+				iostatfilename="${IOSTATLOGDIR}/iostat-fio-${testmode}-${ioSize}K-${ioDepth}td.txt"
+				nohup iostat -x $ioruntime -t -y > $iostatfilename &
+				iostatPID=$!
+				sarfilename="${SAROGDIR}/sar-fio-${testmode}-${ioSize}K-${ioDepth}td.txt"
+				nohup sar -n DEV 1 $ioruntime 2>&1 > $sarfilename & 
+				sarPID=$!
+				vmstatfilename="${VMSTATLOGDIR}/vmstat-fio-${testmode}-${ioSize}K-${ioDepth}td.txt"
+				nohup vmstat 1 $ioruntime 2>&1 > $vmstatfilename & 
+				vmstatPID=$!			
+				echo "-- iteration ${iteration} ----------------------------- ${testmode} test, ${ioSize}K bs, ${ioDepth} threads, ${numjobs} jobs, $ioruntime seconds ------------------ $(date +"%x %r %Z") ---" >> $LOGFILE
+				jsonfilename="${JSONFILELOG}/fio-result-${testmode}-${ioSize}K-${ioDepth}td.json"
+				fio $FILEIO --readwrite=$testmode --bs=${ioSize}K --runtime=$ioruntime --iodepth=$ioDepth --numjobs=$numjobs --output-format=json --output=$jsonfilename --name="iteration"${iteration} >> $LOGFILE
+				kill -9 $iostatPID $sarPID $vmstatPID		
 				iteration=$(( iteration+1 ))
 			done
-		iosize=$(( iosize*2 ))
 		done
 	done
 	####################################
-	#LogMsg "===================================== Completed Run $(date +"%x %r %Z") script generated 2/9/2015 4:24:44 PM ================================"
-	echo "===================================== Completed Run $(date +"%x %r %Z") script generated 2/9/2015 4:24:44 PM ================================" >> $LOGFILE
+	echo "===================================== Completed Run $(date +"%x %r %Z") ================================" >> $LOGFILE
 	rm fiodata
-
-	compressedFileName="${HOMEDIR}/FIOTest-$(date +"%m%d%Y-%H%M%S").tar.gz"
-	LogMsg "INFO: Please wait...Compressing all results to ${compressedFileName}..."
-	tar -cvzf $compressedFileName $LOGDIR/
-
 	echo "Test logs are located at ${LOGDIR}"
 }
 
@@ -480,4 +472,11 @@ LogMsg "*********INFO: Starting test execution*********"
 cd ${mountDir}
 mkdir sampleDIR
 RunFIO
+if [ $? -ne 0 ]; then
+    LogMsg "Error: FIO run: FAILED"
+    UpdateTestState $ICA_TESTFAILED
+    exit 1
+fi
 LogMsg "*********INFO: Script execution reach END. Completed !!!*********"
+UpdateTestState $ICA_TESTCOMPLETED
+exit 0

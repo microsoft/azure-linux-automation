@@ -3,8 +3,8 @@ Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""
 $resultArr = @()
-$isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 
+$isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
 	try
@@ -89,7 +89,18 @@ if ($isDeployed)
 		{
 			LogMsg "Test Completed."
 			$testResult = "PASS"
-			RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "FIOTest-*.tar.gz"
+			
+			$fioLogDir = "$LogDir\FIOLog"
+			mkdir $fioLogDir -Force | Out-Null
+			mkdir $fioLogDir\jsonLog -Force | Out-Null
+			RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $fioLogDir\jsonLog -files "FIOLog/jsonLog/*"
+			mkdir $fioLogDir\iostatLog -Force | Out-Null
+			RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $fioLogDir\iostatLog  -files "FIOLog/iostatLog/*"
+			mkdir $fioLogDir\vmstatLog -Force | Out-Null
+			RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $fioLogDir\vmstatLog -files "FIOLog/vmstatLog/*"
+			mkdir $fioLogDir\sarLog -Force | Out-Null
+			RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $fioLogDir\sarLog -files "FIOLog/sarLog/*"
+			RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $fioLogDir -files "FIOLog/fio-test.log.txt"
 		}
 		elseif ( $finalStatus -imatch "TestRunning")
 		{

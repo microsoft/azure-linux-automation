@@ -5590,15 +5590,16 @@
 				<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 				<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 				<TestParameters>
-					<param>startIOdepth=1</param>
-					<param>maxIOdepth=1024</param>
-					<param>startIOsize=8</param>
-					<param>maxIOsize=8</param>
+					<param>ioDepths='1 2 4 16 32 64 128 256 512 1024'</param>
+					<!-- if you want to run test for multiple io sizes ioSizes='1 2 4' -->
+					<param>ioSizes=8</param>
 					<param>ioruntime=300</param>
+					<param>testmodes='read write'</param>
+					<param>testfilesize="16G"</param>
 				</TestParameters>
 				<remoteFiles></remoteFiles>
 				<Priority>P0</Priority>
-			</test>	
+			</test>		
 			<test>
 			<testName>RHUI-CROSS-REGION-MIGRATION</testName>
 			<testScript></testScript>
