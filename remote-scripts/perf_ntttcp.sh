@@ -117,8 +117,25 @@ ssh ${server} "./ntttcp -r > ntttcp-server-logs.txt &"
 i=1
 for currenttest in "${connections[@]}"
 do
+	ssh ${server} "sar -n DEV 1 900"   2>&1 > ntttcp-server-logs-test#${i}-connections-${currenttest}.sar.netio.log  &
+	ssh ${server} "iostat -x -d 1 900" 2>&1 > ntttcp-server-logs-test#${i}-connections-${currenttest}.iostat.diskio.log  &
+	ssh ${server} "vmstat 1 900"       2>&1 > ntttcp-server-logs-test#${i}-connections-${currenttest}.vmstat.memory.cpu.log  &
+
+	ssh ${client} "sar -n DEV 1 900"   2>&1 > ntttcp-client-logs-test#${i}-connections-${currenttest}.sar.netio.log  &
+	ssh ${client} "iostat -x -d 1 900" 2>&1 > ntttcp-client-logs-test#${i}-connections-${currenttest}.iostat.diskio.log &
+	ssh ${client} "vmstat 1 900"       2>&1 > ntttcp-client-logs-test#${i}-connections-${currenttest}.vmstat.memory.cpu.log &
+
 	LogMsg "Starting ntttcp with ${currenttest} connections..."
 	ssh ${client} "./ntttcp -s${server} -n${currenttest} > ntttcp-client-logs-test#${i}-connections-${currenttest}.txt"
+	
+	ssh ${client} pkill -f sar 2>&1 > /dev/null
+	ssh ${client} pkill -f iostat 2>&1 > /dev/null
+	ssh ${client} pkill -f vmstat 2>&1 > /dev/null	
+	
+	ssh ${server} pkill -f sar 2>&1 > /dev/null
+	ssh ${server} pkill -f iostat 2>&1 > /dev/null
+	ssh ${server} pkill -f vmstat 2>&1 > /dev/null	
+	
 	i=`expr $i + 1`
 done
 
