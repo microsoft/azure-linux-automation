@@ -28,21 +28,21 @@ do
 	# prepare running mongodb-server
 	echo "prepare running mongodb-server"
 	ssh root@${MD_SERVER} "mkdir -p $log_folder/$threads"
-	ssh root@${MD_SERVER} "sar -n DEV 1 ${maxexecutiontime}   2>&1 > $log_folder/$threads/$threads.sar.netio.log " & 
-	ssh root@${MD_SERVER} "iostat -x -d 1 ${maxexecutiontime} 2>&1 > $log_folder/$threads/$threads.iostat.diskio.log " &
-	ssh root@${MD_SERVER} "vmstat 1 ${maxexecutiontime} 2>&1 > $log_folder/$threads/$threads.vmstat.memory.cpu.log " & 
+	ssh root@${MD_SERVER} "sar -n DEV 1 ${maxexecutiontime}   2>&1 > $log_folder/$threads/$threads-server.sar.netio.log " & 
+	ssh root@${MD_SERVER} "iostat -x -d 1 ${maxexecutiontime} 2>&1 > $log_folder/$threads/$threads-server.iostat.diskio.log " &
+	ssh root@${MD_SERVER} "vmstat 1 ${maxexecutiontime} 2>&1 > $log_folder/$threads/$threads-server.vmstat.memory.cpu.log " & 
 	
 	# prepare running mongodb-benchmark(ycsb)
 	echo "prepare running mongodb-benchmark(ycsb)"
 	mkdir -p $log_folder/$threads
-	sar -n DEV 1 ${maxexecutiontime}   2>&1 > $log_folder/$threads/$threads.sar.netio.log  & 
-	iostat -x -d 1 ${maxexecutiontime} 2>&1 > $log_folder/$threads/$threads.iostat.diskio.log &
-	vmstat 1 ${maxexecutiontime} 2>&1 > $log_folder/$threads/$threads.vmstat.memory.cpu.log & 
+	sar -n DEV 1 ${maxexecutiontime}   2>&1 > $log_folder/$threads/$threads-client.sar.netio.log  & 
+	iostat -x -d 1 ${maxexecutiontime} 2>&1 > $log_folder/$threads/$threads-client.iostat.diskio.log &
+	vmstat 1 ${maxexecutiontime} 2>&1 > $log_folder/$threads/$threads-client.vmstat.memory.cpu.log & 
 	
 	#start running the mongodb(ycsb)-benchmark on client
 	echo "-> TEST RUNNING with threads $threads .."
 	echo "CMD: ./ycsb-0.5.0/bin/ycsb  run  mongodb-async -s -P workloadAzure -p mongodb.url=mongodb://${MD_SERVER}:27017/ycsb?w=0 -threads $threads > $log_folder/$threads/$threads.ycsb.run.log"
-	./ycsb-0.5.0/bin/ycsb  run  mongodb-async -s -P workloadAzure -p mongodb.url=mongodb://${MD_SERVER}:27017/ycsb?w=0 -threads $threads > $log_folder/$threads/$threads.ycsb.run.log
+	./ycsb-0.5.0/bin/ycsb  run  mongodb-async -s -P workloadAzure -p mongodb.url=mongodb://${MD_SERVER}:27017/ycsb?w=0 -threads $threads > $log_folder/$threads/$threads-client.ycsb.run.log
 	echo "-> TEST END with threads $threads"
 	
 	#cleanup mongodb-server

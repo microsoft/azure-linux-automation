@@ -5577,7 +5577,7 @@
 				<!--Remote XML will be downloaded to automation server for analysis-->
 				<remoteXML></remoteXML>
 				<TestParameters>
-					<param>test_threads_collection=(1 2 4 16 32 64 128 256 512 1024)</param>
+					<param>test_threads_collection=(1 2 4 8 16 32 64 128 256 512 1024)</param>
 				</TestParameters>
 				<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 				<Priority>P0</Priority>
@@ -5590,7 +5590,7 @@
 				<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 				<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 				<TestParameters>
-					<param>ioDepths='1 2 4 16 32 64 128 256 512 1024'</param>
+					<param>ioDepths='1 2 4 8 16 32 64 128 256 512 1024'</param>
 					<!-- if you want to run test for multiple io sizes ioSizes='1 2 4' -->
 					<param>ioSizes=8</param>
 					<param>ioruntime=300</param>
