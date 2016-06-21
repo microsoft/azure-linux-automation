@@ -88,7 +88,7 @@ if ($isDeployed)
 		$ntttcpLogFiles = Get-ChildItem -Path $LogDir | Select Name | where {( $_ -imatch "ntttcp-client-logs-test#") -and ( $_ -imatch ".txt")}
 		foreach ( $file in $ntttcpLogFiles )
 		{
-			LogMsg "$($file.Name) downloaded."
+			LogMsg "$($file.Name) downloaded and analysed for throughput."
 			$ntttcpConnResult = Get-Content -Path "$LogDir\$($file.Name)" | where { $_ -imatch "throughput	:"}
 			$metadata = "Connections=" + $($file.Name).Replace(".txt","").Split("-")[5]
 			if ( $ntttcpConnResult )
@@ -104,13 +104,24 @@ if ($isDeployed)
 		$ntttcpLogFiles = Get-ChildItem -Path $LogDir | Select Name | where {( $_ -imatch "ntttcp-server") -or ( $_ -imatch "ntttcp-client")}
 		foreach ( $file in $ntttcpLogFiles )
 		{
-			$fileName = $($file.Name)
-			$connFolder = $fileName.Split("-")[$fileName.Split("-").count-1].Split(".")[0]
-			mkdir -Path "$LogDir\$connFolder" -Force | Out-Null
-			Move-Item -Path "$LogDir\$fileName" -Destination "$LogDir\$connFolder"
-			LogMsg "$fileName downloaded to folder '$connFolder'"		
-		}
-		
+			$fileName = $file.Name
+			if ( ( ( $fileName -imatch ".sar.netio.log" ) -and ( $fileName -imatch "-server-" ) ) -or ( ( $fileName -imatch ".iostat.diskio.log" ) -and ( $fileName -imatch "-server-" ) ) -or ( ( $fileName -imatch ".vmstat.memory.cpu.log" ) -and ( $fileName -imatch "-server-" ) ) )
+			{
+				$connFolder = $fileName.Split("-")[$fileName.Split("-").Count-1].Split(".")[0]
+				mkdir "$LogDir\server-ntttcp-logs" -Force | Out-Null
+				mkdir "$LogDir\server-ntttcp-logs\$connFolder" -Force | Out-Null
+				Move-Item "$LogDir\$fileName" -Destination "$LogDir\server-ntttcp-logs\$connFolder" -Force 
+				LogMsg "$($file.Name) downloaded and moved to 'server-ntttcp-logs\$connFolder'"
+			}
+			if ( ( ( $fileName -imatch ".sar.netio.log" ) -and ( $fileName -imatch "-client-" ) ) -or ( ( $fileName -imatch ".iostat.diskio.log" ) -and ( $fileName -imatch "-client-" ) ) -or ( ( $fileName -imatch ".vmstat.memory.cpu.log" ) -and ( $fileName -imatch "-client-" ) ) )
+			{
+				$connFolder = $fileName.Split("-")[$fileName.Split("-").Count-1].Split(".")[0]
+				mkdir "$LogDir\client-ntttcp-logs" -Force | Out-Null
+				mkdir "$LogDir\client-ntttcp-logs\$connFolder" -Force | Out-Null
+				Move-Item "$LogDir\$fileName" -Destination "$LogDir\client-ntttcp-logs\$connFolder" -Force 
+				LogMsg "$($file.Name) downloaded and moved to 'client-ntttcp-logs\$connFolder'"
+			}			
+		}		
 		#endregion
 
 		if ( $finalStatus -imatch "TestFailed")

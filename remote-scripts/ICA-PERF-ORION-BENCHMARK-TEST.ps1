@@ -337,8 +337,6 @@ if ($isDeployed)
 		if ( $advancedWrite50BasicResult )
 		{
 			$resultSummary +=  CreateResultSummary -testResult $advancedWrite50BasicResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
-			$advancedWrite50BasicResult = ($advancedWrite50BasicResultContents | where { $_ -imatch  "Maximum Large MBPS" })
-			$resultSummary +=  CreateResultSummary -testResult $advancedWrite50BasicResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 			$advancedWrite50BasicResult = ($advancedWrite50BasicResultContents | where { $_ -imatch  "Maximum Small IOPS" })
 			$resultSummary +=  CreateResultSummary -testResult $advancedWrite50BasicResult -metaData $testType -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 			$advancedWrite50BasicResult = ($advancedWrite50BasicResultContents | where { $_ -imatch  "Minimum Small Latency" })

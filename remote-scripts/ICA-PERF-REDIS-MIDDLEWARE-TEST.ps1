@@ -97,10 +97,6 @@ if ($isDeployed)
 			$testTypeResult = $null
 			$clientTxt = Get-Content -Path "$LogDir\$($file.Name)"
 			$fileName = $file.Name
-			$connFolder = $fileName.Split("-")[$fileName.Split("-").Count-1].Split(".")[0]
-			mkdir "$LogDir\$connFolder" -Force | Out-Null
-			Move-Item "$LogDir\$fileName" -Destination "$LogDir\$connFolder" -Force 
-			LogMsg "$($file.Name) downloaded and moved to '$connFolder'"
 
 			foreach ( $line in $clientTxt ) 
 			{ 
@@ -139,19 +135,30 @@ if ($isDeployed)
 			{
 				$resultSummary +=  CreateResultSummary -testResult "ERROR: No result matching strings found. Possible Test Error." -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 			}
-			LogMsg "Analysed $($file.Name) for number of requests."
+			LogMsg "Downloaded and Analysed $($file.Name) for number of requests."
 		}
 
 		$redisLogFiles = Get-ChildItem -Path $LogDir | Select Name | where { ( $_ -imatch "redis-server-pipelines") -or ( $_ -imatch "redis-client-pipelines") }
 		foreach ( $file in $redisLogFiles )
 		{
 			$fileName = $file.Name
-			$connFolder = $fileName.Split("-")[$fileName.Split("-").Count-1].Split(".")[0]
-			mkdir "$LogDir\$connFolder" -Force | Out-Null
-			Move-Item "$LogDir\$fileName" -Destination "$LogDir\$connFolder" -Force 
-			LogMsg "$($file.Name) downloaded and moved to '$connFolder'"
+			if ( ( ( $fileName -imatch ".sar.netio.log" ) -and ( $fileName -imatch "-server-" ) ) -or ( ( $fileName -imatch ".iostat.diskio.log" ) -and ( $fileName -imatch "-server-" ) ) -or ( ( $fileName -imatch ".vmstat.memory.cpu.log" ) -and ( $fileName -imatch "-server-" ) ) )
+			{
+				$connFolder = $fileName.Split("-")[$fileName.Split("-").Count-1].Split(".")[0]
+				mkdir "$LogDir\server-redis-logs" -Force | Out-Null
+				mkdir "$LogDir\server-redis-logs\$connFolder" -Force | Out-Null
+				Move-Item "$LogDir\$fileName" -Destination "$LogDir\server-redis-logs\$connFolder" -Force 
+				LogMsg "$($file.Name) downloaded and moved to 'server-redis-logs\$connFolder'"
+			}
+			if ( ( ( $fileName -imatch ".sar.netio.log" ) -and ( $fileName -imatch "-client-" ) ) -or ( ( $fileName -imatch ".iostat.diskio.log" ) -and ( $fileName -imatch "-client-" ) ) -or ( ( $fileName -imatch ".vmstat.memory.cpu.log" ) -and ( $fileName -imatch "-client-" ) ) )
+			{
+				$connFolder = $fileName.Split("-")[$fileName.Split("-").Count-1].Split(".")[0]
+				mkdir "$LogDir\client-redis-logs" -Force | Out-Null
+				mkdir "$LogDir\client-redis-logs\$connFolder" -Force | Out-Null
+				Move-Item "$LogDir\$fileName" -Destination "$LogDir\client-redis-logs\$connFolder" -Force 
+				LogMsg "$($file.Name) downloaded and moved to 'client-redis-logs\$connFolder'"
+			}			
 		}
-
 		#endregion
 
 		if ( $finalStatus -imatch "TestFailed")
