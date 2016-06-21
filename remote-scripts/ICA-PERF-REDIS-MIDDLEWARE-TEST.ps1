@@ -145,18 +145,18 @@ if ($isDeployed)
 			if ( ( ( $fileName -imatch ".sar.netio.log" ) -and ( $fileName -imatch "-server-" ) ) -or ( ( $fileName -imatch ".iostat.diskio.log" ) -and ( $fileName -imatch "-server-" ) ) -or ( ( $fileName -imatch ".vmstat.memory.cpu.log" ) -and ( $fileName -imatch "-server-" ) ) )
 			{
 				$connFolder = $fileName.Split("-")[$fileName.Split("-").Count-1].Split(".")[0]
-				mkdir "$LogDir\server-redis-logs" -Force | Out-Null
-				mkdir "$LogDir\server-redis-logs\$connFolder" -Force | Out-Null
-				Move-Item "$LogDir\$fileName" -Destination "$LogDir\server-redis-logs\$connFolder" -Force 
-				LogMsg "$($file.Name) downloaded and moved to 'server-redis-logs\$connFolder'"
+				mkdir "$LogDir\$($serverVMData.RoleName)" -Force | Out-Null
+				mkdir "$LogDir\$($serverVMData.RoleName)\$connFolder" -Force | Out-Null
+				Move-Item "$LogDir\$fileName" -Destination "$LogDir\$($serverVMData.RoleName)\$connFolder" -Force 
+				LogMsg "$($file.Name) downloaded and moved to '$($serverVMData.RoleName)\$connFolder'"
 			}
 			if ( ( ( $fileName -imatch ".sar.netio.log" ) -and ( $fileName -imatch "-client-" ) ) -or ( ( $fileName -imatch ".iostat.diskio.log" ) -and ( $fileName -imatch "-client-" ) ) -or ( ( $fileName -imatch ".vmstat.memory.cpu.log" ) -and ( $fileName -imatch "-client-" ) ) )
 			{
 				$connFolder = $fileName.Split("-")[$fileName.Split("-").Count-1].Split(".")[0]
-				mkdir "$LogDir\client-redis-logs" -Force | Out-Null
-				mkdir "$LogDir\client-redis-logs\$connFolder" -Force | Out-Null
-				Move-Item "$LogDir\$fileName" -Destination "$LogDir\client-redis-logs\$connFolder" -Force 
-				LogMsg "$($file.Name) downloaded and moved to 'client-redis-logs\$connFolder'"
+				mkdir "$LogDir\$($clientVMData.RoleName)" -Force | Out-Null
+				mkdir "$LogDir\$($clientVMData.RoleName)\$connFolder" -Force | Out-Null
+				Move-Item "$LogDir\$fileName" -Destination "$LogDir\$($clientVMData.RoleName)\$connFolder" -Force 
+				LogMsg "$($file.Name) downloaded and moved to '$($clientVMData.RoleName)\$connFolder'"
 			}			
 		}
 		#endregion

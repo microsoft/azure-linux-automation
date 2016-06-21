@@ -90,7 +90,7 @@ if ($isDeployed)
 		{
 			LogMsg "$($file.Name) downloaded and analysed for throughput."
 			$ntttcpConnResult = Get-Content -Path "$LogDir\$($file.Name)" | where { $_ -imatch "throughput	:"}
-			$metadata = "Connections=" + $($file.Name).Replace(".txt","").Split("-")[5]
+			$metadata = "Connections=" + $($file.Name).Replace(".ConsoleResult.txt","").Split("-")[5]
 			if ( $ntttcpConnResult )
 			{
 				$connResult = $ntttcpConnResult.Split(":")[($ntttcpConnResult.Split(":")).Count-1]
@@ -108,18 +108,18 @@ if ($isDeployed)
 			if ( ( ( $fileName -imatch ".sar.netio.log" ) -and ( $fileName -imatch "-server-" ) ) -or ( ( $fileName -imatch ".iostat.diskio.log" ) -and ( $fileName -imatch "-server-" ) ) -or ( ( $fileName -imatch ".vmstat.memory.cpu.log" ) -and ( $fileName -imatch "-server-" ) ) )
 			{
 				$connFolder = $fileName.Split("-")[$fileName.Split("-").Count-1].Split(".")[0]
-				mkdir "$LogDir\server-ntttcp-logs" -Force | Out-Null
-				mkdir "$LogDir\server-ntttcp-logs\$connFolder" -Force | Out-Null
-				Move-Item "$LogDir\$fileName" -Destination "$LogDir\server-ntttcp-logs\$connFolder" -Force 
-				LogMsg "$($file.Name) downloaded and moved to 'server-ntttcp-logs\$connFolder'"
+				mkdir "$LogDir\$($serverVMData.RoleName)" -Force | Out-Null
+				mkdir "$LogDir\$($serverVMData.RoleName)\$connFolder" -Force | Out-Null
+				Move-Item "$LogDir\$fileName" -Destination "$LogDir\$($serverVMData.RoleName)\$connFolder" -Force 
+				LogMsg "$($file.Name) downloaded and moved to '$($serverVMData.RoleName)\$connFolder'"
 			}
 			if ( ( ( $fileName -imatch ".sar.netio.log" ) -and ( $fileName -imatch "-client-" ) ) -or ( ( $fileName -imatch ".iostat.diskio.log" ) -and ( $fileName -imatch "-client-" ) ) -or ( ( $fileName -imatch ".vmstat.memory.cpu.log" ) -and ( $fileName -imatch "-client-" ) ) )
 			{
 				$connFolder = $fileName.Split("-")[$fileName.Split("-").Count-1].Split(".")[0]
-				mkdir "$LogDir\client-ntttcp-logs" -Force | Out-Null
-				mkdir "$LogDir\client-ntttcp-logs\$connFolder" -Force | Out-Null
-				Move-Item "$LogDir\$fileName" -Destination "$LogDir\client-ntttcp-logs\$connFolder" -Force 
-				LogMsg "$($file.Name) downloaded and moved to 'client-ntttcp-logs\$connFolder'"
+				mkdir "$LogDir\$($clientVMData.RoleName)" -Force | Out-Null
+				mkdir "$LogDir\$($clientVMData.RoleName)\$connFolder" -Force | Out-Null
+				Move-Item "$LogDir\$fileName" -Destination "$LogDir\$($clientVMData.RoleName)\$connFolder" -Force 
+				LogMsg "$($file.Name) downloaded and moved to '$($clientVMData.RoleName)\$connFolder'"
 			}			
 		}		
 		#endregion
