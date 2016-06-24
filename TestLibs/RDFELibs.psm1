@@ -4102,16 +4102,16 @@ Function GetAllStringMatchObject([string] $logFile,[string] $beg,[string] $end)
 	return $match
 }
 
-Function GetParallelConnectionCount([string] $logFile,[string] $beg,[string] $end)
+Function GetParallelConnectionCount([string] $logFile,[string] $beg,[string] $end,[string] $role)
 {
 	if ($role -eq "server")
-        {
-	   $connectStr= $allVMData[0].InternalIP+"\sport\s\d*\sconnected with " +$allVMData[1].InternalIP + "\sport\s\d"
-        }
-        else
-        {
-	   $connectStr= $allVMData[1].InternalIP+"\sport\s\d*\sconnected with " +$allVMData[0].InternalIP + "\sport\s\d"
-        }
+	{
+		$connectStr= $allVMData[0].InternalIP+"\sport\s\d*\sconnected with " +$allVMData[1].InternalIP + "\sport\s\d"
+	}
+	else
+	{
+		$connectStr= $allVMData[1].InternalIP+"\sport\s\d*\sconnected with " +$allVMData[0].InternalIP + "\sport\s\d"
+	}
 
 	$p=GetStringMatchCount -logFile $logFile -beg $beg -end $end -str $connectStr
 	return $p
