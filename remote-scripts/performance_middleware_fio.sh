@@ -235,6 +235,11 @@ ConfigCentOS7()
 	fioCentOS7pkg="fio-2.1.10-1.el7.rf.x86_64.rpm"
 	LogMsg "INFO: CentOS7: installing required packages"
 	yum install -y wget sysstat mdadm blktrace
+	if [ $? -ne 0 ]; then
+		LogMsg "Error: Unable to install wget tar sysstat mdadm blktrace"
+		UpdateTestState $ICA_TESTABORTED
+		exit 1
+	fi
 	mount -t debugfs none /sys/kernel/debug
 	
 	installed=`which fio`
@@ -246,10 +251,11 @@ ConfigCentOS7()
 			wget "http://pkgs.repoforge.org/fio/${fioCentOS7pkg}"
 		fi
 		yum install -y ${fioCentOS7pkg}
-        if [ $? -ne 0 ]; then
-            LogMsg "Error: Unable to install fio"
-            exit 1
-        fi
+		if [ $? -ne 0 ]; then
+			LogMsg "Error: Unable to install fio"
+			UpdateTestState $ICA_TESTABORTED
+			exit 1
+		fi
     fi	
 }
 
@@ -258,6 +264,11 @@ ConfigCentOS6()
 	fioCentOS6pkg="fio-2.1.10-1.el6.rf.x86_64.rpm"
 	LogMsg "INFO: CentOS6: installing required packages"
 	yum install -y wget sysstat mdadm blktrace
+	if [ $? -ne 0 ]; then
+		LogMsg "Error: Unable to install wget tar sysstat mdadm blktrace"
+		UpdateTestState $ICA_TESTABORTED
+		exit 1
+	fi
 	mount -t debugfs none /sys/kernel/debug
 	
 	installed=`which fio`
@@ -270,10 +281,11 @@ ConfigCentOS6()
 		fi
 		yum install -y libibverbs.x86_64
 		yum install -y ${fioCentOS6pkg}
-        if [ $? -ne 0 ]; then
-            LogMsg "Error: Unable to install fio"
-            exit 1
-        fi
+		if [ $? -ne 0 ]; then
+			LogMsg "Error: Unable to install fio"
+			UpdateTestState $ICA_TESTABORTED
+			exit 1
+		fi
     fi	
 }
 
@@ -281,8 +293,18 @@ ConfigUbuntu()
 {
 	LogMsg "INFO: Ubuntu installing required packages"
 	
-	
+	apt-get update -y
+	if [ $? -ne 0 ]; then
+		LogMsg "Error: Unable to apt-get update"
+		UpdateTestState $ICA_TESTABORTED
+		exit 1
+	fi
 	apt-get install -y wget tar sysstat blktrace
+	if [ $? -ne 0 ]; then
+		LogMsg "Error: Unable to install wget tar sysstat mdadm blktrace"
+		UpdateTestState $ICA_TESTABORTED
+		exit 1
+	fi
 	mount -t debugfs none /sys/kernel/debug
 	
 	installed=`which fio`
@@ -290,10 +312,11 @@ ConfigUbuntu()
         LogMsg "INFO: Installing fio"
 
 		apt-get install -y fio ;
-        if [ $? -ne 0 ]; then
-            LogMsg "Error: Unable to install fio"
-            exit 1
-        fi
+		if [ $? -ne 0 ]; then
+			LogMsg "Error: Unable to install fio"
+			UpdateTestState $ICA_TESTABORTED
+			exit 1
+		fi
     fi
 }
 
@@ -302,6 +325,11 @@ ConfigSLES()
 	fioCentOS6pkg="fio-2.1.2-2.1.3.x86_64.rpm"
 	LogMsg "INFO: SLES: installing required packages"
 	zypper --non-interactive install wget sysstat mdadm blktrace
+	if [ $? -ne 0 ]; then
+		LogMsg "Error: Unable to install wget tar sysstat mdadm blktrace"
+		UpdateTestState $ICA_TESTABORTED
+		exit 1
+	fi
 	mount -t debugfs none /sys/kernel/debug
 	
 	installed=`which fio`
@@ -313,10 +341,11 @@ ConfigSLES()
 			wget "ftp://195.220.108.108/linux/opensuse/distribution/13.1/repo/oss/suse/x86_64/${fioCentOS6pkg}"
 		fi		
 		(echo i;) | zypper --non-interactive install ${fioCentOS6pkg}
-        if [ $? -ne 0 ]; then
-            LogMsg "Error: Unable to install fio"
-            exit 1
-        fi
+		if [ $? -ne 0 ]; then
+			LogMsg "Error: Unable to install fio"
+			UpdateTestState $ICA_TESTABORTED
+			exit 1
+		fi
     fi	
 }
 
@@ -350,9 +379,10 @@ CreateRAID0()
 	mkdir ${mountDir}
 	mount -o nobarrier ${mdVolume} ${mountDir}
 	if [ $? -ne 0 ]; then
-            LogMsg "Error: Unable to create raid"            
-            exit 1
-        fi
+		LogMsg "Error: Unable to create raid"
+		UpdateTestState $ICA_TESTABORTED
+		exit 1
+	fi
 	
 	#LogMsg "INFO: adding fstab entry"
 	#echo "${mdVolume}	${mountDir}	ext4	defaults	1 1" >> /etc/fstab
@@ -388,9 +418,10 @@ CreateLVM()
 	mkdir ${mountDir}
 	mount -o nobarrier /dev/${vggroup}/lv1 ${mountDir}
 	if [ $? -ne 0 ]; then
-            LogMsg "Error: Unable to create LVM "            
-            exit 1
-        fi
+		LogMsg "Error: Unable to create LVM " 
+		UpdateTestState $ICA_TESTABORTED
+		exit 1
+	fi
 	
 	#LogMsg "INFO: adding fstab entry"
 	#echo "${mdVolume}	${mountDir}	ext4	defaults	1 1" >> /etc/fstab
@@ -430,7 +461,7 @@ testdisk=${testdisk}
 echo "Disk for FIO benchmark test $testdisk" && (echo n; echo p; echo 1; echo; echo; echo t; echo 83; echo w;) | fdisk $testdisk && time mkfs.ext4 ${testdisk}1 && echo "${testdisk}1 disk format: Success" && mkdir -p $mountDir && mount -o nobarrier ${testdisk}1 $mountDir && echo "${testdisk}1 disk mount: Success on $mountDir"
 if [ $? -ne 0 ]; then
     LogMsg "Error: Disk for FIO benchmark test $testdisk: FAILED"
-    UpdateTestState $ICA_TESTFAILED
+    UpdateTestState $ICA_TESTABORTED
     exit 1
 fi
 LogMsg "Disk for FIO benchmark test $testdisk is mounted on $mountDir: Success"
@@ -473,9 +504,9 @@ cd ${mountDir}
 mkdir sampleDIR
 RunFIO
 if [ $? -ne 0 ]; then
-    LogMsg "Error: FIO run: FAILED"
-    UpdateTestState $ICA_TESTFAILED
-    exit 1
+	LogMsg "Error: FIO run: FAILED"
+	UpdateTestState $ICA_TESTFAILED
+	exit 1
 fi
 LogMsg "*********INFO: Script execution reach END. Completed !!!*********"
 UpdateTestState $ICA_TESTCOMPLETED
