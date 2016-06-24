@@ -3044,14 +3044,14 @@ Function IperfClientServerTestParallel($server,$client)
 			}
 			$clientLog= $client.LogDir + "\iperf-client.txt"
 			$isClientConnected = AnalyseIperfClientConnectivity -logFile $clientLog -beg "ClientStarted" -end "ClientStopped"
-			$clientConnCount = GetParallelConnectionCount -logFile $clientLog -beg "ClientStarted" -end "ClientStopped"
+			$clientConnCount = GetParallelConnectionCount -logFile $clientLog -beg "ClientStarted" -end "ClientStopped" -role "client"
 			If ($isClientConnected) {
 				$testResult = "PASS"
 				$serverLog= $server.LogDir + "\iperf-server.txt"
 				$isServerConnected = AnalyseIperfServerConnectivity $serverLog "ServerStarted" "ServerStopped"
 				If ($isServerConnected) {
 					$testResult = "PASS"
-					$serverConnCount = GetParallelConnectionCount -logFile $serverLog -beg "ServerStarted" -end "ServerStopped"
+					$serverConnCount = GetParallelConnectionCount -logFile $serverLog -beg "ServerStarted" -end "ServerStopped" -role "server"
 					LogMsg "Server Parallel Connection Count is $serverConnCount"
 					LogMsg "Client Parallel Connection Count is $clientConnCount"
 					If ($serverConnCount -eq $clientConnCount) {
@@ -3131,14 +3131,14 @@ Function IperfClientServerUDPTestParallel($server,$client)
 			}
 			$clientLog= $client.LogDir + "\iperf-client.txt"
 			$isClientConnected = AnalyseIperfClientConnectivity -logFile $clientLog -beg "Test Started" -end "TestComplete"
-			$clientConnCount = GetParallelConnectionCount -logFile $clientLog -beg "Test Started" -end "TestComplete"
+			$clientConnCount = GetParallelConnectionCount -logFile $clientLog -beg "Test Started" -end "TestComplete" -role "client"
 			If ($isClientConnected) {
 				$testResult = "PASS"
 				$serverLog= $server.LogDir + "\iperf-server.txt"
 				$isServerConnected = AnalyseIperfServerConnectivity $serverLog "Test Started" "TestComplete"
 				If ($isServerConnected) {
 					$testResult = "PASS"
-					$serverConnCount = GetParallelConnectionCount -logFile $serverLog -beg "Test Started" -end "TestComplete"
+					$serverConnCount = GetParallelConnectionCount -logFile $serverLog -beg "Test Started" -end "TestComplete" -role "server"
 					LogMsg "Server Parallel Connection Count is $serverConnCount"
 					LogMsg "Client Parallel Connection Count is $clientConnCount"
 					If ($serverConnCount -eq $clientConnCount) {
@@ -3435,7 +3435,7 @@ Function VerifyLBTCPConnectivity ($server1,$server2, $client, [string] $probe, [
 			}
 			$clientLog= $client.LogDir + "\iperf-client.txt"
 			$isClientConnected = AnalyseIperfClientConnectivity -logFile $clientLog -beg "Test Started" -end "TestComplete"
-			$clientConnCount = GetParallelConnectionCount -logFile $clientLog -beg "Test Started" -end "TestComplete"
+			$clientConnCount = GetParallelConnectionCount -logFile $clientLog -beg "Test Started" -end "TestComplete" -role "client"
 			$server1CpConnCount = 0
 			$server2CpConnCount = 0
 			If ($isClientConnected) {
@@ -4104,7 +4104,15 @@ Function GetAllStringMatchObject([string] $logFile,[string] $beg,[string] $end)
 
 Function GetParallelConnectionCount([string] $logFile,[string] $beg,[string] $end)
 {
-	$connectStr="\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\sport\s\d*\sconnected with \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\sport\s\d"
+	if ($role -eq "server")
+        {
+	   $connectStr= $allVMData[0].InternalIP+"\sport\s\d*\sconnected with " +$allVMData[1].InternalIP + "\sport\s\d"
+        }
+        else
+        {
+	   $connectStr= $allVMData[1].InternalIP+"\sport\s\d*\sconnected with " +$allVMData[0].InternalIP + "\sport\s\d"
+        }
+
 	$p=GetStringMatchCount -logFile $logFile -beg $beg -end $end -str $connectStr
 	return $p
 }
