@@ -3,7 +3,7 @@ Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""
 $resultArr = @()
-$threads=$currentTestData.threads
+$threads=$currentTestData.TestParameters.param
 
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
@@ -120,7 +120,7 @@ if ($isDeployed)
 
 			foreach ($thread in $threads.Split(","))
 			{
-				$threadStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "cat /root/benchmark/mongodb/logs/$thread/$thread.ycsb.run.log | grep 'OVERALL], Throughput'" -ignoreLinuxExitCode
+				$threadStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "cat /root/benchmark/mongodb/logs/$thread/$thread-mongodb.ycsb.run.log | grep 'OVERALL], Throughput'" -ignoreLinuxExitCode
 				if (($threadStatus -imatch 'OVERALL') -and ($threadStatus -imatch 'Throughput'))
 				{
 					$overallThroghput = $threadStatus.Trim().Split()[2].Trim()
@@ -158,15 +158,17 @@ if ($isDeployed)
 		elseif ( $finalStatus -imatch "TestCompleted")
 		{
 			LogMsg "Test Completed. Result : $finalStatus."
-			$testResult = "PASS"
+			
 			foreach ($thread in $threads.Split(","))
 			{	
 				mkdir $LogDir\$($clientVMData.RoleName)\$($thread) -Force| out-null
-				RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir\$($clientVMData.RoleName)\$($thread) -files "/root/benchmark/mongodb/logs/$($thread)/*"  2>&1 | Out-Null
+				RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir\$($clientVMData.RoleName)\$($thread) -files "/root/benchmark/mongodb/logs/$($thread)/$($thread)-mongodb-client*"  2>&1 | Out-Null
 				mkdir  $LogDir\$($serverVMData.RoleName)\$($thread) -Force| out-null
-				RemoteCopy -downloadFrom $clientVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir\$($serverVMData.RoleName)\$($thread) -files "/root/benchmark/mongodb/logs/$($thread)/*"  2>&1 | Out-Null
+				RemoteCopy -downloadFrom $clientVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir\$($serverVMData.RoleName)\$($thread) -files "/root/benchmark/mongodb/logs/$($thread)/$($thread)-mongodb-server*"  2>&1 | Out-Null
+				RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/benchmark/mongodb/logs/$($thread)/$($thread)-mongodb.ycsb.run.log"  2>&1 | Out-Null
 			}
 			RemoteCopy -downloadFrom $clientVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/mongodServerConsole.txt"  2>&1 | Out-Null
+			$testResult = "PASS"
 		}
 		elseif ( $finalStatus -imatch "TestRunning")
 		{

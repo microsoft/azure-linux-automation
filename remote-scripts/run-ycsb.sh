@@ -42,7 +42,7 @@ do
 	#start running the mongodb(ycsb)-benchmark on client
 	echo "-> TEST RUNNING with threads $threads .."
 	echo "CMD: ./ycsb-0.5.0/bin/ycsb  run  mongodb-async -s -P workloadAzure -p mongodb.url=mongodb://${MD_SERVER}:27017/ycsb?w=0 -threads $threads > $log_folder/$threads/$threads.ycsb.run.log"
-	./ycsb-0.5.0/bin/ycsb  run  mongodb-async -s -P workloadAzure -p mongodb.url=mongodb://${MD_SERVER}:27017/ycsb?w=0 -threads $threads > $log_folder/$threads/$threads-mongodb-client.ycsb.run.log
+	./ycsb-0.5.0/bin/ycsb  run  mongodb-async -s -P workloadAzure -p mongodb.url=mongodb://${MD_SERVER}:27017/ycsb?w=0 -threads $threads > $log_folder/$threads/$threads-mongodb.ycsb.run.log
 	echo "-> TEST END with threads $threads"
 	
 	#cleanup mongodb-server
