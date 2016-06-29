@@ -2088,9 +2088,9 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 
 Function WrapperCommandsToFile([string] $username,[string] $password,[string] $ip,[string] $command, [int] $port)
 {
-	$command | out-file -encoding ASCII -filepath runtest.sh
-	RemoteCopy -upload -uploadTo $ip -username $username -port $port -password $password -files '.\runtest.sh'
-	del runtest.sh
+	$command | out-file -encoding ASCII -filepath "$LogDir\runtest.sh"
+	RemoteCopy -upload -uploadTo $ip -username $username -port $port -password $password -files ".\$LogDir\runtest.sh"
+	del "$LogDir\runtest.sh"
 }
 
 Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string] $command, [int] $port, [switch]$runAsSudo, [Boolean]$WriteHostOnly, [Boolean]$NoLogsPlease, [switch]$ignoreLinuxExitCode, [int]$runMaxAllowedTime = 300, [switch]$RunInBackGround)
