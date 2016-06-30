@@ -51,7 +51,7 @@ if ($isDeployed)
 		if ($LogFilesPaths)
 		{   
 			$retryCount = 1
-			$maxRetryCount = 50
+			$maxRetryCount = 20
 			do
 			{   LogMsg "Attempt : $retryCount/$maxRetryCount : Checking extension log files...."
 				foreach ($file in $LogFilesPaths.Split(","))
