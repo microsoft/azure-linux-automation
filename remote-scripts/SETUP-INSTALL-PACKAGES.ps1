@@ -27,7 +27,13 @@ if ($isDeployed)
         RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cp /root/.bash_history /root/default_bash_history" -runAsSudo -ignoreLinuxExitCode
         RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files $currentTestData.files -username $user -password $password -upload -doNotCompress
         RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "chmod +x *" -runAsSudo
-
+        
+        if($env:UpdateKernel -eq $false)
+        {
+        	LogMsg "Disable Update Kernel in $($currentTestData.testScript)"
+        	RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "sed -i '/UpdateRepos/d' ./$($currentTestData.testScript)" -runAsSudo
+        }
+        
         LogMsg "Executing : $($currentTestData.testScript)"
         try{
             $DistroName = DetectLinuxDistro -VIP $hs1VIP -SSHport $hs1vm1sshport -testVMUser $user -testVMPassword $password
