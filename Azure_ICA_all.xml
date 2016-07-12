@@ -5875,6 +5875,7 @@
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<remoteFiles></remoteFiles>
+			<InitialWaitSeconds>300<InitialWaitSeconds>
 			<Priority>P0</Priority>
 		</test>			
 		<test>
@@ -5885,6 +5886,7 @@
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<remoteFiles></remoteFiles>
+			<InitialWaitSeconds>300<InitialWaitSeconds>
 			<Priority>P0</Priority>		
 		</test>
 		<test>

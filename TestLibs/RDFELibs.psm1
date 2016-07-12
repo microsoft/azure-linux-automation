@@ -955,6 +955,11 @@ Function VerifyAllDeployments($servicesToVerify, [Switch]$GetVMProvisionTime)
 		{
 			LogMsg ""
 			LogMsg "$serviceName is Ready.."
+            if ( $currentTestData.InitialWaitSeconds )
+            {
+                LogMsg "Waiting for initial wait time. $($currentTestData.InitialWaitSeconds) seconds."
+                WaitFor -seconds $currentTestData.InitialWaitSeconds
+            }
 			Write-Host ""
 			$retValue = "True"
 		}
