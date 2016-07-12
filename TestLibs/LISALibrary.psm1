@@ -15,14 +15,11 @@ Function ProvisionVMsForLisa($allVMData, $installPackagesOnRoleNames)
 	$out = Invoke-WebRequest -Uri $scriptUrl -OutFile "$LogDir\$scriptName"
 	LogMsg "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
 
-	Set-Content -Value "echo `"Host *`" > /home/$user/.ssh/config" -Path "$LogDir\disableHostKeyVerification.sh"
-	Add-Content -Value "echo StrictHostKeyChecking=no >> /home/$user/.ssh/config" -Path "$LogDir\disableHostKeyVerification.sh"
-	Add-Content -Value "echo IdentityFile /root/$sshPrivateKey >> /home/$user/.ssh/config" -Path "$LogDir\disableHostKeyVerification.sh"
-
+    $keysGenerated = $false
 	foreach ( $vmData in $allVMData )
 	{
 		LogMsg "Configuring $($vmData.RoleName) for LISA test..."
-		RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\remote-scripts\enableRoot.sh,$sshPrivateKeyPath,.\$LogDir\disableHostKeyVerification.sh,.\$LogDir\provisionLinuxForLisa.sh" -username $user -password $password -upload
+		RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\remote-scripts\enableRoot.sh,.\remote-scripts\enablePasswordLessRoot.sh,.\$LogDir\provisionLinuxForLisa.sh" -username $user -password $password -upload
 		$out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "chmod +x /home/$user/*.sh" -runAsSudo			
 		$rootPasswordSet = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/home/$user/enableRoot.sh -password $($password.Replace('"',''))" -runAsSudo
 		LogMsg $rootPasswordSet
@@ -34,12 +31,49 @@ Function ProvisionVMsForLisa($allVMData, $installPackagesOnRoleNames)
 		{
 			Throw "Failed to enable root password / starting SSHD service. Please check logs. Aborting test."
 		}
-		$out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "chmod 600 /home/$user/$sshPrivateKey && cp -ar /home/$user/* /root/"
-		$out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "mkdir -p /root/.ssh/ && cp /home/$user/.ssh/authorized_keys /root/.ssh/" 
-		$out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "/home/$user/disableHostKeyVerification.sh" 
-		$out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "cp /home/$user/.ssh/config /root/.ssh/" 
-		$out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "service sshd restart" 
-		LogMsg "$($vmData.RoleName) preparation finished."
+		$out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "cp -ar /home/$user/*.sh ."
+        if ( $keysGenerated )
+        {
+            RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\$LogDir\sshFix.tar" -username "root" -password $password -upload
+            $keyCopyOut = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "./enablePasswordLessRoot.sh" 
+            LogMsg $keyCopyOut
+            if ( $keyCopyOut -imatch "KEY_COPIED_SUCCESSFULLY" )
+            {
+                $keysGenerated = $true
+                LogMsg "SSH keys copied to $($vmData.RoleName)"
+                $md5sumCopy = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "md5sum .ssh/id_rsa"
+                if ( $md5sumGen -eq $md5sumCopy )
+                { 
+		            LogMsg "md5sum check success for .ssh/id_rsa."
+                }
+                else
+                {
+                    Throw "md5sum check failed for .ssh/id_rsa. Aborting test."
+                }
+            }
+            else
+            {
+                Throw "Error in copying SSH key to $($vmData.RoleName)"
+            }
+        }
+        else
+        {
+            $out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "rm -rf /root/sshFix*" 
+            $keyGenOut = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "./enablePasswordLessRoot.sh" 
+            LogMsg $keyGenOut
+            if ( $keyGenOut -imatch "KEY_GENERATED_SUCCESSFULLY" )
+            {
+                $keysGenerated = $true
+                LogMsg "SSH keys generated in $($vmData.RoleName)"
+                RemoteCopy -download -downloadFrom $vmData.PublicIP -port $vmData.SSHPort  -files "/root/sshFix.tar" -username "root" -password $password -downloadTo $LogDir
+                $md5sumGen = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "md5sum .ssh/id_rsa"
+            }
+            else
+            {
+                Throw "Error in generating SSH key in $($vmData.RoleName)"
+            }
+        }
+
 	}
 	
 	$packageInstallJobs = @()

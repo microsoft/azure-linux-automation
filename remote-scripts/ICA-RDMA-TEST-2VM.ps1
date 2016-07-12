@@ -9,7 +9,9 @@ if ($isDeployed)
 {
 	try
 	{
-		$noServer = $true
+        #Wait for For RDMA finish.
+        WaitFor -seconds 300
+        $noServer = $true
 		$noClient = $true
 		$clientMachines = @()
 		$slaveHostnames = ""
@@ -111,9 +113,9 @@ if ($isDeployed)
 
 		#region Install LIS-RDMA drivers..
 
-		$osRelease = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "cat /etc/*release*"
-		$modinfo_hv_vmbus = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "modinfo hv_vmbus"
-		if (!( $modinfo_hv_vmbus -imatch "microsoft-hyper-v-rdma" ))
+		$osRelease = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "cat /etc/*release*" -ignoreLinuxExitCode
+		$modinfo_hv_vmbus = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "lsmod | grep hv_network_direct"
+		if (!( $modinfo_hv_vmbus -imatch "hv_network_direct" ))
 		{
 			LogMsg "RDMA LIS Drivers not installed. RDMA drivers will be installed now..."
 			LogMsg $modinfo_hv_vmbus
@@ -235,6 +237,11 @@ if ($isDeployed)
 		RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/rdmaConsole.txt"
 		RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/summary.log"
 		RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/pingPongTestInterNodeTestOut.txt"
+        RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/exchangeTestInterNodeTestOut.txt"
+
+        RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/var/log/waagent.log"
+        $out= RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "dmesg > /var/log/dmesg.txt"
+        RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/var/log/dmesg.txt"
 		$finalStatus = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "cat /root/state.txt"
 		$rdmaSummary = Get-Content -Path "$LogDir\summary.log" -ErrorAction SilentlyContinue
 		

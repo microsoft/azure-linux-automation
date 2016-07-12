@@ -301,6 +301,7 @@ then
 	
 	#MPI-pingpong inter node
 	$mpirunPath -hosts ${master},${slaves} -ppn 1 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 $imb_mpi1Path pingpong > pingPongTestInterNodeTestOut.txt 2>&1
+	$mpirunPath -hosts ${master},${slaves} -ppn 16 -n 32 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 $imb_mpi1Path Exchange > exchangeTestInterNodeTestOut.txt 2>&1
 	
 	testExitCode=$?
 	if [ $testExitCode -ne 0 ]
