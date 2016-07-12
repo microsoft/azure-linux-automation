@@ -9,8 +9,6 @@ if ($isDeployed)
 {
 	try
 	{
-        #Wait for For RDMA finish.
-        WaitFor -seconds 300
         $noServer = $true
 		$noClient = $true
 		$clientMachines = @()
