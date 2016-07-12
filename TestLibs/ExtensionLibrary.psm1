@@ -5,8 +5,8 @@
 	{
 		if ( $UseAzureResourceManager )
 		{
-			LogMsg "Verifying $ExtensionName from Azure Using Get-AzureResource command ..."
-			$ExtensionStatus = Get-AzureResource -OutputObjectFormat New -ResourceGroupName $ResourceGroupName  -ResourceType "Microsoft.Compute/virtualMachines/extensions" -ExpandProperties
+			LogMsg "Verifying $ExtensionName from Azure Using Get-AzureRmResource command ..."
+			$ExtensionStatus = Get-AzureRmResource -ResourceGroupName $ResourceGroupName  -ResourceType "Microsoft.Compute/virtualMachines/extensions" -ExpandProperties
 			if ( ($ExtensionStatus.Properties.ProvisioningState -eq "Succeeded") -and ( $ExtensionStatus.Properties.Type -eq $ExtensionName ) )
 			{
 				LogMsg "$ExtensionName extension status is Succeeded in Properties.ProvisioningState"
@@ -180,27 +180,27 @@ Function SetAzureVMExtension ( $publicConfigString, $privateConfigString, $Exten
 		{
 			$RGName = $vmData.ResourceGroupName
 			$VMName = $vmData.RoleName
-			$Location = (Get-AzureResourceGroup -Name $RGName).Location
+			$Location = (Get-AzureRmResourceGroup -Name $RGName).Location
 			if ( $publicConfigString -and $privateConfigString )
 			{
 				LogMsg "Public Config : $publicConfigString"
 				LogMsg "Private Config : $privateConfigString"
-				$ExtStatus = Set-AzureVMExtension -ResourceGroupName $RGName -VMName $VMName -Location $Location -Name $ExtensionName -Publisher $Publisher -ExtensionType $ExtensionName -TypeHandlerVersion $LatestExtensionVersion -Settingstring $publicConfigString -ProtectedSettingString $privateConfigString -Verbose
+				$ExtStatus = Set-AzureRmVMExtension -ResourceGroupName $RGName -VMName $VMName -Location $Location -Name $ExtensionName -Publisher $Publisher -ExtensionType $ExtensionName -TypeHandlerVersion $LatestExtensionVersion -Settingstring $publicConfigString -ProtectedSettingString $privateConfigString -Verbose
 			}
 			else
 			{
 				if ($publicConfigString)
 				{
 					LogMsg "Public Config : $publicConfigString"
-					$ExtStatus = Set-AzureVMExtension -ResourceGroupName $RGName -VMName $VMName -Location $Location -Name $ExtensionName -Publisher $Publisher -ExtensionType $ExtensionName -TypeHandlerVersion $LatestExtensionVersion -Settingstring $publicConfigString -Verbose
+					$ExtStatus = Set-AzureRmVMExtension -ResourceGroupName $RGName -VMName $VMName -Location $Location -Name $ExtensionName -Publisher $Publisher -ExtensionType $ExtensionName -TypeHandlerVersion $LatestExtensionVersion -Settingstring $publicConfigString -Verbose
 				}
-				if ($privateConfigString )
+				if ($privateConfigString)
 				{
 					LogMsg "Private Config : $privateConfigString"
-					$ExtStatus = Set-AzureVMExtension -ResourceGroupName $RGName -VMName $VMName -Location $Location -Name $ExtensionName -Publisher $Publisher -ExtensionType $ExtensionName -TypeHandlerVersion $LatestExtensionVersion -ProtectedSettingString $privateConfigString -Verbose
+					$ExtStatus = Set-AzureRmVMExtension -ResourceGroupName $RGName -VMName $VMName -Location $Location -Name $ExtensionName -Publisher $Publisher -ExtensionType $ExtensionName -TypeHandlerVersion $LatestExtensionVersion -ProtectedSettingString $privateConfigString -Verbose
 				}
 			}
-			if ( $ExtStatus.Status -eq "Succeeded" )
+			if ( ![string]::IsNullOrEmpty($ExtStatus.StatusCode) -and $ExtStatus.StatusCode.ToString() -eq "OK" )
 			{
 				$retValue = $true
 				$waitForExtension = $false
