@@ -294,14 +294,16 @@ fi
 
 if [ "${rdmaRun}" == "yes" ]
 then
-	mpirunPath=`find / -name mpirun`
-	imb_mpi1Path=`find / -name IMB-MPI1`
+	mpirunPath=`find / -name mpirun | grep intel64`
+	imb_mpi1Path=`find / -name IMB-MPI1 | grep intel64`
 	
-	LogMsg "Executing test command : ${mpirunPath} -hosts ${master},${slaves} -ppn 1 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 ${imb_mpi1Path} pingpong > pingPongTestOut.txt 2>&1"
-	
+	LogMsg "Executing test command : ${mpirunPath} -hosts ${master},${slaves} -ppn 2 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 ${imb_mpi1Path} pingpong > pingPongTestIntraNodeTestOut.txt 2>&1"
+	#MPI-pingpong intra node
+	$mpirunPath -hosts ${master} -ppn 2 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 $imb_mpi1Path pingpong > pingPongTestIntraNodeTestOut.txt 2>&1
+	sleep 10
 	#MPI-pingpong inter node
+	LogMsg "Executing test command : $mpirunPath -hosts ${master},${slaves} -ppn 1 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 $imb_mpi1Path pingpong > pingPongTestInterNodeTestOut.txt 2>&1"
 	$mpirunPath -hosts ${master},${slaves} -ppn 1 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 $imb_mpi1Path pingpong > pingPongTestInterNodeTestOut.txt 2>&1
-	$mpirunPath -hosts ${master},${slaves} -ppn 16 -n 32 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 $imb_mpi1Path Exchange > exchangeTestInterNodeTestOut.txt 2>&1
 	
 	testExitCode=$?
 	if [ $testExitCode -ne 0 ]
@@ -314,5 +316,4 @@ then
 	else
 		UpdateTestState $ICA_TESTCOMPLETED
 	fi
-	
 fi

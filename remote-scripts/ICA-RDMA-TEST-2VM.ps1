@@ -234,8 +234,8 @@ if ($isDeployed)
 		}		
 		RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/rdmaConsole.txt"
 		RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/summary.log"
-		RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/pingPongTestInterNodeTestOut.txt"
-        RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/exchangeTestInterNodeTestOut.txt"
+		RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/pingPongTestIntraNodeTestOut.txt"
+        RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/pingPongTestInterNodeTestOut.txt"
 
         RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/var/log/waagent.log"
         $out= RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "dmesg > /var/log/dmesg.txt"
@@ -246,8 +246,12 @@ if ($isDeployed)
 		if ($finalStatus -imatch "TestCompleted")
 		{
 			LogMsg "Test finished successfully."
-			$pingPongInterNodeTestOut =  ( Get-Content -Path "$LogDir\pingPongTestInterNodeTestOut.txt" | Out-String )
-			LogMsg $pingPongInterNodeTestOut
+			LogMsg "PINGPONG INTRA NODE TEST OUTPUT-"
+			$pingPongTestIntraNodeTestOut =  ( Get-Content -Path "$LogDir\pingPongTestIntraNodeTestOut.txt" | Out-String )
+			LogMsg $pingPongTestIntraNodeTestOut
+			LogMsg "PINGPONG INTER NODE TEST OUTPUT-"
+			$pingPongTestInterNodeTestOut =  ( Get-Content -Path "$LogDir\pingPongTestInterNodeTestOut.txt" | Out-String )
+			LogMsg $pingPongTestInterNodeTestOut
 		}
 		else
 		{
