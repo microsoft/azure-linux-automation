@@ -1,7 +1,10 @@
 #!/bin/bash
 #AUTHOR : SHITAL SAVEKAR <v-shisav@microsoft.com>
-#Description : Enables root user and sets password. Needs to run with sudo permissions.
-#How to use : ./enablePasswordLessRoot.sh -password <new_root_password>
+#Description : Enables passwordless authentication for root user.
+#How to use : ./enablePasswordLessRoot.sh
+#In multi VM cluster. Execute this script in one VM. It will create a sshFix.tar
+#Copy this sshFix.tar to other VMs (/root) in your cluster and execute same script. It will extract previously created keys.
+#This way, all VMs will have same public and private keys in .ssh folder.
 
 rm -rf /root/.ssh
 cd /root
