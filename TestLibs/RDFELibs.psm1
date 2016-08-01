@@ -1391,6 +1391,15 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, 
        }
 		$retValue = DeployManagementServices -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro -getLogsIfFailed $getLogsIfFailed -GetDeploymentStatistics $GetDeploymentStatistics -region $region -storageAccount $storageAccount -timeOutSeconds $timeOutSeconds
 	}
+    if ( $retValue -and $customKernel)
+    {
+        LogMsg "Custom kernel: $customKernel will be installed on all machines..."
+        $kernelUpgradeStatus = InstallCustomKernel -customKernel $customKernel -allVMData $allVMData -RestartAfterUpgrade
+        if ( !$kernelUpgradeStatus )
+        {
+            Throw "Custom Kernel: $customKernel installation FAIL. Aborting tests."
+        }
+    }
 	return $retValue
 }
 
@@ -1939,8 +1948,28 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 						else
 						{
 							LogMsg "Uploading $tarFileName to $username : $uploadTo, port $port using Password authentication"
-							echo y | .\tools\pscp -pw $password -q -P $port $tarFileName $username@${uploadTo}:
-							$returnCode = $LASTEXITCODE
+							$curDir = $PWD
+							$uploadStatusRandomFile = "UploadStatusFile" + (Get-Random -Maximum 9999 -Minimum 1111) + ".txt"
+							$uploadStartTime = Get-Date
+							$uploadJob = Start-Job -ScriptBlock { cd $args[0]; Write-Host $args; Set-Content -Value "1" -Path $args[6]; $username = $args[4]; $uploadTo = $args[5]; echo y | .\tools\pscp -v -pw $args[1] -q -P $args[2] $args[3] $username@${uploadTo}: ; Set-Content -Value $LASTEXITCODE -Path $args[6];} -ArgumentList $curDir,$password,$port,$tarFileName,$username,${uploadTo},$uploadStatusRandomFile
+							sleep -Milliseconds 100
+							$uploadJobStatus = Get-Job -Id $uploadJob.Id
+							$uploadTimout = $false
+							while (( $uploadJobStatus.State -eq "Running" ) -and ( !$uploadTimout ))					
+							{
+								Write-Host "." -NoNewline
+								$now = Get-Date
+								if ( ($now - $uploadStartTime).TotalSeconds -gt 600 )
+								{
+									$uploadTimout = $true
+									LogErr "Upload Timout!"
+								}
+								sleep -Seconds 1
+								$uploadJobStatus = Get-Job -Id $uploadJob.Id
+							}
+							$returnCode = Get-Content -Path $uploadStatusRandomFile
+							Remove-Item -Force $uploadStatusRandomFile | Out-Null
+							Remove-Job -Id $uploadJob.Id -Force | Out-Null
 						}
 						if(($returnCode -ne 0) -and ($retry -ne $maxRetry))
 						{
@@ -2003,8 +2032,28 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 						else
 						{
 							LogMsg "Uploading $testFile to $username : $uploadTo, port $port using Password authentication"
-							echo y | .\tools\pscp -pw $password -q -P $port $testFile $username@${uploadTo}:
-							$returnCode = $LASTEXITCODE
+							$curDir = $PWD
+							$uploadStatusRandomFile = "UploadStatusFile" + (Get-Random -Maximum 9999 -Minimum 1111) + ".txt"
+							$uploadStartTime = Get-Date
+							$uploadJob = Start-Job -ScriptBlock { cd $args[0]; Write-Host $args; Set-Content -Value "1" -Path $args[6]; $username = $args[4]; $uploadTo = $args[5]; echo y | .\tools\pscp -v -pw $args[1] -q -P $args[2] $args[3] $username@${uploadTo}: ; Set-Content -Value $LASTEXITCODE -Path $args[6];} -ArgumentList $curDir,$password,$port,$testFile,$username,${uploadTo},$uploadStatusRandomFile
+							sleep -Milliseconds 100
+							$uploadJobStatus = Get-Job -Id $uploadJob.Id
+							$uploadTimout = $false
+							while (( $uploadJobStatus.State -eq "Running" ) -and ( !$uploadTimout ))					
+							{
+								Write-Host "." -NoNewline
+								$now = Get-Date
+								if ( ($now - $uploadStartTime).TotalSeconds -gt 600 )
+								{
+									$uploadTimout = $true
+									LogErr "Upload Timout!"
+								}
+								sleep -Seconds 1
+								$uploadJobStatus = Get-Job -Id $uploadJob.Id
+							}
+							$returnCode = Get-Content -Path $uploadStatusRandomFile
+							Remove-Item -Force $uploadStatusRandomFile | Out-Null
+							Remove-Job -Id $uploadJob.Id -Force | Out-Null
 						}
 						if(($returnCode -ne 0) -and ($retry -ne $maxRetry))
 						{
