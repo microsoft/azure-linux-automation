@@ -1397,7 +1397,8 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, 
         $kernelUpgradeStatus = InstallCustomKernel -customKernel $customKernel -allVMData $allVMData -RestartAfterUpgrade
         if ( !$kernelUpgradeStatus )
         {
-            Throw "Custom Kernel: $customKernel installation FAIL. Aborting tests."
+            LogErr "Custom Kernel: $customKernel installation FAIL. Aborting tests."
+            $retValue = ""
         }
     }
 	return $retValue

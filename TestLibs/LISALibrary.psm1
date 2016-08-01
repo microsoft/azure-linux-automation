@@ -140,9 +140,9 @@ Function ProvisionVMsForLisa($allVMData, $installPackagesOnRoleNames)
 function InstallCustomKernel ($customKernel, $allVMData, [switch]$RestartAfterUpgrade)
 {
     $customKernel = $customKernel.Trim()
-    if($customKernel -ne "next")
+    if( ($customKernel -ne "linuxnext") -and ($customKernel -ne "netnext") )
     {
-        Throw "Only Linux next version is supported. Other version will be added soon. Use -customKernel next"
+        Throw "Only linuxnext and netnext version is supported. Other version will be added soon. Use -customKernel linuxnext"
     }
     $scriptName = "customKernelInstall.sh"
     $jobCount = 0
@@ -179,12 +179,15 @@ function InstallCustomKernel ($customKernel, $allVMData, [switch]$RestartAfterUp
 			}
 			else
 			{
-				RemoteCopy -download -downloadFrom $job.PublicIP -port $job.SSHPort -files "build-customKernel.txt" -username $user -password $password -downloadTo $LogDir
-                if ( ( Get-Content "$LogDir\build-customKernel.txt" ) -imatch "CUSTOM_KERNEL_SUCCESS" )
+                if ( !(Test-Path -Path "$LogDir\$($job.RoleName)-build-customKernel.txt" ) )
                 {
-                    $kernelSuccess += 1
+				    RemoteCopy -download -downloadFrom $job.PublicIP -port $job.SSHPort -files "build-customKernel.txt" -username $user -password $password -downloadTo $LogDir
+                    if ( ( Get-Content "$LogDir\build-customKernel.txt" ) -imatch "CUSTOM_KERNEL_SUCCESS" )
+                    {
+                        $kernelSuccess += 1
+                    }
+				    Rename-Item -Path "$LogDir\build-customKernel.txt" -NewName "$($job.RoleName)-build-customKernel.txt" -Force | Out-Null
                 }
-				Rename-Item -Path "$LogDir\build-customKernel.txt" -NewName "$($job.RoleName)-build-customKernel.txt" -Force | Out-Null
 			}
 		}
 		if ( $packageInstallJobsRunning )

@@ -64,7 +64,13 @@ if [ -z "$customKernel" ]; then
 	exit 1
 fi
 touch ~/build-customKernel.txt
-
+if [ "${customKernel}" == "linuxnext" ]; then
+	kernelSource="https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git"
+	sourceDir="linux-next"
+elif [ "${customKernel}" == "netnext" ]; then
+	kernelSource="https://git.kernel.org/pub/scm/linux/kernel/git/davem/net-next.git"
+	sourceDir="net-next"
+fi
 LogMsg "Custom Kernel:$customKernel"
 chmod +x ~/DetectLinuxDistro.sh
 LinuxDistro=`~/DetectLinuxDistro.sh`
@@ -80,27 +86,24 @@ elif [ $LinuxDistro == "UBUNTU" ]; then
 	LogMsg "Updating distro..."
 	apt-get update
 	LogMsg "Installing packages git make tar gcc bc patch dos2unix wget kernel-package..."
-	apt-get install -y git make tar gcc bc patch dos2unix wget kernel-package
-	if [ "${customKernel}" == "next" ]; then
-		rm -rf linux-next
-		LogMsg "Downloading kernel source..."
-		git clone https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
-		cd linux-next
-		
-		#Download kernel build shell script...
-		wget https://raw.githubusercontent.com/simonxiaoss/linux_performance_test/master/git_bisect/build-ubuntu.sh
-		chmod +x build-ubuntu.sh
-		#Start installing kernel
-		LogMsg "Building and Installing kernel..."
-		./build-ubuntu.sh  >> ~/build-customKernel.txt 2>&1
-		if [ $? -ne 0 ]; then
-			LogMsg "CUSTOM_KERNEL_FAIL"
-			UpdateTestState $ICA_TESTFAILED
-			exit 0
-		fi
-	else:
-		#TBD
+	apt-get install -y git make tar gcc bc patch dos2unix wget kernel-package	
+	rm -rf linux-next
+	LogMsg "Downloading kernel source..."
+	git clone ${kernelSource}
+	cd ${sourceDir}
+	
+	#Download kernel build shell script...
+	wget https://raw.githubusercontent.com/simonxiaoss/linux_performance_test/master/git_bisect/build-ubuntu.sh
+	chmod +x build-ubuntu.sh
+	#Start installing kernel
+	LogMsg "Building and Installing kernel..."
+	./build-ubuntu.sh  >> ~/build-customKernel.txt 2>&1
+	if [ $? -ne 0 ]; then
+		LogMsg "CUSTOM_KERNEL_FAIL"
+		UpdateTestState $ICA_TESTFAILED
+		exit 0
 	fi
+
 fi
 UpdateTestState $ICA_TESTCOMPLETED
 sleep 10
