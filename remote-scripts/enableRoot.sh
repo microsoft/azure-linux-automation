@@ -20,6 +20,10 @@ if [ $? == 0 ]; then
         echo "ROOT_PASSWRD_SET"
         service $sshdServiceName restart
         sshdServiceStatus=$?
+        if [ $sshdServiceStatus != 0 ]; then
+                service ssh restart
+                sshdServiceStatus=$?
+        fi
     else
         echo "$sshd_configFilePath verification failed for root login."
         echo "ROOT_PASSWORD_SET_SSHD_CONFIG_FAIL"

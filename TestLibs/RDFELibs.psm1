@@ -1968,6 +1968,7 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 								sleep -Seconds 1
 								$uploadJobStatus = Get-Job -Id $uploadJob.Id
 							}
+							Write-Host ""
 							$returnCode = Get-Content -Path $uploadStatusRandomFile
 							Remove-Item -Force $uploadStatusRandomFile | Out-Null
 							Remove-Job -Id $uploadJob.Id -Force | Out-Null
@@ -2052,6 +2053,7 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 								sleep -Seconds 1
 								$uploadJobStatus = Get-Job -Id $uploadJob.Id
 							}
+							Write-Host ""
 							$returnCode = Get-Content -Path $uploadStatusRandomFile
 							Remove-Item -Force $uploadStatusRandomFile | Out-Null
 							Remove-Job -Id $uploadJob.Id -Force | Out-Null
@@ -2143,9 +2145,20 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 
 Function WrapperCommandsToFile([string] $username,[string] $password,[string] $ip,[string] $command, [int] $port)
 {
-	$command | out-file -encoding ASCII -filepath "$LogDir\runtest.sh"
-	RemoteCopy -upload -uploadTo $ip -username $username -port $port -password $password -files ".\$LogDir\runtest.sh"
-	del "$LogDir\runtest.sh"
+    if ( ( $lastLinuxCmd -eq $command) -and ($lastIP -eq $ip) -and ($lastPort -eq $port) -and ($lastUser -eq $username) )
+    {
+        #Skip upload if current command is same as last command.
+    }
+    else
+    {
+        Set-Variable -Name lastLinuxCmd -Value $command -Scope Global
+        Set-Variable -Name lastIP -Value $ip -Scope Global
+        Set-Variable -Name lastPort -Value $port -Scope Global
+        Set-Variable -Name lastUser -Value $username -Scope Global
+	    $command | out-file -encoding ASCII -filepath "$LogDir\runtest.sh"
+	    RemoteCopy -upload -uploadTo $ip -username $username -port $port -password $password -files ".\$LogDir\runtest.sh"
+	    del "$LogDir\runtest.sh"
+    }
 }
 
 Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string] $command, [int] $port, [switch]$runAsSudo, [Boolean]$WriteHostOnly, [Boolean]$NoLogsPlease, [switch]$ignoreLinuxExitCode, [int]$runMaxAllowedTime = 300, [switch]$RunInBackGround)
@@ -2447,7 +2460,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 					if($timeOut)
 					{
 						$retValue = ""
-						Throw "Tmeout while executing command : $command"
+						LogErr "Tmeout while executing command : $command"
 					}
 					LogErr "Linux machine returned exit code : $($LinuxExitCode.Split("-")[4])"
 					if ($attemptswt -eq $maxRetryCount -and $attemptswot -eq $maxRetryCount)
@@ -2458,7 +2471,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 					{
 						if ($notExceededTimeLimit)
 						{
-							LogMsg "Failed to execute : $command. Retrying..."
+							LogErr "Failed to execute : $command. Retrying..."
 						}
 					}
 				}
