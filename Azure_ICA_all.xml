@@ -5667,7 +5667,17 @@
 			<TestID>UI_001</TestID>
 			<Priority>P0</Priority>
 		</test>
-		
+		<test>
+			<testName>ICA-MIRROR-TEST</testName>
+			<testScript>ICA-MIRROR-TEST-1.sh,ICA-MIRROR-TEST-2.sh</testScript>
+			<testScriptPs1>ICA-MIRROR-TEST.ps1</testScriptPs1>
+			<files>.\remote-scripts\ICA-MIRROR-TEST-1.sh,.\remote-scripts\ICA-MIRROR-TEST-2.sh</files>
+			<setupType>MIRROR2VM</setupType>
+			<TestType>
+			</TestType>
+			<TestCount>10</TestCount>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+		</test>		
 	</testsDefinition>
 
 	<testCycles>
@@ -5676,6 +5686,12 @@
 			<cycleName>AUTOSETUP</cycleName>
 			<test>
 				<Name>SETUP-INSTALL-PACKAGES</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>MIRROR</cycleName>
+			<test>
+				<Name>ICA-MIRROR-TEST</Name>
 			</test>
 		</Cycle>
 		<Cycle>
