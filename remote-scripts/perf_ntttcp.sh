@@ -49,6 +49,9 @@ ConfigureNtttcpUbuntu()
 	ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
 	ssh ${1} "cd ntttcp-for-linux/src/ && make && make install"
 	ssh ${1} "cp ntttcp-for-linux/src/ntttcp ."
+	ssh ${1} "rm -rf lagscope"
+	ssh ${1} "git clone https://github.com/Microsoft/lagscope"
+	ssh ${1} "cd lagscope/src && make && make install"
 }
 
 LogMsg()
@@ -108,35 +111,15 @@ ConfigureNtttcpUbuntu ${client}
 LogMsg "Configuring server ${server}..."
 ConfigureNtttcpUbuntu ${server}
 
-#start ntttcp on server-vm in receiver mode.
-LogMsg "Starting nttcp server in ${server}"
-ssh ${server} "pkill ntttcp"
-ssh ${server} "./ntttcp -r > ntttcp-server-logs.txt &"
-
 #Now, start the ntttcp client on client VM.
-i=1
-for currenttest in "${connections[@]}"
-do
-	ssh ${server} "sar -n DEV 1 900"   2>&1 > ntttcp-server-logs-test#${i}-connections-${currenttest}.sar.netio.log  &
-	ssh ${server} "iostat -x -d 1 900" 2>&1 > ntttcp-server-logs-test#${i}-connections-${currenttest}.iostat.diskio.log  &
-	ssh ${server} "vmstat 1 900"       2>&1 > ntttcp-server-logs-test#${i}-connections-${currenttest}.vmstat.memory.cpu.log  &
 
-	ssh ${client} "sar -n DEV 1 900"   2>&1 > ntttcp-client-logs-test#${i}-connections-${currenttest}.sar.netio.log  &
-	ssh ${client} "iostat -x -d 1 900" 2>&1 > ntttcp-client-logs-test#${i}-connections-${currenttest}.iostat.diskio.log &
-	ssh ${client} "vmstat 1 900"       2>&1 > ntttcp-client-logs-test#${i}-connections-${currenttest}.vmstat.memory.cpu.log &
-
-	LogMsg "Starting ntttcp with ${currenttest} connections..."
-	ssh ${client} "./ntttcp -s${server} -n${currenttest} > ntttcp-client-logs-test#${i}-connections-${currenttest}.ConsoleResult.txt"
-	
-	ssh ${client} pkill -f sar 2>&1 > /dev/null
-	ssh ${client} pkill -f iostat 2>&1 > /dev/null
-	ssh ${client} pkill -f vmstat 2>&1 > /dev/null	
-	
-	ssh ${server} pkill -f sar 2>&1 > /dev/null
-	ssh ${server} pkill -f iostat 2>&1 > /dev/null
-	ssh ${server} pkill -f vmstat 2>&1 > /dev/null	
-	
-	i=`expr $i + 1`
-done
+ssh root@${client} "wget https://raw.githubusercontent.com/simonxiaoss/linux_performance_test/master/run_ntttcp-for-linux/run-ntttcp-and-tcping.sh"
+ssh root@${client} "wget https://raw.githubusercontent.com/simonxiaoss/linux_performance_test/master/run_ntttcp-for-linux/report-ntttcp-and-tcping.sh"
+ssh root@${client} "chmod +x run-ntttcp-and-tcping.sh && chmod +x report-ntttcp-and-tcping.sh"
+LogMsg "Now running NTTTCP test"
+ssh root@${client} "rm -rf ntttcp-test-logs"
+ssh root@${client} "./run-ntttcp-and-tcping.sh ntttcp-test-logs ${server} root"
+ssh root@${client} "./report-ntttcp-and-tcping.sh ntttcp-test-logs"
+ssh root@${client} "cp ntttcp-test-logs/* ."
 
 UpdateTestState ICA_TESTCOMPLETED

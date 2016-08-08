@@ -73,55 +73,38 @@ if ($isDeployed)
 		#region MONITOR TEST
 		while ( (Get-Job -Id $testJob).State -eq "Running" )
 		{
-			$currentStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "tail -n 1 /root/ntttcpConsoleLogs.txt"
+			$currentStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "tail -2 ntttcpConsoleLogs.txt | head -1"
 			LogMsg "Current Test Staus : $currentStatus"
 			WaitFor -seconds 20
 		}
 		$finalStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "cat /root/state.txt"
-		
-		$finalStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "cat /root/state.txt"
 		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/ntttcpConsoleLogs.txt"
-		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "ntttcp-client-logs*"
-		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "ntttcp-server-logs*"
+		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "lagscope-ntttcp-*"
+		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "ntttcp-p*"
+		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "report.log"
 		
 		$testSummary = $null
-		$ntttcpLogFiles = Get-ChildItem -Path $LogDir | Select Name | where {( $_ -imatch "ntttcp-client-logs-test#") -and ( $_ -imatch ".txt")}
-		foreach ( $file in $ntttcpLogFiles )
+		$ntttcpReportLog = Get-Content -Path "$LogDir\report.log"
+		foreach ( $line in $ntttcpReportLog )
 		{
-			LogMsg "$($file.Name) downloaded and analysed for throughput."
-			$ntttcpConnResult = Get-Content -Path "$LogDir\$($file.Name)" | where { $_ -imatch "throughput	:"}
-			$metadata = "Connections=" + $($file.Name).Replace(".ConsoleResult.txt","").Split("-")[5]
-			if ( $ntttcpConnResult )
-			{
-				$connResult = $ntttcpConnResult.Split(":")[($ntttcpConnResult.Split(":")).Count-1]
-				$resultSummary +=  CreateResultSummary -testResult $connResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
-			}
-			else
-			{
-				$resultSummary +=  CreateResultSummary -testResult "EROR: No result matching strings found. Possible Test Error." -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
-			}
+            if ( $line -imatch "test_connections" )
+            {
+                continue;
+            }
+            try
+            {
+                $test_connections = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[0]
+                $throughput_gbps = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[1]
+                $average_tcp_latency = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[2]
+                $metadata = "Connections=$test_connections"
+                $connResult = "throughput=$throughput_gbps`Gbps Avg_TCP_lat=$average_tcp_latency"
+                $resultSummary +=  CreateResultSummary -testResult $connResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+            }
+            catch
+            {
+                $resultSummary +=  CreateResultSummary -testResult "Error in parsing logs." -metaData "NTTTCP" -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+            }
 		}
-		$ntttcpLogFiles = Get-ChildItem -Path $LogDir | Select Name | where {( $_ -imatch "ntttcp-server") -or ( $_ -imatch "ntttcp-client")}
-		foreach ( $file in $ntttcpLogFiles )
-		{
-			$fileName = $file.Name
-			if ( ( ( $fileName -imatch ".sar.netio.log" ) -and ( $fileName -imatch "-server-" ) ) -or ( ( $fileName -imatch ".iostat.diskio.log" ) -and ( $fileName -imatch "-server-" ) ) -or ( ( $fileName -imatch ".vmstat.memory.cpu.log" ) -and ( $fileName -imatch "-server-" ) ) )
-			{
-				$connFolder = $fileName.Split("-")[$fileName.Split("-").Count-1].Split(".")[0]
-				mkdir "$LogDir\$($serverVMData.RoleName)" -Force | Out-Null
-				mkdir "$LogDir\$($serverVMData.RoleName)\$connFolder" -Force | Out-Null
-				Move-Item "$LogDir\$fileName" -Destination "$LogDir\$($serverVMData.RoleName)\$connFolder" -Force 
-				LogMsg "$($file.Name) downloaded and moved to '$($serverVMData.RoleName)\$connFolder'"
-			}
-			if ( ( ( $fileName -imatch ".sar.netio.log" ) -and ( $fileName -imatch "-client-" ) ) -or ( ( $fileName -imatch ".iostat.diskio.log" ) -and ( $fileName -imatch "-client-" ) ) -or ( ( $fileName -imatch ".vmstat.memory.cpu.log" ) -and ( $fileName -imatch "-client-" ) ) )
-			{
-				$connFolder = $fileName.Split("-")[$fileName.Split("-").Count-1].Split(".")[0]
-				mkdir "$LogDir\$($clientVMData.RoleName)" -Force | Out-Null
-				mkdir "$LogDir\$($clientVMData.RoleName)\$connFolder" -Force | Out-Null
-				Move-Item "$LogDir\$fileName" -Destination "$LogDir\$($clientVMData.RoleName)\$connFolder" -Force 
-				LogMsg "$($file.Name) downloaded and moved to '$($clientVMData.RoleName)\$connFolder'"
-			}			
-		}		
 		#endregion
 
 		if ( $finalStatus -imatch "TestFailed")
@@ -142,7 +125,7 @@ if ($isDeployed)
 		elseif ( $finalStatus -imatch "TestRunning")
 		{
 			LogMsg "Powershell backgroud job for test is completed but VM is reporting that test is still running. Please check $LogDir\zkConsoleLogs.txt"
-			LogMsg "Contests of summary.log : $zookeeperSummary"
+			LogMsg "Contests of summary.log : $testSummary"
 			$testResult = "PASS"
 		}
 		LogMsg "Test result : $testResult"
@@ -155,7 +138,7 @@ if ($isDeployed)
 	}
 	Finally
 	{
-		$metaData = "ZooKeeper RESULT"
+		$metaData = "NTTTCP RESULT"
 		if (!$testResult)
 		{
 			$testResult = "Aborted"
