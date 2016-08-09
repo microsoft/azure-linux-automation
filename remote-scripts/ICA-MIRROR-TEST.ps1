@@ -58,6 +58,8 @@ While ($count -lt $TestCount)
 			
 			LogMsg "Executing : $TestScript1"
 			RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "bash $TestScript1" -runAsSudo -runMaxAllowedTime 1800
+			LogMsg "Waiting 10 minutues for next execution"			
+			WaitFor -minutes 10
 			LogMsg "Executing : $TestScript2"
 			RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "bash $TestScript2" -runAsSudo -runMaxAllowedTime 1800
 
