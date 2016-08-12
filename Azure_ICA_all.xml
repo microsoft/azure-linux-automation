@@ -1534,7 +1534,7 @@
 					</VirtualMachine>
 				</HostedService>
 			</BVTDeployment>
-
+			
 			<RdmaVM>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -5330,7 +5330,7 @@
 			<virtualNetworkName>clouderavnet</virtualNetworkName>
 			<subnetName>clouderasubvnet</subnetName>
 			<numberOfDataNodes>1</numberOfDataNodes>
-			<VmSize>Standard_D4</VmSize>
+			<VmSize>Standard_DS14</VmSize>
           </parameters>
 		  <TestType>
 		  </TestType>
@@ -5667,7 +5667,7 @@
 			<TestID>UI_001</TestID>
 			<Priority>P0</Priority>
 		</test>
-		
+	
 	</testsDefinition>
 
 	<testCycles>
