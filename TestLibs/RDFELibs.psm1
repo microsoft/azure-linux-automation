@@ -2103,14 +2103,56 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 					if($usePrivateKey)
 					{
 						LogMsg "Downloading $testFile from $username : $downloadFrom,port $port to $downloadTo using PrivateKey authentication"
-						echo y | .\tools\pscp -i .\ssh\$sshKey -q -P $port $username@${downloadFrom}:$testFile $downloadTo
-						$returnCode = $LASTEXITCODE
+						$curDir = $PWD
+						$downloadStatusRandomFile = "DownloadStatusFile" + (Get-Random -Maximum 9999 -Minimum 1111) + ".txt"
+						$downloadStartTime = Get-Date
+						$downloadJob = Start-Job -ScriptBlock { $curDir=$args[0];$sshKey=$args[1];$port=$args[2];$testFile=$args[3];$username=$args[4];${downloadFrom}=$args[5];$downloadTo=$args[6];$downloadStatusRandomFile=$args[7]; cd $curDir; Set-Content -Value "1" -Path $args[6]; echo y | .\tools\pscp -i .\ssh\$sshKey -q -P $port $username@${downloadFrom}:$testFile $downloadTo; Set-Content -Value $LASTEXITCODE -Path $downloadStatusRandomFile;} -ArgumentList $curDir,$sshKey,$port,$testFile,$username,${downloadFrom},$downloadTo,$downloadStatusRandomFile
+						sleep -Milliseconds 100
+						$downloadJobStatus = Get-Job -Id $downloadJob.Id
+						$downloadTimout = $false
+						while (( $downloadJobStatus.State -eq "Running" ) -and ( !$downloadTimout ))					
+						{
+							Write-Host "." -NoNewline
+							$now = Get-Date
+							if ( ($now - $downloadStartTime).TotalSeconds -gt 600 )
+							{
+								$downloadTimout = $true
+								LogErr "Download Timout!"
+							}
+							sleep -Seconds 1
+							$downloadJobStatus = Get-Job -Id $downloadJob.Id
+						}
+						Write-Host ""
+						$returnCode = Get-Content -Path $downloadStatusRandomFile
+						Remove-Item -Force $downloadStatusRandomFile | Out-Null
+						Remove-Job -Id $downloadJob.Id -Force | Out-Null
 					}
 					else
 					{
 						LogMsg "Downloading $testFile from $username : $downloadFrom,port $port to $downloadTo using Password authentication"
-						echo y | .\tools\pscp -pw $password -q -P $port $username@${downloadFrom}:$testFile $downloadTo
-						$returnCode = $LASTEXITCODE
+						$curDir = $PWD
+						$downloadStatusRandomFile = "DownloadStatusFile" + (Get-Random -Maximum 9999 -Minimum 1111) + ".txt"
+						$downloadStartTime = Get-Date
+						$downloadJob = Start-Job -ScriptBlock { $curDir=$args[0];$password=$args[1];$port=$args[2];$testFile=$args[3];$username=$args[4];${downloadFrom}=$args[5];$downloadTo=$args[6];$downloadStatusRandomFile=$args[7]; cd $curDir; Set-Content -Value "1" -Path $args[6]; ; echo y | .\tools\pscp -pw $password -q -P $port $username@${downloadFrom}:$testFile $downloadTo ; Set-Content -Value $LASTEXITCODE -Path $downloadStatusRandomFile;} -ArgumentList $curDir,$password,$port,$testFile,$username,${downloadFrom},$downloadTo,$downloadStatusRandomFile
+						sleep -Milliseconds 100
+						$downloadJobStatus = Get-Job -Id $downloadJob.Id
+						$downloadTimout = $false
+						while (( $downloadJobStatus.State -eq "Running" ) -and ( !$downloadTimout ))					
+						{
+							Write-Host "." -NoNewline
+							$now = Get-Date
+							if ( ($now - $downloadStartTime).TotalSeconds -gt 600 )
+							{
+								$downloadTimout = $true
+								LogErr "Download Timout!"
+							}
+							sleep -Seconds 1
+							$downloadJobStatus = Get-Job -Id $downloadJob.Id
+						}
+						Write-Host ""
+						$returnCode = Get-Content -Path $downloadStatusRandomFile
+						Remove-Item -Force $downloadStatusRandomFile | Out-Null
+						Remove-Job -Id $downloadJob.Id -Force | Out-Null
 					}
 					if(($returnCode -ne 0) -and ($retry -ne $maxRetry))
 					{
