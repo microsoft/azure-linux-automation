@@ -31,7 +31,7 @@ else
 	}
 	foreach($size in $SupportSizes)
 	{
-		if($size -match 'DS' -or $size -match 'GS')
+		if($size -match 'DS' -or $size -match 'GS' -or ($size.Trim().EndsWith("s")) )
 		{
 			$XioSizes += $size.Replace('Standard','').Replace('_','')
 		}
