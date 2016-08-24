@@ -40,6 +40,13 @@
 			<!--<Location>"Preferred_Location"</Location>-->
 			<AffinityGroup>Your_Affinity_Group</AffinityGroup>
 		</General>
+		<database>
+			<server></server>
+			<user></user>
+			<password></password>
+			<dbname></dbname>
+			<dbtable></dbtable>
+		</database>
 		<CSUpload>
 			<!-- Note : Please fill the subscription Id , Thumbprint and Service management link accordingly.Following details are for Production Cluster-->
 			<Subscription>"SubscriptionID=Your_Azure_Subscription_ID;CertificateThumbprint=Certificate_Associated_with_your_Azure_Subscription;ServiceManagementEndpoint=https://management.core.windows.net"</Subscription>
@@ -6097,13 +6104,6 @@
 			<TestParameters>
 				<param>connections=(1 2 4 8 16 32 64 128 256 512 1024)</param>
 			</TestParameters>
-			<database>
-				<server></server>
-				<user></user>
-				<password></password>
-				<dbname></dbname>
-				<dbtable></dbtable>
-			</database>
 			<Priority>P0</Priority>
 		</test>					
 		<test>
