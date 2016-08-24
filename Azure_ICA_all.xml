@@ -6097,6 +6097,13 @@
 			<TestParameters>
 				<param>connections=(1 2 4 8 16 32 64 128 256 512 1024)</param>
 			</TestParameters>
+			<database>
+				<server></server>
+				<user></user>
+				<password></password>
+				<dbname></dbname>
+				<dbtable></dbtable>
+			</database>
 			<Priority>P0</Priority>
 		</test>					
 		<test>
