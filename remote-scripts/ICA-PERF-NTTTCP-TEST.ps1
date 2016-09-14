@@ -65,7 +65,7 @@ if ($isDeployed)
 		#region EXECUTE TEST
 		$myString = @"
 cd /root/
-perf_ntttcp.sh &> ntttcpConsoleLogs.txt
+./perf_ntttcp.sh &> ntttcpConsoleLogs.txt
 . azuremodules.sh
 collect_VM_properties
 "@
