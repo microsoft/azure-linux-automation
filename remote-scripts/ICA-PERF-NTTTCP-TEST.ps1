@@ -63,8 +63,15 @@ if ($isDeployed)
 
 		
 		#region EXECUTE TEST
-		Set-Content -Value "/root/perf_ntttcp.sh &> ntttcpConsoleLogs.txt" -Path "$LogDir\StartNtttcpTest.sh"
-		RemoteCopy -uploadTo $clientVMData.PublicIP -port $clientVMData.SSHPort -files ".\$constantsFile,.\remote-scripts\perf_ntttcp.sh,.\$LogDir\StartNtttcpTest.sh" -username "root" -password $password -upload
+		$myString = @"
+cd /root/
+./perf_ntttcp.sh &> ntttcpConsoleLogs.txt
+. azuremodules.sh
+collect_VM_properties
+"@
+		Set-Content "$LogDir\StartNtttcpTest.sh" $myString
+		RemoteCopy -uploadTo $clientVMData.PublicIP -port $clientVMData.SSHPort -files ".\$constantsFile,.\remote-scripts\azuremodules.sh,.\remote-scripts\perf_ntttcp.sh,.\$LogDir\StartNtttcpTest.sh" -username "root" -password $password -upload
+		RemoteCopy -uploadTo $clientVMData.PublicIP -port $clientVMData.SSHPort -files $currentTestData.files -username "root" -password $password -upload
 
 		$out = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "chmod +x *.sh"
 		$testJob = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "/root/StartNtttcpTest.sh" -RunInBackground
@@ -82,6 +89,7 @@ if ($isDeployed)
 		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "lagscope-ntttcp-*"
 		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "ntttcp-p*"
 		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "report.log"
+		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "VM_properties.csv"
 		
 		$testSummary = $null
 		$ntttcpReportLog = Get-Content -Path "$LogDir\report.log"
@@ -130,6 +138,54 @@ if ($isDeployed)
 		}
 		LogMsg "Test result : $testResult"
 		LogMsg "Test Completed"
+		
+		LogMsg "Uploading the test results.."
+		$dataSource = $xmlConfig.config.Azure.database.server
+		$user = $xmlConfig.config.Azure.database.user
+		$password = $xmlConfig.config.Azure.database.password
+		$database = $xmlConfig.config.Azure.database.dbname
+		$dataTableName = $xmlConfig.config.Azure.database.dbtable
+		
+		if ($dataSource -And $user -And $password -And $database -And $dataTableName) 
+		{
+			$GuestDistro	= cat "$LogDir\VM_properties.csv" | Select-String "OS type"| %{$_ -replace ",OS type,",""}
+			
+			$TestCaseName	= "LINUX-NEXT-UPSTREAM-TEST"
+			$HostType	= "Azure"
+			$HostBy	= $xmlConfig.config.Azure.General.Location 
+			$HostOS	= cat "$LogDir\VM_properties.csv" | Select-String "Host Version"| %{$_ -replace ",Host Version,",""}
+			$GuestOSType	= "Linux"
+			$GuestDistro	= cat "$LogDir\VM_properties.csv" | Select-String "OS type"| %{$_ -replace ",OS type,",""}
+			$GuestSize = $clientVMData.InstanceSize
+			$KernelVersion	= cat "$LogDir\VM_properties.csv" | Select-String "Kernel version"| %{$_ -replace ",Kernel version,",""}
+			$IPVersion = "IPv4"
+			$ProtocolType = "TCP"
+
+			$connectionString = "Server=$dataSource;uid=$user; pwd=$password;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+			$LogContents = Get-Content -Path "$LogDir\report.log"
+			$SQLQuery = "INSERT INTO $dataTableName (TestCaseName,TestDate,HostType,HostBy,HostOS,GuestOSType,GuestDistro,GuestSize,KernelVersion,IPVersion,ProtocolType,NumberOfConnections,Throughput_Gbps,Latency_ms) VALUES "
+
+			for($i = 1; $i -lt $LogContents.Count; $i++)
+			{
+				$Line = $LogContents[$i].Trim() -split '\s+'
+				$SQLQuery += "('$TestCaseName','$(Get-Date -Format yyyy-MM-dd)','$HostType','$HostBy','$HostOS','$GuestOSType','$GuestDistro','$GuestSize','$KernelVersion','$IPVersion','$ProtocolType',$($Line[0]),$($Line[1]),$($Line[2])),"    
+			}
+			$SQLQuery = $SQLQuery.TrimEnd(',')
+
+			$connection = New-Object System.Data.SqlClient.SqlConnection
+			$connection.ConnectionString = $connectionString
+			$connection.Open()
+
+			$command = $connection.CreateCommand()
+			$command.CommandText = $SQLQuery
+			$result = $command.executenonquery()
+			$connection.Close()
+			LogMsg "Uploading the test results done!!"
+		}
+		else
+		{
+			LogMsg "Invalid database details. Failed to upload result to database!"
+		}
 	}
 	catch
 	{
