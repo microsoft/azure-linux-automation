@@ -45,7 +45,7 @@ ConfigureNtttcpUbuntu()
 {
 	LogMsg "Configuring ${1} for ntttcp test..."
 	ssh ${1} "apt-get update"
-	ssh ${1} "apt-get -y install libaio1 sysstat git"
+	ssh ${1} "apt-get -y install libaio1 sysstat git bc make"
 	ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
 	ssh ${1} "cd ntttcp-for-linux/src/ && make && make install"
 	ssh ${1} "cp ntttcp-for-linux/src/ntttcp ."
