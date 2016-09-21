@@ -6623,6 +6623,7 @@
 				<Name>ICA-BUILD-LINUX-NEXT-DEB-PACKAGE</Name>
 			</test>
 		</Cycle>
+		<Cycle>
 			<cycleName>DEBUG</cycleName>
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
 			<test>
