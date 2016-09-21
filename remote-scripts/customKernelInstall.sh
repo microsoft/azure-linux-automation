@@ -70,6 +70,24 @@ if [ "${customKernel}" == "linuxnext" ]; then
 elif [ "${customKernel}" == "netnext" ]; then
 	kernelSource="https://git.kernel.org/pub/scm/linux/kernel/git/davem/net-next.git"
 	sourceDir="net-next"
+elif [[ $customKernel == *.deb ]]; then
+	LogMsg "Custom Kernel:$customKernel"
+	apt-get update
+	apt-get install wget
+	LogMsg "Debian package web link detected. Downloading $customKernel"
+	wget $customKernel
+	LogMsg "Installing ${customKernel##*/}"
+	dpkg -i "${customKernel##*/}"
+	kernelInstallStatus=$?
+	UpdateTestState $ICA_TESTCOMPLETED
+	if [ $kernelInstallStatus -ne 0 ]; then
+		LogMsg "CUSTOM_KERNEL_FAIL"
+		UpdateTestState $ICA_TESTFAILED
+	else
+		LogMsg "CUSTOM_KERNEL_SUCCESS"
+		UpdateTestState $ICA_TESTCOMPLETED
+	fi
+	exit 0
 fi
 LogMsg "Custom Kernel:$customKernel"
 chmod +x ~/DetectLinuxDistro.sh
