@@ -955,6 +955,11 @@ Function VerifyAllDeployments($servicesToVerify, [Switch]$GetVMProvisionTime)
 		{
 			LogMsg ""
 			LogMsg "$serviceName is Ready.."
+            if ( $currentTestData.InitialWaitSeconds )
+            {
+                LogMsg "Waiting for initial wait time. $($currentTestData.InitialWaitSeconds) seconds."
+                WaitFor -seconds $currentTestData.InitialWaitSeconds
+            }
 			Write-Host ""
 			$retValue = "True"
 		}
@@ -1386,6 +1391,16 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, 
        }
 		$retValue = DeployManagementServices -xmlConfig $xmlConfig -setupType $setupType -Distro $Distro -getLogsIfFailed $getLogsIfFailed -GetDeploymentStatistics $GetDeploymentStatistics -region $region -storageAccount $storageAccount -timeOutSeconds $timeOutSeconds
 	}
+    if ( $retValue -and $customKernel)
+    {
+        LogMsg "Custom kernel: $customKernel will be installed on all machines..."
+        $kernelUpgradeStatus = InstallCustomKernel -customKernel $customKernel -allVMData $allVMData -RestartAfterUpgrade
+        if ( !$kernelUpgradeStatus )
+        {
+            LogErr "Custom Kernel: $customKernel installation FAIL. Aborting tests."
+            $retValue = ""
+        }
+    }
 	return $retValue
 }
 
@@ -1934,8 +1949,29 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 						else
 						{
 							LogMsg "Uploading $tarFileName to $username : $uploadTo, port $port using Password authentication"
-							echo y | .\tools\pscp -pw $password -q -P $port $tarFileName $username@${uploadTo}:
-							$returnCode = $LASTEXITCODE
+							$curDir = $PWD
+							$uploadStatusRandomFile = "UploadStatusFile" + (Get-Random -Maximum 9999 -Minimum 1111) + ".txt"
+							$uploadStartTime = Get-Date
+							$uploadJob = Start-Job -ScriptBlock { cd $args[0]; Write-Host $args; Set-Content -Value "1" -Path $args[6]; $username = $args[4]; $uploadTo = $args[5]; echo y | .\tools\pscp -v -pw $args[1] -q -P $args[2] $args[3] $username@${uploadTo}: ; Set-Content -Value $LASTEXITCODE -Path $args[6];} -ArgumentList $curDir,$password,$port,$tarFileName,$username,${uploadTo},$uploadStatusRandomFile
+							sleep -Milliseconds 100
+							$uploadJobStatus = Get-Job -Id $uploadJob.Id
+							$uploadTimout = $false
+							while (( $uploadJobStatus.State -eq "Running" ) -and ( !$uploadTimout ))					
+							{
+								Write-Host "." -NoNewline
+								$now = Get-Date
+								if ( ($now - $uploadStartTime).TotalSeconds -gt 600 )
+								{
+									$uploadTimout = $true
+									LogErr "Upload Timout!"
+								}
+								sleep -Seconds 1
+								$uploadJobStatus = Get-Job -Id $uploadJob.Id
+							}
+							Write-Host ""
+							$returnCode = Get-Content -Path $uploadStatusRandomFile
+							Remove-Item -Force $uploadStatusRandomFile | Out-Null
+							Remove-Job -Id $uploadJob.Id -Force | Out-Null
 						}
 						if(($returnCode -ne 0) -and ($retry -ne $maxRetry))
 						{
@@ -1998,8 +2034,29 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 						else
 						{
 							LogMsg "Uploading $testFile to $username : $uploadTo, port $port using Password authentication"
-							echo y | .\tools\pscp -pw $password -q -P $port $testFile $username@${uploadTo}:
-							$returnCode = $LASTEXITCODE
+							$curDir = $PWD
+							$uploadStatusRandomFile = "UploadStatusFile" + (Get-Random -Maximum 9999 -Minimum 1111) + ".txt"
+							$uploadStartTime = Get-Date
+							$uploadJob = Start-Job -ScriptBlock { cd $args[0]; Write-Host $args; Set-Content -Value "1" -Path $args[6]; $username = $args[4]; $uploadTo = $args[5]; echo y | .\tools\pscp -v -pw $args[1] -q -P $args[2] $args[3] $username@${uploadTo}: ; Set-Content -Value $LASTEXITCODE -Path $args[6];} -ArgumentList $curDir,$password,$port,$testFile,$username,${uploadTo},$uploadStatusRandomFile
+							sleep -Milliseconds 100
+							$uploadJobStatus = Get-Job -Id $uploadJob.Id
+							$uploadTimout = $false
+							while (( $uploadJobStatus.State -eq "Running" ) -and ( !$uploadTimout ))					
+							{
+								Write-Host "." -NoNewline
+								$now = Get-Date
+								if ( ($now - $uploadStartTime).TotalSeconds -gt 600 )
+								{
+									$uploadTimout = $true
+									LogErr "Upload Timout!"
+								}
+								sleep -Seconds 1
+								$uploadJobStatus = Get-Job -Id $uploadJob.Id
+							}
+							Write-Host ""
+							$returnCode = Get-Content -Path $uploadStatusRandomFile
+							Remove-Item -Force $uploadStatusRandomFile | Out-Null
+							Remove-Job -Id $uploadJob.Id -Force | Out-Null
 						}
 						if(($returnCode -ne 0) -and ($retry -ne $maxRetry))
 						{
@@ -2046,14 +2103,56 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 					if($usePrivateKey)
 					{
 						LogMsg "Downloading $testFile from $username : $downloadFrom,port $port to $downloadTo using PrivateKey authentication"
-						echo y | .\tools\pscp -i .\ssh\$sshKey -q -P $port $username@${downloadFrom}:$testFile $downloadTo
-						$returnCode = $LASTEXITCODE
+						$curDir = $PWD
+						$downloadStatusRandomFile = "DownloadStatusFile" + (Get-Random -Maximum 9999 -Minimum 1111) + ".txt"
+						$downloadStartTime = Get-Date
+						$downloadJob = Start-Job -ScriptBlock { $curDir=$args[0];$sshKey=$args[1];$port=$args[2];$testFile=$args[3];$username=$args[4];${downloadFrom}=$args[5];$downloadTo=$args[6];$downloadStatusRandomFile=$args[7]; cd $curDir; Set-Content -Value "1" -Path $args[6]; echo y | .\tools\pscp -i .\ssh\$sshKey -q -P $port $username@${downloadFrom}:$testFile $downloadTo; Set-Content -Value $LASTEXITCODE -Path $downloadStatusRandomFile;} -ArgumentList $curDir,$sshKey,$port,$testFile,$username,${downloadFrom},$downloadTo,$downloadStatusRandomFile
+						sleep -Milliseconds 100
+						$downloadJobStatus = Get-Job -Id $downloadJob.Id
+						$downloadTimout = $false
+						while (( $downloadJobStatus.State -eq "Running" ) -and ( !$downloadTimout ))					
+						{
+							Write-Host "." -NoNewline
+							$now = Get-Date
+							if ( ($now - $downloadStartTime).TotalSeconds -gt 600 )
+							{
+								$downloadTimout = $true
+								LogErr "Download Timout!"
+							}
+							sleep -Seconds 1
+							$downloadJobStatus = Get-Job -Id $downloadJob.Id
+						}
+						Write-Host ""
+						$returnCode = Get-Content -Path $downloadStatusRandomFile
+						Remove-Item -Force $downloadStatusRandomFile | Out-Null
+						Remove-Job -Id $downloadJob.Id -Force | Out-Null
 					}
 					else
 					{
 						LogMsg "Downloading $testFile from $username : $downloadFrom,port $port to $downloadTo using Password authentication"
-						echo y | .\tools\pscp -pw $password -q -P $port $username@${downloadFrom}:$testFile $downloadTo
-						$returnCode = $LASTEXITCODE
+						$curDir = $PWD
+						$downloadStatusRandomFile = "DownloadStatusFile" + (Get-Random -Maximum 9999 -Minimum 1111) + ".txt"
+						$downloadStartTime = Get-Date
+						$downloadJob = Start-Job -ScriptBlock { $curDir=$args[0];$password=$args[1];$port=$args[2];$testFile=$args[3];$username=$args[4];${downloadFrom}=$args[5];$downloadTo=$args[6];$downloadStatusRandomFile=$args[7]; cd $curDir; Set-Content -Value "1" -Path $args[6]; ; echo y | .\tools\pscp -pw $password -q -P $port $username@${downloadFrom}:$testFile $downloadTo ; Set-Content -Value $LASTEXITCODE -Path $downloadStatusRandomFile;} -ArgumentList $curDir,$password,$port,$testFile,$username,${downloadFrom},$downloadTo,$downloadStatusRandomFile
+						sleep -Milliseconds 100
+						$downloadJobStatus = Get-Job -Id $downloadJob.Id
+						$downloadTimout = $false
+						while (( $downloadJobStatus.State -eq "Running" ) -and ( !$downloadTimout ))					
+						{
+							Write-Host "." -NoNewline
+							$now = Get-Date
+							if ( ($now - $downloadStartTime).TotalSeconds -gt 600 )
+							{
+								$downloadTimout = $true
+								LogErr "Download Timout!"
+							}
+							sleep -Seconds 1
+							$downloadJobStatus = Get-Job -Id $downloadJob.Id
+						}
+						Write-Host ""
+						$returnCode = Get-Content -Path $downloadStatusRandomFile
+						Remove-Item -Force $downloadStatusRandomFile | Out-Null
+						Remove-Job -Id $downloadJob.Id -Force | Out-Null
 					}
 					if(($returnCode -ne 0) -and ($retry -ne $maxRetry))
 					{
@@ -2088,9 +2187,20 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 
 Function WrapperCommandsToFile([string] $username,[string] $password,[string] $ip,[string] $command, [int] $port)
 {
-	$command | out-file -encoding ASCII -filepath runtest.sh
-	RemoteCopy -upload -uploadTo $ip -username $username -port $port -password $password -files '.\runtest.sh'
-	del runtest.sh
+    if ( ( $lastLinuxCmd -eq $command) -and ($lastIP -eq $ip) -and ($lastPort -eq $port) -and ($lastUser -eq $username) )
+    {
+        #Skip upload if current command is same as last command.
+    }
+    else
+    {
+        Set-Variable -Name lastLinuxCmd -Value $command -Scope Global
+        Set-Variable -Name lastIP -Value $ip -Scope Global
+        Set-Variable -Name lastPort -Value $port -Scope Global
+        Set-Variable -Name lastUser -Value $username -Scope Global
+	    $command | out-file -encoding ASCII -filepath "$LogDir\runtest.sh"
+	    RemoteCopy -upload -uploadTo $ip -username $username -port $port -password $password -files ".\$LogDir\runtest.sh"
+	    del "$LogDir\runtest.sh"
+    }
 }
 
 Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string] $command, [int] $port, [switch]$runAsSudo, [Boolean]$WriteHostOnly, [Boolean]$NoLogsPlease, [switch]$ignoreLinuxExitCode, [int]$runMaxAllowedTime = 300, [switch]$RunInBackGround)
@@ -2109,8 +2219,8 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 		$plainTextPassword = $password.Replace('"','');
 		if ( $detectedDistro -eq "COREOS" )
 		{
-			$linuxCommand = "`"export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/usr/share/oem/python/bin:/opt/bin && echo $plainTextPassword | sudo -S env `"PATH=`$PATH`" $command && echo AZURE-LINUX-EXIT-CODE-`$? || echo AZURE-LINUX-EXIT-CODE-`$?`""
-			$logCommand = "`"export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/usr/share/oem/python/bin:/opt/bin && echo $plainTextPassword | sudo -S env `"PATH=`$PATH`" $command`""
+			$linuxCommand = "`"export PATH=/usr/share/oem/python/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/opt/bin && echo $plainTextPassword | sudo -S env `"PATH=`$PATH`" $command && echo AZURE-LINUX-EXIT-CODE-`$? || echo AZURE-LINUX-EXIT-CODE-`$?`""
+			$logCommand = "`"export PATH=/usr/share/oem/python/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/opt/bin && echo $plainTextPassword | sudo -S env `"PATH=`$PATH`" $command`""
 		}
 		else
 		{
@@ -2123,8 +2233,8 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 	{
 		if ( $detectedDistro -eq "COREOS" )
 		{
-			$linuxCommand = "`"export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/usr/share/oem/python/bin:/opt/bin && $command && echo AZURE-LINUX-EXIT-CODE-`$? || echo AZURE-LINUX-EXIT-CODE-`$?`""
-			$logCommand = "`"export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/usr/share/oem/python/bin:/opt/bin && $command`""		
+			$linuxCommand = "`"export PATH=/usr/share/oem/python/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/opt/bin && $command && echo AZURE-LINUX-EXIT-CODE-`$? || echo AZURE-LINUX-EXIT-CODE-`$?`""
+			$logCommand = "`"export PATH=/usr/share/oem/python/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/opt/bin && $command`""		
 		}
 		else
 		{
@@ -2392,7 +2502,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 					if($timeOut)
 					{
 						$retValue = ""
-						Throw "Tmeout while executing command : $command"
+						LogErr "Tmeout while executing command : $command"
 					}
 					LogErr "Linux machine returned exit code : $($LinuxExitCode.Split("-")[4])"
 					if ($attemptswt -eq $maxRetryCount -and $attemptswot -eq $maxRetryCount)
@@ -2403,7 +2513,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 					{
 						if ($notExceededTimeLimit)
 						{
-							LogMsg "Failed to execute : $command. Retrying..."
+							LogErr "Failed to execute : $command. Retrying..."
 						}
 					}
 				}
@@ -2486,16 +2596,22 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 									$isVMLogsCollected = $true								}
 								else
 								{
-									LogMsg "Cleaning up deployed test virtual machines."
-									$isClened = DeleteService -serviceName $hsDetails.ServiceName
-						
-									if ($isClened -contains "False")
+                                	if ( $keepReproInact )
+                                	{
+										LogMsg "Skipping cleanup due to 'keepReproInact' flag is set."
+                                    }
+                                    else
 									{
-										LogMsg "CleanUP unsuccessful for $($hsDetails.ServiceName).. Please delete the services manually."
-									}
-									else
-									{
-										LogMsg "CleanUP Successful for $($hsDetails.ServiceName).."
+										LogMsg "Cleaning up deployed test virtual machines."
+										$isClened = DeleteService -serviceName $hsDetails.ServiceName
+										if ($isClened -contains "False")
+										{
+											LogMsg "CleanUP unsuccessful for $($hsDetails.ServiceName).. Please delete the services manually."
+										}
+										else
+										{
+											LogMsg "CleanUP Successful for $($hsDetails.ServiceName).."
+										}
 									}
 								}
 							}
@@ -2567,16 +2683,23 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 							}
 							else
 							{
-								LogMsg "Cleaning up deployed test virtual machines."
-								$isClened = DeleteResourceGroup -RGName $group
-								if (!$isClened)
-								{
-									LogMsg "CleanUP unsuccessful for $group.. Please delete the services manually."
-								}
-								else
-								{
-									LogMsg "CleanUP Successful for $group.."
-								}
+                                if ( $keepReproInact )
+                                {
+									LogMsg "Skipping cleanup due to 'keepReproInact' flag is set."
+                                }
+                                else
+                                {
+									LogMsg "Cleaning up deployed test virtual machines."
+									$isClened = DeleteResourceGroup -RGName $group
+									if (!$isClened)
+									{
+										LogMsg "CleanUP unsuccessful for $group.. Please delete the services manually."
+									}
+								    else
+									{
+										LogMsg "CleanUP Successful for $group.."
+									}
+                                }
 							}
 						}
 					}

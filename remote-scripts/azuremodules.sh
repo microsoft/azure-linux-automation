@@ -130,25 +130,28 @@ function zypper_install ()
 
 function install_package ()
 {
-    local package_name=$1
+    local package_name=$@
     ditribution=$(detect_linux_ditribution)
-    case "$ditribution" in
-        oracle|rhel|centos)
-            yum_install $package_name
-            ;;
+	for i in "${package_name[@]}"
+	do
+		case "$ditribution" in
+			oracle|rhel|centos)
+				yum_install "$package_name"
+				;;
 
-        ubuntu)
-            apt_get_install $package_name
-            ;;
+			ubuntu)
+				apt_get_install "$package_name"
+				;;
 
-        suse|opensuse|sles)
-            zypper_install $package_name
-            ;;
+			suse|opensuse|sles)
+				zypper_install "$package_name"
+				;;
 
-        *)
-            echo "Unknown ditribution"
-            return 1
-    esac
+			*)
+				echo "Unknown ditribution"
+				return 1
+		esac
+	done
 }
 
 function creat_partitions ()
@@ -233,7 +236,7 @@ function remote_copy ()
 
     if [ "x$host" == "x" ] || [ "x$user" == "x" ] || [ "x$passwd" == "x" ] || [ "x$filename" == "x" ] ; then
        echo "Usage: remote_copy -user <username> -passwd <user password> -host <host ipaddress> -filename <filename> -remote_path <location of the file on remote vm> -cmd <put/get>"
-       exit -1
+       return
     fi
 
     if [ "$cmd" == "get" ] || [ "x$cmd" == "x" ]; then
@@ -264,7 +267,7 @@ function remote_exec ()
 
     if [ "x$host" == "x" ] || [ "x$user" == "x" ] || [ "x$passwd" == "x" ] || [ "x$cmd" == "x" ] ; then
        echo "Usage: remote_exec -user <username> -passwd <user password> -host <host ipaddress> <onlycommand>"
-       exit -1
+       return
     fi
 
     status=`sshpass -p $passwd ssh -t -o StrictHostKeyChecking=no $user@$host $cmd 2>&1`
@@ -290,7 +293,7 @@ function set_user_password {
     if [ "x$string" == "x" ]
     then
         echo "$user not found in /etc/shadow"
-    return -1
+		return -1
     fi
 
     IFS=':' read -r -a array <<< "$string"
@@ -327,4 +330,56 @@ function collect_VM_properties ()
     echo ",LIS Version,"`get_lis_version` >> $output_file
     echo ",Host Version,"`get_host_version` >> $output_file
     echo ",Data disks attached,"`lsblk | grep "^sd" | awk '{print $1}' | sort | grep -v "sd[ab]$" | wc -l`  >> $output_file
+    echo ",WALA Version,"`waagent -version| awk '{print $1}'` >> $output_file
 }
+
+function keep_cmd_in_startup ()
+{
+	testcommand=$*
+	startup_files="/etc/rc.d/rc.local /etc/rc.local /etc/SuSE-release"
+	count=0
+	for file in $startup_files 
+	do
+		if [[ -f $file ]]
+		then
+			if ! grep -q "${testcommand}" $file
+			then
+				sed "/^\s*exit 0/i ${testcommand}" $file -i
+				if ! grep -q "${testcommand}" $file
+				then
+					echo $testcommand >> $file
+				fi
+				echo "Added $testcommand >> $file"
+				((count++))
+			fi
+		fi	
+	done
+	if [ $count == 0 ]
+	then
+		echo "Cannot find $startup_files files"
+	fi
+}
+
+function remove_cmd_from_startup ()
+{
+	testcommand=$*
+	startup_files="/etc/rc.d/rc.local /etc/rc.local /etc/SuSE-release"
+	count=0
+	for file in $startup_files 
+	do
+		if [[ -f $file ]]
+		then
+			if grep -q "${testcommand}" $file
+			then
+				sed "s/${testcommand}//" $file -i
+				((count++))
+				echo "Removed $testcommand from $file"
+			fi
+		fi	
+	done
+	if [ $count == 0 ]
+	then
+		echo "Cannot find $testcommand in $startup_files files"
+	fi
+}
+
