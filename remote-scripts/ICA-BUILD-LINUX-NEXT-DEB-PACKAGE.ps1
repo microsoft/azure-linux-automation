@@ -43,7 +43,7 @@ if ($isDeployed)
        try
        {
               $allVMData  = GetAllDeployementData -DeployedServices $isDeployed
-              $out = Set-Variable -Name AllVMData -Value $allVMData
+              Set-Variable -Name AllVMData -Value $allVMData
               [string] $ServiceName = $allVMData.ServiceName
               $hs1VIP = $allVMData.PublicIP
               $hs1ServiceUrl = $allVMData.URL
@@ -84,7 +84,7 @@ if ($isDeployed)
               $KernelVersion = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "uname -r 2>&1" -runAsSudo
               LogMsg "Kernel Version : $KernelVersion"
               
-              $out = Set-Content -Value "bash /home/$user/code/$($currentTestData.testScript) > /home/$user/code/linuxNextBuildTest.txt" -Path "$LogDir\StartTest.sh"
+              Set-Content -Value "bash /home/$user/code/$($currentTestData.testScript) > /home/$user/code/linuxNextBuildTest.txt" -Path "$LogDir\StartTest.sh"
               $out = RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files ".\$LogDir\StartTest.sh" -username $user -password $password -upload
               $out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "mv StartTest.sh /home/$user/code/" -runAsSudo
               $testJob = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "bash /home/$user/code/StartTest.sh" -runAsSudo -RunInBackground
@@ -100,7 +100,6 @@ if ($isDeployed)
               $testStartUpStatus = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat /home/$user/code/state.txt" -runAsSudo 
               $linuxNextBuildInfo = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "cat /home/$user/code/linuxNextBuildTest.txt " -runAsSudo 
               if (($testStartUpStatus -eq "TestCompleted") -or ($linuxNextBuildInfo -imatch "Updating test case state to completed"))
-			  if ($true)
               {
                      LogMsg "Linux Next build deb package generated successfully download deb package from /home/$user/code."
                      LogMsg "Generation of deb package from Linux Next build is SUCCESS.."
@@ -112,22 +111,21 @@ if ($isDeployed)
                      }
                      else
                      {
-						   $out = RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/*.deb, /home/$user/code/*.txt, /home/$user/code/*.log, /home/$user/code/*.sh" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password 2>&1 | Out-Null						   
-						   $debPackageName = (ls $LogDir  | where {$_.Name -imatch "linux-image"}).Name
-						   $debPackageFilePath = "$LogDir\$debPackageName"
-						   $debPackageUploadInfo = Set-AzureStorageBlobContent -File $debPackageFilePath -Container $SAContainer -Blob $debPackageName -Context (New-AzureStorageContext -StorageAccountName $SAName -StorageAccountKey $SAPrimaryKey) -Force ; $debPackageuploadStatus = $? 
-						   $out = Set-Content -Value "http://konkasoft.blob.core.windows.net/linuxbinaries/$debPackageName" -Path "$LogDir\linux-next-weekly-debian-package.txt"
-						   $deblinkUploadInfo = Set-AzureStorageBlobContent -File "$LogDir\linux-next-weekly-debian-package.txt" -Container $SAContainer -Blob $debPackageName -Context (New-AzureStorageContext -StorageAccountName $SAName -StorageAccountKey $SAPrimaryKey) -Force ; $debLinkuploadStatus = $? 
-						   if ($debPackageuploadStatus -imatch "True")
-						   {
-								LogMsg "$debPackageName upload is SUCCESS"
-								$testResult = "PASS"
-						   }
-						   else
-						   {
-								LogMsg "$debPackageName upload is FAILED"
-								$testResult = "FAIL"
-						   }
+						$out = RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/*.deb, /home/$user/code/*.txt, /home/$user/code/*.log, /home/$user/code/*.sh" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password 2>&1 | Out-Null						   
+						$debPackageName = (ls $LogDir  | where {$_.Name -imatch "linux-image"}).Name
+						$debPackageFilePath = "$LogDir\$debPackageName"
+						$debPackageUploadInfo = Set-AzureStorageBlobContent -File $debPackageFilePath -Container $SAContainer -Blob $debPackageName -Context (New-AzureStorageContext -StorageAccountName $SAName -StorageAccountKey $SAPrimaryKey) -Force ; $debPackageuploadStatus = $? 
+						$debPackageUploadInfo1 = Set-AzureStorageBlobContent -File $debPackageFilePath -Container $SAContainer -Blob "linuxnext-latest.deb" -Context (New-AzureStorageContext -StorageAccountName $SAName -StorageAccountKey $SAPrimaryKey) -Force ; $debPackageuploadStatus1 = $? 
+						if (($debPackageuploadStatus -imatch "True") -and ($debPackageuploadStatus1 -imatch "True"))
+						{
+							LogMsg "$debPackageName upload is SUCCESS"
+							$testResult = "PASS"
+						}
+						else
+						{
+							LogMsg "$debPackageName upload is FAILED"
+							$testResult = "FAIL"
+						}
                      }
               }
               else
@@ -140,8 +138,8 @@ if ($isDeployed)
 
        catch
        {
-			  $ErrorMessage =  $_.Exception.Message
-			  LogMsg "EXCEPTION : $ErrorMessage"   
+		  $ErrorMessage =  $_.Exception.Message
+		  LogMsg "EXCEPTION : $ErrorMessage"   
        }
        Finally
        {
@@ -151,7 +149,7 @@ if ($isDeployed)
                      $testResult = "Aborted"
               }
               $resultArr += $testResult
-#$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
+			  $resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
        }   
 }
 
@@ -167,4 +165,4 @@ $result = GetFinalResultHeader -resultarr $resultArr
 DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed -ResourceGroups $isDeployed
 
 #Return the result and summery to the test suite script..
-return $result 
+return $result, $resultSummary 
