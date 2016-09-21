@@ -118,7 +118,10 @@ if ($isDeployed)
 						$debPackageUploadInfo1 = Set-AzureStorageBlobContent -File $debPackageFilePath -Container $SAContainer -Blob "linuxnext-latest.deb" -Context (New-AzureStorageContext -StorageAccountName $SAName -StorageAccountKey $SAPrimaryKey) -Force ; $debPackageuploadStatus1 = $? 
 						if (($debPackageuploadStatus -imatch "True") -and ($debPackageuploadStatus1 -imatch "True"))
 						{
-							LogMsg "$debPackageName upload is SUCCESS"
+							
+							LogMsg "Uploading $debPackageName into linuxbinaries container is SUCCESS"
+							LogMsg "Uploading linuxnext-latest.deb into linuxbinaries container is SUCCESS"
+							LogMsg "*********************************** LINUX-NEXT DEB PAKAGE AVAILABLE LINKS ***********************************`n`n 	https://konkasoft.blob.core.windows.net/linuxbinaries/$debPackageName`n`n 	https://konkasoft.blob.core.windows.net/linuxbinaries/linuxnext-latest.deb`n`n******************************************************************##************************************##**********************************"
 							$testResult = "PASS"
 						}
 						else
