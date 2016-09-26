@@ -101,13 +101,20 @@ elif [ $LinuxDistro == "CENTOS" -o $LinuxDistro == "REDHAT" -o $LinuxDistro == "
 	yum install -y git make tar gcc bc patch dos2unix wget xz
 	#TBD
 elif [ $LinuxDistro == "UBUNTU" ]; then
+	unset UCF_FORCE_CONFFOLD
+	export UCF_FORCE_CONFFNEW=YES
+	export DEBIAN_FRONTEND=noninteractive
+	ucf --purge /etc/kernel-img.conf
+	export DEBIAN_FRONTEND=noninteractive
 	LogMsg "Updating distro..."
 	apt-get update
-	LogMsg "Installing packages git make tar gcc bc patch dos2unix wget kernel-package..."
-	apt-get install -y git make tar gcc bc patch dos2unix wget kernel-package	
+	LogMsg "Installing packages git make tar gcc bc patch dos2unix wget ..."
+	apt-get install -y git make tar gcc bc patch dos2unix wget >> ~/build-customKernel.txt 2>&1
+	LogMsg "Installing kernel-package ..."
+	apt-get -o Dpkg::Options::="--force-confnew" -y install kernel-package >> ~/build-customKernel.txt 2>&1
 	rm -rf linux-next
 	LogMsg "Downloading kernel source..."
-	git clone ${kernelSource}
+	git clone ${kernelSource} >> ~/build-customKernel.txt 2>&1
 	cd ${sourceDir}
 	
 	#Download kernel build shell script...
