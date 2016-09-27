@@ -152,7 +152,7 @@ collect_VM_properties
 			
 			$TestCaseName	= "LINUX-NEXT-UPSTREAM-TEST"
 			$HostType	= "Azure"
-			$HostBy	= $xmlConfig.config.Azure.General.Location 
+			$HostBy	= ($xmlConfig.config.Azure.General.Location).Replace('"','')
 			$HostOS	= cat "$LogDir\VM_properties.csv" | Select-String "Host Version"| %{$_ -replace ",Host Version,",""}
 			$GuestOSType	= "Linux"
 			$GuestDistro	= cat "$LogDir\VM_properties.csv" | Select-String "OS type"| %{$_ -replace ",OS type,",""}

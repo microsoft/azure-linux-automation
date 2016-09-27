@@ -4452,6 +4452,7 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name InternalIP -Value $InternalIP -Force
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name URL -Value $URL -Force
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name Status -Value $Status -Force
+		Add-Member -InputObject $objNode -MemberType NoteProperty -Name InstanceSize -Value $InstanceSize -Force
 		return $objNode
 	}
 
@@ -4546,6 +4547,7 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 				$QuickVMNode.RoleName = $testVM.InstanceName
 				$QuickVMNode.PublicIP = $AllEndpoints[0].Vip
 				$QuickVMNode.InternalIP = $testVM.IpAddress
+				$QuickVMNode.InstanceSize = $testVM.InstanceSize
 				foreach ($endpoint in $AllEndpoints)
 				{
 					Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endpoint.Name)Port" -Value $endpoint.Port -Force
