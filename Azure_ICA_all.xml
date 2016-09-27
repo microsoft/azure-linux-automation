@@ -2746,6 +2746,23 @@
 					</VirtualMachine>
 				</HostedService>
 			</A11>
+			<F16>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_F16</InstanceSize>
+						<ARMInstanceSize>Standard_F16</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</F16>
 			<DS2DISK2>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -5762,7 +5779,7 @@
 			<testName>ICA-BUILD-LINUX-NEXT-DEB-PACKAGE</testName>
 			<testScript>build_deb_from_linux_next.sh</testScript>
 			<testScriptps1>ICA-BUILD-LINUX-NEXT-DEB-PACKAGE.ps1</testScriptps1>
-			<setupType>A4</setupType>
+			<setupType>F16</setupType>
 			<!-- standard or daily images in gallery -->
 			<imageType>Standard</imageType>
 			<remoteDEBPath>"http://konkasoft.blob.core.windows.net/linuxbinaries"</remoteDEBPath>
