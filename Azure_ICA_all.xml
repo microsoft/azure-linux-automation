@@ -5782,6 +5782,7 @@
 			<setupType>F16</setupType>
 			<!-- standard or daily images in gallery -->
 			<imageType>Standard</imageType>
+			<remoteSA>konkasoft</remoteSA>
 			<remoteDEBPath>"http://konkasoft.blob.core.windows.net/linuxbinaries"</remoteDEBPath>
 			<files>.\remote-scripts\azuremodules.sh,.\remote-scripts\build_deb_from_linux_next.sh</files>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>

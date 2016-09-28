@@ -12,7 +12,7 @@ $result = ""
 $testResult = ""
 $resultArr = @()
 
-$SAName = $xmlConfig.config.Azure.General.StorageAccount
+$SAName = $currentTestData.remoteSA
 $SAPrimaryKey = (Get-AzureStorageKey -StorageAccountName $SAName).Primary
 $SAContainer = "linuxbinaries"
 $imageType = $currentTestData.imageType
