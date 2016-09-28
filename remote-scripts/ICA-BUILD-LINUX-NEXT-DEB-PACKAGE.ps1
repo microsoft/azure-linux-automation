@@ -17,6 +17,8 @@ $SAPrimaryKey = (Get-AzureStorageKey -StorageAccountName $SAName).Primary
 $SAContainer = "linuxbinaries"
 $imageType = $currentTestData.imageType
 $BaseOsImageName = GetOSImageFromDistro -Distro $Distro -xmlConfig $xmlConfig
+LogMsg "Remote Storage Account to copy deb package : $SAName"
+Logmsg "Image type : $imageType"
 if($imageType -imatch "Standard")
 {
 	LogMsg "BaseOsImageName : $BaseOsImageName"
