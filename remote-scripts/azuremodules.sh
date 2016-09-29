@@ -322,9 +322,12 @@ function collect_VM_properties ()
     echo "" > $output_file
     echo ",OS type,"`detect_linux_ditribution`-`detect_linux_ditribution_version` >> $output_file
     echo ",Kernel version,"`uname -r` >> $output_file
-    echo ",Total CPU cores,"`nproc` >> $output_file
-    echo ",Memory,"`free -h| grep Mem| awk '{print $2}'`  >> $output_file
     echo ",LIS Version,"`get_lis_version` >> $output_file
     echo ",Host Version,"`get_host_version` >> $output_file
+    echo ",Total CPU cores,"`nproc` >> $output_file
+    echo ",Total Memory,"`free -h|grep Mem|awk '{print $2}'` >> $output_file
+    echo ",Resource disks size,"`lsblk|grep "^sdb"| awk '{print $4}'`  >> $output_file
     echo ",Data disks attached,"`lsblk | grep "^sd" | awk '{print $1}' | sort | grep -v "sd[ab]$" | wc -l`  >> $output_file
+    echo ",eth0 MTU,"`ifconfig eth0|grep MTU|sed "s/.*MTU:\(.*\) .*/\1/"` >> $output_file
+    echo ",eth1 MTU,"`ifconfig eth1|grep MTU|sed "s/.*MTU:\(.*\) .*/\1/"` >> $output_file
 }
