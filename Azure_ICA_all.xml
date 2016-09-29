@@ -46,6 +46,7 @@
 			<password></password>
 			<dbname></dbname>
 			<dbtable></dbtable>
+			<testTag></testTag>
 		</database>
 		<CSUpload>
 			<!-- Note : Please fill the subscription Id , Thumbprint and Service management link accordingly.Following details are for Production Cluster-->
