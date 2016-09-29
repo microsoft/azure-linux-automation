@@ -145,12 +145,12 @@ collect_VM_properties
 		$password = $xmlConfig.config.Azure.database.password
 		$database = $xmlConfig.config.Azure.database.dbname
 		$dataTableName = $xmlConfig.config.Azure.database.dbtable
-		
+		$TestCaseName=$currentTestData.testTag
 		if ($dataSource -And $user -And $password -And $database -And $dataTableName) 
 		{
 			$GuestDistro	= cat "$LogDir\VM_properties.csv" | Select-String "OS type"| %{$_ -replace ",OS type,",""}
 			
-			$TestCaseName	= "LINUX-NEXT-UPSTREAM-TEST"
+			#$TestCaseName	= "LINUX-NEXT-UPSTREAM-TEST"
 			$HostType	= "Azure"
 			$HostBy	= ($xmlConfig.config.Azure.General.Location).Replace('"','')
 			$HostOS	= cat "$LogDir\VM_properties.csv" | Select-String "Host Version"| %{$_ -replace ",Host Version,",""}
