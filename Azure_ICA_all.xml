@@ -46,6 +46,7 @@
 			<password></password>
 			<dbname></dbname>
 			<dbtable></dbtable>
+			<testTag></testTag>
 		</database>
 		<CSUpload>
 			<!-- Note : Please fill the subscription Id , Thumbprint and Service management link accordingly.Following details are for Production Cluster-->
@@ -6097,7 +6098,6 @@
 		<test>
 			<testName>ICA-PERF-NTTTCP-TEST</testName>
 			<testScript></testScript>
-			<testTag></testTag>
 			<testScriptps1>ICA-PERF-NTTTCP-TEST.ps1</testScriptps1>
 			<setupType>M1S1</setupType>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
