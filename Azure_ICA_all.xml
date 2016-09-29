@@ -6097,6 +6097,7 @@
 		<test>
 			<testName>ICA-PERF-NTTTCP-TEST</testName>
 			<testScript></testScript>
+			<testTag></testTag>
 			<testScriptps1>ICA-PERF-NTTTCP-TEST.ps1</testScriptps1>
 			<setupType>M1S1</setupType>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
