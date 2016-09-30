@@ -67,7 +67,7 @@ function detect_linux_ditribution()
             linux_ditribution='unknown'
         fi
     fi
-    echo $linux_ditribution
+    echo "${linux_ditribution^}"
 }
 
 function updaterepos()
