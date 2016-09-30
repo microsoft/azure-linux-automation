@@ -320,7 +320,7 @@ function collect_VM_properties ()
     fi
 
     echo "" > $output_file
-    echo ",OS type,"`detect_linux_ditribution`-`detect_linux_ditribution_version` >> $output_file
+    echo ",OS type,"`detect_linux_ditribution` `detect_linux_ditribution_version` >> $output_file
     echo ",Kernel version,"`uname -r` >> $output_file
     echo ",LIS Version,"`get_lis_version` >> $output_file
     echo ",Host Version,"`get_host_version` >> $output_file
