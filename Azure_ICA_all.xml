@@ -5242,11 +5242,23 @@
 			<testScript>NetPerf_setup_startup.sh</testScript>
 			<testScriptps1>ICA-NETWORK-PERF-TEST.ps1</testScriptps1>
 			<files>.\remote-scripts\NetPerf_setup_startup.sh,.\remote-scripts\client_start.sh,.\remote-scripts\server_start.sh,.\remote-scripts\keep_cmds_in_startup.sh,.\remote-scripts\azuremodules.sh,.\remote-scripts\sar-top.sh,.\remote-scripts\generate_csvs.sh</files>
-			<setupType>NetPerf1HS2VM</setupType>
-			<TestType></TestType>
+			<setupType>M1S1</setupType>
+			<TestType>TCP</TestType>
 			<TestFeature></TestFeature>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>Perf_005</TestID>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-NET-PERF-UDP-TEST</testName>
+			<testScript>NetPerf_setup_startup.sh</testScript>
+			<testScriptps1>ICA-NETWORK-PERF-TEST.ps1</testScriptps1>
+			<files>.\remote-scripts\NetPerf_setup_startup.sh,.\remote-scripts\client_start.sh,.\remote-scripts\server_start.sh,.\remote-scripts\keep_cmds_in_startup.sh,.\remote-scripts\azuremodules.sh,.\remote-scripts\sar-top.sh,.\remote-scripts\generate_csvs.sh</files>
+			<setupType>M1S1</setupType>
+			<TestType>UDP</TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<TestID>Perf_008</TestID>
 			<Priority>P0</Priority>
 		</test>
 		<test>

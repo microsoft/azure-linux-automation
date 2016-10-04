@@ -5,10 +5,17 @@
 # Email	: v-srm@microsoft.com
 #
 
-if [[ $# == 2 ]]
+if [[ $# == 3 ]]
 then
 	server_ip=$1
 	username=$2
+	testtype=$3
+	if [[ $testtype == "UDP" ]]
+	then
+		testtype=" -u"
+	else
+		testtype=""
+	fi
 else
 	echo "Usage: bash $0 <server_ip> <vm_loginuser>"
 	exit -1
@@ -35,12 +42,12 @@ do
 	echo "Starting client with $number_of_connections connections"
 	while [ $number_of_connections -gt 64 ]; do
 		number_of_connections=$(($number_of_connections-64))
-		iperf3 -c $server_ip -p $port_number -P 64 -t $duration > /dev/null &
+		iperf3 -c $server_ip -p $port_number -P 64 -t $duration $testtype > /dev/null &
 		port_number=$((port_number+1))
 	done
 	if [ $number_of_connections -ne 0 ] 
 	then
-		iperf3 -c $server_ip -p $port_number -P $number_of_connections -t $duration > /dev/null &
+		iperf3 -c $server_ip -p $port_number -P $number_of_connections -t $duration $testtype > /dev/null &
 	fi
 
 	connections_count=`netstat -natp | grep iperf | grep ESTA | wc -l`
