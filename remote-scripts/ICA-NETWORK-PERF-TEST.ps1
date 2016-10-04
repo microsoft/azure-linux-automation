@@ -46,8 +46,8 @@ if ($isDeployed)
 		LogMsg "VM is ready for netperf test"
 		LogMsg "VM1 kernel version:- $KernelVersionVM1"
 		LogMsg "VM2 kernel version:- $KernelVersionVM2"
-		$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "bash /home/$user/code/$($currentTestData.testScript) server $user $hs1vm1IP" -runAsSudo
-		$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "bash /home/$user/code/$($currentTestData.testScript) client $user $hs1vm1IP" -runAsSudo
+		$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "bash /home/$user/code/$($currentTestData.testScript) server $user $hs1vm1IP " -runAsSudo
+		$out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "bash /home/$user/code/$($currentTestData.testScript) client $user $hs1vm1IP $($currentTestData.TestType)" -runAsSudo
 		
 		$restartvmstatus = RestartAllDeployments -allVMData $allVMData
 		if ($restartvmstatus -eq "True")
