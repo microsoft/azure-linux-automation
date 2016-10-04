@@ -6762,6 +6762,12 @@
 			</test>
 		</Cycle>
 		<Cycle>
+			<cycleName>NETPERF-UDP</cycleName>
+			<test>
+				<Name>ICA-NET-PERF-UDP-TEST</Name>
+			</test>
+		</Cycle>
+		<Cycle>
 			<cycleName>LISA-MARIADB-PERF</cycleName>
 			<test>
 				<Name>ICA-MYSQLDB-PERF-TEST</Name>
