@@ -2955,7 +2955,7 @@
 				<HostedService>
 					<VirtualMachine>
 						<state></state>
-						<InstanceSize>Standard_DS2</InstanceSize>
+						<InstanceSize>Standard_DS14</InstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -3025,6 +3025,81 @@
 					</VirtualMachine>
 				</HostedService>
 			</DS14DISK12>
+			<D14DISK12>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS14</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk>
+							<LUN>0</LUN>
+							<DiskSizeInGB>512</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>1</LUN>
+							<DiskSizeInGB>512</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>2</LUN>
+							<DiskSizeInGB>512</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>3</LUN>
+							<DiskSizeInGB>512</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>4</LUN>
+							<DiskSizeInGB>512</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>5</LUN>
+							<DiskSizeInGB>512</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>6</LUN>
+							<DiskSizeInGB>512</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>7</LUN>
+							<DiskSizeInGB>512</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>8</LUN>
+							<DiskSizeInGB>512</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>9</LUN>
+							<DiskSizeInGB>512</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>10</LUN>
+							<DiskSizeInGB>512</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>11</LUN>
+							<DiskSizeInGB>512</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</D14DISK12>
 			<DS14DISK32>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -5210,11 +5285,25 @@
 			<Priority>P0</Priority>
 		</test>
 		<test>
-			<testName>ICA-IO-DISK-PERF-TEST-RAID</testName>
+			<testName>ICA-IO-DISK-PERF-TEST-RAID-D</testName>
 			<testScript>io-test-setup.sh</testScript>
 			<testScriptps1>ICA-IO-DISK-PERF-TEST.ps1</testScriptps1>
 			<files>.\remote-scripts\sysbench-full-io-test.sh,.\remote-scripts\azuremodules.sh,.\remote-scripts\sysbench-log-parser.sh,.\remote-scripts\io-test-setup.sh,.\remote-scripts\keep_cmds_in_startup.sh</files>
-			<setupType>D14DISK32</setupType>
+			<setupType>D14DISK12</setupType>
+			<!-- <setupType>DS14DISK32</setupType> -->
+			<TestType></TestType>
+			<DiskType>RAID</DiskType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<TestID>Perf_004</TestID>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-IO-DISK-PERF-TEST-RAID-DS</testName>
+			<testScript>io-test-setup.sh</testScript>
+			<testScriptps1>ICA-IO-DISK-PERF-TEST.ps1</testScriptps1>
+			<files>.\remote-scripts\sysbench-full-io-test.sh,.\remote-scripts\azuremodules.sh,.\remote-scripts\sysbench-log-parser.sh,.\remote-scripts\io-test-setup.sh,.\remote-scripts\keep_cmds_in_startup.sh</files>
+			<setupType>DS14DISK12</setupType>
 			<!-- <setupType>DS14DISK32</setupType> -->
 			<TestType></TestType>
 			<DiskType>RAID</DiskType>
