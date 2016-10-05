@@ -6771,13 +6771,13 @@
 		<Cycle>
 			<cycleName>IOPERF-RAID-XIO</cycleName>
 			<test>
-				<Name>ICA-IO-DISK-PERF-TEST-RAID-D</Name>
+				<Name>ICA-IO-DISK-PERF-TEST-RAID-DS</Name>
 			</test>
 		</Cycle>
 		<Cycle>
 			<cycleName>IOPERF-RAID-NON-XIO</cycleName>
 			<test>
-				<Name>ICA-IO-DISK-PERF-TEST-RAID-DS</Name>
+				<Name>ICA-IO-DISK-PERF-TEST-RAID-D</Name>
 			</test>
 		</Cycle>		
 		<Cycle>
