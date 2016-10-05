@@ -133,15 +133,15 @@ function install_package ()
     local package_name=$1
     ditribution=$(detect_linux_ditribution)
     case "$ditribution" in
-        oracle|rhel|centos)
+        Oracle|RHEL|CentOS)
             yum_install $package_name
             ;;
 
-        ubuntu)
+        Ubuntu)
             apt_get_install $package_name
             ;;
 
-        suse|opensuse|sles)
+        SUSE|OpenSUSE|sles)
             zypper_install $package_name
             ;;
 
