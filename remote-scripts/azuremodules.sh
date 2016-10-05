@@ -50,24 +50,24 @@ function detect_linux_ditribution()
     if [ "$linux_ditribution" == "" ]
     then
         if echo "$temp_text" | grep -qi "ol"; then
-            linux_ditribution='oracle'
+            linux_ditribution='Oracle'
         elif echo "$temp_text" | grep -qi "Ubuntu"; then
-            linux_ditribution='ubuntu'
-        elif echo "$temp_text" | grep -qi "SUSE Linux"; then
-            linux_ditribution='suse'
+            linux_ditribution='Ubuntu'
+        elif echo "$temp_text" | grep -qi "SUSE"; then
+            linux_ditribution='SUSE'
         elif echo "$temp_text" | grep -qi "openSUSE"; then
-            linux_ditribution='opensuse'
+            linux_ditribution='OpenSUSE'
         elif echo "$temp_text" | grep -qi "centos"; then
-            linux_ditribution='centos'
+            linux_ditribution='CentOS'
         elif echo "$temp_text" | grep -qi "Oracle"; then
-            linux_ditribution='oracle'
+            linux_ditribution='Oracle'
         elif echo "$temp_text" | grep -qi "Red Hat"; then
-            linux_ditribution='rhel'
+            linux_ditribution='RHEL'
         else
             linux_ditribution='unknown'
         fi
     fi
-    echo $linux_ditribution
+    echo "${linux_ditribution^}"
 }
 
 function updaterepos()
@@ -320,11 +320,14 @@ function collect_VM_properties ()
     fi
 
     echo "" > $output_file
-    echo ",OS type,"`detect_linux_ditribution`-`detect_linux_ditribution_version` >> $output_file
+    echo ",OS type,"`detect_linux_ditribution` `detect_linux_ditribution_version` >> $output_file
     echo ",Kernel version,"`uname -r` >> $output_file
-    echo ",Total CPU cores,"`nproc` >> $output_file
-    echo ",Memory,"`free -h| grep Mem| awk '{print $2}'`  >> $output_file
     echo ",LIS Version,"`get_lis_version` >> $output_file
     echo ",Host Version,"`get_host_version` >> $output_file
+    echo ",Total CPU cores,"`nproc` >> $output_file
+    echo ",Total Memory,"`free -h|grep Mem|awk '{print $2}'` >> $output_file
+    echo ",Resource disks size,"`lsblk|grep "^sdb"| awk '{print $4}'`  >> $output_file
     echo ",Data disks attached,"`lsblk | grep "^sd" | awk '{print $1}' | sort | grep -v "sd[ab]$" | wc -l`  >> $output_file
+    echo ",eth0 MTU,"`ifconfig eth0|grep MTU|sed "s/.*MTU:\(.*\) .*/\1/"` >> $output_file
+    echo ",eth1 MTU,"`ifconfig eth1|grep MTU|sed "s/.*MTU:\(.*\) .*/\1/"` >> $output_file
 }
