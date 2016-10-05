@@ -6775,6 +6775,13 @@
 			</test>
 		</Cycle>
 		<Cycle>
+			<cycleName>IOPERF-RAID-FIO</cycleName>
+			<test>
+				<Name>ICA-FIO-TEST</Name>
+			</test>
+		</Cycle>
+
+		<Cycle>
 			<cycleName>IOPERF-RAID-NON-XIO</cycleName>
 			<test>
 				<Name>ICA-IO-DISK-PERF-TEST-RAID-D</Name>
