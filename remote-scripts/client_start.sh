@@ -60,3 +60,6 @@ logs_dir=logs-`hostname`-`uname -r`-`get_lis_version`/
 collect_VM_properties $code_path/$logs_dir/VM_properties.csv
 
 bash $code_path/generate_csvs.sh $code_path/$logs_dir
+mv /etc/rc.d/after.local.bkp /etc/rc.d/after.local
+mv /etc/rc.local.bkp /etc/rc.local
+mv /etc/rc.d/rc.local.bkp /etc/rc.d/rc.local
