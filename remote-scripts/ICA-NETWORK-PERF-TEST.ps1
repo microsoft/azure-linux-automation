@@ -76,6 +76,7 @@ if ($isDeployed)
 						else{
 							LogMsg "NetPerf test is COMPLETED."
 							$testResult = "PASS"
+							WaitFor -seconds 200
 							$out = RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/code/*.tar" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password 2>&1 | Out-Null
 							$out = RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/code/*.tar" -downloadTo $LogDir -port $hs1vm2sshport -username $user -password $password 2>&1 | Out-Null
 							$out = RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/code/*.csv" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password 2>&1 | Out-Null
