@@ -1,0 +1,9 @@
+S.No.,Region,VMSize,StorageAccount
+1,Japan East,A11,konkacijapaneast1
+2,East Asia,Standard_D14,konkacieastasia
+3,Australia East,Standard_D5_v2,konkaciaustraliaeast1
+4,West Europe,Standard_D14_v2,konkaciwesteurope
+5,Central US,Standard_D15_v2,konkacicentralus
+6,East US 2,Standard_G4,konkacieastus2
+7,West US,Standard_G5,konkaciwestus1
+8,South India,Standard_F16,konkacisouthindia1

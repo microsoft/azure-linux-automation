@@ -1939,6 +1939,22 @@
 					</VirtualMachine>
 				</HostedService>
 			</D14V2>
+			<D15V2>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D15_v2</InstanceSize>
+						<ARMInstanceSize>Standard_D15_v2</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+					</VirtualMachine>
+				</HostedService>
+			</D15V2>
 			<DS11V2>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -2003,6 +2019,22 @@
 					</VirtualMachine>
 				</HostedService>
 			</DS14V2>
+			<DS15V2>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS15_v2</InstanceSize>
+						<ARMInstanceSize>Standard_DS15_v2</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+					</VirtualMachine>
+				</HostedService>
+			</DS15V2>
 			<D1>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -6762,6 +6794,12 @@
 			</test>
 		</Cycle>
 		<Cycle>
+			<cycleName>NETPERF-UDP</cycleName>
+			<test>
+				<Name>ICA-NET-PERF-UDP-TEST</Name>
+			</test>
+		</Cycle>
+		<Cycle>
 			<cycleName>LISA-MARIADB-PERF</cycleName>
 			<test>
 				<Name>ICA-MYSQLDB-PERF-TEST</Name>
@@ -7108,7 +7146,7 @@
 			<cycleName>DEBUG</cycleName>
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
 			<test>
-				<Name>ICA-DOCKER-EXTENSION-TEST</Name>
+				<Name>ICA-NET-PERF-UDP-TEST</Name>
 			</test>
 		</Cycle>
 	</testCycles>
