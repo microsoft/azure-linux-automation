@@ -28,7 +28,7 @@ gen_csv(){
 	tx_array_file=$input_file-txkBps.log
 	cpu_vmstat_array_file=$input_file-cpu-vmstat.log
 
-	cat $cpu_vmstat_file | grep -v [a-z]| awk '{print 100 - $15}' > $cpu_vmstat_array_file 
+	cat $cpu_vmstat_file | grep -v [a-z]| awk '{print 100 - $15}' > $cpu_vmstat_array_file
 	cat $input_file | grep eth0 | awk '{print $4}' > $rx_pcks_array_file
 	cat $input_file | grep eth0 | awk '{print $5}' > $tx_pcks_array_file
 	cat $input_file | grep eth0 | awk '{print $6}' > $rx_array_file
@@ -75,7 +75,7 @@ gen_csv(){
 		rx_sum=`echo $rx_sum ${rx_array[count]}| awk '{printf "%.3f \n", $1+$2}'`
 		tx_sum=`echo $tx_sum ${tx_array[count]}| awk '{printf "%.3f \n", $1+$2}'`
 		cpu_sum=`echo $cpu_sum ${cpu_array[count]}| awk '{printf "%.3f \n", $1+$2}'`
-	
+
 		((count++))
 	done
 	sum=`echo $tx_sum $rx_sum| awk '{printf "%.3f \n", $1+$2}'`
@@ -88,10 +88,11 @@ gen_csv(){
 }
 
 logs_folder=$1
-summary_file=$logs_folder/summary_file_`hostname`.csv
+#summary_file=$logs_folder/summary_file_`hostname`.csv
+summary_file=summary_file_`hostname`.csv
 echo "" > $summary_file
 echo "Connections,Avg Throughput,Total packets,Avg CPU" > $summary_file
-for number_of_connections in 1 2 4 8 16 32 64 128 256 512 1024 2000 3000 4000 5000 6000
+for number_of_connections in 1 2 4 8 16 32 64 128 256 512 1024
 do
 	echo "Converting $number_of_connections logs.."
 	gen_csv $logs_folder/$number_of_connections/$number_of_connections-sar.log $number_of_connections $summary_file&
@@ -99,7 +100,7 @@ done
 wait
 
 mkdir -p $logs_folder/csv_files/
-for number_of_connections  in 1 2 4 8 16 32 64 128 256 512 1024 2000 3000 4000 5000 6000
+for number_of_connections  in 1 2 4 8 16 32 64 128 256 512 1024
 do
 	mv $logs_folder/$number_of_connections/$number_of_connections-sar.csv $logs_folder/csv_files/
 done

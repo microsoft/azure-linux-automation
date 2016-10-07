@@ -54,7 +54,7 @@ if ($isDeployed)
 		{
 			$testDuration=0
 			LogMsg "VMs Restarted Successfully"
-			for($testDuration -le 11000)
+			for($testDuration -le 4100)
 			{
 				WaitFor -seconds 600
 				LogMsg "testDuration :- $testDuration "
@@ -66,7 +66,7 @@ if ($isDeployed)
 					$NetStatStatus = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "netstat -natp | grep iperf | grep ESTA | wc -l" -runAsSudo
 					if ($NetStatStatus -eq 0)
 					{
-						if($testDuration -lt 9600)
+						if($testDuration -lt 3000)
 						{
 							LogMsg "NetStatStatus after 30 sec :- $NetStatStatus "
 							LogMsg "NetPerf test is ABORTED.."
@@ -76,6 +76,7 @@ if ($isDeployed)
 						else{
 							LogMsg "NetPerf test is COMPLETED."
 							$testResult = "PASS"
+							WaitFor -seconds 200
 							$out = RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/code/*.tar" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password 2>&1 | Out-Null
 							$out = RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/code/*.tar" -downloadTo $LogDir -port $hs1vm2sshport -username $user -password $password 2>&1 | Out-Null
 							$out = RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/code/*.csv" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password 2>&1 | Out-Null
@@ -121,7 +122,6 @@ if ($isDeployed)
 
 							    $i++
 							}
-
 							$UDPresult
 
 							break
