@@ -66,7 +66,7 @@ if ($isDeployed)
 					$NetStatStatus = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "netstat -natp | grep iperf | grep ESTA | wc -l" -runAsSudo
 					if ($NetStatStatus -eq 0)
 					{
-						if($testDuration -lt 3300)
+						if($testDuration -lt 3000)
 						{
 							LogMsg "NetStatStatus after 30 sec :- $NetStatStatus "
 							LogMsg "NetPerf test is ABORTED.."
