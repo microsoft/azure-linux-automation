@@ -54,7 +54,7 @@ if ($isDeployed)
 		{
 			$testDuration=0
 			LogMsg "VMs Restarted Successfully"
-			for($testDuration -le 11000)
+			for($testDuration -le 4100)
 			{
 				WaitFor -seconds 600
 				LogMsg "testDuration :- $testDuration "
@@ -66,7 +66,7 @@ if ($isDeployed)
 					$NetStatStatus = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm2sshport -command "netstat -natp | grep iperf | grep ESTA | wc -l" -runAsSudo
 					if ($NetStatStatus -eq 0)
 					{
-						if($testDuration -lt 9600)
+						if($testDuration -lt 3300)
 						{
 							LogMsg "NetStatStatus after 30 sec :- $NetStatStatus "
 							LogMsg "NetPerf test is ABORTED.."
@@ -121,7 +121,6 @@ if ($isDeployed)
 
 							    $i++
 							}
-
 							$UDPresult
 
 							break

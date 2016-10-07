@@ -18,8 +18,8 @@ code_path="/home/$username/code/"
 
 if [[ `which iperf3` == "" ]]
 then
-    echo "iperf3 not installed\n Installing now..." 
-    install_package "iperf3" 
+    echo "iperf3 not installed\n Installing now..."
+    install_package "iperf3"
 fi
 
 for port_number in `seq 8001 8101`
@@ -33,8 +33,8 @@ do
 	echo "waiting..."
 done
 
-duration=600
-for number_of_connections  in 1 2 4 8 16 32 64 128 256 512 1024 2000 3000 4000 5000 6000
+duration=300
+for number_of_connections  in 1 2 4 8 16 32 64 128 256 512 1024
 do
 	for port_number in `seq 8001 8501`
 	do
