@@ -14,9 +14,16 @@
 # must log its output to a different directory.
 #
 
-sleep 10
-#export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/usr/share/oem/python/bin:/opt/bin
 HOMEDIR=$HOME
+LogMsg()
+{
+    echo "[$(date +"%x %r %Z")] ${1}"
+	echo "[$(date +"%x %r %Z")] ${1}" >> "${HOMEDIR}/runlog.txt"
+}
+LogMsg "Sleeping 10 seconds.."
+sleep 10
+
+#export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/oem/bin:/usr/share/oem/python/bin:/opt/bin
 CONSTANTS_FILE="$HOMEDIR/constants.sh"
 ICA_TESTRUNNING="TestRunning"      # The test is running
 ICA_TESTCOMPLETED="TestCompleted"  # The test completed successfully
@@ -34,21 +41,15 @@ else
 fi
 
 
-LogMsg()
-{
-    echo "[$(date +"%x %r %Z")] ${1}"
-	echo "[$(date +"%x %r %Z")] ${1}" >> "${LOGDIR}/runlog.txt"
-}
-
 UpdateTestState()
 {
-    echo "${1}" > $HOMEDIR//state.txt
+    echo "${1}" > $HOMEDIR/state.txt
 }
 
 RunFIO()
 {
 	UpdateTestState ICA_TESTRUNNING
-	FILEIO="--size=134G --direct=1 --ioengine=libaio --filename=fiodata --overwrite=1  "
+	FILEIO="--size=${fileSize} --direct=1 --ioengine=libaio --filename=fiodata --overwrite=1  "
 
 	####################################
 	#All run config set here
@@ -96,6 +97,7 @@ RunFIO()
 	chmod 666 $LOGFILE
 	echo "Preparing Files: $FILEIO"
 	echo "Preparing Files: $FILEIO" >> $LOGFILE
+	LogMsg "Preparing Files: $FILEIO"
 	# Remove any old files from prior runs (to be safe), then prepare a set of new files.
 	rm fiodata
 	echo "--- Kernel Version Information ---" >> $LOGFILE
@@ -113,7 +115,7 @@ RunFIO()
 	echo "--- Disk Usage After Generating New Files ---" >> $LOGFILE
 	df -h >> $LOGFILE
 	echo "=== End Preparation  $(date +"%x %r %Z") ===" >> $LOGFILE
-
+	LogMsg "Preparing Files: $FILEIO: Finished."
 	####################################
 	#Trigger run from here
 	for testmode in $modes; do
@@ -138,6 +140,7 @@ RunFIO()
 				#blktrace -w 40 -d /dev/sdf -D $blk_operation &
 				#blktrace -w 40 -d /dev/sdm -D $blk_operation &
 				echo "-- iteration ${iteration} ----------------------------- ${testmode} test, ${io}K bs, ${Thread} threads, ${numjobs} jobs, 5 minutes ------------------ $(date +"%x %r %Z") ---" >> $LOGFILE
+				LogMsg "Running ${testmode} test, ${io}K bs, ${Thread} threads ..."
 				jsonfilename="${JSONFILELOG}/fio-result-${testmode}-${io}K-${Thread}td.json"
 				fio $FILEIO --readwrite=$testmode --bs=${io}K --runtime=$ioruntime --iodepth=$Thread --numjobs=$numjobs --output-format=json --output=$jsonfilename --name="iteration"${iteration} >> $LOGFILE
 				#fio $FILEIO --readwrite=$testmode --bs=${io}K --runtime=$ioruntime --iodepth=$Thread --numjobs=$numjobs --name="iteration"${iteration} --group_reporting >> $LOGFILE
@@ -213,7 +216,7 @@ ConfigUbuntu()
 	LogMsg "INFO: Ubuntu installing required packages"
 	
 	apt-get update
-	apt-get install -y wget sysstat blktrace
+	apt-get install -y wget sysstat blktrace bc
 	mount -t debugfs none /sys/kernel/debug
 	
 	installed=`which fio`

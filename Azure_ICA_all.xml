@@ -6225,6 +6225,7 @@
 				<param>numjobs=1</param>
 				<param>ioruntime=300</param>
 				<param>maxIO=8</param>		
+				<param>fileSize=134G</param>
 			</TestParameters>
 			<Priority>P0</Priority>
 		</test>								
