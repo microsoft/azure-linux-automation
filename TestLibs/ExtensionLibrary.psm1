@@ -194,7 +194,7 @@ Function SetAzureVMExtension ( $publicConfigString, $privateConfigString, $Exten
 					LogMsg "Public Config : $publicConfigString"
 					$ExtStatus = Set-AzureRmVMExtension -ResourceGroupName $RGName -VMName $VMName -Location $Location -Name $ExtensionName -Publisher $Publisher -ExtensionType $ExtensionName -TypeHandlerVersion $LatestExtensionVersion -Settingstring $publicConfigString -Verbose
 				}
-				if ($privateConfigString )
+				if ($privateConfigString)
 				{
 					LogMsg "Private Config : $privateConfigString"
 					$ExtStatus = Set-AzureRmVMExtension -ResourceGroupName $RGName -VMName $VMName -Location $Location -Name $ExtensionName -Publisher $Publisher -ExtensionType $ExtensionName -TypeHandlerVersion $LatestExtensionVersion -ProtectedSettingString $privateConfigString -Verbose

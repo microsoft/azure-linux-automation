@@ -4227,9 +4227,31 @@ Function GetAllStringMatchObject([string] $logFile,[string] $beg,[string] $end)
 
 Function GetParallelConnectionCount([string] $logFile,[string] $beg,[string] $end)
 {
-	$connectStr="\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\sport\s\d*\sconnected with \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\sport\s\d"
-	$p=GetStringMatchCount -logFile $logFile -beg $beg -end $end -str $connectStr
-	return $p
+	$connectStr1 = $allVMData[0].InternalIP+"\sport\s\d*\sconnected with " +$allVMData[1].InternalIP + "\sport\s\d"
+	$p1=GetStringMatchCount -logFile $logFile -beg $beg -end $end -str $connectStr1
+
+	$connectStr2 = $allVMData[0].PublicIP+"\sport\s\d*\sconnected with " +$allVMData[1].PublicIP + "\sport\s\d"
+	$p2=GetStringMatchCount -logFile $logFile -beg $beg -end $end -str $connectStr2
+
+	$connectStr3 = $allVMData[0].InternalIP+"\sport\s\d*\sconnected with " +$allVMData[1].PublicIP + "\sport\s\d"
+	$p3=GetStringMatchCount -logFile $logFile -beg $beg -end $end -str $connectStr3
+
+	$connectStr4 = $allVMData[0].PublicIP+"\sport\s\d*\sconnected with " +$allVMData[1].InternalIP + "\sport\s\d"
+	$p4=GetStringMatchCount -logFile $logFile -beg $beg -end $end -str $connectStr4
+
+	$connectStr5 = $allVMData[1].InternalIP+"\sport\s\d*\sconnected with " +$allVMData[0].InternalIP + "\sport\s\d"
+	$p5=GetStringMatchCount -logFile $logFile -beg $beg -end $end -str $connectStr5
+
+	$connectStr6 = $allVMData[1].PublicIP+"\sport\s\d*\sconnected with " +$allVMData[0].PublicIP + "\sport\s\d"
+	$p6=GetStringMatchCount -logFile $logFile -beg $beg -end $end -str $connectStr6
+
+	$connectStr7 = $allVMData[1].InternalIP+"\sport\s\d*\sconnected with " +$allVMData[0].PublicIP + "\sport\s\d"
+	$p7=GetStringMatchCount -logFile $logFile -beg $beg -end $end -str $connectStr7
+
+	$connectStr8 = $allVMData[1].PublicIP+"\sport\s\d*\sconnected with " +$allVMData[0].InternalIP + "\sport\s\d"
+	$p8=GetStringMatchCount -logFile $logFile -beg $beg -end $end -str $connectStr8
+
+	return $p1+$p2+$p3+$p4+$p5+$p6+$p7+$p8
 }
 
 Function GetMSSSize([string] $logFile,[string] $beg,[string] $end)
@@ -6672,6 +6694,7 @@ Function GetStorageAccountKey ($xmlConfig)
 			{
 				LogMsg "Getting $storageAccountName storage account key..."
 				$storageAccountKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $SA.ResourceGroupName -Name $SA.StorageAccountName).Value[0]
+				break
 			}
 		}
 	}

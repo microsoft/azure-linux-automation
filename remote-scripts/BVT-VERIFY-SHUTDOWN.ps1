@@ -16,7 +16,7 @@ if ($isDeployed)
 		LogMsg "Trying to shut down $($AllVMData.RoleName)..."
 		if ( $UseAzureResourceManager )
 		{
-			$stopVM = Stop-AzureRmVM  -ResourceGroupName $AllVMData.ResourceGroupName -Name $AllVMData.RoleName -Force -StayProvisioned -Verbose
+			$stopVM = Stop-AzureRmVM -ResourceGroupName $AllVMData.ResourceGroupName -Name $AllVMData.RoleName -Force -StayProvisioned -Verbose
 			if ( $stopVM.Status -eq "Succeeded" )
 			{
 				$isStopped = $true
