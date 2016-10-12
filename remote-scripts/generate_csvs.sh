@@ -89,7 +89,7 @@ gen_csv(){
 
 logs_folder=$1
 #summary_file=$logs_folder/summary_file_`hostname`.csv
-summary_file=summary_file_`hostname`.csv
+summary_file=$logs_folder/summary_file_`hostname`.csv
 echo "" > $summary_file
 echo "Connections,Avg Throughput,Total packets,Avg CPU" > $summary_file
 for number_of_connections in 1 2 4 8 16 32 64 128 256 512 1024
