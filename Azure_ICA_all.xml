@@ -1939,6 +1939,22 @@
 					</VirtualMachine>
 				</HostedService>
 			</D14V2>
+			<D15V2>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D15_v2</InstanceSize>
+						<ARMInstanceSize>Standard_D15_v2</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+					</VirtualMachine>
+				</HostedService>
+			</D15V2>
 			<DS11V2>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -2003,6 +2019,22 @@
 					</VirtualMachine>
 				</HostedService>
 			</DS14V2>
+			<DS15V2>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS15_v2</InstanceSize>
+						<ARMInstanceSize>Standard_DS15_v2</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+					</VirtualMachine>
+				</HostedService>
+			</DS15V2>
 			<D1>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
