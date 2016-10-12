@@ -1545,7 +1545,7 @@
 					</VirtualMachine>
 				</HostedService>
 			</BVTDeployment>
-
+			
 			<RdmaVM>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -2996,62 +2996,62 @@
 						</EndPoints>
 						<DataDisk>
 							<LUN>0</LUN>
-							<DiskSizeInGB>512</DiskSizeInGB>
+							<DiskSizeInGB>1023</DiskSizeInGB>
 							<HostCaching>None</HostCaching>
 						</DataDisk>
 						<DataDisk>
 							<LUN>1</LUN>
-							<DiskSizeInGB>512</DiskSizeInGB>
+							<DiskSizeInGB>1023</DiskSizeInGB>
 							<HostCaching>None</HostCaching>
 						</DataDisk>
 						<DataDisk>
 							<LUN>2</LUN>
-							<DiskSizeInGB>512</DiskSizeInGB>
+							<DiskSizeInGB>1023</DiskSizeInGB>
 							<HostCaching>None</HostCaching>
 						</DataDisk>
 						<DataDisk>
 							<LUN>3</LUN>
-							<DiskSizeInGB>512</DiskSizeInGB>
+							<DiskSizeInGB>1023</DiskSizeInGB>
 							<HostCaching>None</HostCaching>
 						</DataDisk>
 						<DataDisk>
 							<LUN>4</LUN>
-							<DiskSizeInGB>512</DiskSizeInGB>
+							<DiskSizeInGB>1023</DiskSizeInGB>
 							<HostCaching>None</HostCaching>
 						</DataDisk>
 						<DataDisk>
 							<LUN>5</LUN>
-							<DiskSizeInGB>512</DiskSizeInGB>
+							<DiskSizeInGB>1023</DiskSizeInGB>
 							<HostCaching>None</HostCaching>
 						</DataDisk>
 						<DataDisk>
 							<LUN>6</LUN>
-							<DiskSizeInGB>512</DiskSizeInGB>
+							<DiskSizeInGB>1023</DiskSizeInGB>
 							<HostCaching>None</HostCaching>
 						</DataDisk>
 						<DataDisk>
 							<LUN>7</LUN>
-							<DiskSizeInGB>512</DiskSizeInGB>
+							<DiskSizeInGB>1023</DiskSizeInGB>
 							<HostCaching>None</HostCaching>
 						</DataDisk>
 						<DataDisk>
 							<LUN>8</LUN>
-							<DiskSizeInGB>512</DiskSizeInGB>
+							<DiskSizeInGB>1023</DiskSizeInGB>
 							<HostCaching>None</HostCaching>
 						</DataDisk>
 						<DataDisk>
 							<LUN>9</LUN>
-							<DiskSizeInGB>512</DiskSizeInGB>
+							<DiskSizeInGB>1023</DiskSizeInGB>
 							<HostCaching>None</HostCaching>
 						</DataDisk>
 						<DataDisk>
 							<LUN>10</LUN>
-							<DiskSizeInGB>512</DiskSizeInGB>
+							<DiskSizeInGB>1023</DiskSizeInGB>
 							<HostCaching>None</HostCaching>
 						</DataDisk>
 						<DataDisk>
 							<LUN>11</LUN>
-							<DiskSizeInGB>512</DiskSizeInGB>
+							<DiskSizeInGB>1023</DiskSizeInGB>
 							<HostCaching>None</HostCaching>
 						</DataDisk>
 					</VirtualMachine>
@@ -5876,7 +5876,7 @@
 			<virtualNetworkName>clouderavnet</virtualNetworkName>
 			<subnetName>clouderasubvnet</subnetName>
 			<numberOfDataNodes>1</numberOfDataNodes>
-			<VmSize>Standard_D4</VmSize>
+			<VmSize>Standard_DS14</VmSize>
           </parameters>
 		  <TestType>
 		  </TestType>
@@ -6240,7 +6240,27 @@
 				<param>connections=(1 2 4)</param>
 			</TestParameters>
 			<Priority>P0</Priority>
-		</test>					
+		</test>		
+		<test>
+			<testName>ICA-PERF-FIO-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-FIO-TEST.ps1</testScriptps1>
+			<setupType>DS14DISK12</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>			
+			<TestParameters>
+				<param>modes='randread randwrite read write'</param>
+				<param>startThread=1</param>
+				<param>maxThread=1024</param>
+				<param>startIO=8</param>
+				<param>numjobs=1</param>
+				<param>ioruntime=300</param>
+				<param>maxIO=8</param>		
+				<param>fileSize=134G</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>								
 		<test>
 			<testName>ICA-PERF-REDIS-MIDDLEWARE-TEST</testName>
 			<testScript></testScript>
@@ -6255,6 +6275,7 @@
 			</TestParameters>
 			<Priority>P0</Priority>
 		</test>			
+		
 	</testsDefinition>
 
 	<testCycles>
@@ -7136,6 +7157,12 @@
 				<Name>ICA-PERF-NTTTCP-TEST</Name>
 			</test>
 		</Cycle>
+		<Cycle>
+			<cycleName>PERF-FIO</cycleName>
+			<test>
+				<Name>ICA-PERF-FIO-TEST</Name>
+			</test>
+		</Cycle>		
 		<Cycle>
 			<cycleName>PERF-REDIS-M</cycleName>
 			<test>

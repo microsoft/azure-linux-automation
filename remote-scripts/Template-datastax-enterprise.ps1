@@ -33,13 +33,13 @@ try
 	if($env:GetRandomValue -eq $True)
 	{
 		$AllowedValue =  Get-Content ..\azure-quickstart-templates\datastax-enterprise\azuredeploy.json -Raw | ConvertFrom-Json
-		$jsonfile.parameters.region.value = $AllowedValue.parameters.region.allowedValues | Get-Random
+		#$jsonfile.parameters.region.value = $AllowedValue.parameters.region.allowedValues | Get-Random
 		$jsonfile.parameters.clusterVmSize.value = $AllowedValue.parameters.clusterVmSize.allowedValues | Get-Random
 	}
 	else
 	{
 		$jsonfile.parameters.clusterVmSize.value = $parameters.clusterVmSize
-		$jsonfile.parameters.region.value = $location.Replace('"','')
+		#$jsonfile.parameters.region.value = $location.Replace('"','')
 		if($env:RoleInstanceSize)
 		{
 			$jsonfile.parameters.clusterVmSize.value = $env:RoleInstanceSize
