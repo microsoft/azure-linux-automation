@@ -14,7 +14,8 @@ $resultArr = @()
 
 $SAName = $currentTestData.remoteSA
 $SAPrimaryKey = (Get-AzureStorageKey -StorageAccountName $SAName).Primary
-$SAContainer = "linuxbinaries"
+$SAContainer = $currentTestData.remoteSAContainer
+$remoteDebPath = $currentTestData.remoteDEBPath
 $imageType = $currentTestData.imageType
 $BaseOsImageName = GetOSImageFromDistro -Distro $Distro -xmlConfig $xmlConfig
 LogMsg "Remote Storage Account to copy deb package : $SAName"
@@ -121,9 +122,9 @@ if ($isDeployed)
 						if (($debPackageuploadStatus -imatch "True") -and ($debPackageuploadStatus1 -imatch "True"))
 						{
 							
-							LogMsg "Uploading $debPackageName into linuxbinaries container is SUCCESS"
-							LogMsg "Uploading linuxnext-latest.deb into linuxbinaries container is SUCCESS"
-							LogMsg "*********************************** LINUX-NEXT DEB PAKAGE AVAILABLE LINKS ***********************************`n`n 	https://konkasoft.blob.core.windows.net/linuxbinaries/$debPackageName`n`n 	https://konkasoft.blob.core.windows.net/linuxbinaries/linuxnext-latest.deb`n`n******************************************************************##************************************##**********************************"
+							LogMsg "Uploading $debPackageName into $SAContainer container is SUCCESS"
+							LogMsg "Uploading linuxnext-latest.deb into $SAContainer container is SUCCESS"
+							LogMsg "*********************************** LINUX-NEXT DEB PAKAGE AVAILABLE LINKS ***********************************`n`n 	$remoteDebPath/$debPackageName`n`n 	$remoteDebPath/linuxnext-latest.deb`n`n******************************************************************##************************************##**********************************"
 							$testResult = "PASS"
 						}
 						else
