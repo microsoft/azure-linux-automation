@@ -154,7 +154,15 @@ chmod 666 /home/$user/perf_fio.csv
 				$GuestDistro	= cat "$LogDir\VM_properties.csv" | Select-String "OS type"| %{$_ -replace ",OS type,",""}
 			
 				$TestCaseName	= "FIO-TEST"
-				$HostType	= "Azure"
+				if ( $UseAzureResourceManager )
+				{
+					$HostType	= "Azure-ARM"
+				}
+				else
+				{
+					$HostType	= "Azure"
+				}
+				
 				$HostBy	= ($xmlConfig.config.Azure.General.Location).Replace('"','')
 				$HostOS	= cat "$LogDir\VM_properties.csv" | Select-String "Host Version"| %{$_ -replace ",Host Version,",""}
 				$GuestOSType	= "Linux"

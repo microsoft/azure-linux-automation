@@ -123,7 +123,6 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
                         $ARMImage.Version = [string](($armTempImages[$armTempImages.Count - 1]).Version)
                     }
                     LogMsg "ARMImage name - $($ARMImage.Publisher) : $($ARMImage.Offer) : $($ARMImage.Sku) : $($ARMImage.Version)"
-                    Write-Host "Temp"
 		        }
             }
             else

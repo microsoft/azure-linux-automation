@@ -368,7 +368,34 @@ $StorageProfileScriptBlock = {
                         Add-Content -Value "$($indents[6])^caching^: ^ReadWrite^" -Path $jsonFile
 
                     }
-                    Add-Content -Value "$($indents[5])}" -Path $jsonFile
+                    Add-Content -Value "$($indents[5])}," -Path $jsonFile
+                    $dataDiskAdded = $false
+                    Add-Content -Value "$($indents[5])^dataDisks^ : " -Path $jsonFile
+                    Add-Content -Value "$($indents[5])[" -Path $jsonFile
+                foreach ( $dataDisk in $newVM.DataDisk )
+                {
+                    if ( $dataDisk.LUN -ge 0 )
+                    {
+                        if( $dataDiskAdded )
+                        {
+                        Add-Content -Value "$($indents[6])," -Path $jsonFile
+                        }
+                        Add-Content -Value "$($indents[6]){" -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^name^: ^$vmName-disk-lun-$($dataDisk.LUN)^," -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^diskSizeGB^: ^$($dataDisk.DiskSizeInGB)^," -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^lun^: ^$($dataDisk.LUN)^," -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^createOption^: ^Empty^," -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^caching^: ^$($dataDisk.HostCaching)^," -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^vhd^:" -Path $jsonFile
+                            Add-Content -Value "$($indents[7]){" -Path $jsonFile
+                                Add-Content -Value "$($indents[8])^uri^: ^[concat('http://',variables('StorageAccountName'),'.blob.core.windows.net/vhds/','$vmName-$RGrandomWord-disk-lun-$($dataDisk.LUN).vhd')]^" -Path $jsonFile
+                            Add-Content -Value "$($indents[7])}" -Path $jsonFile
+                        Add-Content -Value "$($indents[6])}" -Path $jsonFile
+                        LogMsg "Added $($dataDisk.DiskSizeInGB)GB Datadisk to $($dataDisk.LUN)."
+                        $dataDiskAdded = $true
+                    }
+                }
+                    Add-Content -Value "$($indents[5])]" -Path $jsonFile
                 Add-Content -Value "$($indents[4])}" -Path $jsonFile
 }
 
