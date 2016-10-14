@@ -309,7 +309,22 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
 $StorageProfileScriptBlock = {
                 Add-Content -Value "$($indents[4])^storageProfile^: " -Path $jsonFile
                 Add-Content -Value "$($indents[4]){" -Path $jsonFile
-                if (!$osVHD)
+                if ($ARMImage)
+                {
+                    LogMsg "├Using ARMImage : $($ARMImage.Publisher):$($ARMImage.Offer):$($ARMImage.Sku):$($ARMImage.Version)"
+                    Add-Content -Value "$($indents[5])^imageReference^ : " -Path $jsonFile
+                    Add-Content -Value "$($indents[5]){" -Path $jsonFile
+                        $publisher = $ARMImage.Publisher
+                        $offer = $ARMImage.Offer
+                        $sku = $ARMImage.Sku
+                        $version = $ARMImage.Version
+                        Add-Content -Value "$($indents[6])^publisher^: ^$publisher^," -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^offer^: ^$offer^," -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^sku^: ^$sku^," -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^version^: ^$version^" -Path $jsonFile
+                    Add-Content -Value "$($indents[5])}," -Path $jsonFile
+                }
+                elseif (!$osVHD)
                 {
                     Add-Content -Value "$($indents[5])^imageReference^ : " -Path $jsonFile
                     Add-Content -Value "$($indents[5]){" -Path $jsonFile
@@ -344,7 +359,6 @@ $StorageProfileScriptBlock = {
                     }
                     else
                     {
-                        LogMsg "├Using ImageName : $osImage"
                         Add-Content -Value "$($indents[6])^name^: ^$vmName-OSDisk^," -Path $jsonFile
                         Add-Content -Value "$($indents[6])^createOption^: ^FromImage^," -Path $jsonFile
                         Add-Content -Value "$($indents[6])^vhd^: " -Path $jsonFile
