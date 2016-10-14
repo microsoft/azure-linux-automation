@@ -2998,6 +2998,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Standard_DS14</InstanceSize>
+						<ARMInstanceSize>Standard_DS14</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
