@@ -4551,6 +4551,7 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 				$QuickVMNode.URL = $RGIPdata.Properties.DnsSettings.Fqdn
 				$QuickVMNode.RoleName = $testVM.ResourceName
 				$QuickVMNode.Status = $testVM.Properties.ProvisioningState
+				$QuickVMNode.InstanceSize = $testVM.Properties.hardwareProfile.vmSize
 				$allDeployedVMs += $QuickVMNode
 			}
 			LogMsg "Collected $ResourceGroup data!"		
