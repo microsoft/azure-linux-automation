@@ -116,12 +116,12 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 		        { 
 			        Set-Variable -Name ARMImage -Value $tempDistro.ARMImage -Scope Global
 			    
-                    if ( $ARMImage.Version -imatch "latest" )
-                    {
-                        LogMsg "Getting latest image details..."
-                        $armTempImages = Get-AzureRmVMImage -Location ($xmlConfig.config.Azure.General.Location).Replace('"','') -PublisherName $ARMImage.Publisher -Offer $ARMImage.Offer -Skus $ARMImage.Sku
-                        $ARMImage.Version = [string](($armTempImages[$armTempImages.Count - 1]).Version)
-                    }
+                    #if ( $ARMImage.Version -imatch "latest" )
+                    #{
+                    #    LogMsg "Getting latest image details..."
+                    #    $armTempImages = Get-AzureRmVMImage -Location ($xmlConfig.config.Azure.General.Location).Replace('"','') -PublisherName $ARMImage.Publisher -Offer $ARMImage.Offer -Skus $ARMImage.Sku
+                    #    $ARMImage.Version = [string](($armTempImages[$armTempImages.Count - 1]).Version)
+                    #}
                     LogMsg "ARMImage name - $($ARMImage.Publisher) : $($ARMImage.Offer) : $($ARMImage.Sku) : $($ARMImage.Version)"
 		        }
             }
