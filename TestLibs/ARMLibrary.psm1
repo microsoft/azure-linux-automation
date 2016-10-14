@@ -122,6 +122,8 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
     {
         Remove-AzureRmResourceGroup -Name $RGName -Force -Verbose
         $retValue = $?
+        $ARMStorageAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
+        RemoveResidualResourceGroupVHDs -ResourceGroup $RGName -storageAccount $ARMStorageAccount
     }
     else
     {
@@ -131,6 +133,25 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
     return $retValue
 }
 
+Function RemoveResidualResourceGroupVHDs($ResourceGroup,$storageAccount)
+{
+    # Verify that the OS VHD does not already exist
+    
+    $azureStorage = $storageAccount
+    LogMsg "Removing residual VHDs of $ResourceGroup from $azureStorage..."
+    $storageContext = (Get-AzureRmStorageAccount | Where-Object{$_.StorageAccountName -match $azureStorage}).Context
+    $storageBlob = Get-AzureStorageBlob -Context $storageContext -Container "vhds"
+    $vhdList = $storageBlob | Where-Object{$_.Name -match "$ResourceGroup"}
+    if ($vhdList) 
+    {
+        # Remove VHD files
+        foreach($diskName in $vhdList.Name) 
+        {
+            LogMsg "Removing VHD $diskName"
+            Remove-AzureStorageBlob -Blob $diskname -Container vhds -Context $storageContext -Verbose -ErrorAction SilentlyContinue
+        }
+    }
+}
 Function CreateResourceGroup([string]$RGName, $location)
 {
     $FailCounter = 0
