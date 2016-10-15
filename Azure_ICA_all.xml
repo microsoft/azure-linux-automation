@@ -61,6 +61,16 @@
 			<Data>
 				<!-- You can add your own distro and Image names here -->
 				<Distro>
+					<Name>SSU1604P</Name>
+					<OsImage>b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu-16_04-LTS-amd64-server-20160907.1-en-us-30GB</OsImage>
+					<ARMImage>
+						<Publisher>Canonical</Publisher>
+						<Offer>UbuntuServer</Offer>
+						<Sku>16.04.0-LTS</Sku>
+						<Version>latest</Version>
+					</ARMImage>
+				</Distro>				
+				<Distro>
 					<Name>SSU1510P</Name>
 					<OsImage>b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu_DAILY_BUILD-wily-15_10-amd64-server-20160217.2-en-us-30GB</OsImage><!-- To run the tests in ASM mode, you need to provide the ImageName name. You can get the available ImageNames by executing Get-AzureVMImage command.-->
 					<OsVHD></OsVHD> <!-- To run the tests in ARM mode, you need to provide the VHD name, which should be uploaded to "vhds" container of your storage account.-->
@@ -2988,6 +2998,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Standard_DS14</InstanceSize>
+						<ARMInstanceSize>Standard_DS14</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>

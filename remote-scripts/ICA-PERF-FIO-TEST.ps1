@@ -102,8 +102,8 @@ chmod 666 /home/$user/perf_fio.csv
 		LogMsg "Test Completed"
 		$resultSummary +=  CreateResultSummary -testResult $testResult -metaData "" -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 		
-		try
-		{
+    try
+        {
 			foreach($line in (Get-Content "$LogDir\perf_fio.csv"))
 			{
 				if ( $line -imatch "Max IOPS of each mode" )
@@ -144,27 +144,35 @@ chmod 666 /home/$user/perf_fio.csv
 
 			LogMsg "Uploading the test results.."
 			$dataSource = $xmlConfig.config.Azure.database.server
-			$user = $xmlConfig.config.Azure.database.user
-			$password = $xmlConfig.config.Azure.database.password
+			$DBuser = $xmlConfig.config.Azure.database.user
+			$DBpassword = $xmlConfig.config.Azure.database.password
 			$database = $xmlConfig.config.Azure.database.dbname
 			$dataTableName = $xmlConfig.config.Azure.database.dbtable
 			$TestCaseName = $xmlConfig.config.Azure.database.testTag
-			if ($dataSource -And $user -And $password -And $database -And $dataTableName) 
+			if ($dataSource -And $DBuser -And $DBpassword -And $database -And $dataTableName) 
 			{
 				$GuestDistro	= cat "$LogDir\VM_properties.csv" | Select-String "OS type"| %{$_ -replace ",OS type,",""}
 			
 				$TestCaseName	= "FIO-TEST"
-				$HostType	= "Azure"
+				if ( $UseAzureResourceManager )
+				{
+					$HostType	= "Azure-ARM"
+				}
+				else
+				{
+					$HostType	= "Azure"
+				}
+				
 				$HostBy	= ($xmlConfig.config.Azure.General.Location).Replace('"','')
 				$HostOS	= cat "$LogDir\VM_properties.csv" | Select-String "Host Version"| %{$_ -replace ",Host Version,",""}
 				$GuestOSType	= "Linux"
 				$GuestDistro	= cat "$LogDir\VM_properties.csv" | Select-String "OS type"| %{$_ -replace ",OS type,",""}
-				$GuestSize = $clientVMData.InstanceSize
+				$GuestSize = $testVMData.InstanceSize
 				$KernelVersion	= cat "$LogDir\VM_properties.csv" | Select-String "Kernel version"| %{$_ -replace ",Kernel version,",""}
 				
-				$connectionString = "Server=$dataSource;uid=$user; pwd=$password;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+				$connectionString = "Server=$dataSource;uid=$DBuser; pwd=$DBpassword;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 				
-				$SQLQuery = "INSERT INTO $dataTableName (TestCaseName,TestDate,HostType,HostBy,HostOS,GuestOSType,GuestDistro,GuestSize,KernelVersion,QDepth,seq_read_iops,seq_read_lat_usec,rand_read_iops,rand_read_lat_usec,seq_write_iops,seq_write_lat_usec,rand_write_iops,rand_write_lat_usec) VALUES "
+				$SQLQuery = "INSERT INTO $dataTableName (TestCaseName,TestDate,HostType,HostBy,HostOS,GuestOSType,GuestDistro,GuestSize,KernelVersion,BlockSize_KB,QDepth,seq_read_iops,seq_read_lat_usec,rand_read_iops,rand_read_lat_usec,seq_write_iops,seq_write_lat_usec,rand_write_iops,rand_write_lat_usec) VALUES "
 
 				for ( $QDepth = $startThread; $QDepth -le $maxThread; $QDepth *= 2 ) 
 				{
@@ -180,18 +188,21 @@ chmod 666 /home/$user/perf_fio.csv
 					$rand_write_iops = ($fioDataCsv |  where { $_.TestType -eq "randwrite" -and  $_.Threads -eq "$QDepth"} | Select WriteIOPS).WriteIOPS
 					$rand_write_lat_usec= ($fioDataCsv |  where { $_.TestType -eq "randwrite" -and  $_.Threads -eq "$QDepth"} | Select MaxOfWriteMeanLatency).MaxOfWriteMeanLatency
 
-					$SQLQuery += "('$TestCaseName','$(Get-Date -Format yyyy-MM-dd)','$HostType','$HostBy','$HostOS','$GuestOSType','$GuestDistro','$GuestSize','$KernelVersion','$QDepth','$seq_read_iops','$seq_read_lat_usec','$rand_read_iops','$rand_read_lat_usec','$seq_write_iops','$seq_write_lat_usec','$rand_write_iops','$rand_write_lat_usec'),"	
+					$BlockSize_KB= (($fioDataCsv |  where { $_.Threads -eq "$QDepth"} | Select BlockSize)[0].BlockSize).Replace("K","")
+                    
+				    $SQLQuery += "('$TestCaseName','$(Get-Date -Format yyyy-MM-dd)','$HostType','$HostBy','$HostOS','$GuestOSType','$GuestDistro','$GuestSize','$KernelVersion','$BlockSize_KB','$QDepth','$seq_read_iops','$seq_read_lat_usec','$rand_read_iops','$rand_read_lat_usec','$seq_write_iops','$seq_write_lat_usec','$rand_write_iops','$rand_write_lat_usec'),"	
+				    LogMsg "Collected performace data for $QDepth QDepth."
 				}
 
 				$SQLQuery = $SQLQuery.TrimEnd(',')
-
+				Write-Host $SQLQuery
 				$connection = New-Object System.Data.SqlClient.SqlConnection
 				$connection.ConnectionString = $connectionString
 				$connection.Open()
 
 				$command = $connection.CreateCommand()
 				$command.CommandText = $SQLQuery
-				Write-Host $command.CommandText
+				
 				$result = $command.executenonquery()
 				$connection.Close()
 				LogMsg "Uploading the test results done!!"

@@ -2671,16 +2671,19 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 						else
 						{
 							$RGdetails = Get-AzureRmResourceGroup -Name $group
-							if ( (  $RGdetails.Tags[0].Name -eq $preserveKeyword ) -and (  $RGdetails.Tags[0].Value -eq "yes" ))
-							{
-								LogMsg "Skipping Cleanup of preserved resource group."
-								LogMsg "Collecting VM logs.."
-								if ( !$isVMLogsCollected)
-								{
-									GetVMLogs -allVMData $allVMData
-								}
-								$isVMLogsCollected = $true
-							}
+                            if ( $RGdetails.Tags )
+                            {
+							    if ( (  $RGdetails.Tags[0].Name -eq $preserveKeyword ) -and (  $RGdetails.Tags[0].Value -eq "yes" ))
+							    {
+								    LogMsg "Skipping Cleanup of preserved resource group."
+								    LogMsg "Collecting VM logs.."
+								    if ( !$isVMLogsCollected)
+								    {
+									    GetVMLogs -allVMData $allVMData
+								    }
+								    $isVMLogsCollected = $true
+							    }
+                            }
 							else
 							{
                                 if ( $keepReproInact )
@@ -4548,6 +4551,7 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 				$QuickVMNode.URL = $RGIPdata.Properties.DnsSettings.Fqdn
 				$QuickVMNode.RoleName = $testVM.ResourceName
 				$QuickVMNode.Status = $testVM.Properties.ProvisioningState
+				$QuickVMNode.InstanceSize = $testVM.Properties.hardwareProfile.vmSize
 				$allDeployedVMs += $QuickVMNode
 			}
 			LogMsg "Collected $ResourceGroup data!"		
