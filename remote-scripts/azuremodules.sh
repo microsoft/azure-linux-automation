@@ -50,24 +50,24 @@ function detect_linux_ditribution()
     if [ "$linux_ditribution" == "" ]
     then
         if echo "$temp_text" | grep -qi "ol"; then
-            linux_ditribution='Oracle'
+            linux_ditribution='oracle'
         elif echo "$temp_text" | grep -qi "Ubuntu"; then
-            linux_ditribution='Ubuntu'
-        elif echo "$temp_text" | grep -qi "SUSE"; then
-            linux_ditribution='SUSE'
+            linux_ditribution='ubuntu'
+        elif echo "$temp_text" | grep -qi "SUSE Linux"; then
+            linux_ditribution='suse'
         elif echo "$temp_text" | grep -qi "openSUSE"; then
-            linux_ditribution='OpenSUSE'
+            linux_ditribution='opensuse'
         elif echo "$temp_text" | grep -qi "centos"; then
-            linux_ditribution='CentOS'
+            linux_ditribution='centos'
         elif echo "$temp_text" | grep -qi "Oracle"; then
-            linux_ditribution='Oracle'
+            linux_ditribution='oracle'
         elif echo "$temp_text" | grep -qi "Red Hat"; then
-            linux_ditribution='RHEL'
+            linux_ditribution='rhel'
         else
             linux_ditribution='unknown'
         fi
     fi
-    echo "${linux_ditribution^}"
+    echo $linux_ditribution
 }
 
 function updaterepos()
@@ -130,25 +130,28 @@ function zypper_install ()
 
 function install_package ()
 {
-    local package_name=$1
+    local package_name=$@
     ditribution=$(detect_linux_ditribution)
-    case "$ditribution" in
-        Oracle|RHEL|CentOS)
-            yum_install $package_name
-            ;;
+	for i in "${package_name[@]}"
+	do
+		case "$ditribution" in
+			oracle|rhel|centos)
+				yum_install "$package_name"
+				;;
 
-        Ubuntu)
-            apt_get_install $package_name
-            ;;
+			ubuntu)
+				apt_get_install "$package_name"
+				;;
 
-        SUSE|OpenSUSE|sles)
-            zypper_install $package_name
-            ;;
+			suse|opensuse|sles)
+				zypper_install "$package_name"
+				;;
 
-        *)
-            echo "Unknown ditribution"
-            return 1
-    esac
+			*)
+				echo "Unknown ditribution"
+				return 1
+		esac
+	done
 }
 
 function creat_partitions ()
@@ -233,7 +236,7 @@ function remote_copy ()
 
     if [ "x$host" == "x" ] || [ "x$user" == "x" ] || [ "x$passwd" == "x" ] || [ "x$filename" == "x" ] ; then
        echo "Usage: remote_copy -user <username> -passwd <user password> -host <host ipaddress> -filename <filename> -remote_path <location of the file on remote vm> -cmd <put/get>"
-       exit -1
+       return
     fi
 
     if [ "$cmd" == "get" ] || [ "x$cmd" == "x" ]; then
@@ -264,7 +267,7 @@ function remote_exec ()
 
     if [ "x$host" == "x" ] || [ "x$user" == "x" ] || [ "x$passwd" == "x" ] || [ "x$cmd" == "x" ] ; then
        echo "Usage: remote_exec -user <username> -passwd <user password> -host <host ipaddress> <onlycommand>"
-       exit -1
+       return
     fi
 
     status=`sshpass -p $passwd ssh -t -o StrictHostKeyChecking=no $user@$host $cmd 2>&1`
@@ -290,7 +293,7 @@ function set_user_password {
     if [ "x$string" == "x" ]
     then
         echo "$user not found in /etc/shadow"
-    return -1
+		return -1
     fi
 
     IFS=':' read -r -a array <<< "$string"
