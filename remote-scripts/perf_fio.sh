@@ -88,6 +88,7 @@ RunFIO()
 	#ioruntime=300
 	#maxThread=1024
 	#maxIO=8
+	io_increment=128
 
 	####################################
 	echo "Test log created at: ${LOGFILE}"
@@ -149,7 +150,7 @@ RunFIO()
 				Thread=$(( Thread*2 ))		
 				iteration=$(( iteration+1 ))
 			done
-		io=$(( io*2 ))
+		io=$(( io * io_increment ))
 		done
 	done
 	####################################
