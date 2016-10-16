@@ -151,7 +151,14 @@ collect_VM_properties
 			$GuestDistro	= cat "$LogDir\VM_properties.csv" | Select-String "OS type"| %{$_ -replace ",OS type,",""}
 			
 			#$TestCaseName	= "LINUX-NEXT-UPSTREAM-TEST"
-			$HostType	= "Azure"
+			if ( $UseAzureResourceManager )
+			{
+				$HostType	= "Azure-ARM"
+			}
+			else
+			{
+				$HostType	= "Azure"
+			}
 			$HostBy	= ($xmlConfig.config.Azure.General.Location).Replace('"','')
 			$HostOS	= cat "$LogDir\VM_properties.csv" | Select-String "Host Version"| %{$_ -replace ",Host Version,",""}
 			$GuestOSType	= "Linux"
