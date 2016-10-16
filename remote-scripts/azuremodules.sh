@@ -50,19 +50,19 @@ function detect_linux_ditribution()
     if [ "$linux_ditribution" == "" ]
     then
         if echo "$temp_text" | grep -qi "ol"; then
-            linux_ditribution='oracle'
+            linux_ditribution='Oracle'
         elif echo "$temp_text" | grep -qi "Ubuntu"; then
-            linux_ditribution='ubuntu'
-        elif echo "$temp_text" | grep -qi "SUSE Linux"; then
-            linux_ditribution='suse'
+            linux_ditribution='Ubuntu'
+        elif echo "$temp_text" | grep -qi "SUSE"; then
+            linux_ditribution='SUSE'
         elif echo "$temp_text" | grep -qi "openSUSE"; then
-            linux_ditribution='opensuse'
+            linux_ditribution='OpenSUSE'
         elif echo "$temp_text" | grep -qi "centos"; then
-            linux_ditribution='centos'
+            linux_ditribution='CentOS'
         elif echo "$temp_text" | grep -qi "Oracle"; then
-            linux_ditribution='oracle'
+            linux_ditribution='Oracle'
         elif echo "$temp_text" | grep -qi "Red Hat"; then
-            linux_ditribution='rhel'
+            linux_ditribution='RHEL'
         else
             linux_ditribution='unknown'
         fi
@@ -134,22 +134,22 @@ function install_package ()
     ditribution=$(detect_linux_ditribution)
 	for i in "${package_name[@]}"
 	do
-		case "$ditribution" in
-			oracle|rhel|centos)
-				yum_install "$package_name"
-				;;
+	    case "$ditribution" in
+	        Oracle|RHEL|CentOS)
+	            yum_install "$package_name"
+	            ;;
 
-			ubuntu)
-				apt_get_install "$package_name"
-				;;
+	        Ubuntu)
+	            apt_get_install "$package_name"
+	            ;;
 
-			suse|opensuse|sles)
-				zypper_install "$package_name"
-				;;
+	        SUSE|OpenSUSE|sles)
+	            zypper_install "$package_name"
+	            ;;
 
-			*)
-				echo "Unknown ditribution"
-				return 1
+	        *)
+	            echo "Unknown ditribution"
+	            return 1
 		esac
 	done
 }
@@ -293,7 +293,7 @@ function set_user_password {
     if [ "x$string" == "x" ]
     then
         echo "$user not found in /etc/shadow"
-		return -1
+        return -1
     fi
 
     IFS=':' read -r -a array <<< "$string"
