@@ -178,7 +178,7 @@ collect_VM_properties
 				$SQLQuery += "('$TestCaseName','$(Get-Date -Format yyyy-MM-dd)','$HostType','$HostBy','$HostOS','$GuestOSType','$GuestDistro','$GuestSize','$KernelVersion','$IPVersion','$ProtocolType',$($Line[0]),$($Line[1]),$($Line[2])),"    
 			}
 			$SQLQuery = $SQLQuery.TrimEnd(',')
-
+			LogMsg $SQLQuery
 			$connection = New-Object System.Data.SqlClient.SqlConnection
 			$connection.ConnectionString = $connectionString
 			$connection.Open()
