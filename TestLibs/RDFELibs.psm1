@@ -2602,6 +2602,8 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
                                     }
                                     else
 									{
+										LogMsg "Collecting VM logs of PASS test case.."
+										$out = GetVMLogs -allVMData $allVMData
 										LogMsg "Cleaning up deployed test virtual machines."
 										$isClened = DeleteService -serviceName $hsDetails.ServiceName
 										if ($isClened -contains "False")
