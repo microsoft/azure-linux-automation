@@ -2602,6 +2602,8 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
                                     }
                                     else
 									{
+										LogMsg "Collecting VM logs of PASS test case.."
+										$out = GetVMLogs -allVMData $allVMData
 										LogMsg "Cleaning up deployed test virtual machines."
 										$isClened = DeleteService -serviceName $hsDetails.ServiceName
 										if ($isClened -contains "False")
@@ -4474,8 +4476,10 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name ResourceGroupName -Value $ResourceGroupName -Force
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name RoleName -Value $RoleName -Force 
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name PublicIP -Value $PublicIP -Force
+		Add-Member -InputObject $objNode -MemberType NoteProperty -Name PublicIPv6 -Value $PublicIP -Force
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name InternalIP -Value $InternalIP -Force
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name URL -Value $URL -Force
+		Add-Member -InputObject $objNode -MemberType NoteProperty -Name URLv6 -Value $URL -Force
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name Status -Value $Status -Force
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name InstanceSize -Value $InstanceSize -Force
 		return $objNode
@@ -4494,14 +4498,14 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 			{
 				$numberOfVMs += 1
 			}
-			if ( $numberOfVMs -gt 1 )
+			if ( ($numberOfVMs -gt 1) -or (($RGIPData | where { $_.Properties.publicIPAddressVersion -eq "IPv6" }).Properties.ipAddress) )
 			{
 				$LBdata = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/loadBalancers" -ExpandProperties -Verbose
 			}
 			foreach ($testVM in $RGVMs)
 			{
 				$QuickVMNode = CreateQuickVMNode
-				if ( $numberOfVMs -gt 1 )
+				if ( ( $numberOfVMs -gt 1 ) -or (($RGIPData | where { $_.Properties.publicIPAddressVersion -eq "IPv6" }).Properties.ipAddress))
 				{
 					$InboundNatRules = $LBdata.Properties.InboundNatRules
 					foreach ($endPoint in $InboundNatRules)
@@ -4547,8 +4551,11 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 					}
 				}
 				$QuickVMNode.ResourceGroupName = $ResourceGroup
-				$QuickVMNode.PublicIP = $RGIPdata.Properties.IpAddress
-				$QuickVMNode.URL = $RGIPdata.Properties.DnsSettings.Fqdn
+                
+				$QuickVMNode.PublicIP = ($RGIPData | where { $_.Properties.publicIPAddressVersion -eq "IPv4" }).Properties.ipAddress
+				$QuickVMNode.PublicIPv6 = ($RGIPData | where { $_.Properties.publicIPAddressVersion -eq "IPv6" }).Properties.ipAddress
+				$QuickVMNode.URL = ($RGIPData | where { $_.Properties.publicIPAddressVersion -eq "IPv4" }).Properties.dnsSettings.fqdn
+				$QuickVMNode.URLv6 = ($RGIPData | where { $_.Properties.publicIPAddressVersion -eq "IPv6" }).Properties.dnsSettings.fqdn
 				$QuickVMNode.RoleName = $testVM.ResourceName
 				$QuickVMNode.Status = $testVM.Properties.ProvisioningState
 				$QuickVMNode.InstanceSize = $testVM.Properties.hardwareProfile.vmSize

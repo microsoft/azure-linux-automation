@@ -50,19 +50,19 @@ function detect_linux_ditribution()
     if [ "$linux_ditribution" == "" ]
     then
         if echo "$temp_text" | grep -qi "ol"; then
-            linux_ditribution='Oracle'
+            linux_ditribution='oracle'
         elif echo "$temp_text" | grep -qi "Ubuntu"; then
-            linux_ditribution='Ubuntu'
-        elif echo "$temp_text" | grep -qi "SUSE"; then
-            linux_ditribution='SUSE'
+            linux_ditribution='ubuntu'
+        elif echo "$temp_text" | grep -qi "SUSE Linux"; then
+            linux_ditribution='suse'
         elif echo "$temp_text" | grep -qi "openSUSE"; then
-            linux_ditribution='OpenSUSE'
+            linux_ditribution='opensuse'
         elif echo "$temp_text" | grep -qi "centos"; then
-            linux_ditribution='CentOS'
+            linux_ditribution='centos'
         elif echo "$temp_text" | grep -qi "Oracle"; then
-            linux_ditribution='Oracle'
+            linux_ditribution='oracle'
         elif echo "$temp_text" | grep -qi "Red Hat"; then
-            linux_ditribution='RHEL'
+            linux_ditribution='rhel'
         else
             linux_ditribution='unknown'
         fi
