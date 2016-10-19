@@ -134,22 +134,22 @@ function install_package ()
     ditribution=$(detect_linux_ditribution)
 	for i in "${package_name[@]}"
 	do
-		case "$ditribution" in
-			oracle|rhel|centos)
-				yum_install "$package_name"
-				;;
+	    case "$ditribution" in
+	        Oracle|RHEL|CentOS)
+	            yum_install "$package_name"
+	            ;;
 
-			ubuntu)
-				apt_get_install "$package_name"
-				;;
+	        Ubuntu)
+	            apt_get_install "$package_name"
+	            ;;
 
-			suse|opensuse|sles)
-				zypper_install "$package_name"
-				;;
+	        SUSE|OpenSUSE|sles)
+	            zypper_install "$package_name"
+	            ;;
 
-			*)
-				echo "Unknown ditribution"
-				return 1
+	        *)
+	            echo "Unknown ditribution"
+	            return 1
 		esac
 	done
 }
@@ -293,7 +293,7 @@ function set_user_password {
     if [ "x$string" == "x" ]
     then
         echo "$user not found in /etc/shadow"
-		return -1
+        return -1
     fi
 
     IFS=':' read -r -a array <<< "$string"
