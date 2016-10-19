@@ -2967,23 +2967,6 @@
 					</VirtualMachine>
 				</HostedService>
 			</A11>
-			<F16>
-				<isDeployed>NO</isDeployed>
-				<HostedService>
-					<VirtualMachine>
-						<state></state>
-						<InstanceSize>Standard_F16</InstanceSize>
-						<ARMInstanceSize>Standard_F16</ARMInstanceSize>
-						<EndPoints>
-							<Name>SSH</Name>
-							<Protocol>tcp</Protocol>
-							<LocalPort>22</LocalPort>
-							<PublicPort>22</PublicPort>
-						</EndPoints>
-						<DataDisk></DataDisk>
-					</VirtualMachine>
-				</HostedService>
-			</F16>
 			<DS2DISK2>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
