@@ -3883,6 +3883,74 @@
 					</VirtualMachine>					
 				</HostedService>
 			</S2C1>			
+			
+			<!-- IPv6 Enabled Deployments -->
+			<S1C1LBIPv6>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VnetName></VnetName>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_DS1</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>750</LocalPort>
+							<PublicPort>750</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>UDPtest</Name>
+							<Protocol>udp</Protocol>
+							<LocalPort>990</LocalPort>
+							<PublicPort>990</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+				<HostedService>
+					<VnetName></VnetName>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_DS1</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>750</LocalPort>
+							<PublicPort>750</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>UDPtest</Name>
+							<Protocol>udp</Protocol>
+							<LocalPort>990</LocalPort>
+							<PublicPort>990</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>						
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</S1C1LBIPv6>			
 		</Deployment>
 		
 
