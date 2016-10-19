@@ -1,7 +1,7 @@
 # This script deploys the VMs for the LVM functional test and trigger the test.
 # 1. dos2unix, tar, git, make must be installed in the test image
 #
-# Author: Sivakanth R
+# Author: Sivakanth Rebba
 # Email       : v-sirebb@microsoft.com
 #
 ###################################################################################
@@ -124,7 +124,7 @@ if ($isDeployed)
 							
 							LogMsg "Uploading $debPackageName into $SAContainer container is SUCCESS"
 							LogMsg "Uploading linuxnext-latest.deb into $SAContainer container is SUCCESS"
-							LogMsg "*********************************** LINUX-NEXT DEB PAKAGE AVAILABLE LINKS ***********************************`n`n 	$remoteDebPath/$debPackageName`n`n 	$remoteDebPath/linuxnext-latest.deb`n`n******************************************************************##************************************##**********************************"
+							LogMsg "*********************************** LINUX-NEXT DEB PACKAGE AVAILABLE LINKS ***********************************`n`n 	$remoteDebPath/$debPackageName`n`n 	$remoteDebPath/linuxnext-latest.deb`n`n******************************************************************##************************************##**********************************"
 							$testResult = "PASS"
 						}
 						else

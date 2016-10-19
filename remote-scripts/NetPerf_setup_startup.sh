@@ -19,10 +19,10 @@ then
 	testcommand="bash $code_path/server_start.sh $username >> $code_path/server.log&" 
 elif [ "$vm_type" = "client" ]
 then
-	if [ "$#" -ne 3 ]; then
+	if [ "$#" -ne 4 ]; then
 		echo "Illegal number of parameters passed exiting..." >> $error_file
 	fi
-	testcommand="bash $code_path/client_start.sh $server_ip $username >> $code_path/client.log&"
+	testcommand="bash $code_path/client_start.sh $server_ip $username $4 >> $code_path/client.log&"
 else
 	echo "Invalid arguments passed" >> $error_file
 fi

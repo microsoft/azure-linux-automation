@@ -1221,7 +1221,7 @@ Function GetAndCheckKernelLogs($allDeployedVMs, $status, $vmUser, $vmPassword)
 				if ( $UseAzureResourceManager )
 				{
 					LogMsg "Adding preserve tag to $($VM.ResourceGroup) .."
-					$out = Set-AzureResourceGroup -Name $($VM.ResourceGroup) -Tag @{Name =$preserveKeyword; Value = "yes"},@{Name ="callTrace"; Value = "yes"}
+					$out = Set-AzureRmResourceGroup -Name $($VM.ResourceGroup) -Tag @{Name =$preserveKeyword; Value = "yes"},@{Name ="callTrace"; Value = "yes"}
 				}
 				else
 				{
@@ -2670,17 +2670,20 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 						}
 						else
 						{
-							$RGdetails = Get-AzureResourceGroup -Name $group
-							if ( (  $RGdetails.Tags[0].Name -eq $preserveKeyword ) -and (  $RGdetails.Tags[0].Value -eq "yes" ))
-							{
-								LogMsg "Skipping Cleanup of preserved resource group."
-								LogMsg "Collecting VM logs.."
-								if ( !$isVMLogsCollected)
-								{
-									GetVMLogs -allVMData $allVMData
-								}
-								$isVMLogsCollected = $true
-							}
+							$RGdetails = Get-AzureRmResourceGroup -Name $group
+                            if ( $RGdetails.Tags )
+                            {
+							    if ( (  $RGdetails.Tags[0].Name -eq $preserveKeyword ) -and (  $RGdetails.Tags[0].Value -eq "yes" ))
+							    {
+								    LogMsg "Skipping Cleanup of preserved resource group."
+								    LogMsg "Collecting VM logs.."
+								    if ( !$isVMLogsCollected)
+								    {
+									    GetVMLogs -allVMData $allVMData
+								    }
+								    $isVMLogsCollected = $true
+							    }
+                            }
 							else
 							{
                                 if ( $keepReproInact )
@@ -2707,7 +2710,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 					{
 						LogMsg "Preserving the Resource Group(s) $group"
 						LogMsg "Setting tags : preserve = yes; testName = $testName"
-						$out = Set-AzureResourceGroup -Name $group -Tag @{Name =$preserveKeyword; Value = "yes"},@{Name ="testName"; Value = "$testName"}
+						$out = Set-AzureRmResourceGroup -Name $group -Tag @{Name =$preserveKeyword; Value = "yes"},@{Name ="testName"; Value = "$testName"}
 						LogMsg "Collecting VM logs.."
 						if ( !$isVMLogsCollected)
 						{
@@ -4227,9 +4230,31 @@ Function GetAllStringMatchObject([string] $logFile,[string] $beg,[string] $end)
 
 Function GetParallelConnectionCount([string] $logFile,[string] $beg,[string] $end)
 {
-	$connectStr="\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\sport\s\d*\sconnected with \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\sport\s\d"
-	$p=GetStringMatchCount -logFile $logFile -beg $beg -end $end -str $connectStr
-	return $p
+	$connectStr1 = $allVMData[0].InternalIP+"\sport\s\d*\sconnected with " +$allVMData[1].InternalIP + "\sport\s\d"
+	$p1=GetStringMatchCount -logFile $logFile -beg $beg -end $end -str $connectStr1
+
+	$connectStr2 = $allVMData[0].PublicIP+"\sport\s\d*\sconnected with " +$allVMData[1].PublicIP + "\sport\s\d"
+	$p2=GetStringMatchCount -logFile $logFile -beg $beg -end $end -str $connectStr2
+
+	$connectStr3 = $allVMData[0].InternalIP+"\sport\s\d*\sconnected with " +$allVMData[1].PublicIP + "\sport\s\d"
+	$p3=GetStringMatchCount -logFile $logFile -beg $beg -end $end -str $connectStr3
+
+	$connectStr4 = $allVMData[0].PublicIP+"\sport\s\d*\sconnected with " +$allVMData[1].InternalIP + "\sport\s\d"
+	$p4=GetStringMatchCount -logFile $logFile -beg $beg -end $end -str $connectStr4
+
+	$connectStr5 = $allVMData[1].InternalIP+"\sport\s\d*\sconnected with " +$allVMData[0].InternalIP + "\sport\s\d"
+	$p5=GetStringMatchCount -logFile $logFile -beg $beg -end $end -str $connectStr5
+
+	$connectStr6 = $allVMData[1].PublicIP+"\sport\s\d*\sconnected with " +$allVMData[0].PublicIP + "\sport\s\d"
+	$p6=GetStringMatchCount -logFile $logFile -beg $beg -end $end -str $connectStr6
+
+	$connectStr7 = $allVMData[1].InternalIP+"\sport\s\d*\sconnected with " +$allVMData[0].PublicIP + "\sport\s\d"
+	$p7=GetStringMatchCount -logFile $logFile -beg $beg -end $end -str $connectStr7
+
+	$connectStr8 = $allVMData[1].PublicIP+"\sport\s\d*\sconnected with " +$allVMData[0].InternalIP + "\sport\s\d"
+	$p8=GetStringMatchCount -logFile $logFile -beg $beg -end $end -str $connectStr8
+
+	return $p1+$p2+$p3+$p4+$p5+$p6+$p7+$p8
 }
 
 Function GetMSSSize([string] $logFile,[string] $beg,[string] $end)
@@ -4414,8 +4439,8 @@ Function Get-SSHDetailofVMs($DeployedServices, $ResourceGroups)
 	{
 		foreach ($ResourceGroup in $ResourceGroups.Split("^"))
 		{
-			$RGIPdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/publicIPAddresses" -ExpandProperties -OutputObjectFormat New -Verbose
-			$RGVMs = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Compute/virtualMachines" -ExpandProperties -OutputObjectFormat New -Verbose
+			$RGIPdata = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/publicIPAddresses" -ExpandProperties -Verbose
+			$RGVMs = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Compute/virtualMachines" -ExpandProperties -Verbose
 			foreach ($testVM in $RGVMs)
 			{
 				$AllEndpoints = $testVM.Properties.NetworkProfile.InputEndpoints
@@ -4452,6 +4477,7 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name InternalIP -Value $InternalIP -Force
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name URL -Value $URL -Force
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name Status -Value $Status -Force
+		Add-Member -InputObject $objNode -MemberType NoteProperty -Name InstanceSize -Value $InstanceSize -Force
 		return $objNode
 	}
 
@@ -4460,9 +4486,9 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 		foreach ($ResourceGroup in $ResourceGroups.Split("^"))
 		{
 			LogMsg "Collecting $ResourceGroup data.."
-			$RGIPdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/publicIPAddresses" -Verbose -ExpandProperties -OutputObjectFormat New
-			$RGVMs = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Compute/virtualMachines" -Verbose -ExpandProperties -OutputObjectFormat New
-			$NICdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/networkInterfaces" -Verbose -ExpandProperties -OutputObjectFormat New
+			$RGIPdata = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/publicIPAddresses" -Verbose -ExpandProperties
+			$RGVMs = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Compute/virtualMachines" -Verbose -ExpandProperties
+			$NICdata = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/networkInterfaces" -Verbose -ExpandProperties
 			$numberOfVMs = 0
 			foreach ($testVM in $RGVMs)
 			{
@@ -4470,7 +4496,7 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 			}
 			if ( $numberOfVMs -gt 1 )
 			{
-				$LBdata = Get-AzureResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/loadBalancers" -ExpandProperties -OutputObjectFormat New -Verbose
+				$LBdata = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/loadBalancers" -ExpandProperties -Verbose
 			}
 			foreach ($testVM in $RGVMs)
 			{
@@ -4525,6 +4551,7 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 				$QuickVMNode.URL = $RGIPdata.Properties.DnsSettings.Fqdn
 				$QuickVMNode.RoleName = $testVM.ResourceName
 				$QuickVMNode.Status = $testVM.Properties.ProvisioningState
+				$QuickVMNode.InstanceSize = $testVM.Properties.hardwareProfile.vmSize
 				$allDeployedVMs += $QuickVMNode
 			}
 			LogMsg "Collected $ResourceGroup data!"		
@@ -4546,6 +4573,7 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 				$QuickVMNode.RoleName = $testVM.InstanceName
 				$QuickVMNode.PublicIP = $AllEndpoints[0].Vip
 				$QuickVMNode.InternalIP = $testVM.IpAddress
+				$QuickVMNode.InstanceSize = $testVM.InstanceSize
 				foreach ($endpoint in $AllEndpoints)
 				{
 					Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endpoint.Name)Port" -Value $endpoint.Port -Force
@@ -4922,7 +4950,7 @@ Function RestartAllDeployments($allVMData)
 	{
 		if ( $UseAzureResourceManager)
 		{
-			$restartVM = Restart-AzureVM -ResourceGroupName $vmData.ResourceGroupName -Name $vmData.RoleName -Verbose
+			$restartVM = Restart-AzureRmVM -ResourceGroupName $vmData.ResourceGroupName -Name $vmData.RoleName -Verbose
 			if ( $restartVM.Status -eq "Succeeded" )
 			{
 				LogMsg "Restarted : $($vmData.RoleName)"
@@ -6663,13 +6691,14 @@ Function GetStorageAccountKey ($xmlConfig)
 	if ( $UseAzureResourceManager )
 	{
 		$storageAccountName =  $xmlConfig.config.Azure.General.ARMStorageAccount
-		$StorageAccounts = Get-AzureStorageAccount
+		$StorageAccounts = Get-AzureRmStorageAccount
 		foreach ($SA in $StorageAccounts)
 		{
-			if ( $SA.Name -eq $storageAccountName )
+			if ( $SA.StorageAccountName -eq $storageAccountName )
 			{
 				LogMsg "Getting $storageAccountName storage account key..."
-				$storageAccountKey = (Get-AzureStorageAccountKey -ResourceGroupName $SA.ResourceGroupName -Name $SA.Name).Key1
+				$storageAccountKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $SA.ResourceGroupName -Name $SA.StorageAccountName).Value[0]
+				break
 			}
 		}
 	}

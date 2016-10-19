@@ -100,7 +100,7 @@ function GetTestSummary($testCycle, [DateTime] $StartTime, [string] $xmlFilename
 	$testSuiteRunDuration=$testSuiteRunDuration.Days.ToString() + ":" +  $testSuiteRunDuration.hours.ToString() + ":" + $testSuiteRunDuration.minutes.ToString()
     $str = "<br />Test Results Summary<br />"
     $str += "ICA test run on " + $startTime
-    $str += "<br />Image under test " + $distro
+    $str += "<br />Image under test " + $BaseOsImage
 	$str += "<br />Total Executed TestCases " + $testSuiteResultDetails.totalTc + " (" + $testSuiteResultDetails.totalPassTc + " Pass" + ", " + $testSuiteResultDetails.totalFailTc + " Fail" + ", " + $testSuiteResultDetails.totalAbortedTc + " Abort)"
 	$str += "<br />Total Execution Time(dd:hh:mm) " + $testSuiteRunDuration.ToString()
     $str += "<br />XML file: $xmlFilename<br /><br />"
@@ -113,21 +113,18 @@ function GetTestSummary($testCycle, [DateTime] $StartTime, [string] $xmlFilename
     $str += "</pre>"
     $plainTextSummary = $str
     $strHtml =  "<style type='text/css'>" +
-			".TFtable{width:800px; border-collapse:collapse; }" +
+			".TFtable{width:1024px; border-collapse:collapse; }" +
 			".TFtable td{ padding:7px; border:#4e95f4 1px solid;}" +
 			".TFtable tr{ background: #b8d1f3;}" +
 			".TFtable tr:nth-child(odd){ background: #dbe1e9;}" +
 			".TFtable tr:nth-child(even){background: #ffffff;}</style>" +
             "<Html><head><title>Test Results Summary</title></head>" +
             "<body style = 'font-family:sans-serif;font-size:13px;color:#000000;margin:0px;padding:30px'>" +
-            "<br/><h1 style='background-color:lightblue;width:800'>Test Results Summary - ${xmlFilename} </h1>"
-    $strHtml += "<h2 style='background-color:lightblue;width:800'>ICA test run on - " + $startTime + "</h2><span style='font-size: medium'>"
-    $strHtml += "<br /><br/>Image under test - " + $distrHtmlo
-    $strHtml += "<br /><br/>Total Executed TestCases - " + $testSuiteResultDetails.totalTc + " (" +
-	$testSuiteResultDetails.totalPassTc + " - <span style='background-color:green'>PASS</span>" + ", " +
-	$testSuiteResultDetails.totalFailTc + " - <span style='background-color:red'>FAIL</span>" + ", " + 
-	$testSuiteResultDetails.totalAbortedTc + " - <span style='background-color:yellow'>ABORTED</span>)"
+            "<br/><h1 style='background-color:lightblue;width:1024'>Test Results Summary</h1>"
+    $strHtml += "<h2 style='background-color:lightblue;width:1024'>ICA test run on - " + $startTime + "</h2><span style='font-size: medium'>"
+    $strHtml += '<p>Image under test - <span style="font-family:courier new,courier,monospace;">' + "$BaseOsImage</span></p>"
 
+    $strHtml += '<p>Total Executed TestCases - <strong><span style="font-size:16px;">' + "$($testSuiteResultDetails.totalTc)" + '</span></strong><br />' + '[&nbsp;<span style="font-size:16px;"><span style="color:#008000;"><strong>' +  $testSuiteResultDetails.totalPassTc + ' </strong></span></span> - PASS, <span style="font-size:16px;"><span style="color:#ff0000;"><strong>' + "$($testSuiteResultDetails.totalFailTc)" + '</strong></span></span>- FAIL, <span style="font-size:16px;"><span style="color:#ff0000;"><strong><span style="background-color:#ffff00;">' + "$($testSuiteResultDetails.totalAbortedTc)" +'</span></strong></span></span> - ABORTED ]</p>'
     $strHtml += "<br /><br/>Total Execution Time(dd:hh:mm) " + $testSuiteRunDuration.ToString()
     $strHtml += "<br /><br/>XML file: $xmlFilename<br /><br /></span>"
 

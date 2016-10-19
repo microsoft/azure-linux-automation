@@ -9,7 +9,7 @@
 #              - Invokes azure test suite
 ## Author : v-ampaw@microsoft.com
 ###############################################################################################
-param ([string] $xmlConfigFile, [switch] $eMail, [string] $logFilename="azure_ica.log", [switch] $runtests, [switch]$onCloud, [switch] $vhdprep, [switch]$upload, [switch] $help, [string] $Distro, [string] $cycleName, [string] $TestPriority, [string]$osImage, [switch]$EconomyMode, [switch]$keepReproInact, [string] $DebugDistro, [switch]$UseAzureResourceManager, [string] $OverrideVMSize)
+param ([string] $xmlConfigFile, [switch] $eMail, [string] $logFilename="azure_ica.log", [switch] $runtests, [switch]$onCloud, [switch] $vhdprep, [switch]$upload, [switch] $help, [string] $Distro, [string] $cycleName, [string] $TestPriority, [string]$osImage, [switch]$EconomyMode, [switch]$keepReproInact, [string] $DebugDistro, [switch]$UseAzureResourceManager, [string] $OverrideVMSize, [string]$customKernel)
 
 Import-Module .\TestLibs\AzureWinUtils.psm1 -Force -Scope Global
 Import-Module .\TestLibs\RDFELibs.psm1 -Force -Scope Global
@@ -35,6 +35,10 @@ if ( $OverrideVMSize )
 {
     Set-Variable -Name OverrideVMSize -Value $OverrideVMSize -Scope Global
 }
+if ( $customKernel )
+{
+    Set-Variable -Name customKernel -Value $customKernel -Scope Global
+}
 
 try
 {
@@ -42,6 +46,7 @@ try
     # Work flow starts here
     # Creating TestResults directory
     $testResults = "TestResults"
+    
     if (! (test-path $testResults))
     {
         mkdir $testResults | out-null
@@ -78,6 +83,8 @@ try
     $testDir = $testResults + "\" + $fname + "-" + $testStartTime.ToString("yyyyMMdd-HHmmss")
 
     mkdir $testDir -ErrorAction SilentlyContinue | out-null
+    Set-Content -Value "" -Path .\report\testSummary.html -Force | Out-Null
+    Set-Content -Value "" -Path .\report\AdditionalInfo.html -Force | Out-Null
 
     if ($logFilename)
     {
@@ -86,6 +93,7 @@ try
 
     $logFile = $testDir + "\" + $logfile
     Set-Variable -Name logfile -Value $logFile -Scope Global
+    Set-Content -Path .\report\lastLogDirectory.txt -Value $testDir
     Set-Variable -Name Distro -Value $Distro -Scope Global
     Set-Variable -Name onCloud -Value $onCloud -Scope Global
     Set-Variable -Name xmlConfig -Value $xmlConfig -Scope Global
@@ -102,9 +110,15 @@ try
     else
     {
         Set-Variable -Name EconomyMode -Value $false -Scope Global
-        Set-Variable -Name keepReproInact -Value $false -Scope Global
+        if($keepReproInact)
+        {
+            Set-Variable -Name keepReproInact -Value $true -Scope Global
+        }
+        else
+        {
+            Set-Variable -Name keepReproInact -Value $false -Scope Global
+        }
     }
-
     $AzureSetup = $xmlConfig.config.Azure.General
     LogMsg  ("Info : AzureAutomationManager.ps1 - LIS on Azure Automation")
     LogMsg  ("Info : Created test results directory:", $testDir)
@@ -113,19 +127,16 @@ try
 
     if ($UseAzureResourceManager)
     {
-		Switch-AzureMode -Name AzureResourceManager
-		Set-Variable -Name UseAzureResourceManager -Value $true -Scope Global
-		$selectSubscription = Select-AzureSubscription -SubscriptionId $AzureSetup.SubscriptionID
-		$selectedSubscription = Get-AzureSubscription | where { $_.IsCurrent -eq "True" }
-		LogMsg "SubscriptionName       : $($selectedSubscription.SubscriptionName)"
-		LogMsg "SubscriptionId         : $($selectedSubscription.SubscriptionId)"
-		LogMsg "User                   : $($selectedSubscription.DefaultAccount)"
-		#LogMsg "ServiceEndpoint        : $($selectedSubscription.DefaultAccount)"
-		LogMsg "CurrentStorageAccount  : $($AzureSetup.ARMStorageAccount)"
+        Set-Variable -Name UseAzureResourceManager -Value $true -Scope Global
+        $selectSubscription = Select-AzureRmSubscription -SubscriptionId $AzureSetup.SubscriptionID
+        LogMsg "SubscriptionName       : $($AzureSetup.SubscriptionName)"
+        LogMsg "SubscriptionId         : $($selectSubscription.Subscription.SubscriptionId)"
+        LogMsg "User                   : $($selectSubscription.Account.Id)"
+        LogMsg "ServiceEndpoint        : $($selectSubscription.Environment.ActiveDirectoryServiceEndpointResourceId)"
+        LogMsg "CurrentStorageAccount  : $($AzureSetup.ARMStorageAccount)"
     }
     else
     {
-        Switch-AzureMode -Name AzureServiceManagement
         Set-Variable -Name UseAzureResourceManager -Value $false -Scope Global
         LogMsg "Setting Azure Subscription ..."
 		$out = SetSubscription -subscriptionID $AzureSetup.SubscriptionID -subscriptionName $AzureSetup.SubscriptionName -certificateThumbprint $AzureSetup.CertificateThumbprint -managementEndpoint $AzureSetup.ManagementEndpoint -storageAccount $AzureSetup.StorageAccount -environment $AzureSetup.Environment
@@ -147,6 +158,10 @@ try
         else
         {
 	        LogMsg "*************AZURE SERVICE MANAGEMENT MODE****************"
+        }
+        if($keepReproInact)
+        {
+            LogMsg "PLEASE NOTE: keepReproInact is set. VMs will not be deleted after test is finished even if, test gets PASS."
         }
     }
     if($upload)
@@ -218,8 +233,11 @@ try
 }
 catch
 {
+    $line = $_.InvocationInfo.ScriptLineNumber
+    $script_name = ($_.InvocationInfo.ScriptName).Replace($PWD,".")
     $ErrorMessage =  $_.Exception.Message
-    LogMsg "EXCEPTION : $ErrorMessage"   
+    LogErr "EXCEPTION : $ErrorMessage"
+    LogErr "Source : Line $line in script $script_name."   
 }
 Finally
 {

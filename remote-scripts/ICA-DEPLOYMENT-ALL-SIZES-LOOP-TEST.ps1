@@ -17,10 +17,10 @@ else
 	if ( $UseAzureResourceManager )
 	{
 		$StorAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
-		$AccountDetail =  Get-AzureStorageAccount | where {$_.Name -eq $StorAccount}
+		$AccountDetail =  Get-AzureRmStorageAccount | where {$_.StorageAccountName -eq $StorAccount}
 		$Location = $AccountDetail.PrimaryLocation
-		$AccountType = $AccountDetail.AccountType
-		$SupportSizes = (Get-AzureVMSize -Location $location).Name
+		$AccountType = $AccountDetail.Sku.Tier.ToString()
+		$SupportSizes = (Get-AzureRmVMSize -Location $location).Name
 	}
 	else
 	{
@@ -31,7 +31,7 @@ else
 	}
 	foreach($size in $SupportSizes)
 	{
-		if($size -match 'DS' -or $size -match 'GS')
+		if($size -match 'DS' -or $size -match 'GS' -or ($size.Trim().EndsWith("s")) )
 		{
 			$XioSizes += $size.Replace('Standard','').Replace('_','')
 		}

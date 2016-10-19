@@ -113,15 +113,17 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
 {
     try
     {
-        $ResourceGroup = Get-AzureResourceGroup -Name $RGName -ErrorAction Ignore
+        $ResourceGroup = Get-AzureRmResourceGroup -Name $RGName -ErrorAction Ignore
     }
     catch
     {
     }
     if ($ResourceGroup)
     {
-        Remove-AzureResourceGroup -Name $RGName -Force -Verbose
+        Remove-AzureRmResourceGroup -Name $RGName -Force -Verbose
         $retValue = $?
+        $ARMStorageAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
+        RemoveResidualResourceGroupVHDs -ResourceGroup $RGName -storageAccount $ARMStorageAccount
     }
     else
     {
@@ -131,6 +133,25 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
     return $retValue
 }
 
+Function RemoveResidualResourceGroupVHDs($ResourceGroup,$storageAccount)
+{
+    # Verify that the OS VHD does not already exist
+    
+    $azureStorage = $storageAccount
+    LogMsg "Removing residual VHDs of $ResourceGroup from $azureStorage..."
+    $storageContext = (Get-AzureRmStorageAccount | Where-Object{$_.StorageAccountName -match $azureStorage}).Context
+    $storageBlob = Get-AzureStorageBlob -Context $storageContext -Container "vhds"
+    $vhdList = $storageBlob | Where-Object{$_.Name -match "$ResourceGroup"}
+    if ($vhdList) 
+    {
+        # Remove VHD files
+        foreach($diskName in $vhdList.Name) 
+        {
+            LogMsg "Removing VHD $diskName"
+            Remove-AzureStorageBlob -Blob $diskname -Container vhds -Context $storageContext -Verbose -ErrorAction SilentlyContinue
+        }
+    }
+}
 Function CreateResourceGroup([string]$RGName, $location)
 {
     $FailCounter = 0
@@ -145,7 +166,7 @@ Function CreateResourceGroup([string]$RGName, $location)
             if($location)
             {
                 LogMsg "Using location : $location"
-                $createRG = New-AzureResourceGroup -Name $RGName -Location $location.Replace('"','') -Force -Verbose
+                $createRG = New-AzureRmResourceGroup -Name $RGName -Location $location.Replace('"','') -Force -Verbose
             }
             $operationStatus = $createRG.ProvisioningState
             if ($operationStatus  -eq "Succeeded")
@@ -180,7 +201,7 @@ Function CreateResourceGroupDeployment([string]$RGName, $location, $setupType, $
             if($location)
             {
                 LogMsg "Creating Deployment using $TemplateFile ..."
-                $createRGDeployment = New-AzureResourceGroupDeployment -Name $ResourceGroupDeploymentName -ResourceGroupName $RGName -TemplateFile $TemplateFile -Verbose
+                $createRGDeployment = New-AzureRmResourceGroupDeployment -Name $ResourceGroupDeploymentName -ResourceGroupName $RGName -TemplateFile $TemplateFile -Verbose
             }
             $operationStatus = $createRGDeployment.ProvisioningState
             if ($operationStatus  -eq "Succeeded")
@@ -213,7 +234,7 @@ if($storageAccount)
  $StorageAccountName = $storageAccount
 }
 LogMsg "Getting Storage Account : $StorageAccountName details ..."
-$StorageAccountType = (Get-AzureStorageAccount | where {$_.StorageAccountName -eq "$StorageAccountName"}).AccountType
+$StorageAccountType = (Get-AzureRmStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).Sku.Tier.ToString()
 if($StorageAccountType -match 'Premium')
 {
     $StorageAccountType = "Premium_LRS"
@@ -280,7 +301,7 @@ if ($RGXMLData.ARMVnetName)
 {
     $ExistingVnet = $RGXMLData.ARMVnetName
     LogMsg "Getting $ExistingVnet Virtual Netowrk info ..."
-    $ExistingVnetResourceGroupName = ( Get-AzureResource | Where {$_.Name -eq $ExistingVnet}).ResourceGroupName
+    $ExistingVnetResourceGroupName = ( Get-AzureRmResource | Where {$_.Name -eq $ExistingVnet}).ResourceGroupName
     LogMsg "ARM VNET : $ExistingVnet (ResourceGroup : $ExistingVnetResourceGroupName)"
     $virtualNetworkName = $ExistingVnet
 }
@@ -309,7 +330,22 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
 $StorageProfileScriptBlock = {
                 Add-Content -Value "$($indents[4])^storageProfile^: " -Path $jsonFile
                 Add-Content -Value "$($indents[4]){" -Path $jsonFile
-                if (!$osVHD)
+                if ($ARMImage)
+                {
+                    LogMsg "├Using ARMImage : $($ARMImage.Publisher):$($ARMImage.Offer):$($ARMImage.Sku):$($ARMImage.Version)"
+                    Add-Content -Value "$($indents[5])^imageReference^ : " -Path $jsonFile
+                    Add-Content -Value "$($indents[5]){" -Path $jsonFile
+                        $publisher = $ARMImage.Publisher
+                        $offer = $ARMImage.Offer
+                        $sku = $ARMImage.Sku
+                        $version = $ARMImage.Version
+                        Add-Content -Value "$($indents[6])^publisher^: ^$publisher^," -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^offer^: ^$offer^," -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^sku^: ^$sku^," -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^version^: ^$version^" -Path $jsonFile
+                    Add-Content -Value "$($indents[5])}," -Path $jsonFile
+                }
+                elseif (!$osVHD)
                 {
                     Add-Content -Value "$($indents[5])^imageReference^ : " -Path $jsonFile
                     Add-Content -Value "$($indents[5]){" -Path $jsonFile
@@ -344,7 +380,6 @@ $StorageProfileScriptBlock = {
                     }
                     else
                     {
-                        LogMsg "├Using ImageName : $osImage"
                         Add-Content -Value "$($indents[6])^name^: ^$vmName-OSDisk^," -Path $jsonFile
                         Add-Content -Value "$($indents[6])^createOption^: ^FromImage^," -Path $jsonFile
                         Add-Content -Value "$($indents[6])^vhd^: " -Path $jsonFile
@@ -354,7 +389,34 @@ $StorageProfileScriptBlock = {
                         Add-Content -Value "$($indents[6])^caching^: ^ReadWrite^" -Path $jsonFile
 
                     }
-                    Add-Content -Value "$($indents[5])}" -Path $jsonFile
+                    Add-Content -Value "$($indents[5])}," -Path $jsonFile
+                    $dataDiskAdded = $false
+                    Add-Content -Value "$($indents[5])^dataDisks^ : " -Path $jsonFile
+                    Add-Content -Value "$($indents[5])[" -Path $jsonFile
+                foreach ( $dataDisk in $newVM.DataDisk )
+                {
+                    if ( $dataDisk.LUN -ge 0 )
+                    {
+                        if( $dataDiskAdded )
+                        {
+                        Add-Content -Value "$($indents[6])," -Path $jsonFile
+                        }
+                        Add-Content -Value "$($indents[6]){" -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^name^: ^$vmName-disk-lun-$($dataDisk.LUN)^," -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^diskSizeGB^: ^$($dataDisk.DiskSizeInGB)^," -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^lun^: ^$($dataDisk.LUN)^," -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^createOption^: ^Empty^," -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^caching^: ^$($dataDisk.HostCaching)^," -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^vhd^:" -Path $jsonFile
+                            Add-Content -Value "$($indents[7]){" -Path $jsonFile
+                                Add-Content -Value "$($indents[8])^uri^: ^[concat('http://',variables('StorageAccountName'),'.blob.core.windows.net/vhds/','$vmName-$RGrandomWord-disk-lun-$($dataDisk.LUN).vhd')]^" -Path $jsonFile
+                            Add-Content -Value "$($indents[7])}" -Path $jsonFile
+                        Add-Content -Value "$($indents[6])}" -Path $jsonFile
+                        LogMsg "Added $($dataDisk.DiskSizeInGB)GB Datadisk to $($dataDisk.LUN)."
+                        $dataDiskAdded = $true
+                    }
+                }
+                    Add-Content -Value "$($indents[5])]" -Path $jsonFile
                 Add-Content -Value "$($indents[4])}" -Path $jsonFile
 }
 
@@ -1302,7 +1364,7 @@ Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed
         {
             $VerifiedGroups =  $NULL
             $retValue = $NULL
-            #$ExistingGroups = RetryOperation -operation { Get-AzureResourceGroup } -description "Getting information of existing resource groups.." -retryInterval 5 -maxRetryCount 5
+            #$ExistingGroups = RetryOperation -operation { Get-AzureRmResourceGroup } -description "Getting information of existing resource groups.." -retryInterval 5 -maxRetryCount 5
             $i = 0
             $role = 1
             $setupTypeData = $xmlConfig.config.Azure.Deployment.$setupType
@@ -1450,7 +1512,7 @@ Function CreateRGDeploymentWithTempParameters([string]$RGName, $TemplateFile, $T
         {
             $FailCounter++
             LogMsg "Creating Deployment using $TemplateFile $TemplateParameterFile..."
-            $createRGDeployment = New-AzureResourceGroupDeployment -Name $ResourceGroupDeploymentName -ResourceGroupName $RGName -TemplateFile $TemplateFile -TemplateParameterFile $TemplateParameterFile -Verbose
+            $createRGDeployment = New-AzureRmResourceGroupDeployment -Name $ResourceGroupDeploymentName -ResourceGroupName $RGName -TemplateFile $TemplateFile -TemplateParameterFile $TemplateParameterFile -Verbose
             $operationStatus = $createRGDeployment.ProvisioningState
             if ($operationStatus  -eq "Succeeded")
             {
