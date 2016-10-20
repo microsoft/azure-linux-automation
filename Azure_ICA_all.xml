@@ -6431,7 +6431,7 @@
 			<imageType>Standard</imageType>
 			<remoteSA>ubuntulinuxnextkernels</remoteSA>
 			<remoteSAContainer>debs</remoteSAContainer>
-			<remoteDEBPath>"http://ubuntulinuxnextkernels.blob.core.windows.net/debs"</remoteDEBPath>
+			<remoteDEBPath>http://ubuntulinuxnextkernels.blob.core.windows.net/debs</remoteDEBPath>
 			<files>.\remote-scripts\azuremodules.sh,.\remote-scripts\build_deb_from_linux_next.sh</files>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
