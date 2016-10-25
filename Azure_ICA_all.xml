@@ -62,14 +62,20 @@
 				<!-- You can add your own distro and Image names here -->
 				<Distro>
 					<Name>SSU1604P</Name>
-					<OsImage>b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu-16_04-LTS-amd64-server-20160907.1-en-us-30GB</OsImage>
+					<OsImage></OsImage>
+					<!-- <OsImage>b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu-16_04-LTS-amd64-server-20160907.1-en-us-30GB</OsImage> -->
 					<ARMImage>
-						<Publisher>Canonical</Publisher>
-						<Offer>UbuntuServer</Offer>
-						<Sku>16.04.0-LTS</Sku>
-						<Version>latest</Version>
+						<Publisher></Publisher>
+						<!-- <Publisher>Canonical</Publisher> -->
+						<Offer></Offer>
+						<!-- <Offer>UbuntuServer</Offer> -->
+						<Sku></Sku>
+						<!-- <Sku>16.04.0-LTS</Sku> -->
+						<Version></Version>
+						<!-- <Version>latest</Version> -->
 					</ARMImage>
-					<OsVHD>VHD_NAME.vhd</OsVHD>
+					<OsVHD></OsVHD>
+					<!-- <OsVHD>VHD_NAME.vhd</OsVHD> -->
 				</Distro>				
 				<Distro>
 					<Name>SSU1510P</Name>
