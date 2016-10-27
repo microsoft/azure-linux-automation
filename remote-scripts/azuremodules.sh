@@ -74,15 +74,15 @@ function updaterepos()
 {
     ditribution=$(detect_linux_ditribution)
     case "$ditribution" in
-        oracle|rhel|centos)
+        Oracle|RHEL|CentOS)
             yum makecache
             ;;
     
-        ubuntu)
+        Ubuntu)
             apt-get update
             ;;
          
-        suse|opensuse|sles)
+        SUSE|OpenSUSE|SLES)
             zypper refresh
             ;;
          
