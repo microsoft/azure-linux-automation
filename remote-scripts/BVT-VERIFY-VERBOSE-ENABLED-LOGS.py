@@ -32,7 +32,7 @@ def RunTest():
         output = Run("grep -i 'iptables -I INPUT -p udp --dport' /var/log/waagent* | wc -l | tr -d '\n'")
         RunLog.info("agent version is 2.0")
     else:
-        output = Run("grep -i 'VERBOSE HTTP Req' /var/log/waagent* | wc -l | tr -d '\n'")
+        output = Run("grep -i 'VERBOSE Fabric supported wire protocol version' /var/log/waagent* | wc -l | tr -d '\n'")
         RunLog.info("agent version > 2.0")
 
     if not (output == "0") :
