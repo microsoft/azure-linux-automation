@@ -102,6 +102,13 @@ if [ ! ${connections} ]; then
 	UpdateTestState $ICA_TESTABORTED
 	exit 1
 fi
+if [ ! ${testDuration} ]; then
+	errMsg="Please add/provide value for connections in constants.sh. connections=(1 2 4 8 16)"
+	LogMsg "${errMsg}"
+	echo "${errMsg}" >> ./summary.log
+	UpdateTestState $ICA_TESTABORTED
+	exit 1
+fi
 
 #Make & build ntttcp on client and server Machine
 
@@ -118,7 +125,7 @@ ssh root@${client} "wget https://raw.githubusercontent.com/iamshital/linux_perfo
 ssh root@${client} "chmod +x run-ntttcp-and-tcping.sh && chmod +x report-ntttcp-and-tcping.sh"
 LogMsg "Now running NTTTCP test"
 ssh root@${client} "rm -rf ntttcp-test-logs"
-ssh root@${client} "./run-ntttcp-and-tcping.sh ntttcp-test-logs ${server} root"
+ssh root@${client} "./run-ntttcp-and-tcping.sh ntttcp-test-logs ${server} root ${testDuration}"
 ssh root@${client} "./report-ntttcp-and-tcping.sh ntttcp-test-logs"
 ssh root@${client} "cp ntttcp-test-logs/* ."
 
