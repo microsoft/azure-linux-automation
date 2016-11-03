@@ -38,12 +38,12 @@ if [ -e $code_path/summary.log ]; then
     rm -f $code_path/summary.log
 fi
 
-echo "build not started.. " > $code_path/build.log
+echo "build not is started.. " > $code_path/build.log
 cd $code_path
 
 updaterepos
 install_package git-core sysstat gcc make libssl-dev kernel-package
-LogMsg "linux next git clone STARTED.."
+LogMsg "linux next git clone is RUNNING.."
 git clone git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git  
 if [ $? -ne 0 ]; then
     LogMsg "Error in linux next git clone"
@@ -55,7 +55,7 @@ fi
 cd linux-next
 
 ## Make config file
-LogMsg "Make .config file STARTED.."
+LogMsg "Make .config file is RUNNING.."
 cp /boot/config-$current_kernel .config
 
 CONFIG_FILE=.config

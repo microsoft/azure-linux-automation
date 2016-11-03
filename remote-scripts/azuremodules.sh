@@ -53,7 +53,7 @@ function detect_linux_ditribution()
             linux_ditribution='Oracle'
         elif echo "$temp_text" | grep -qi "Ubuntu"; then
             linux_ditribution='Ubuntu'
-        elif echo "$temp_text" | grep -qi "SUSE"; then
+        elif echo "$temp_text" | grep -qi "SUSE Linux"; then
             linux_ditribution='SUSE'
         elif echo "$temp_text" | grep -qi "openSUSE"; then
             linux_ditribution='OpenSUSE'
@@ -74,15 +74,15 @@ function updaterepos()
 {
     ditribution=$(detect_linux_ditribution)
     case "$ditribution" in
-        oracle|rhel|centos)
+        Oracle|RHEL|CentOS)
             yum makecache
             ;;
     
-        ubuntu)
+        Ubuntu)
             apt-get update
             ;;
          
-        suse|opensuse|sles)
+        SUSE|openSUSE|sles)
             zypper refresh
             ;;
          
