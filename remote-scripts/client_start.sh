@@ -13,7 +13,7 @@ then
 	buffersize=$4
 	if [[ $testtype == "UDP" ]]
 	then
-		testtypeOption=" -u"
+		testtypeOption=" -u -b 0"
 		buffersizeOption=" -l $buffersize"
 	else
 		testtype=""
