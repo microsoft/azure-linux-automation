@@ -53,7 +53,7 @@ if [ $? -ne 0 ]; then
 fi
 
 cd linux-next
-
+touch Documentation/Changes
 ## Make config file
 LogMsg "Make .config file STARTED.."
 cp /boot/config-$current_kernel .config
