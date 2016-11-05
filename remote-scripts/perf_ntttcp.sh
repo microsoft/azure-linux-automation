@@ -118,7 +118,7 @@ ssh root@${client} "wget https://raw.githubusercontent.com/iamshital/linux_perfo
 ssh root@${client} "chmod +x run-ntttcp-and-tcping.sh && chmod +x report-ntttcp-and-tcping.sh"
 LogMsg "Now running NTTTCP test"
 ssh root@${client} "rm -rf ntttcp-test-logs"
-ssh root@${client} "./run-ntttcp-and-tcping.sh ntttcp-test-logs ${server} root"
+ssh root@${client} "./run-ntttcp-and-tcping.sh ntttcp-test-logs ${server} root 90"
 ssh root@${client} "./report-ntttcp-and-tcping.sh ntttcp-test-logs"
 ssh root@${client} "cp ntttcp-test-logs/* ."
 
