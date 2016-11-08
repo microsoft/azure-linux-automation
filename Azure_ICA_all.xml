@@ -69,6 +69,7 @@
 						<Sku>16.04.0-LTS</Sku>
 						<Version>latest</Version>
 					</ARMImage>
+					<OsVHD>VHD_NAME.vhd</OsVHD>
 				</Distro>				
 				<Distro>
 					<Name>SSU1510P</Name>
