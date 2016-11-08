@@ -2712,7 +2712,10 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 					{
 						LogMsg "Preserving the Resource Group(s) $group"
 						LogMsg "Setting tags : preserve = yes; testName = $testName"
-						$out = Set-AzureRmResourceGroup -Name $group -Tag @{Name =$preserveKeyword; Value = "yes"},@{Name ="testName"; Value = "$testName"}
+						$hash = @{}
+						$hash.Add($preserveKeyword,"yes")
+						$hash.Add("testName","$testName")
+						$out = Set-AzureRmResourceGroup -Name $group -Tag $hash
 						LogMsg "Collecting VM logs.."
 						if ( !$isVMLogsCollected)
 						{

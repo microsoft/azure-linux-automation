@@ -95,8 +95,9 @@ if [ ! ${client} ]; then
 	UpdateTestState $ICA_TESTABORTED
 	exit 1
 fi
-if [ ! ${connections} ]; then
-	errMsg="Please add/provide value for connections in constants.sh. connections=(1 2 4 8 16)"
+
+if [ ! ${testDuration} ]; then
+	errMsg="Please add/provide value for testDuration in constants.sh. testDuration=60"
 	LogMsg "${errMsg}"
 	echo "${errMsg}" >> ./summary.log
 	UpdateTestState $ICA_TESTABORTED
