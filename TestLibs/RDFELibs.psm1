@@ -4493,8 +4493,11 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 		foreach ($ResourceGroup in $ResourceGroups.Split("^"))
 		{
 			LogMsg "Collecting $ResourceGroup data.."
+			LogMsg "    Microsoft.Network/publicIPAddresses data collection in progress.."
 			$RGIPdata = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/publicIPAddresses" -Verbose -ExpandProperties
+			LogMsg "    Microsoft.Compute/virtualMachines data collection in progress.."
 			$RGVMs = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Compute/virtualMachines" -Verbose -ExpandProperties
+			LogMsg "    Microsoft.Network/networkInterfaces data collection in progress.."
 			$NICdata = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/networkInterfaces" -Verbose -ExpandProperties
 			$numberOfVMs = 0
 			foreach ($testVM in $RGVMs)
@@ -4503,6 +4506,7 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 			}
 			if ( ($numberOfVMs -gt 1) -or (($RGIPData | where { $_.Properties.publicIPAddressVersion -eq "IPv6" }).Properties.ipAddress) )
 			{
+				LogMsg "    Microsoft.Network/loadBalancers data collection in progress.."
 				$LBdata = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/loadBalancers" -ExpandProperties -Verbose
 			}
 			foreach ($testVM in $RGVMs)
@@ -4540,10 +4544,11 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 				}
 				else
 				{
-					$AllEndpoints = $testVM.Properties.NetworkProfile.InputEndpoints
-					foreach ($endPoint in $AllEndpoints)
+					LogMsg "    Microsoft.Network/networkSecurityGroups data collection in progress.."
+					$SGData = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceName "SG-$ResourceGroup" -ResourceType "Microsoft.Network/networkSecurityGroups" -ExpandProperties
+					foreach ($securityRule in $SGData.Properties.securityRules)
 					{
-						Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($endPoint.EndpointName)Port" -Value $endPoint.PublicPort -Force
+						Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($securityRule.name)Port" -Value $securityRule.properties.destinationPortRange -Force
 					}
 				}
 				foreach ( $nic in $NICdata )
