@@ -124,6 +124,12 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
                     #}
                     LogMsg "ARMImage name - $($ARMImage.Publisher) : $($ARMImage.Offer) : $($ARMImage.Sku) : $($ARMImage.Version)"
 		        }
+		        if ( $tempDistro.OsVHD )
+		        { 
+			        $BaseOsVHD = $tempDistro.OsVHD.ToUpper() 
+			        Set-Variable -Name BaseOsVHD -Value $BaseOsVHD -Scope Global
+			        LogMsg "Base VHD name - $BaseOsVHD"
+		        }
             }
             else
             {
@@ -132,12 +138,6 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 			        $BaseOsImage = $tempDistro.OsImage.ToUpper() 
 			        Set-Variable -Name BaseOsImage -Value $BaseOsImage -Scope Global
 			        LogMsg "Base image name - $BaseOsImage"
-		        }
-		        if ( $tempDistro.OsVHD )
-		        { 
-			        $BaseOsVHD = $tempDistro.OsVHD.ToUpper() 
-			        Set-Variable -Name BaseOsVHD -Value $BaseOsVHD -Scope Global
-			        LogMsg "Base VHD name - $BaseOsVHD"
 		        }
             }
         }

@@ -349,7 +349,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
 $StorageProfileScriptBlock = {
                 Add-Content -Value "$($indents[4])^storageProfile^: " -Path $jsonFile
                 Add-Content -Value "$($indents[4]){" -Path $jsonFile
-                if ($ARMImage)
+                if ($ARMImage -and !$osVHD)
                 {
                     LogMsg "├Using ARMImage : $($ARMImage.Publisher):$($ARMImage.Offer):$($ARMImage.Sku):$($ARMImage.Version)"
                     Add-Content -Value "$($indents[5])^imageReference^ : " -Path $jsonFile
@@ -364,7 +364,7 @@ $StorageProfileScriptBlock = {
                         Add-Content -Value "$($indents[6])^version^: ^$version^" -Path $jsonFile
                     Add-Content -Value "$($indents[5])}," -Path $jsonFile
                 }
-                elseif (!$osVHD)
+                elseif ($CurrentTestData.Publisher -and $CurrentTestData.Offer)
                 {
                     Add-Content -Value "$($indents[5])^imageReference^ : " -Path $jsonFile
                     Add-Content -Value "$($indents[5]){" -Path $jsonFile
