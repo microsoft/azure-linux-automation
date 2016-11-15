@@ -223,7 +223,7 @@ if distro == "DEBIAN":
 	#Test 2 : Make sure that repositories are installed.
 	RunLog.info("Checking if repositories are installed or not..")
 	repository_out = Run("apt-get update")
-	if "security.debian.org" in repository_out and "debian-archive.trafficmanager.net" in repository_out and "Hit" in repository_out:
+	if ( "deb.debian.org" in repository_out or "debian-archive.trafficmanager.net" in repository_out ) and "Hit" in repository_out:
 		print(distro+"_TEST_REPOSITORIES_AVAILABLE")
 	else:
 		print(distro+"_TEST_REPOSITORIES_ERROR")
