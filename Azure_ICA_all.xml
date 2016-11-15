@@ -6328,7 +6328,7 @@
 			<Priority>P0</Priority>
 		</test>		
 		<test>
-			<testName>ICA-PERF-FIO-TEST</testName>
+			<testName>ICA-PERF-FIO-TEST-8K</testName>
 			<testScript></testScript>
 			<testScriptps1>ICA-PERF-FIO-TEST.ps1</testScriptps1>
 			<setupType>DS14DISK12</setupType>
@@ -6342,11 +6342,32 @@
 				<param>startIO=8</param>
 				<param>numjobs=1</param>
 				<param>ioruntime=300</param>
+				<param>maxIO=8</param>		
+				<param>fileSize=134G</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>		
+		<test>
+			<testName>ICA-PERF-FIO-TEST-1024K</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-FIO-TEST.ps1</testScriptps1>
+			<setupType>DS14DISK12</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>			
+			<TestParameters>
+				<param>modes='randread randwrite read write'</param>
+				<param>startThread=1</param>
+				<param>maxThread=1024</param>
+				<param>startIO=1024</param>
+				<param>numjobs=1</param>
+				<param>ioruntime=300</param>
 				<param>maxIO=1024</param>		
 				<param>fileSize=134G</param>
 			</TestParameters>
 			<Priority>P0</Priority>
 		</test>		
+		
 		<test>
 			<testName>ICA-PERF-UDP-LOSS-TEST</testName>
 			<testScript></testScript>
@@ -7278,8 +7299,11 @@
 		<Cycle>
 			<cycleName>PERF-FIO</cycleName>
 			<test>
-				<Name>ICA-PERF-FIO-TEST</Name>
+				<Name>ICA-PERF-FIO-TEST-8K</Name>
 			</test>
+			<test>
+				<Name>ICA-PERF-FIO-TEST-1024K</Name>
+			</test>			
 		</Cycle>		
 		<Cycle>
 			<cycleName>PERF-REDIS-M</cycleName>
