@@ -46,6 +46,9 @@ ConfigureIperf3Ubuntu()
 	LogMsg "Configuring ${1} for IPERF3 test..."
 	ssh ${1} "apt-get update"
 	ssh ${1} "apt-get -y install iperf3 sysstat bc "
+	scp ConfigureUbuntu1604IPv6.sh ${1}:
+	ssh ${1} "chmod +x ConfigureUbuntu1604IPv6.sh"
+	ssh ${1} "./ConfigureUbuntu1604IPv6.sh"
 }
 
 LogMsg()
@@ -192,10 +195,10 @@ for current_buffer in "${bufferLenghs[@]}"
 		while [ $currentIperfInstanses -lt $num_threads_n ]
 		do
 			currentIperfInstanses=$(($currentIperfInstanses+1))
-			currentPort=$(($currentPort+1))
 			serverCommand="iperf3 -s -1 -J -i10 -f g -p ${currentPort} > iperf-server-${testType}-IPv${IPversion}-buffer-${current_buffer}K-conn-$current_test_connections-instance-${currentIperfInstanses}.txt 2>&1"
 			ssh ${server} $serverCommand &
 			LogMsg "Executed: $serverCommand"
+			currentPort=$(($currentPort+1))
 			sleep 0.1
 		done
 
@@ -215,7 +218,7 @@ for current_buffer in "${bufferLenghs[@]}"
 		while [ $currentIperfInstanses -lt $num_threads_n ]
 		do
 			currentIperfInstanses=$(($currentIperfInstanses+1))
-			currentPort=$(($currentPort+1))
+
 			if [[ "$testType" == "udp" ]];
 			then
 				clientCommand="iperf3 -c $testServer -u -b 0 -J -f g -i10 -l ${current_buffer}K -t ${testDuration} -p ${currentPort} -P $num_threads_P -${IPversion} > iperf-client-${testType}-IPv${IPversion}-buffer-${current_buffer}K-conn-$current_test_connections-instance-${currentIperfInstanses}.txt 2>&1"
@@ -227,6 +230,7 @@ for current_buffer in "${bufferLenghs[@]}"
 			
 			ssh ${client} $clientCommand &
 			LogMsg "Executed: $clientCommand"
+			currentPort=$(($currentPort+1))
 			sleep 0.1
 		done
 		LogMsg "Iperf3 running buffer ${current_buffer}K $num_threads_P X $num_threads_n ..."

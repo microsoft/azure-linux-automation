@@ -3899,6 +3899,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<RoleName>client-vm</RoleName>
 						<ARMInstanceSize>Standard_DS1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -3914,6 +3915,126 @@
 							<LoadBalanced>True</LoadBalanced>
 							<EnableIPv6>True</EnableIPv6>
 						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest1</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>751</LocalPort>
+							<PublicPort>751</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest2</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>752</LocalPort>
+							<PublicPort>752</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest3</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>753</LocalPort>
+							<PublicPort>753</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest4</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>754</LocalPort>
+							<PublicPort>754</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest5</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>755</LocalPort>
+							<PublicPort>755</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest6</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>756</LocalPort>
+							<PublicPort>756</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest7</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>757</LocalPort>
+							<PublicPort>757</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest8</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>758</LocalPort>
+							<PublicPort>758</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest9</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>759</LocalPort>
+							<PublicPort>759</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest10</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>760</LocalPort>
+							<PublicPort>760</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest11</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>761</LocalPort>
+							<PublicPort>761</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest12</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>762</LocalPort>
+							<PublicPort>762</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest13</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>763</LocalPort>
+							<PublicPort>763</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest14</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>764</LocalPort>
+							<PublicPort>764</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest15</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>765</LocalPort>
+							<PublicPort>765</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>						
 						<EndPoints>
 							<Name>UDPtest</Name>
 							<Protocol>udp</Protocol>
@@ -3922,7 +4043,6 @@
 							<LoadBalanced>True</LoadBalanced>
 							<EnableIPv6>True</EnableIPv6>
 						</EndPoints>
-						
 						<DataDisk></DataDisk>
 					</VirtualMachine>
 				</HostedService>
@@ -3931,6 +4051,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<RoleName>server-vm</RoleName>
 						<ARMInstanceSize>Standard_DS1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -3946,6 +4067,126 @@
 							<LoadBalanced>True</LoadBalanced>
 							<EnableIPv6>True</EnableIPv6>
 						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest1</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>751</LocalPort>
+							<PublicPort>751</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest2</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>752</LocalPort>
+							<PublicPort>752</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest3</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>753</LocalPort>
+							<PublicPort>753</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest4</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>754</LocalPort>
+							<PublicPort>754</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest5</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>755</LocalPort>
+							<PublicPort>755</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest6</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>756</LocalPort>
+							<PublicPort>756</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest7</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>757</LocalPort>
+							<PublicPort>757</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest8</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>758</LocalPort>
+							<PublicPort>758</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest9</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>759</LocalPort>
+							<PublicPort>759</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest10</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>760</LocalPort>
+							<PublicPort>760</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest11</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>761</LocalPort>
+							<PublicPort>761</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest12</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>762</LocalPort>
+							<PublicPort>762</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest13</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>763</LocalPort>
+							<PublicPort>763</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest14</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>764</LocalPort>
+							<PublicPort>764</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest15</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>765</LocalPort>
+							<PublicPort>765</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>						
 						<EndPoints>
 							<Name>UDPtest</Name>
 							<Protocol>udp</Protocol>
@@ -7296,6 +7537,12 @@
 				<Name>ICA-PERF-NTTTCP-TEST</Name>
 			</test>
 		</Cycle>
+		<Cycle>
+			<cycleName>PERF-TCPv6</cycleName>
+			<test>
+				<Name>ICA-PERF-TCP-IPV6-TEST</Name>
+			</test>
+		</Cycle>		
 		<Cycle>
 			<cycleName>PERF-FIO</cycleName>
 			<test>
