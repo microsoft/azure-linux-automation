@@ -8,12 +8,17 @@
 if [[ $# == 1 ]]
 then
 	username=$1
+elif [[ $# == 3 ]]
+then
+	username=$1
+	testtype=$2
+	buffersize=$3
 else
 	echo "Usage: bash $0 <vm_loginuser>"
 	exit -1
 fi
 
-code_path="/home/$username/code/"
+code_path="/home/$username/code"
 . $code_path/azuremodules.sh
 
 if [[ `which iperf3` == "" ]]
@@ -40,12 +45,17 @@ do
 	do
 		iperf3 -s -D -p $port_number
 	done
-	bash $code_path/sar-top.sh $duration $number_of_connections $username&
+	bash $code_path/sar-top.sh $duration $number_of_connections $username $testtype $buffersize&
 	sleep $(($duration+10))
 done
 
-logs_dir=logs-`hostname`-`uname -r`-`get_lis_version`/
+logs_dir=logs-`hostname`-$testtype-$buffersize
 
 collect_VM_properties $code_path/$logs_dir/VM_properties.csv
 
-bash $code_path/generate_csvs.sh $code_path/$logs_dir
+bash $code_path/generate_csvs.sh $code_path/$logs_dir $testtype $buffersize
+mv /etc/rc.d/after.local.bkp /etc/rc.d/after.local
+mv /etc/rc.local.bkp /etc/rc.local
+mv /etc/rc.d/rc.local.bkp /etc/rc.d/rc.local
+echo "$testtype $buffersize test is Completed at Server"
+

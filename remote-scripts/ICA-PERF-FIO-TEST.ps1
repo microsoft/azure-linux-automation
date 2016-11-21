@@ -54,7 +54,7 @@ chmod 666 /home/$user/perf_fio.csv
 		RemoteCopy -uploadTo $testVMData.PublicIP -port $testVMData.SSHPort -files $currentTestData.files -username $user -password $password -upload
 
 		$out = RunLinuxCmd -ip $testVMData.PublicIP -port $testVMData.SSHPort -username $user -password $password -command "chmod +x *.sh" -runAsSudo
-
+		$out = RunLinuxCmd -ip $testVMData.PublicIP -port $testVMData.SSHPort -username $user -password $password -command "cp /home/$user/constants.sh /root/" -runAsSudo
 
 		$testJob = RunLinuxCmd -ip $testVMData.PublicIP -port $testVMData.SSHPort -username $user -password $password -command "./StartFioTest.sh" -RunInBackground -runAsSudo
 		#endregion

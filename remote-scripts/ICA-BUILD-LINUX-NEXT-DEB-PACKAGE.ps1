@@ -25,6 +25,7 @@ if($imageType -imatch "Standard")
 	LogMsg "BaseOsImageName : $BaseOsImageName"
 	LogMsg "Collecting latest $imageType ubuntu image from Azure gallery.." 
 	$latestLinuxImage = (Get-AzureVMImage | where {$_.ImageName -imatch "Ubuntu-16_04-LTS-amd64-server" } | sort PublishedDate -Descending)[0].ImageName
+	$latestLinuxImage =  "b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu-16_04-LTS-amd64-server-20160907.1-en-us-30GB"
 	LogMsg "Latest $imageType Image from Azure gallery : $latestLinuxImage"
 	$latestOsImage = SetOSImageToDistro -Distro $Distro -xmlConfig $xmlConfig -ImageName $latestLinuxImage
 	LogMsg "Is $imageType latestOsImage SET : $latestOsImage"
@@ -105,43 +106,79 @@ if ($isDeployed)
               if (($testStartUpStatus -eq "TestCompleted") -or ($linuxNextBuildInfo -imatch "Updating test case state to completed"))
               {
                      LogMsg "Linux Next build deb package generated successfully download deb package from /home/$user/code."
-                     LogMsg "Generation of deb package from Linux Next build is SUCCESS.."
+                     
                      $debPackageStatus = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "ls /home/$user/linux-image*.deb" -runAsSudo
                      if ($debPackageStatus -imatch "No such file or directory")
                      {
                            LogMsg "DEB package not availabe.. "
                            $testResult = "FAIL"
+                           $resultSummary +=  CreateResultSummary -testResult $testResult -metaData "LINUX-NEXT DEB CREATION" -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
                      }
                      else
                      {
-						$out = RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/*.deb, /home/$user/code/*.txt, /home/$user/code/*.log, /home/$user/code/*.sh" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password 2>&1 | Out-Null						   
-						$debPackageName = (ls $LogDir  | where {$_.Name -imatch "linux-image"}).Name
-						$debPackageFilePath = "$LogDir\$debPackageName"
-						$debPackageUploadInfo = Set-AzureStorageBlobContent -File $debPackageFilePath -Container $SAContainer -Blob $debPackageName -Context (New-AzureStorageContext -StorageAccountName $SAName -StorageAccountKey $SAPrimaryKey) -Force ; $debPackageuploadStatus = $? 
-						$debPackageUploadInfo1 = Set-AzureStorageBlobContent -File $debPackageFilePath -Container $SAContainer -Blob "linuxnext-latest.deb" -Context (New-AzureStorageContext -StorageAccountName $SAName -StorageAccountKey $SAPrimaryKey) -Force ; $debPackageuploadStatus1 = $? 
-						if (($debPackageuploadStatus -imatch "True") -and ($debPackageuploadStatus1 -imatch "True"))
+						LogMsg "Generation of deb package from Linux Next build is SUCCESS.."
+						$testResult = "PASS"
+						$resultSummary +=  CreateResultSummary -testResult $testResult -metaData "LINUX-NEXT DEB CREATION" -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+						$defualtKernelVersion = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "uname -r" -runAsSudo
+						LogMsg "DEFAULT KERNEL VERSION : $defualtKernelVersion"
+						LogMsg "Verification of created linux-next .deb package installtion .."
+						$debCheckStattus = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "dpkg -i linux-image*.deb >> debPackageinstalltion.log" -runAsSudo
+						$restartvmstatus = RestartAllDeployments -allVMData $allVMData
+						if ($restartvmstatus -eq "True")
 						{
+							$testDuration=0
+							LogMsg "VMs Restarted Successfully"
+							$latestKernelVersion = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "uname -r" -runAsSudo
+							LogMsg "LATEST KERNEL VERSION : $latestKernelVersion"
+							if(($latestKernelVersion -ne $defualtKernelVersion) -and ($latestKernelVersion -imatch "next"))
+							{
+								$testResult = "PASS"
+								$resultSummary +=  CreateResultSummary -testResult $testResult -metaData "LINUX-NEXT DEB INSTALLATION : $latestKernelVersion" -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+								LogMsg "DEFAULT KERNEL VERSION : $defualtKernelVersion"
+								LogMsg "LATEST KERNEL VERSION : $latestKernelVersion"
+								$out = RemoteCopy -download -downloadFrom $hs1VIP -files "/home/$user/*.deb, /home/$user/code/*.txt, /home/$user/code/*.log, /home/$user/code/*.sh" -downloadTo $LogDir -port $hs1vm1sshport -username $user -password $password 2>&1 | Out-Null						   
+						        $debPackageName = (ls $LogDir  | where {$_.Name -imatch "linux-image"}).Name
+						        $debPackageFilePath = "$LogDir\$debPackageName"
+						        $debPackageUploadInfo = Set-AzureStorageBlobContent -File $debPackageFilePath -Container $SAContainer -Blob $debPackageName -Context (New-AzureStorageContext -StorageAccountName $SAName -StorageAccountKey $SAPrimaryKey) -Force ; $debPackageuploadStatus = $? 
+						        $debPackageUploadInfo1 = Set-AzureStorageBlobContent -File $debPackageFilePath -Container $SAContainer -Blob "linuxnext-latest.deb" -Context (New-AzureStorageContext -StorageAccountName $SAName -StorageAccountKey $SAPrimaryKey) -Force ; $debPackageuploadStatus1 = $? 
+						        if (($debPackageuploadStatus -imatch "True") -and ($debPackageuploadStatus1 -imatch "True"))
+						        {
 							
-							LogMsg "Uploading $debPackageName into $SAContainer container is SUCCESS"
-							LogMsg "Uploading linuxnext-latest.deb into $SAContainer container is SUCCESS"
-							LogMsg "*********************************** LINUX-NEXT DEB PACKAGE AVAILABLE LINKS ***********************************`n`n 	$remoteDebPath/$debPackageName`n`n 	$remoteDebPath/linuxnext-latest.deb`n`n******************************************************************##************************************##**********************************"
-							$testResult = "PASS"
-						}
-						else
-						{
-							LogMsg "$debPackageName upload is FAILED"
-							$testResult = "FAIL"
-						}
+							        LogMsg "Uploading $debPackageName into $SAContainer container is SUCCESS"
+							        LogMsg "Uploading linuxnext-latest.deb into $SAContainer container is SUCCESS"
+							        LogMsg "*********************************** LINUX-NEXT DEB PACKAGE AVAILABLE LINKS ***********************************`n`n 	$remoteDebPath/$debPackageName`n`n 	$remoteDebPath/linuxnext-latest.deb`n`n******************************************************************##************************************##**********************************"
+							        $testResult = "PASS"
+							        $resultSummary +=  CreateResultSummary -testResult $testResult -metaData "LINUX-NEXT DEB PACK UPLOAD" -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+						        }
+						        else
+						        {
+							        LogMsg "$debPackageName upload is FAILED"
+							        $testResult = "FAIL"
+									$resultSummary +=  CreateResultSummary -testResult $testResult -metaData "LINUX-NEXT DEB PACK UPLOAD" -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+						        }
+							}
+							else
+							{
+                                LogMsg "$debPackageName installation is FAILED"
+							    $testResult = "FAIL"
+                                $resultSummary +=  CreateResultSummary -testResult $testResult -metaData "LINUX-NEXT DEB CREATION" -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+							}
+                        }
+                        else
+                        {
+                            LogMsg "Restart VM is FAILED" 
+                            $testResult = "FAIL"  
+                        }
+						
                      }
               }
               else
               {
-                     LogMsg "Linux Next build deb package generate script NOT placed at StartUp file. FAILED.."
+                     LogMsg "Linux Next build deb package generation is FAILED.."
                      $testResult = "FAIL"
               }
               LogMsg "Test result : $testResult"
        }
-
        catch
        {
 		  $ErrorMessage =  $_.Exception.Message
@@ -155,7 +192,7 @@ if ($isDeployed)
                      $testResult = "Aborted"
               }
               $resultArr += $testResult
-			  $resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
+			  #$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName # if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
        }   
 }
 
