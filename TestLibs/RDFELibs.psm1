@@ -4477,6 +4477,7 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 		$objNode = New-Object -TypeName PSObject
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name ServiceName -Value $ServiceName -Force
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name ResourceGroupName -Value $ResourceGroupName -Force
+		Add-Member -InputObject $objNode -MemberType NoteProperty -Name Location -Value $ResourceGroupName -Force
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name RoleName -Value $RoleName -Force 
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name PublicIP -Value $PublicIP -Force
 		Add-Member -InputObject $objNode -MemberType NoteProperty -Name PublicIPv6 -Value $PublicIP -Force
@@ -4493,18 +4494,21 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 		foreach ($ResourceGroup in $ResourceGroups.Split("^"))
 		{
 			LogMsg "Collecting $ResourceGroup data.."
+
+			$allRGResources = (Get-AzureRmResource | where { $_.ResourceGroupName -eq $ResourceGroup } | Select ResourceType).ResourceType
 			LogMsg "    Microsoft.Network/publicIPAddresses data collection in progress.."
 			$RGIPdata = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/publicIPAddresses" -Verbose -ExpandProperties
 			LogMsg "    Microsoft.Compute/virtualMachines data collection in progress.."
 			$RGVMs = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Compute/virtualMachines" -Verbose -ExpandProperties
 			LogMsg "    Microsoft.Network/networkInterfaces data collection in progress.."
 			$NICdata = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/networkInterfaces" -Verbose -ExpandProperties
+			$currentRGLocation = (Get-AzureRmResourceGroup -ResourceGroupName $ResourceGroup).Location
 			$numberOfVMs = 0
 			foreach ($testVM in $RGVMs)
 			{
 				$numberOfVMs += 1
 			}
-			if ( ($numberOfVMs -gt 1) -or (($RGIPData | where { $_.Properties.publicIPAddressVersion -eq "IPv6" }).Properties.ipAddress) )
+			if ( ($numberOfVMs -gt 1) -or (($RGIPData | where { $_.Properties.publicIPAddressVersion -eq "IPv6" }).Properties.ipAddress) -or ($allRGResources -contains "Microsoft.Network/loadBalancers"))
 			{
 				LogMsg "    Microsoft.Network/loadBalancers data collection in progress.."
 				$LBdata = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceType "Microsoft.Network/loadBalancers" -ExpandProperties -Verbose
@@ -4512,7 +4516,7 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 			foreach ($testVM in $RGVMs)
 			{
 				$QuickVMNode = CreateQuickVMNode
-				if ( ( $numberOfVMs -gt 1 ) -or (($RGIPData | where { $_.Properties.publicIPAddressVersion -eq "IPv6" }).Properties.ipAddress))
+				if ( ( $numberOfVMs -gt 1 ) -or (($RGIPData | where { $_.Properties.publicIPAddressVersion -eq "IPv6" }).Properties.ipAddress)  -or ($allRGResources -contains "Microsoft.Network/loadBalancers"))
 				{
 					$InboundNatRules = $LBdata.Properties.InboundNatRules
 					foreach ($endPoint in $InboundNatRules)
@@ -4567,6 +4571,7 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 				$QuickVMNode.RoleName = $testVM.ResourceName
 				$QuickVMNode.Status = $testVM.Properties.ProvisioningState
 				$QuickVMNode.InstanceSize = $testVM.Properties.hardwareProfile.vmSize
+				$QuickVMNode.Location = $currentRGLocation
 				$allDeployedVMs += $QuickVMNode
 			}
 			LogMsg "Collected $ResourceGroup data!"		

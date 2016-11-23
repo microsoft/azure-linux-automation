@@ -46,9 +46,11 @@ ConfigureIperf3Ubuntu()
 	LogMsg "Configuring ${1} for IPERF3 test..."
 	ssh ${1} "apt-get update"
 	ssh ${1} "apt-get -y install iperf3 sysstat bc "
-	scp ConfigureUbuntu1604IPv6.sh ${1}:
-	ssh ${1} "chmod +x ConfigureUbuntu1604IPv6.sh"
-	ssh ${1} "./ConfigureUbuntu1604IPv6.sh"
+	if [ $IPversion -eq 6 ]; then	
+		scp ConfigureUbuntu1604IPv6.sh ${1}:
+		ssh ${1} "chmod +x ConfigureUbuntu1604IPv6.sh"
+		ssh ${1} "./ConfigureUbuntu1604IPv6.sh"
+	fi
 }
 
 LogMsg()

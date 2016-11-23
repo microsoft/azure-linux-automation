@@ -7,6 +7,7 @@
 #              - VHD preparation : Installing packages required by ICA, LIS drivers and waagent
 #              - Uplaoding test VHD to cloud
 #              - Invokes azure test suite
+## Author : v-shisav@microsoft.com
 ## Author : v-ampaw@microsoft.com
 ###############################################################################################
 param ([string] $xmlConfigFile, [switch] $eMail, [string] $logFilename="azure_ica.log", [switch] $runtests, [switch]$onCloud, [switch] $vhdprep, [switch]$upload, [switch] $help, [string] $Distro, [string] $cycleName, [string] $TestPriority, [string]$osImage, [switch]$EconomyMode, [switch]$keepReproInact, [string] $DebugDistro, [switch]$UseAzureResourceManager, [string] $OverrideVMSize, [string]$customKernel)
@@ -39,6 +40,17 @@ if ( $customKernel )
 {
     Set-Variable -Name customKernel -Value $customKernel -Scope Global
 }
+if ( $xmlConfig.config.Azure.General.StorageAccount -imatch "NewStorage_" )
+{
+    $NewASMStorageAccountType = ($xmlConfig.config.Azure.General.StorageAccount).Replace("NewStorage_","")
+    Set-Variable -Name NewASMStorageAccountType -Value $NewASMStorageAccountType -Scope Global
+}
+if ( $xmlConfig.config.Azure.General.ARMStorageAccount -imatch "NewStorage_" )
+{
+    $NewARMStorageAccountType = ($xmlConfig.config.Azure.General.ARMStorageAccount).Replace("NewStorage_","")
+    Set-Variable -Name NewARMStorageAccountType -Value $NewASMStorageAccountType -Scope Global
+}
+
 
 try
 {
