@@ -6921,7 +6921,7 @@
 			<testName>ICA-IPERF3-TCP-IPV4-TEST</testName>
 			<testScript></testScript>
 			<testScriptps1>ICA-IPERF3-TCPv4v6-xREGION-TEST.ps1</testScriptps1>
-			<setupType>S1C1LBIPv6</setupType>
+			<setupType>S1C1LBIPv4</setupType>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<files>.\remote-scripts\azuremodules.sh</files>			
