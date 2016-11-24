@@ -151,8 +151,6 @@ chmod 666 /root/perf_fio.csv
 			if ($dataSource -And $DBuser -And $DBpassword -And $database -And $dataTableName) 
 			{
 				$GuestDistro	= cat "$LogDir\VM_properties.csv" | Select-String "OS type"| %{$_ -replace ",OS type,",""}
-			
-				$TestCaseName	= "FIO-TEST"
 				if ( $UseAzureResourceManager )
 				{
 					$HostType	= "Azure-ARM"
