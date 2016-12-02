@@ -65,7 +65,10 @@ done
                     echo "COREOS"
                     exitVal=0
                 fi
-
+        elif [ -e /usr/share/clear/version ]; then
+                tmp=`cat /usr/share/clear/version`
+                echo "CLEARLINUX"
+                exitVal=0
         fi
 return $exitVal
 }
