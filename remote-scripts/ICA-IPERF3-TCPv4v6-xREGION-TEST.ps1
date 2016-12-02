@@ -77,15 +77,18 @@ if ($isDeployed)
 			{
 				$testConnections = $param.Replace("connections=(","").Replace(")","").Split(" ")
 			}
-            if ( $param -imatch "IPversion=6" )
+            if ( $param -imatch "IPversion" )
             {
-                $IPVersion = "IPv6"
-		        Add-Content -Value "serverIpv6=$($serverVMData.PublicIPv6)" -Path $constantsFile	
-		        Add-Content -Value "clientIpv6=$($clientVMData.PublicIPv6)" -Path $constantsFile
-            }
-            else
-            {
-                $IPVersion = "IPv4"
+                if ( $param -imatch "IPversion=6" )
+                {
+                    $IPVersion = "IPv6"
+		            Add-Content -Value "serverIpv6=$($serverVMData.PublicIPv6)" -Path $constantsFile	
+		            Add-Content -Value "clientIpv6=$($clientVMData.PublicIPv6)" -Path $constantsFile
+                }
+                else
+                {
+                    $IPVersion = "IPv4"
+                }
             }
 		}
 		LogMsg "constanst.sh created successfully..."
