@@ -1222,6 +1222,7 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
             Add-Content -Value "$($indents[3])^dependsOn^: " -Path $jsonFile
             Add-Content -Value "$($indents[3])[" -Path $jsonFile
                 Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPv4AddressName'))]^," -Path $jsonFile
+                Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/networkSecurityGroups/', '$SecurityGroupName')]^," -Path $jsonFile
                 Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]^" -Path $jsonFile
             Add-Content -Value "$($indents[3])]," -Path $jsonFile
 
