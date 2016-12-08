@@ -15,7 +15,7 @@ white_list_xml = args.whitelist
 def RunTest():
     UpdateState("TestRunning")
     RunLog.info("Checking for ERROR messages in waagent.log...")
-    errors = Run("grep -i error /var/log/waagent.log")
+    errors = Run("grep ERROR /var/log/waagent.log")
     if (not errors) :
         RunLog.info('There is no errors in the logs waagent.log')
         ResultLog.info('PASS')

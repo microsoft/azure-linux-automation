@@ -1922,7 +1922,7 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 				if ( $CompressCount -eq $fileCounter )
 				{
 					$retry=1
-					$maxRetry=10
+					$maxRetry=3
 					while($retry -le $maxRetry)
 					{
 						if($usePrivateKey)

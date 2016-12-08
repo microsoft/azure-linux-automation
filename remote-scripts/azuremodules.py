@@ -188,6 +188,21 @@ def GetResourceDiskMountPoint():
         RunLog.info("ResourceDisk handled by waagent.")
         return walacfg_dict['ResourceDisk.MountPoint']
 
+def RunGetOutput(cmd):
+    try:
+        output = subprocess.check_output(cmd,
+                                         stderr=subprocess.STDOUT,
+                                         shell=True)
+        output = unicode(output,
+                         encoding='utf-8',
+                         errors="backslashreplace")
+    except subprocess.CalledProcessError as e:
+        output = unicode(e.output,
+                         encoding='utf-8',
+                         errors="backslashreplace")
+        return e.returncode, output
+    return 0, output
+
 def Run(cmd):
         proc=subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         proc.wait()
