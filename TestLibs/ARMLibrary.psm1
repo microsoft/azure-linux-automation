@@ -44,15 +44,16 @@
     foreach ($RG in $setupTypeData.HostedService )
     {
         $curtime = Get-Date
+        $randomNumber = Get-Random -Maximum 999 -Minimum 111 -SetSeed (Get-Random -Maximum 999 -Minimum 111 )
         $isServiceDeployed = "False"
         $retryDeployment = 0
         if ( $RG.Tag -ne $null )
         {
-            $groupName = "ICA-RG-" + $RG.Tag + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
+            $groupName = "ICA-RG-" + $RG.Tag + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $randomNumber 
         }
         else
         {
-            $groupName = "ICA-RG-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
+            $groupName = "ICA-RG-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $randomNumber
         }
         if($isMultiple -eq "True")
         {

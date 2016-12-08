@@ -846,15 +846,16 @@ Function CreateAllDeployments($setupType, $xmlConfig, $Distro, [string]$region =
         foreach ($img in $osImage)
         {
         	$curtime = Get-Date
+        	$randomNumber = Get-Random -Maximum 999 -Minimum 111 -SetSeed (Get-Random -Maximum 999 -Minimum 111 )
 		    $isServiceDeployed = "False"
 		    $retryDeployment = 0
 		    if ( $HS.Tag -ne $null )
 		    {
-			    $serviceName = "ICA-HS-" + $HS.Tag + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
+			    $serviceName = "ICA-HS-" + $HS.Tag + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $randomNumber
 		    }
 		    else
 		    {
-			    $serviceName = "ICA-HS-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
+			    $serviceName = "ICA-HS-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $randomNumber
 		    }
 		    if($isMultiple -eq "True")
 		    {
