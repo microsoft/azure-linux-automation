@@ -109,6 +109,7 @@ try
     Set-Variable -Name Distro -Value $Distro -Scope Global
     Set-Variable -Name onCloud -Value $onCloud -Scope Global
     Set-Variable -Name xmlConfig -Value $xmlConfig -Scope Global
+	Set-Content -Path .\report\lastLogDirectory.txt -Value $testDir
     Set-Variable -Name vnetIsAllConfigured -Value $false -Scope Global
     if($EconomyMode)
     {

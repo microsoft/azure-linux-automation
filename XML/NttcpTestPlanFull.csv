@@ -18,5 +18,5 @@ S.No.,Region,VMSize,StorageAccount (Classic),StorageAccount (ARM)
 17,South Central US,A8,konkacisouthcentralus,
 18,UK WEST,Standard_DS4_v2,konkaciukwest1,konkaciukwest
 19,North Europe,A10,konkacinortheurope,konkacineuropev2
-20,West Europe,Standard_G3,konkaciwesteurope,
+20,West Europe,Standard_G3,konkaciwesteurope,konkaciwesteuropev2
 21,Japan East,A11,konkacijapaneast1,konkacijapaneast
