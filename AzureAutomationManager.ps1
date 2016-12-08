@@ -92,7 +92,7 @@ try
     Set-Variable -Name testStartTime -Value $testStartTime -Scope Global
 
     $fname = [System.IO.Path]::GetFilenameWithoutExtension($xmlConfigFile)
-    $testDir = $testResults + "\" + $fname + "-" + $testStartTime.ToString("yyyyMMdd-HHmmss")
+    $testDir = $testResults + "\" + $fname + "-" + $testStartTime.ToString("yyyyMMdd-HHmmss") + "-$(Get-Random -Maximum 999 -Minimum 111)"
 
     mkdir $testDir -ErrorAction SilentlyContinue | out-null
     Set-Content -Value "" -Path .\report\testSummary.html -Force | Out-Null
