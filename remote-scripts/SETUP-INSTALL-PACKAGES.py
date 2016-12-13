@@ -48,7 +48,7 @@ def set_variables_OS_dependent():
                 waagent_cmd= "{0} {1}".format(python_cmd, waagent_bin_path)
 
         Run("echo 'checking python version' >> PackageStatus.txt")
-        retcode, output = RunGetOutput('waagent --version | grep Python')
+        retcode, output = RunGetOutput('{0} --version | grep Python'.format(waagent_cmd))
         if retcode == 0 and 'Python: 3.' in output:
                 python_cmd = 'python3'
         Run("echo 'using [{0}]' >> PackageStatus.txt".format(python_cmd))
