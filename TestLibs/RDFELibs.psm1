@@ -4503,8 +4503,10 @@ Function ConfigureDnsServer($intermediateVM, $DnsServer, $HostnameDIPDetails, $v
 {
 #Get VNETVM details using - Get-AllVMHostnameAndDIP() function. This will generate the string of all VMs IP and hostname.
 	$HostnameDIP = $HostnameDIPDetails
-	$DnsConfigureCommand = "python /home/$user/ConfigureDnsServer.py -v `"$HostnameDIP`" -D $vnetDomainDBFilePath -r $vnetDomainREVFilePath" 
+	$DnsConfigureCommand = "echo $($dnsServer.password) | sudo -S python /home/$user/ConfigureDnsServer.py -v `"$HostnameDIP`" -D $vnetDomainDBFilePath -r $vnetDomainREVFilePath" 
 	$out = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $DnsServer -remoteCommand $DnsConfigureCommand
+	#Add time interval for changes to take effect
+	sleep 60
 	if($out -imatch 'CONFIGURATION_SUCCESSFUL')
 	{
 		LogMsg  "DNS server configured successfully."
@@ -5352,13 +5354,13 @@ Function DoSSHTestFromLocalVM($intermediateVM, $LocalVM, $toVM,[switch]$hostname
 	if($hostnameMode)
 	{
 		LogMsg "Executing - date - command on $($toVM.Hostname) .."
-		$sshOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "$python_cmd /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RunSSHCmd.py -s `"$($toVM.hostname)`" -u $user -p $($toVM.password)  -P 22 -c `"date`" -o yes`'"
+		$sshOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "$python_cmd /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'echo $($LocalVM.password) | sudo -S python /home/$user/RunSSHCmd.py -s `"$($toVM.hostname)`" -u $user -p $($toVM.password)  -P 22 -c `"date`" -o yes`'"
 
 	}
 	else
 	{
 		LogMsg "Executing - date - command on $($toVM.DIP) .."
-		$sshOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "$python_cmd /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RunSSHCmd.py -s `"$($toVM.dip)`" -u $user -p $($toVM.password)  -P 22 -c `"date`" -o yes`'"
+		$sshOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "$python_cmd /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'echo $($LocalVM.password) | sudo -S python /home/$user/RunSSHCmd.py -s `"$($toVM.dip)`" -u $user -p $($toVM.password)  -P 22 -c `"date`" -o yes`'"
 	}
 	LogMsg "Verifying output.."
 	$logfilepath = $toVM.logDir + "\sshOutput.log"
@@ -5386,12 +5388,12 @@ Function DoSCPTestFromLocalVM( $intermediateVM, $LocalVM, $toVM, [switch]$hostna
 	if($hostnameMode)
 	{
 		LogMsg "File Created. Now copying it to $($toVM.Hostname) ..."
-		$scpOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "$python_cmd /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RemoteCopy.py -c `"$($toVM.Hostname)`" -m upload -u `"$($toVM.user)`" -p $($toVM.password) -P 22 -r `"/home/$user`" -f `"/home/$user/testfile`"`'"
+		$scpOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "$python_cmd /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'echo $($LocalVM.password) | sudo -S python /home/$user/RemoteCopy.py -c `"$($toVM.Hostname)`" -m upload -u `"$($toVM.user)`" -p $($toVM.password) -P 22 -r `"/home/$user`" -f `"/home/$user/testfile`"`'"
 	}
 	else
 	{
 		LogMsg "File Created. Now copying it to $($toVM.DIP) ..."
-		$scpOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "$python_cmd /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RemoteCopy.py -c `"$($toVM.DIP)`" -m upload -u `"$($toVM.user)`" -p $($toVM.password) -P 22 -r `"/home/$user`" -f `"/home/$user/testfile`"`'"
+		$scpOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "$python_cmd /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'echo $($LocalVM.password) | sudo -S python /home/$user/RemoteCopy.py -c `"$($toVM.DIP)`" -m upload -u `"$($toVM.user)`" -p $($toVM.password) -P 22 -r `"/home/$user`" -f `"/home/$user/testfile`"`'"
 	}
 	LogMsg "Writing output to $logfilepath ..."
 	Set-Content -Path $logFilepath -Value $scpOutput
@@ -5413,7 +5415,7 @@ Function StartIperfServerOnRemoteVM($remoteVM, $intermediateVM, $expectedServerI
 	$NewremoteVMcmd = $remoteVM.cmd
 	Write-Host $NewremoteVMcmd 
 	LogMsg "Deleting any previous server logs ..."
-	$DeletePreviousLogs = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "rm -rf /root/*.txt /root/*.log" -runAsSudo
+	$DeletePreviousLogs = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "rm -rf /home/$($remoteVM.User)/*.txt /home/$($remoteVM.User)/*.log" -runAsSudo
 	$CommandOutput = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand $NewremoteVMcmd -runAsSudo -RunInBackGround
 	LogMsg "Checking if server started successfully or not ..."
 	$isServerStarted = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "ps -ef | grep iperf -s | grep -v grep | wc -l" -runAsSudo
@@ -5451,15 +5453,15 @@ Function StartIperfClientOnRemoteVM($remoteVM, $intermediateVM)
 	$NewremoteVMcmd = $remoteVM.cmd
 	Write-Host $NewremoteVMcmd 
 	LogMsg "Deleting any previous client logs ..."
-	$DeletePreviousLogs = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "rm -rf /root/*.txt /root/*.log" -runAsSudo
+	$DeletePreviousLogs = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "rm -rf /home/$($remoteVM.User)/*.txt /home/$($remoteVM.User)/*.log" -runAsSudo
 	$CommandOutput = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand $NewremoteVMcmd -runAsSudo
 	LogMsg "Checking if client connected successfully or not ..."
 
-	$DeletePreviousLogs = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cp /root/Runtime.log /root/start-client.py.log" -runAsSudo
+	$DeletePreviousLogs = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cp /home/$($remoteVM.User)/Runtime.log /home/$($remoteVM.User)/start-client.py.log" -runAsSudo
 
-	Set-Content -Value (RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cat /root/start-client.py.log" -runAsSudo -RunMaxAllowedTime 60) -Path ("$($remoteVM.logDir)" + "\start-client.py.log")
-	Set-Content -Value (RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cat /root/state.txt" -runAsSudo -RunMaxAllowedTime 60 ) -Path ("$($remoteVM.logDir)" + "\state.txt")
-	Set-Content -Value (RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cat /root/Summary.log" -runAsSudo -RunMaxAllowedTime 60 ) -Path ("$($remoteVM.logDir)" + "\Summary.log")
+	Set-Content -Value (RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cat /home/$($remoteVM.User)/start-client.py.log" -runAsSudo -RunMaxAllowedTime 60) -Path ("$($remoteVM.logDir)" + "\start-client.py.log")
+	Set-Content -Value (RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cat /home/$($remoteVM.User)/state.txt" -runAsSudo -RunMaxAllowedTime 60 ) -Path ("$($remoteVM.logDir)" + "\state.txt")
+	Set-Content -Value (RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cat /home/$($remoteVM.User)/Summary.log" -runAsSudo -RunMaxAllowedTime 60 ) -Path ("$($remoteVM.logDir)" + "\Summary.log")
 
 
 	$clientState = Get-Content "$($remoteVM.Logdir)\state.txt"
@@ -5533,7 +5535,7 @@ Function IperfVnetToLocalUdpTest ($vnetAsClient, $localAsServer)
 		if ($isClientConnected -eq $true)
 		{
 			LogMsg "Checking if server received connections from client of not ..."
-			$temp = RunLinuxCmdOnRemoteVM -intermediateVM $vnetAsClient -remoteVM $localAsServer -runAsSudo -remoteCommand "cp /root/iperf-server.txt /home/$user/"
+			$temp = RunLinuxCmdOnRemoteVM -intermediateVM $vnetAsClient -remoteVM $localAsServer -runAsSudo -remoteCommand "cp /home/$($localAsServer.user)/iperf-server.txt /home/$user/"
 			$checkServer = RunLinuxCmdOnRemoteVM -intermediateVM $vnetAsClient -remoteVM $localAsServer -runAsSudo -remoteCommand "/home/$user/check-server.py"
 			$checkServerSummary = RunLinuxCmdOnRemoteVM -intermediateVM $vnetAsClient -remoteVM $localAsServer -runAsSudo -remoteCommand "cat ~/Summary.log"		
 			if($checkServerSummary -imatch "PASS")
@@ -6600,6 +6602,7 @@ Function GetVNETDetailsFromXMLDeploymentData([string]$deploymentType)
 		$subnet2Range = $allVnetData.ARMSubnet2Range
 		$vnetDomainDBFilePath = $allVnetData.ARMVnetDomainDBFilePath
 		$vnetDomainRevFilePath = $allVnetData.ARMVnetDomainRevFilePath
+		$dnsServerIP = $allVnetData.ARMDnsServerIP
 	}
 	else
 	{
@@ -6608,8 +6611,8 @@ Function GetVNETDetailsFromXMLDeploymentData([string]$deploymentType)
 		$subnet2Range = $allVnetData.Subnet2Range
 		$vnetDomainDBFilePath = $allVnetData.VnetDomainDBFilePath
 		$vnetDomainRevFilePath = $allVnetData.VnetDomainRevFilePath
+		$dnsServerIP = $allVnetData.DnsServerIP
 	}
-	$dnsServerIP = $allVnetData.DnsServerIP
 	return $vnetName,$subnet1Range,$subnet2Range,$vnetDomainDBFilePath,$vnetDomainRevFilePath,$dnsServerIP
 }
 #endregion  
