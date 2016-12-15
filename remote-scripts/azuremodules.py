@@ -190,9 +190,10 @@ def GetResourceDiskMountPoint():
 
 def RunGetOutput(cmd):
     try:
-        output = subprocess.check_output(cmd,
-                                         stderr=subprocess.STDOUT,
-                                         shell=True)
+        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+        retval = proc.communicate()
+        output = retval[0]
+
         output = unicode(output,
                          encoding='utf-8',
                          errors="backslashreplace")

@@ -28,6 +28,8 @@ def set_variables_OS_dependent():
         global distro_version
         global startup_file
         global python_cmd
+        global waagent_cmd
+        global waagent_bin_path
 
         RunLog.info ("\nset_variables_OS_dependent ..")
         [current_distro, distro_version] = DetectDistro()
