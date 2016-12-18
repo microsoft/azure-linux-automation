@@ -2548,6 +2548,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 				#Removal of background 
 				LogMsg "Removing Background Job ID : $taskID..."
 				Remove-Job -Id $taskID -Force
+				Remove-Item $LogDir\CurrentTestBackgroundJobs.txt -ErrorAction SilentlyContinue
 			}
 			$user=$xmlConfig.config.Azure.Deployment.Data.UserName
 			if ( !$SkipVerifyKernelLogs )

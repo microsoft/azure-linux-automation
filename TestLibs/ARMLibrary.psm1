@@ -269,11 +269,13 @@ if($storageAccount)
 if ( $NewARMStorageAccountType )
 {
     LogMsg "New storage account of type : $NewARMStorageAccountType will be created in $RGName."
+    $StorageAccountRG = $RGName
 }
 else
 {
     LogMsg "Getting Existing Storage Account : $StorageAccountName details ..."
     $StorageAccountType = (Get-AzureRmStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).Sku.Tier.ToString()
+    $StorageAccountRG = (Get-AzureRmStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).ResourceGroupName.ToString()
     if($StorageAccountType -match 'Premium')
     {
         $StorageAccountType = "Premium_LRS"
@@ -1067,6 +1069,8 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                     Add-Content -Value "$($indents[5])}" -Path $jsonFile
                 #endregion
 
+
+
                 #region IPv6 Config...
                 if ( $EnableIPv6 )
                 {
@@ -1167,6 +1171,17 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                             Add-Content -Value "$($indents[7])^id^: ^[resourceId('Microsoft.Network/networkInterfaces','$NIC')]^" -Path $jsonFile
                         Add-Content -Value "$($indents[6])}" -Path $jsonFile
                     Add-Content -Value "$($indents[5])]" -Path $jsonFile
+                Add-Content -Value "$($indents[4])}," -Path $jsonFile
+                #endregion
+
+                #region Enable boot dignostics.
+                Add-Content -Value "$($indents[4])^diagnosticsProfile^: " -Path $jsonFile
+                Add-Content -Value "$($indents[4]){" -Path $jsonFile
+                    Add-Content -Value "$($indents[5])^bootDiagnostics^: " -Path $jsonFile
+                    Add-Content -Value "$($indents[5]){" -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^enabled^: true," -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^storageUri^: ^[reference(resourceId('$StorageAccountRG', 'Microsoft.Storage/storageAccounts', '$StorageAccountName'), '2015-06-15').primaryEndpoints['blob']]^" -Path $jsonFile
+                    Add-Content -Value "$($indents[5])}" -Path $jsonFile
                 Add-Content -Value "$($indents[4])}" -Path $jsonFile
                 #endregion
 
