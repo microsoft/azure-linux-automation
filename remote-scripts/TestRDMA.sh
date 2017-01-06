@@ -296,7 +296,19 @@ if [ "${rdmaRun}" == "yes" ]
 then
 	mpirunPath=`find / -name mpirun | grep intel64`
 	imb_mpi1Path=`find / -name IMB-MPI1 | grep intel64`
-	
+	service NetworkManager status
+	if [ $? -eq 0 ]; then
+		LogMsg "Info: NetworkManager is running. Stopping it."
+		service NetworkManager stop
+		sleep 5
+		service waagent restart
+		sleep 5
+		ssh root@${slaves} "service NetworkManager stop"
+		sleep 5
+		service waagent restart
+		ssh root@${slaves} "service waagent restart"
+		sleep 5
+	fi	
 	LogMsg "Executing test command : ${mpirunPath} -hosts ${master},${slaves} -ppn 2 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 ${imb_mpi1Path} pingpong > pingPongTestIntraNodeTestOut.txt 2>&1"
 	#MPI-pingpong intra node
 	$mpirunPath -hosts ${master} -ppn 2 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 $imb_mpi1Path pingpong > pingPongTestIntraNodeTestOut.txt 2>&1

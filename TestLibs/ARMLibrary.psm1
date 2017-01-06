@@ -32,18 +32,28 @@
       $location = $region;
     }
 
+    if ( $location -imatch "-" )
+    {
+        $RGCount = $setupTypeData.HostedService.Count
+        $xRegionTest = $true
+        $xRegionTotalLocations = $location.Split("-").Count
+        $xRegionLocations = $location.Split("-")
+        $locationCounter = 0
+        LogMsg "$RGCount Resource groups will be deployed in $($xRegionLocations.Replace('-',' and '))"
+    }
     foreach ($RG in $setupTypeData.HostedService )
     {
         $curtime = Get-Date
+        $randomNumber = Get-Random -Maximum 999 -Minimum 111 -SetSeed (Get-Random -Maximum 999 -Minimum 111 )
         $isServiceDeployed = "False"
         $retryDeployment = 0
         if ( $RG.Tag -ne $null )
         {
-            $groupName = "ICA-RG-" + $RG.Tag + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
+            $groupName = "ICA-RG-" + $RG.Tag + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $randomNumber 
         }
         else
         {
-            $groupName = "ICA-RG-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
+            $groupName = "ICA-RG-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $randomNumber
         }
         if($isMultiple -eq "True")
         {
@@ -57,6 +67,12 @@
             $isRGDeleted = DeleteResourceGroup -RGName $groupName 
             if ($isRGDeleted)
             {    
+                if ( $xRegionTest )
+                {
+                    $location = $xRegionLocations[$locationCounter]
+                    $locationCounter += 1
+                }
+
                 $isServiceCreated = CreateResourceGroup -RGName $groupName -location $location
                 if ($isServiceCreated -eq "True")
                 {
@@ -123,7 +139,14 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
         Remove-AzureRmResourceGroup -Name $RGName -Force -Verbose
         $retValue = $?
         $ARMStorageAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
-        RemoveResidualResourceGroupVHDs -ResourceGroup $RGName -storageAccount $ARMStorageAccount
+        if ( $NewARMStorageAccountType )
+        {
+            LogMsg "No need to remove residual VHDs, as storage account in $RGName is deleted."
+        }
+        else
+        {
+            RemoveResidualResourceGroupVHDs -ResourceGroup $RGName -storageAccount $ARMStorageAccount
+        }
     }
     else
     {
@@ -213,6 +236,16 @@ Function CreateResourceGroupDeployment([string]$RGName, $location, $setupType, $
             {
                 LogErr "Failed to Resource Group."
                 $retValue = $false
+                $VMsCreated = Get-AzureRmVM -ResourceGroupName $RGName
+                if ( $VMsCreated )
+                {
+                    LogMsg "Keeping Failed resource group, as we found $($VMsCreated.Count) VM(s) deployed."
+                }
+                else
+                {
+                    LogMsg "Removing Failed resource group, as we found 0 VM(s) deployed."
+                    DeleteResourceGroup -RGName $RGName
+                }
             }
         }
         catch
@@ -233,17 +266,26 @@ if($storageAccount)
 { 
  $StorageAccountName = $storageAccount
 }
-LogMsg "Getting Storage Account : $StorageAccountName details ..."
-$StorageAccountType = (Get-AzureRmStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).Sku.Tier.ToString()
-if($StorageAccountType -match 'Premium')
+if ( $NewARMStorageAccountType )
 {
-    $StorageAccountType = "Premium_LRS"
+    LogMsg "New storage account of type : $NewARMStorageAccountType will be created in $RGName."
+    $StorageAccountRG = $RGName
 }
 else
 {
-	$StorageAccountType = "Standard_LRS"
+    LogMsg "Getting Existing Storage Account : $StorageAccountName details ..."
+    $StorageAccountType = (Get-AzureRmStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).Sku.Tier.ToString()
+    $StorageAccountRG = (Get-AzureRmStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).ResourceGroupName.ToString()
+    if($StorageAccountType -match 'Premium')
+    {
+        $StorageAccountType = "Premium_LRS"
+    }
+    else
+    {
+	    $StorageAccountType = "Standard_LRS"
+    }
+    LogMsg "Storage Account Type : $StorageAccountType"
 }
-LogMsg "Storage Account Type : $StorageAccountType"
 $HS = $RGXMLData
 $setupType = $Setup
 $totalVMs = 0
@@ -301,7 +343,18 @@ if ( $CurrentTestData.ProvisionTimeExtensions )
 	$extensionXML = [xml]$extensionString
 }
 
-LogMsg "ARM Storage Account : $StorageAccountName"
+if ( $NewARMStorageAccountType )
+{
+    $LocationLower = $Location.Replace(" ","").ToLower().Replace('"','')
+    #$StorageAccountName = $($NewARMStorageAccountType.ToLower().Replace("_","").Replace("standard","std").Replace("premium","prm")) + "$RGRandomNumber" + "$LocationLower"
+    $StorageAccountName = $($NewARMStorageAccountType.ToLower().Replace("_","")) + "$RGRandomNumber"
+    #$StorageAccountName = "$LocationLower" + "$RGRandomNumber"
+    LogMsg "Using New ARM Storage Account : $StorageAccountName"
+}
+else
+{
+    LogMsg "Using ARM Storage Account : $StorageAccountName"
+}
 LogMsg "Using API VERSION : $apiVersion"
 $ExistingVnet = $null
 if ($RGXMLData.ARMVnetName -ne $null)
@@ -330,6 +383,7 @@ for ($i =0; $i -lt 30; $i++)
 #Check if the deployment Type is single VM deployment or multiple VM deployment
 $numberOfVMs = 0
 $EnableIPv6 = $false
+$ForceLoadBalancerForSingleVM = $false
 foreach ( $newVM in $RGXMLData.VirtualMachine)
 {
     $numberOfVMs += 1
@@ -340,6 +394,10 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
             if ( $endpoint.EnableIPv6 -eq "True" )
             {
                 $EnableIPv6 = $true
+            }
+            if ( $endpoint.LoadBalanced -eq "True" )
+            {
+                $ForceLoadBalancerForSingleVM = $true
             }
         }
     }
@@ -447,6 +505,8 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
     Add-Content -Value "$($indents[1])^parameters^: {}," -Path $jsonFile
     Add-Content -Value "$($indents[1])^variables^:" -Path $jsonFile
     Add-Content -Value "$($indents[1]){" -Path $jsonFile
+
+    #region Variables
         Add-Content -Value "$($indents[2])^StorageAccountName^: ^$StorageAccountName^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^dnsNameForPublicIP^: ^$dnsNameForPublicIP^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^dnsNameForPublicIPv6^: ^$dnsNameForPublicIPv6^," -Path $jsonFile
@@ -495,6 +555,8 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
     Add-Content -Value "$($indents[1])}," -Path $jsonFile
     LogMsg "Added Variables.."
 
+    #endregion
+
     #region Define Resources
     Add-Content -Value "$($indents[1])^resources^:" -Path $jsonFile
     Add-Content -Value "$($indents[1])[" -Path $jsonFile
@@ -518,6 +580,24 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
         Add-Content -Value "$($indents[2])}," -Path $jsonFile
         LogMsg "Added Public IP Address $PublicIPName.."
         #endregion
+
+    #region New ARM Storage Account, if necessory!
+    if ( $NewARMStorageAccountType )
+    {
+    
+        Add-Content -Value "$($indents[2]){" -Path $jsonFile
+            Add-Content -Value "$($indents[3])^apiVersion^: ^2015-06-15^," -Path $jsonFile
+            Add-Content -Value "$($indents[3])^type^: ^Microsoft.Storage/storageAccounts^," -Path $jsonFile
+            Add-Content -Value "$($indents[3])^name^: ^[variables('StorageAccountName')]^," -Path $jsonFile
+            Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
+            Add-Content -Value "$($indents[3])^properties^:" -Path $jsonFile
+            Add-Content -Value "$($indents[3]){" -Path $jsonFile
+                Add-Content -Value "$($indents[4])^accountType^: ^$($NewARMStorageAccountType.Trim())^" -Path $jsonFile
+            Add-Content -Value "$($indents[3])}" -Path $jsonFile
+        Add-Content -Value "$($indents[2])}," -Path $jsonFile
+        LogMsg "Added New Storage Account $StorageAccountName.."
+    }
+    #endregion
 
         #region virtualNetworks
     if (!$ExistingVnet)
@@ -587,7 +667,7 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
 
     #region Multiple VM Deployment
 
-    if ( ($numberOfVMs -gt 1) -or ($EnableIPv6) )
+    if ( ($numberOfVMs -gt 1) -or ($EnableIPv6) -or ($ForceLoadBalancerForSingleVM) )
     {     
         #region availabilitySets
         Add-Content -Value "$($indents[2]){" -Path $jsonFile
@@ -989,6 +1069,8 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                     Add-Content -Value "$($indents[5])}" -Path $jsonFile
                 #endregion
 
+
+
                 #region IPv6 Config...
                 if ( $EnableIPv6 )
                 {
@@ -1025,6 +1107,10 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
             Add-Content -Value "$($indents[3])^dependsOn^: " -Path $jsonFile
             Add-Content -Value "$($indents[3])[" -Path $jsonFile
                 Add-Content -Value "$($indents[4])^[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]^," -Path $jsonFile
+            if ( $NewARMStorageAccountType) 
+            {
+                Add-Content -Value "$($indents[4])^[concat('Microsoft.Storage/storageAccounts/', variables('StorageAccountName'))]^," -Path $jsonFile
+            }
                 Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/networkInterfaces/', '$NIC')]^" -Path $jsonFile
             Add-Content -Value "$($indents[3])]," -Path $jsonFile
 
@@ -1085,6 +1171,17 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                             Add-Content -Value "$($indents[7])^id^: ^[resourceId('Microsoft.Network/networkInterfaces','$NIC')]^" -Path $jsonFile
                         Add-Content -Value "$($indents[6])}" -Path $jsonFile
                     Add-Content -Value "$($indents[5])]" -Path $jsonFile
+                Add-Content -Value "$($indents[4])}," -Path $jsonFile
+                #endregion
+
+                #region Enable boot dignostics.
+                Add-Content -Value "$($indents[4])^diagnosticsProfile^: " -Path $jsonFile
+                Add-Content -Value "$($indents[4]){" -Path $jsonFile
+                    Add-Content -Value "$($indents[5])^bootDiagnostics^: " -Path $jsonFile
+                    Add-Content -Value "$($indents[5]){" -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^enabled^: true," -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^storageUri^: ^[reference(resourceId('$StorageAccountRG', 'Microsoft.Storage/storageAccounts', '$StorageAccountName'), '2015-06-15').primaryEndpoints['blob']]^" -Path $jsonFile
+                    Add-Content -Value "$($indents[5])}" -Path $jsonFile
                 Add-Content -Value "$($indents[4])}" -Path $jsonFile
                 #endregion
 
@@ -1104,7 +1201,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
     #endregion
     
     #region Single VM Deployment...
-if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 )
+if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM )
 {
     if($newVM.RoleName)
     {
@@ -1141,6 +1238,7 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 )
             Add-Content -Value "$($indents[3])^dependsOn^: " -Path $jsonFile
             Add-Content -Value "$($indents[3])[" -Path $jsonFile
                 Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPv4AddressName'))]^," -Path $jsonFile
+                Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/networkSecurityGroups/', '$SecurityGroupName')]^," -Path $jsonFile
                 Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]^" -Path $jsonFile
             Add-Content -Value "$($indents[3])]," -Path $jsonFile
 
@@ -1286,6 +1384,10 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 )
 					Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/networkInterfaces/', '$NicName')]^," -Path $jsonFile
 					LogMsg "Added Nic $NicName to virtualMachines"
 				}
+            if ( $NewARMStorageAccountType) 
+            {
+                Add-Content -Value "$($indents[4])^[concat('Microsoft.Storage/storageAccounts/', variables('StorageAccountName'))]^," -Path $jsonFile
+            }
                 Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/networkInterfaces/', '$NIC')]^" -Path $jsonFile
 				LogMsg "Added Nic $NIC to virtualMachines"
 				#endregion		
@@ -1341,6 +1443,8 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 )
                         Add-Content -Value "$($indents[6])}" -Path $jsonFile
 					}	
 					#endregion
+                    Add-Content -Value "$($indents[5])]" -Path $jsonFile
+                    <#
                     Add-Content -Value "$($indents[5])]," -Path $jsonFile
                     Add-Content -Value "$($indents[5])^inputEndpoints^: " -Path $jsonFile
                     Add-Content -Value "$($indents[5])[" -Path $jsonFile
@@ -1364,8 +1468,10 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 )
                         $EndPointAdded = $true
                     }
                     #endregion 
-
+                    
                     Add-Content -Value "$($indents[5])]" -Path $jsonFile
+                    #>
+
                 Add-Content -Value "$($indents[4])}" -Path $jsonFile
                 #endregion
             Add-Content -Value "$($indents[3])}" -Path $jsonFile

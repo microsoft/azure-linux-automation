@@ -81,7 +81,6 @@ function updaterepos()
         Ubuntu)
             apt-get update
             ;;
-         
         SUSE|openSUSE|sles)
             zypper refresh
             ;;
