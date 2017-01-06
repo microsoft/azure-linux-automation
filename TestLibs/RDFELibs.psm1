@@ -2548,6 +2548,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 				#Removal of background 
 				LogMsg "Removing Background Job ID : $taskID..."
 				Remove-Job -Id $taskID -Force
+				Remove-Item $LogDir\CurrentTestBackgroundJobs.txt -ErrorAction SilentlyContinue
 			}
 			$user=$xmlConfig.config.Azure.Deployment.Data.UserName
 			if ( !$SkipVerifyKernelLogs )
@@ -4554,6 +4555,14 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 					foreach ($securityRule in $SGData.Properties.securityRules)
 					{
 						Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($securityRule.name)Port" -Value $securityRule.properties.destinationPortRange -Force
+					}
+					if($AllEndpoints.Length -eq 0)
+					{
+						$sg = Get-AzureRmNetworkSecurityGroup -ResourceGroupName $testVM.ResourceGroupName
+						foreach($rule in $sg.SecurityRules)
+						{
+							Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($rule.Name)Port" -Value $rule.DestinationPortRange -Force
+						}
 					}
 				}
 				foreach ( $nic in $NICdata )
