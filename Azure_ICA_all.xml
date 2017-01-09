@@ -536,7 +536,22 @@
 					</VirtualMachine>
 				</HostedService>
 			</E2ESingleVM>
-
+			<SingleVM>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>ExtraSmall</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</SingleVM>
 			<ExtraSmallVM>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
