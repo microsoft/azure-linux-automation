@@ -1402,6 +1402,16 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, 
             $retValue = ""
         }
     }
+    if ( $retValue -and $customLIS)
+    {
+        LogMsg "Custom LIS: $customLIS will be installed on all machines..."
+        $LISUpgradeStatus = InstallCustomLIS -customLIS $customLIS -allVMData $allVMData -customLISBranch $customLISBranch -RestartAfterUpgrade
+        if ( !$LISUpgradeStatus )
+        {
+            LogErr "Custom Kernel: $customKernel installation FAIL. Aborting tests."
+            $retValue = ""
+        }
+    }
 	return $retValue
 }
 

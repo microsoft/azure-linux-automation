@@ -44,7 +44,7 @@
     foreach ($RG in $setupTypeData.HostedService )
     {
         $curtime = Get-Date
-        $randomNumber = Get-Random -Maximum 999 -Minimum 111 -SetSeed (Get-Random -Maximum 999 -Minimum 111 )
+        $randomNumber = Get-Random -Maximum 9999 -Minimum 1111
         $isServiceDeployed = "False"
         $retryDeployment = 0
         if ( $RG.Tag -ne $null )
