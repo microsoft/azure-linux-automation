@@ -25,7 +25,6 @@ if($imageType -imatch "Standard")
 	LogMsg "BaseOsImageName : $BaseOsImageName"
 	LogMsg "Collecting latest $imageType ubuntu image from Azure gallery.." 
 	$latestLinuxImage = (Get-AzureVMImage | where {$_.ImageName -imatch "Ubuntu-16_04-LTS-amd64-server" } | sort PublishedDate -Descending)[0].ImageName
-	$latestLinuxImage =  "b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu-16_04-LTS-amd64-server-20160907.1-en-us-30GB"
 	LogMsg "Latest $imageType Image from Azure gallery : $latestLinuxImage"
 	$latestOsImage = SetOSImageToDistro -Distro $Distro -xmlConfig $xmlConfig -ImageName $latestLinuxImage
 	LogMsg "Is $imageType latestOsImage SET : $latestOsImage"
