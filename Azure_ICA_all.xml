@@ -3626,13 +3626,13 @@
 					</VirtualMachine>					
 				</HostedService>
 			</RDMA2VMA9>						
-			<RDMA2VMH16m>
+			<RDMA2VMH16r>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
 					<VirtualMachine>
 						<state></state>
-						<InstanceSize>Standard_H16m</InstanceSize>
-						<ARMInstanceSize>Standard_H16m</ARMInstanceSize>
+						<InstanceSize>Standard_H16r</InstanceSize>
+						<ARMInstanceSize>Standard_H16r</ARMInstanceSize>
 						<RoleName>server-vm</RoleName>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -3644,8 +3644,8 @@
 					</VirtualMachine>
 					<VirtualMachine>
 						<state></state>
-						<InstanceSize>Standard_H16m</InstanceSize>
-						<ARMInstanceSize>Standard_H16m</ARMInstanceSize>
+						<InstanceSize>Standard_H16r</InstanceSize>
+						<ARMInstanceSize>Standard_H16r</ARMInstanceSize>
 						<RoleName>client-vm</RoleName>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -3656,7 +3656,7 @@
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
 				</HostedService>
-			</RDMA2VMH16m>						
+			</RDMA2VMH16r>						
 			<RDMA2VMH16mr>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -7019,10 +7019,10 @@
 			<Priority>P0</Priority>
 		</test>			
 		<test>
-			<testName>ICA-RDMA-TEST-2VM-H16m</testName>
+			<testName>ICA-RDMA-TEST-2VM-H16r</testName>
 			<testScript></testScript>
 			<testScriptps1>ICA-RDMA-TEST-2VM.ps1</testScriptps1>
-			<setupType>RDMA2VMH16m</setupType>
+			<setupType>RDMA2VMH16r</setupType>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<remoteFiles></remoteFiles>
@@ -8086,7 +8086,7 @@
 				<Name>ICA-RDMA-TEST-2VM-A9</Name>
 			</test>
 			<test>
-				<Name>ICA-RDMA-TEST-2VM-H16m</Name>
+				<Name>ICA-RDMA-TEST-2VM-H16r</Name>
 			</test>
 			<test>
 				<Name>ICA-RDMA-TEST-2VM-H16mr</Name>
