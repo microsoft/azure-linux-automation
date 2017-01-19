@@ -2323,7 +2323,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 					$debugOutput += "$debugString`n"
 				}
 				Write-Progress -Activity "Attempt : $attemptswot+$attemptswt : Initiating command in Background Mode : $logCommand on $ip : $port" -Status "Timeout in $($RunMaxAllowedTime - $RunElaplsedTime) seconds.." -Id 87678 -PercentComplete (($RunElaplsedTime/$RunMaxAllowedTime)*100) -CurrentOperation "SSH ACTIVITY : $debugString"
-                Write-Host "Attempt : $attemptswot+$attemptswt : Initiating command in Background Mode : $logCommand on $ip : $port"
+                #Write-Host "Attempt : $attemptswot+$attemptswt : Initiating command in Background Mode : $logCommand on $ip : $port"
 				$RunCurrentTime = Get-Date
 				$RunDiffTime = $RunCurrentTime - $RunStartTime
 				$RunElaplsedTime =  $RunDiffTime.TotalSeconds
@@ -2442,7 +2442,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 					$debugOutput += "$debugString`n"
 				}
 				Write-Progress -Activity "Attempt : $attemptswot+$attemptswt : Executing $logCommand on $ip : $port" -Status "Timeout in $($RunMaxAllowedTime - $RunElaplsedTime) seconds.." -Id 87678 -PercentComplete (($RunElaplsedTime/$RunMaxAllowedTime)*100) -CurrentOperation "SSH ACTIVITY : $debugString"
-                Write-Host "Attempt : $attemptswot+$attemptswt : Executing $logCommand on $ip : $port" 
+                #Write-Host "Attempt : $attemptswot+$attemptswt : Executing $logCommand on $ip : $port" 
 				$RunCurrentTime = Get-Date
 				$RunDiffTime = $RunCurrentTime - $RunStartTime
 				$RunElaplsedTime =  $RunDiffTime.TotalSeconds
@@ -2483,7 +2483,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 				$debugOutput += "$debugString`n"
 			}
 			Write-Progress -Activity "Attempt : $attemptswot+$attemptswt : Executing $logCommand on $ip : $port" -Status $runLinuxCmdJob.State -Id 87678 -SecondsRemaining ($RunMaxAllowedTime - $RunElaplsedTime) -Completed
-			Write-Host "Attempt : $attemptswot+$attemptswt : Executing $logCommand on $ip : $port"
+			#Write-Host "Attempt : $attemptswot+$attemptswt : Executing $logCommand on $ip : $port"
             Remove-Job $runLinuxCmdJob 
 			Remove-Item $LogDir\$randomFileName -Force | Out-Null
 			if ($LinuxExitCode -imatch "AZURE-LINUX-EXIT-CODE-0") 
