@@ -41,7 +41,7 @@ def set_variables_OS_dependent():
                 startup_file = '/etc/rc.local'
         elif(current_distro == "centos" or current_distro == "rhel" or current_distro == "fedora" or current_distro == "Oracle"):
                 startup_file = '/etc/rc.d/rc.local'
-        elif(current_distro == "SUSE" or current_distro == "sles" or current_distro == "opensuse"):
+        elif(current_distro == "SUSE" or "sles" in current_distro or current_distro == "opensuse"):
                 startup_file = '/etc/rc.d/after.local'
         
         if(current_distro == "coreos"):
@@ -254,7 +254,7 @@ def install_package(package):
                         return AptgetPackageInstall(package)
                 elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos') or (current_distro == 'fedora')):
                         return yum_package_install(package)
-                elif (current_distro == "SUSE") or (current_distro == "openSUSE") or (current_distro == "sles") or (current_distro == "opensuse"):
+                elif (current_distro == "SUSE") or (current_distro == "openSUSE") or ("sles" in current_distro) or (current_distro == "opensuse"):
                         return zypper_package_install(package)
                 else:
                         RunLog.error (package + ": package installation failed!")
@@ -387,7 +387,7 @@ def RunTest():
                                 # Get the requisite package list from 'universal' node, that's must have on system
                                 if(node.attrib['distro'] == 'universal'):
                                         required_packages_list = node.text.split(',')
-                                elif(current_distro == node.attrib["distro"]):
+                                elif(node.attrib["distro"] in current_distro):
                                         packages_list = node.text.split(",")
                         elif node.tag == "waLinuxAgent_link":
                                 tar_link[node.attrib["name"]] = node.text
@@ -419,7 +419,7 @@ def RunTest():
                 else:
                         Run("echo 'coreos support tools installed successfully' >> PackageStatus.txt")                
 
-        if (current_distro == "SUSE") or (current_distro == "openSUSE") or (current_distro == "sles") or (current_distro == "opensuse"):
+        if (current_distro == "SUSE") or (current_distro == "openSUSE") or ("sles" in current_distro) or (current_distro == "opensuse"):
                 iperf_cmd = Run("command -v iperf")
                 iperf3_cmd = Run("command -v iperf3")
                 if not iperf_cmd and iperf3_cmd:
