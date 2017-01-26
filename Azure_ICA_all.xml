@@ -8019,7 +8019,7 @@
 			<cycleName>DEBUG</cycleName>
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
 			<test>
-				<Name>ICA-NET-PERF-UDP-TEST</Name>
+				<Name>BVT-VERIFY-HOSTNAME</Name>
 			</test>
 		</Cycle>
 	</testCycles>

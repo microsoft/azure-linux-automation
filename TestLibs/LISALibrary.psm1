@@ -236,3 +236,104 @@ function InstallCustomKernel ($customKernel, $allVMData, [switch]$RestartAfterUp
         return $false
     }
 }
+
+function InstallcustomLIS ($customLIS, $customLISBranch, $allVMData, [switch]$RestartAfterUpgrade)
+{
+    try
+    {
+        $customLIS = $customLIS.Trim()
+        if( ($customLIS -ne "lisnext") -and !($customLIS.EndsWith("tar.gz")))
+        {
+            LogErr "Only lisnext and *.tar.gz links are supported. Use -customLIS lisnext -LISbranch <branch name>. Or use -customLIS <link to tar.gz file>"
+        }
+        else
+        {
+            ProvisionVMsForLisa -allVMData $allVMData -installPackagesOnRoleNames none
+            $scriptName = "customLISInstall.sh"
+            $jobCount = 0
+            $lisSuccess = 0
+	        $packageInstallJobs = @()
+	        foreach ( $vmData in $allVMData )
+	        {
+                RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\remote-scripts\$scriptName,.\SetupScripts\DetectLinuxDistro.sh" -username "root" -password $password -upload
+                $out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "chmod +x *.sh" -runAsSudo
+                $currentlisVersion = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "modinfo hv_vmbus"
+		        LogMsg "Executing $scriptName ..."
+		        $jobID = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "/root/$scriptName -customLIS $customLIS -LISbranch $customLISBranch" -RunInBackground -runAsSudo
+		        $packageInstallObj = New-Object PSObject
+		        Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name ID -Value $jobID
+		        Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name RoleName -Value $vmData.RoleName
+		        Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name PublicIP -Value $vmData.PublicIP
+		        Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name SSHPort -Value $vmData.SSHPort
+		        $packageInstallJobs += $packageInstallObj
+                $jobCount += 1
+		        #endregion
+	        }
+	
+	        $packageInstallJobsRunning = $true
+	        while ($packageInstallJobsRunning)
+	        {
+		        $packageInstallJobsRunning = $false
+		        foreach ( $job in $packageInstallJobs )
+		        {
+			        if ( (Get-Job -Id $($job.ID)).State -eq "Running" )
+			        {
+				        $currentStatus = RunLinuxCmd -ip $job.PublicIP -port $job.SSHPort -username "root" -password $password -command "tail -n 1 build-customLIS.txt"
+				        LogMsg "Package Installation Status for $($job.RoleName) : $currentStatus"
+				        $packageInstallJobsRunning = $true
+			        }
+			        else
+			        {
+                        if ( !(Test-Path -Path "$LogDir\$($job.RoleName)-build-customLIS.txt" ) )
+                        {
+				            RemoteCopy -download -downloadFrom $job.PublicIP -port $job.SSHPort -files "build-customLIS.txt" -username "root" -password $password -downloadTo $LogDir
+                            if ( ( Get-Content "$LogDir\build-customLIS.txt" ) -imatch "CUSTOM_LIS_SUCCESS" )
+                            {
+                                $lisSuccess += 1
+                            }
+				            Rename-Item -Path "$LogDir\build-customLIS.txt" -NewName "$($job.RoleName)-build-customLIS.txt" -Force | Out-Null
+                        }
+			        }
+		        }
+		        if ( $packageInstallJobsRunning )
+		        {
+			        WaitFor -seconds 10
+		        }
+	        }
+    
+            if ( $lisSuccess -eq $jobCount )
+            {
+                LogMsg "lis upgraded to `"$customLIS`" successfully in all VMs."
+                if ( $RestartAfterUpgrade )
+                {
+                    LogMsg "Now restarting VMs..."
+                    $restartStatus = RestartAllDeployments -allVMData $allVMData
+                    if ( $restartStatus -eq "True")
+                    {
+                        $upgradedlisVersion = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username "root" -password $password -command "modinfo hv_vmbus"
+                        LogMsg "Old lis: $currentlisVersion"
+                        LogMsg "New lis: $upgradedlisVersion"
+                        Add-Content -Value "Old lis: $currentlisVersion" -Path .\report\AdditionalInfo.html -Force
+                        Add-Content -Value "New lis: $upgradedlisVersion" -Path .\report\AdditionalInfo.html -Force
+                        return $true
+                    }
+                    else
+                    {
+                        return $false
+                    }
+                }
+                return $true
+            }
+            else
+            {
+                LogErr "lis upgrade failed in $($jobCount-$lisSuccess) VMs."
+                return $false
+            }
+        }
+    }
+    catch
+    {
+        LogErr "Exception in InstallcustomLIS."
+        return $false
+    }
+}

@@ -10,7 +10,7 @@
 ## Author : v-shisav@microsoft.com
 ## Author : v-ampaw@microsoft.com
 ###############################################################################################
-param ([string] $xmlConfigFile, [switch] $eMail, [string] $logFilename="azure_ica.log", [switch] $runtests, [switch]$onCloud, [switch] $vhdprep, [switch]$upload, [switch] $help, [string] $Distro, [string] $cycleName, [string] $TestPriority, [string]$osImage, [switch]$EconomyMode, [switch]$keepReproInact, [string] $DebugDistro, [switch]$UseAzureResourceManager, [string] $OverrideVMSize, [string]$customKernel)
+param ([string] $xmlConfigFile, [switch] $eMail, [string] $logFilename="azure_ica.log", [switch] $runtests, [switch]$onCloud, [switch] $vhdprep, [switch]$upload, [switch] $help, [string] $Distro, [string] $cycleName, [string] $TestPriority, [string]$osImage, [switch]$EconomyMode, [switch]$keepReproInact, [string] $DebugDistro, [switch]$UseAzureResourceManager, [string] $OverrideVMSize, [string]$customKernel, [string] $customLIS, [string]$customLISBranch)
 
 Import-Module .\TestLibs\AzureWinUtils.psm1 -Force -Scope Global
 Import-Module .\TestLibs\RDFELibs.psm1 -Force -Scope Global
@@ -39,6 +39,14 @@ if ( $OverrideVMSize )
 if ( $customKernel )
 {
     Set-Variable -Name customKernel -Value $customKernel -Scope Global
+}
+if ( $customLIS )
+{
+    Set-Variable -Name customLIS -Value $customLIS -Scope Global
+}
+if ( $customLISBranch )
+{
+    Set-Variable -Name customLISBranch -Value $customLISBranch -Scope Global
 }
 if ( $xmlConfig.config.Azure.General.StorageAccount -imatch "NewStorage_" )
 {
