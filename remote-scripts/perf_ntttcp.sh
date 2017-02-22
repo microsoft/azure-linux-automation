@@ -114,8 +114,8 @@ ConfigureNtttcpUbuntu ${server}
 
 #Now, start the ntttcp client on client VM.
 
-ssh root@${client} "wget https://raw.githubusercontent.com/iamshital/linux_performance_test/master/run_ntttcp-for-linux/run-ntttcp-and-tcping.sh"
-ssh root@${client} "wget https://raw.githubusercontent.com/iamshital/linux_performance_test/master/run_ntttcp-for-linux/report-ntttcp-and-tcping.sh"
+ssh root@${client} "wget https://raw.githubusercontent.com/iamshital/linux_performance_test/ntttcp10k/run_ntttcp-for-linux/run-ntttcp-and-tcping.sh"
+ssh root@${client} "wget https://raw.githubusercontent.com/iamshital/linux_performance_test/ntttcp10k/run_ntttcp-for-linux/report-ntttcp-and-tcping.sh"
 ssh root@${client} "chmod +x run-ntttcp-and-tcping.sh && chmod +x report-ntttcp-and-tcping.sh"
 LogMsg "Now running NTTTCP test"
 ssh root@${client} "rm -rf ntttcp-test-logs"
