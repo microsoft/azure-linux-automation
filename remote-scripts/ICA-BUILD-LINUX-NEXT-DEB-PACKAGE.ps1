@@ -87,7 +87,7 @@ if ($isDeployed)
               $KernelVersion = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "uname -r 2>&1" -runAsSudo
               LogMsg "Kernel Version : $KernelVersion"
               
-              Set-Content -Value "bash /home/$user/code/$($currentTestData.testScript) > /home/$user/code/linuxNextBuildTest.txt" -Path "$LogDir\StartTest.sh"
+              Set-Content -Value "bash /home/$user/code/$($currentTestData.testScript) $user > /home/$user/code/linuxNextBuildTest.txt" -Path "$LogDir\StartTest.sh"
               $out = RemoteCopy -uploadTo $hs1VIP -port $hs1vm1sshport -files ".\$LogDir\StartTest.sh" -username $user -password $password -upload
               $out = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "mv StartTest.sh /home/$user/code/" -runAsSudo
               $testJob = RunLinuxCmd -username $user -password $password -ip $hs1VIP -port $hs1vm1sshport -command "bash /home/$user/code/StartTest.sh" -runAsSudo -RunInBackground

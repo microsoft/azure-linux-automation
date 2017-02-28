@@ -85,6 +85,7 @@ elif [ "${customLIS}" == "netnext" ]; then
 	sourceDir="net-next"
 elif [[ $customLIS == *.rpm ]]; then
 	LogMsg "Custom LIS:$customLIS"
+	sed -i '/^exclude/c\#exclude' /etc/yum.conf
 	yum install -y wget tar
 	LogMsg "Debian package web link detected. Downloading $customLIS"
 	wget $customLIS
@@ -102,6 +103,7 @@ elif [[ $customLIS == *.rpm ]]; then
 	exit 0
 elif [[ $customLIS == *.tar.gz ]]; then
 	LogMsg "Custom LIS:$customLIS"
+	sed -i '/^exclude/c\#exclude' /etc/yum.conf
 	yum install -y git make tar gcc bc patch dos2unix wget xz >> ~/build-customLIS.txt 2>&1
 	LogMsg "LIS tar file web link detected. Downloading $customLIS"
 	wget $customLIS
@@ -129,6 +131,7 @@ if [ $DistroName == "SLES" -o $DistroName == "SUSE" ]; then
 	LogMsg "LIS doesn't support for $DistroName distro..."
 elif [ $DistroName == "CENTOS" -o $DistroName == "REDHAT" -o $DistroName == "FEDORA" -o $DistroName == "ORACLELINUX" ]; then
 	LogMsg "Installing packages git make tar gcc bc patch dos2unix wget ..."
+	sed -i '/^exclude/c\#exclude' /etc/yum.conf
 	yum install -y git make tar gcc bc patch dos2unix wget xz >> ~/build-customLIS.txt 2>&1
 	LogMsg "Downloading LIS source from ${LISSource}..."
 	git clone ${LISSource} >> ~/build-customLIS.txt 2>&1
