@@ -8022,5 +8022,11 @@
 				<Name>BVT-VERIFY-HOSTNAME</Name>
 			</test>
 		</Cycle>
+		<Cycle>
+			<cycleName>PROVISION</cycleName>
+			<test>
+				<Name>BVT-VERIFY-DEPLOYMENT-PROVISION</Name>
+			</test>
+		</Cycle>
 	</testCycles>
 </config>
