@@ -358,19 +358,31 @@ case $DISTRO in
 	Fedora*)
 		echo "FEDORA";;
 	*release*7.*)
-		echo "CENTOS 7.*"
+		case $DISTRO in 
+			Red*Hat*)
+				echo "RHEL 7.*"
+				;;
+			*CentOS*)
+				echo "CENTOS 7.*"
+				;;
+		esac
 		ConfigCentOS7
 		;;
 	*release*6.*)
-		echo "CENTOS 6.*"
+		case $DISTRO in 
+			Red*Hat*)
+				echo "RHEL 6.*"
+				;;
+			*CentOS*)
+				echo "CENTOS 6.*"
+				;;
+		esac
 		ConfigCentOS6
 		;;
 	*SUSE*)
 		echo "SLES"
 		ConfigSLES
 		;;
-	Red*Hat*)
-		echo "RHEL";;
 	Debian*)
 		echo "DEBIAN";;
 esac

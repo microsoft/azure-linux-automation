@@ -41,6 +41,23 @@ ICA_TESTABORTED="TestAborted"      # Error during the setup of the test
 ICA_TESTFAILED="TestFailed"        # Error occurred during the test
 touch ./IPERF3Test.log
 
+DisableFirewallsIpatables()
+{
+	if [ ${2} == "CentOS7" ]; then
+		LogMsg "Disabling Firewall & Iptables in ${2} ${1} for IPERF3 test..."
+		ssh ${1} "iptables -nL; systemctl stop iptables.service; systemctl disable iptables.service; systemctl mask firewalld; systemctl stop firewalld.service; systemctl disable firewalld.service; iptables -nL"
+		LogMsg "Disabling Firewall & Iptables in ${2} ${1} for IPERF3 test...DONE"
+	elif [ ${2} == "CentOS6" ]; then
+		LogMsg "Disabling Firewall & Iptables in ${2} ${1} for IPERF3 test..."
+		ssh ${1} "iptables -nL; service iptables save; service iptables stop; chkconfig iptables off; service ip6tables save; service ip6tables stop; chkconfig ip6tables off"; iptables -nL 
+		LogMsg "Disabling Firewall & Iptables in ${2} ${1} for IPERF3 test...DONE"
+	elif [ ${2} == "Ubuntu" ]; then
+		LogMsg "Disabling Firewall & Iptables in ${2} ${1} for IPERF3 test..."
+		ssh ${1} "iptables -nL; ufw disable; iptables -nL" 
+		LogMsg "Disabling Firewall & Iptables in ${2} ${1} for IPERF3 test...DONE"
+	fi
+}
+
 ConfigureIperf3Ubuntu()
 {
 	LogMsg "Configuring ${1} for IPERF3 test..."
@@ -51,7 +68,60 @@ ConfigureIperf3Ubuntu()
 		ssh ${1} "chmod +x ConfigureUbuntu1604IPv6.sh"
 		ssh ${1} "./ConfigureUbuntu1604IPv6.sh"
 	fi
+	DisableFirewallsIpatables ${1} "Ubuntu"
+	LogMsg "Configuring ${1} for IPERF3 test...Done"
 }
+
+ConfigureIperf3CentOS7()
+{			
+	LogMsg "Configuring ${1} for IPERF3 test..."
+	iperf3CentOS7pkg="iperf3-3.1.6-1.el7.x86_64.rpm"
+	ssh ${1} "yum install -y wget sysstat bc psmisc"
+	
+	installed=`ssh ${1} which iperf3`
+	if [ ! $installed ]; then
+        	LogMsg "INFO: Installing iperf3"
+
+		iperf3lPkg=$(ssh ${1} "ls | grep ${iperf3CentOS7pkg}")
+		if [ -z "$iperf3lPkg" ]; then
+			ssh ${1} "wget https://konkasoftpackages.blob.core.windows.net/linuxbinaries/${iperf3CentOS7pkg}"
+		fi
+		ssh ${1} "yum install -y ${iperf3CentOS7pkg}"
+		if [ $? -ne 0 ]; then
+			LogMsg "Error: Unable to install iperf3"
+			exit 1
+		fi
+
+	fi	
+	LogMsg "Disabling Firewall & Iptables in ${1} for IPERF3 test..."
+	DisableFirewallsIpatables ${1} "CentOS7"
+	LogMsg "Configuring ${1} for IPERF3 test...Done"
+}
+
+ConfigureIperf3CentOS6()
+{			
+	iperf3CentOS6pkg="iperf3-3.0.12-1.el6.x86_64.rpm"
+	LogMsg "INFO: CentOS6: installing required packages"
+	ssh ${1} "yum install -y wget sysstat bc psmisc"
+	
+	installed=`ssh ${1} which iperf3`
+	if [ ! $installed ]; then
+		LogMsg "INFO: Installing iperf3"
+
+		iperf3lPkg=$(ssh ${1} "ls | grep ${iperf3CentOS6pkg}")
+		if [ -z "$iperf3lPkg" ]; then			
+			ssh ${1} "wget https://konkasoftpackages.blob.core.windows.net/linuxbinaries/${iperf3CentOS6pkg}"
+		fi
+		ssh ${1} yum install -y ${iperf3CentOS6pkg}
+		if [ $? -ne 0 ]; then
+			LogMsg "Error: Unable to install iperf3"
+			exit 1
+		fi
+	fi
+	DisableFirewallsIpatables ${1} "CentOS6"
+	LogMsg "Configuring ${1} for IPERF3 test...Done"	
+}
+
 
 LogMsg()
 {
@@ -160,11 +230,57 @@ fi
 #max_parallel_connections_per_instance=64
 #Make & build IPERF3 on client and server Machine
 
-LogMsg "Configuring client ${client}..."
-ConfigureIperf3Ubuntu ${client}
+DISTRO=`grep -ihs "Ubuntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux" /etc/{issue,*release,*version}`
+echo "###############$DISTRO########################"
+case $DISTRO in
+	Ubuntu*)
+		echo "UBUNTU"
+		LogMsg "Configuring client ${client}..."
+		ConfigureIperf3Ubuntu ${client}
 
-LogMsg "Configuring server ${server}..."
-ConfigureIperf3Ubuntu ${server}
+		LogMsg "Configuring server ${server}..."
+		ConfigureIperf3Ubuntu ${server}
+		;;
+	Fedora*)
+		echo "FEDORA";;
+	*release*7.*)
+		case $DISTRO in 
+			Red*Hat*)
+				echo "RHEL 7.*"
+				;;
+			*CentOS*)
+				echo "CENTOS 7.*"
+				;;
+		esac
+		LogMsg "Configuring client ${client}..."
+		ConfigureIperf3CentOS7 ${client}
+
+		LogMsg "Configuring server ${server}..."
+		ConfigureIperf3CentOS7 ${server}
+		;;
+	*release*6.*)
+		case $DISTRO in 
+			Red*Hat*)
+				echo "RHEL 6.*"
+				;;
+			*CentOS*)
+				echo "CENTOS 6.*"
+				;;
+		esac
+		LogMsg "Configuring client ${client}..."
+		ConfigureIperf3CentOS6 ${client}
+
+		LogMsg "Configuring server ${server}..."
+		ConfigureIperf3CentOS6 ${server}
+		;;
+	*SUSE*)
+		echo "SLES"
+		ConfigSLES
+		;;
+	Debian*)
+		echo "DEBIAN";;
+esac
+
 
 ssh ${server} "rm -rf iperf-server-*"
 ssh ${client} "rm -rf iperf-client-*"
