@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # 
 # 
 # This program is distributed in the hope that it will be useful,
