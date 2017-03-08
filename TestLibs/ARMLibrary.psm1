@@ -1472,10 +1472,25 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
                     Add-Content -Value "$($indents[5])]" -Path $jsonFile
                     #>
 
+                Add-Content -Value "$($indents[4])}," -Path $jsonFile
+                #endregion
+                LogMsg "Added Network Profile."
+
+                
+                #region Enable boot dignostics.
+                Add-Content -Value "$($indents[4])^diagnosticsProfile^: " -Path $jsonFile
+                Add-Content -Value "$($indents[4]){" -Path $jsonFile
+                    Add-Content -Value "$($indents[5])^bootDiagnostics^: " -Path $jsonFile
+                    Add-Content -Value "$($indents[5]){" -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^enabled^: true," -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^storageUri^: ^[reference(resourceId('$StorageAccountRG', 'Microsoft.Storage/storageAccounts', '$StorageAccountName'), '2015-06-15').primaryEndpoints['blob']]^" -Path $jsonFile
+                    Add-Content -Value "$($indents[5])}" -Path $jsonFile
                 Add-Content -Value "$($indents[4])}" -Path $jsonFile
                 #endregion
+                LogMsg "Added Diagnostics Profile."
+
             Add-Content -Value "$($indents[3])}" -Path $jsonFile
-            LogMsg "Added Network Profile."
+            
             #endregion
         LogMsg "Added Virtual Machine $vmName"
         Add-Content -Value "$($indents[2])}" -Path $jsonFile
