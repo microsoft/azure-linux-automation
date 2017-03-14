@@ -1476,7 +1476,7 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
                     Add-Content -Value "$($indents[5])]" -Path $jsonFile
                     #>
 
-                Add-Content -Value "$($indents[4])}," -Path $jsonFile
+                Add-Content -Value "$($indents[4])}" -Path $jsonFile
                 #endregion
                 LogMsg "Added Network Profile."
 
