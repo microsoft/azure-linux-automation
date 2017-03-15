@@ -142,7 +142,7 @@ function InstallCustomKernel ($customKernel, $allVMData, [switch]$RestartAfterUp
     try
     {
         $customKernel = $customKernel.Trim()
-        if( ($customKernel -ne "linuxnext") -and ($customKernel -ne "netnext") -and !($customKernel.EndsWith(".deb")))
+        if( ($customKernel -ne "linuxnext") -and ($customKernel -ne "netnext") -and !($customKernel.EndsWith(".deb"))  -and !($customKernel.EndsWith(".rpm")) )
         {
             LogErr "Only linuxnext and netnext version is supported. Other version will be added soon. Use -customKernel linuxnext. Or use -customKernel <link to deb file>"
         }
