@@ -51,7 +51,7 @@ else
 }
 LogMsg "test VM sizes: $VMSizes"
 $NumberOfSizes = $VMSizes.Count
-$DeploymentCount = $NumberOfSizes*5
+$DeploymentCount = $NumberOfSizes
 
 #Test Starts Here..
     try
