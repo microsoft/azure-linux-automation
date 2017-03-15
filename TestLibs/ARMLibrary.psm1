@@ -350,6 +350,7 @@ if ( $NewARMStorageAccountType )
     $StorageAccountName = $($NewARMStorageAccountType.ToLower().Replace("_","")) + "$RGRandomNumber"
     #$StorageAccountName = "$LocationLower" + "$RGRandomNumber"
     LogMsg "Using New ARM Storage Account : $StorageAccountName"
+    $StorageAccountType= $NewARMStorageAccountType
 }
 else
 {
