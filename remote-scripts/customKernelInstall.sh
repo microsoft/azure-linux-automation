@@ -88,6 +88,23 @@ elif [[ $customKernel == *.deb ]]; then
 		UpdateTestState $ICA_TESTCOMPLETED
 	fi
 	exit 0
+elif [[ $customKernel == *.rpm ]]; then
+	LogMsg "Custom Kernel:$customKernel"
+	yum -y install wget
+	LogMsg "RPM package web link detected. Downloading $customKernel"
+	wget $customKernel
+	LogMsg "Installing ${customKernel##*/}"
+	rpm -ivh "${customKernel##*/}"
+	kernelInstallStatus=$?
+	UpdateTestState $ICA_TESTCOMPLETED
+	if [ $kernelInstallStatus -ne 0 ]; then
+		LogMsg "CUSTOM_KERNEL_FAIL"
+		UpdateTestState $ICA_TESTFAILED
+	else
+		LogMsg "CUSTOM_KERNEL_SUCCESS"
+		UpdateTestState $ICA_TESTCOMPLETED
+	fi
+	exit 0
 fi
 LogMsg "Custom Kernel:$customKernel"
 chmod +x ~/DetectLinuxDistro.sh
