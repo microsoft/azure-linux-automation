@@ -1,4 +1,4 @@
-﻿#v-shisav : STILL IN BETA VERSION
+#v-shisav : STILL IN BETA VERSION
 
 param($xmlConfig, [string] $Distro, [string] $cycleName)
 
@@ -16,6 +16,26 @@ Import-Module .\TestLibs\PerfTest\PerfTest.psm1 -Force
 
 Function CollectLogs()
 {}
+
+Function AddReproVMDetailsToHtmlReport()
+{
+	$reproVMHtmlText += "<br><font size=`"2`"><em>Repro VMs: </em></font>"
+	if ( $UserAzureResourceManager )
+	{
+		foreach ( $vm in $allVMData )
+		{
+			$reproVMHtmlText += "<br><font size=`"2`">ResourceGroup : $($vm.ResourceGroup), IP : $($vm.PublicIP), SSH : $($vm.SSHPort)</font>"
+		}					   
+	}
+	else
+	{
+		foreach ( $vm in $allVMData )
+		{
+			$reproVMHtmlText += "<br><font size=`"2`">ServiceName : $($vm.ServiceName), IP : $($vm.PublicIP), SSH : $($vm.SSHPort)</font>"
+		}		
+	}   
+	return $reproVMHtmlText
+}
 
 Function GetCurrentCycleData($xmlConfig, $cycleName)
 {	
@@ -84,25 +104,55 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 {
 	$StartTime = [Datetime]::Now.ToUniversalTime()
 	LogMsg "Starting the Cycle - $($CycleName.ToUpper())"
-	$xmlConfig.config.Azure.Deployment.Data.Distro | ? { $_.name -eq $Distro} | % { 
-		if ( $_.OsImage ) 
-		{ 
-			$BaseOsImage = $_.OsImage.ToUpper() 
-			Set-Variable -Name BaseOsImage -Value $BaseOsImage -Scope Global
-			LogMsg "Base image name - $BaseOsImage"
-		}
-		if ( $_.OsVHD )
-		{ 
-			$BaseOsVHD = $_.OsVHD.ToUpper() 
-			Set-Variable -Name BaseOsVHD -Value $BaseOsVHD -Scope Global
-			LogMsg "Base VHD name - $BaseOsVHD"
-		}
-	}
-    if (!$BaseOsImage -and !$BaseOSVHD)
+	$executionCount = 0
+
+    foreach ( $tempDistro in $xmlConfig.config.Azure.Deployment.Data.Distro )
     {
-        Throw "Please give ImageName or OsVHD for deployment."
+        if ( ($tempDistro.Name).ToUpper() -eq ($Distro).ToUpper() )
+        {
+            if ( $UseAzureResourceManager )
+            {
+		        if ( $tempDistro.ARMImage )
+		        { 
+			        Set-Variable -Name ARMImage -Value $tempDistro.ARMImage -Scope Global
+			    
+                    #if ( $ARMImage.Version -imatch "latest" )
+                    #{
+                    #    LogMsg "Getting latest image details..."
+                    #    $armTempImages = Get-AzureRmVMImage -Location ($xmlConfig.config.Azure.General.Location).Replace('"','') -PublisherName $ARMImage.Publisher -Offer $ARMImage.Offer -Skus $ARMImage.Sku
+                    #    $ARMImage.Version = [string](($armTempImages[$armTempImages.Count - 1]).Version)
+                    #}
+                    LogMsg "ARMImage name - $($ARMImage.Publisher) : $($ARMImage.Offer) : $($ARMImage.Sku) : $($ARMImage.Version)"
+		        }
+		        if ( $tempDistro.OsVHD )
+		        { 
+			        $BaseOsVHD = $tempDistro.OsVHD.ToUpper() 
+			        Set-Variable -Name BaseOsVHD -Value $BaseOsVHD -Scope Global
+			        LogMsg "Base VHD name - $BaseOsVHD"
+		        }
+            }
+            else
+            {
+		        if ( $tempDistro.OsImage ) 
+		        { 
+			        $BaseOsImage = $tempDistro.OsImage.ToUpper() 
+			        Set-Variable -Name BaseOsImage -Value $BaseOsImage -Scope Global
+			        LogMsg "Base image name - $BaseOsImage"
+		        }
+            }
+        }
     }
+	if (!$BaseOsImage  -and !$UseAzureResourceManager)
+	{
+		Throw "Please give ImageName or OsVHD for ASM deployment."
+	}
+    if (!$($ARMImage.Publisher) -and !$BaseOSVHD -and $UseAzureResourceManager)
+    {
+        Throw "Please give ARM Image / VHD for ARM deployment."
+    }
+
 	LogMsg "Loading the cycle Data..."
+
 	$currentCycleData = GetCurrentCycleData -xmlConfig $xmlConfig -cycleName $cycleName
 
 	$xmlElementsToAdd = @("currentTest", "stateTimeStamp", "state", "emailSummary", "htmlSummary", "jobID", "testCaseResults")
@@ -169,6 +219,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 		}
 		if ($currentTestData)
 		{
+			
 			if ( $UseAzureResourceManager -and !($currentTestData.SupportedExecutionModes -imatch "AzureResourceManager"))
 			{
 				LogMsg "$($currentTestData.testName) does not support AzureResourceManager execution mode."
@@ -201,6 +252,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 						$command = ".\remote-scripts\" + $testScriptPs1
 						LogMsg "Starting test $($currentTestData.testName)"
 						$testResult = Invoke-Expression $command
+						$executionCount += 1
 						$testResult = RefineTestResult1 -tempResult $testResult
 						$endTime = [Datetime]::Now.ToUniversalTime()
 						$vmRam= GetTestVMHardwareDetails -xmlConfigFile $xmlConfig -setupType $testSetup  -RAM
@@ -208,7 +260,6 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 						$testRunDuration = GetStopWatchElapasedTime $stopWatch "mm"
 						$testCycle.emailSummary += "$($currentTestData.testName) Execution Time: $testRunDuration minutes<br />"
 						$testCycle.emailSummary += "	$($currentTestData.testName) : $testResult <br />"
-						$testCycle.htmlSummary += "<tr><td>$($currentTestData.testName) - Execution Time  : </td><td> $testRunDuration min</td></tr>"
 						$testResultRow = ""
 						LogMsg "~~~~~~~~~~~~~~~TEST END : $($currentTestData.testName)~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 					}
@@ -223,6 +274,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 						$testSuiteResultDetails.totalPassTc = $testSuiteResultDetails.totalPassTc +1
 						$testResultRow = "<span style='color:green;font-weight:bolder'>PASS</span>"
 						FinishLogTestCase $testcase
+						$testCycle.htmlSummary += "<tr><td><font size=`"3`">$executionCount</font></td><td>$($currentTestData.testName)</td><td>$testRunDuration min</td><td>$testResultRow</td></tr>"
 					}
 					elseif($testResult -imatch "FAIL")
 					{
@@ -230,6 +282,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 						$testResultRow = "<span style='color:red;font-weight:bolder'>FAIL</span>"
 						$caseLog = Get-Content -Raw $testCaseLogFile
 						FinishLogTestCase $testcase "FAIL" "$($test.Name) failed." $caseLog
+						$testCycle.htmlSummary += "<tr><td><font size=`"3`">$executionCount</font></td><td>$($currentTestData.testName)$(AddReproVMDetailsToHtmlReport)</td><td>$testRunDuration min</td><td>$testResultRow</td></tr>"
 					}
 					elseif($testResult -imatch "ABORTED")
 					{
@@ -237,8 +290,9 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 						$testResultRow = "<span style='background-color:yellow;font-weight:bolder'>ABORT</span>"
 						$caseLog = Get-Content -Raw $testCaseLogFile
 						FinishLogTestCase $testcase "ERROR" "$($test.Name) is aborted." $caseLog
+						$testCycle.htmlSummary += "<tr><td><font size=`"3`">$executionCount</font></td><td>$($currentTestData.testName)$(AddReproVMDetailsToHtmlReport)</td><td>$testRunDuration min</td><td>$testResultRow</td></tr>"
 					}
-					$testCycle.htmlSummary += "<tr><td>	$($currentTestData.testName) </td><td> $testResultRow </td></tr>"
+					
 				}
 				else
 				{
@@ -255,6 +309,8 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 						$startTime = [Datetime]::Now.ToUniversalTime()
 						$testResult = Invoke-Expression $command
 						$testResult = RefineTestResult2 -testResult $testResult
+						$tempHtmlText = ($testResult[1]).Substring(0,((($testResult[1]).Length)-6))
+						$executionCount += 1
 						$testRunDuration = GetStopWatchElapasedTime $stopWatch "mm"
 						$testRunDuration = $testRunDuration.ToString()
 						$testCycle.emailSummary += "$($currentTestData.testName) Execution Time: $testRunDuration minutes<br />"
@@ -271,20 +327,27 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 					if($testResult[0] -imatch "PASS")
 					{
 						$testSuiteResultDetails.totalPassTc = $testSuiteResultDetails.totalPassTc +1
+						$testResultRow = "<span style='color:green;font-weight:bolder'>PASS</span>"
 						FinishLogTestCase $testcase
+						$testCycle.htmlSummary += "<tr><td><font size=`"3`">$executionCount</font></td><td>$tempHtmlText</td><td>$testRunDuration min</td><td>$testResultRow</td></tr>"
 					}
 					elseif($testResult[0] -imatch "FAIL")
 					{
 						$testSuiteResultDetails.totalFailTc = $testSuiteResultDetails.totalFailTc +1
 						$caseLog = Get-Content -Raw $testCaseLogFile
+						$testResultRow = "<span style='color:red;font-weight:bolder'>FAIL</span>"
 						FinishLogTestCase $testcase "FAIL" "$($test.Name) failed." $caseLog
+						$testCycle.htmlSummary += "<tr><td><font size=`"3`">$executionCount</font></td><td>$tempHtmlText$(AddReproVMDetailsToHtmlReport)</td><td>$testRunDuration min</td><td>$testResultRow</td></tr>"
 					}
 					elseif($testResult[0] -imatch "ABORTED")
 					{
 						$testSuiteResultDetails.totalAbortedTc = $testSuiteResultDetails.totalAbortedTc +1
 						$caseLog = Get-Content -Raw $testCaseLogFile
+						$testResultRow = "<span style='background-color:yellow;font-weight:bolder'>ABORT</span>"
 						FinishLogTestCase $testcase "ERROR" "$($test.Name) is aborted." $caseLog
+						$testCycle.htmlSummary += "<tr><td><font size=`"3`">$executionCount</font></td><td>$tempHtmlText$(AddReproVMDetailsToHtmlReport)</td><td>$testRunDuration min</td><td>$testResultRow</td></tr>"
 					}
+					
 				} 
 				$currentJobs = Get-Job
 				foreach ( $job in $currentJobs )

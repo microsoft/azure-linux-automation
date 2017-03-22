@@ -10,6 +10,15 @@ then
 	duration=$1
 	filename=$2
 	username=$3
+	logFolder="logs-`hostname`"
+elif [[ $# == 5 ]]
+then
+	duration=$1
+	filename=$2
+	username=$3
+	testtype=$4
+	buffersize=$5
+	logFolder="logs-`hostname`-$testtype-$buffersize"
 else
 	echo "Usage: bash $0 <duration> <filename> <username>"
 	exit -1
@@ -52,7 +61,8 @@ fi
 
 vm_bus_ver=`modinfo hv_vmbus| grep ^version| awk '{print $2}'`
 
-logs_dir=$code_path/logs-`hostname`-`uname -r`-`get_lis_version`/$filename
+#logs_dir=$code_path/logs-`hostname`-`uname -r`-`get_lis_version`/$filename
+logs_dir=$code_path/$logFolder/$filename
 filename=$logs_dir/$filename
 mkdir -p  $logs_dir
 

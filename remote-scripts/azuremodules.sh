@@ -39,7 +39,16 @@ function check_exit_status ()
 
 function detect_linux_ditribution_version()
 {
-    local  distro_version=`cat /etc/*release*|sed 's/"//g'|grep "VERSION_ID="| sed 's/VERSION_ID=//'| sed 's/\r//'`
+    local  distro_version="Unknown"
+    if [ -f /etc/os-release ] ; then
+        distro_version=`cat /etc/os-release|sed 's/"//g'|grep "VERSION_ID="| sed 's/VERSION_ID=//'| sed 's/\r//'`
+    elif [ -f /etc/centos-release ] ; then
+        distro_version=`cat /etc/centos-release | sed s/.*release\ // | sed s/\ .*//`
+    elif [ -f /etc/oracle-release ] ; then
+        distro_version=`cat /etc/oracle-release | sed s/.*release\ // | sed s/\ .*//`
+    elif [ -f /etc/redhat-release ] ; then
+        distro_version=`cat /etc/redhat-release | sed s/.*release\ // | sed s/\ .*//`
+    fi
     echo $distro_version
 }
 
@@ -50,39 +59,38 @@ function detect_linux_ditribution()
     if [ "$linux_ditribution" == "" ]
     then
         if echo "$temp_text" | grep -qi "ol"; then
-            linux_ditribution='oracle'
+            linux_ditribution='Oracle'
         elif echo "$temp_text" | grep -qi "Ubuntu"; then
-            linux_ditribution='ubuntu'
+            linux_ditribution='Ubuntu'
         elif echo "$temp_text" | grep -qi "SUSE Linux"; then
-            linux_ditribution='suse'
+            linux_ditribution='SUSE'
         elif echo "$temp_text" | grep -qi "openSUSE"; then
-            linux_ditribution='opensuse'
+            linux_ditribution='OpenSUSE'
         elif echo "$temp_text" | grep -qi "centos"; then
-            linux_ditribution='centos'
+            linux_ditribution='CentOS'
         elif echo "$temp_text" | grep -qi "Oracle"; then
-            linux_ditribution='oracle'
+            linux_ditribution='Oracle'
         elif echo "$temp_text" | grep -qi "Red Hat"; then
-            linux_ditribution='rhel'
+            linux_ditribution='RHEL'
         else
             linux_ditribution='unknown'
         fi
     fi
-    echo $linux_ditribution
+    echo "$(echo "$linux_ditribution" | sed 's/.*/\u&/')"
 }
 
 function updaterepos()
 {
     ditribution=$(detect_linux_ditribution)
     case "$ditribution" in
-        oracle|rhel|centos)
+        Oracle|RHEL|CentOS)
             yum makecache
             ;;
     
-        ubuntu)
+        Ubuntu)
             apt-get update
             ;;
-         
-        suse|opensuse|sles)
+        SUSE|openSUSE|sles)
             zypper refresh
             ;;
          
@@ -130,25 +138,28 @@ function zypper_install ()
 
 function install_package ()
 {
-    local package_name=$1
+    local package_name=$@
     ditribution=$(detect_linux_ditribution)
-    case "$ditribution" in
-        oracle|rhel|centos)
-            yum_install $package_name
-            ;;
+	for i in "${package_name[@]}"
+	do
+	    case "$ditribution" in
+	        Oracle|RHEL|CentOS)
+	            yum_install "$package_name"
+	            ;;
 
-        ubuntu)
-            apt_get_install $package_name
-            ;;
+	        Ubuntu)
+	            apt_get_install "$package_name"
+	            ;;
 
-        suse|opensuse|sles)
-            zypper_install $package_name
-            ;;
+	        SUSE|OpenSUSE|sles)
+	            zypper_install "$package_name"
+	            ;;
 
-        *)
-            echo "Unknown ditribution"
-            return 1
-    esac
+	        *)
+	            echo "Unknown ditribution"
+	            return 1
+		esac
+	done
 }
 
 function creat_partitions ()
@@ -233,7 +244,7 @@ function remote_copy ()
 
     if [ "x$host" == "x" ] || [ "x$user" == "x" ] || [ "x$passwd" == "x" ] || [ "x$filename" == "x" ] ; then
        echo "Usage: remote_copy -user <username> -passwd <user password> -host <host ipaddress> -filename <filename> -remote_path <location of the file on remote vm> -cmd <put/get>"
-       exit -1
+       return
     fi
 
     if [ "$cmd" == "get" ] || [ "x$cmd" == "x" ]; then
@@ -264,7 +275,7 @@ function remote_exec ()
 
     if [ "x$host" == "x" ] || [ "x$user" == "x" ] || [ "x$passwd" == "x" ] || [ "x$cmd" == "x" ] ; then
        echo "Usage: remote_exec -user <username> -passwd <user password> -host <host ipaddress> <onlycommand>"
-       exit -1
+       return
     fi
 
     status=`sshpass -p $passwd ssh -t -o StrictHostKeyChecking=no $user@$host $cmd 2>&1`
@@ -290,7 +301,7 @@ function set_user_password {
     if [ "x$string" == "x" ]
     then
         echo "$user not found in /etc/shadow"
-    return -1
+        return -1
     fi
 
     IFS=':' read -r -a array <<< "$string"
@@ -320,11 +331,65 @@ function collect_VM_properties ()
     fi
 
     echo "" > $output_file
-    echo ",OS type,"`detect_linux_ditribution`-`detect_linux_ditribution_version` >> $output_file
+    echo ",OS type,"`detect_linux_ditribution` `detect_linux_ditribution_version` >> $output_file
     echo ",Kernel version,"`uname -r` >> $output_file
-    echo ",Total CPU cores,"`nproc` >> $output_file
-    echo ",Memory,"`free -h| grep Mem| awk '{print $2}'`  >> $output_file
     echo ",LIS Version,"`get_lis_version` >> $output_file
     echo ",Host Version,"`get_host_version` >> $output_file
+    echo ",Total CPU cores,"`nproc` >> $output_file
+    echo ",Total Memory,"`free -h|grep Mem|awk '{print $2}'` >> $output_file
+    echo ",Resource disks size,"`lsblk|grep "^sdb"| awk '{print $4}'`  >> $output_file
     echo ",Data disks attached,"`lsblk | grep "^sd" | awk '{print $1}' | sort | grep -v "sd[ab]$" | wc -l`  >> $output_file
+    echo ",eth0 MTU,"`ifconfig eth0|grep MTU|sed "s/.*MTU:\(.*\) .*/\1/"` >> $output_file
+    echo ",eth1 MTU,"`ifconfig eth1|grep MTU|sed "s/.*MTU:\(.*\) .*/\1/"` >> $output_file
 }
+
+function keep_cmd_in_startup ()
+{
+	testcommand=$*
+	startup_files="/etc/rc.d/rc.local /etc/rc.local /etc/SuSE-release"
+	count=0
+	for file in $startup_files 
+	do
+		if [[ -f $file ]]
+		then
+			if ! grep -q "${testcommand}" $file
+			then
+				sed "/^\s*exit 0/i ${testcommand}" $file -i
+				if ! grep -q "${testcommand}" $file
+				then
+					echo $testcommand >> $file
+				fi
+				echo "Added $testcommand >> $file"
+				((count++))
+			fi
+		fi	
+	done
+	if [ $count == 0 ]
+	then
+		echo "Cannot find $startup_files files"
+	fi
+}
+
+function remove_cmd_from_startup ()
+{
+	testcommand=$*
+	startup_files="/etc/rc.d/rc.local /etc/rc.local /etc/SuSE-release"
+	count=0
+	for file in $startup_files 
+	do
+		if [[ -f $file ]]
+		then
+			if grep -q "${testcommand}" $file
+			then
+				sed "s/${testcommand}//" $file -i
+				((count++))
+				echo "Removed $testcommand from $file"
+			fi
+		fi	
+	done
+	if [ $count == 0 ]
+	then
+		echo "Cannot find $testcommand in $startup_files files"
+	fi
+}
+

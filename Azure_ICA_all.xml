@@ -40,6 +40,14 @@
 			<!--<Location>"Preferred_Location"</Location>-->
 			<AffinityGroup>Your_Affinity_Group</AffinityGroup>
 		</General>
+		<database>
+			<server></server>
+			<user></user>
+			<password></password>
+			<dbname></dbname>
+			<dbtable></dbtable>
+			<testTag></testTag>
+		</database>
 		<CSUpload>
 			<!-- Note : Please fill the subscription Id , Thumbprint and Service management link accordingly.Following details are for Production Cluster-->
 			<Subscription>"SubscriptionID=Your_Azure_Subscription_ID;CertificateThumbprint=Certificate_Associated_with_your_Azure_Subscription;ServiceManagementEndpoint=https://management.core.windows.net"</Subscription>
@@ -53,16 +61,36 @@
 			<Data>
 				<!-- You can add your own distro and Image names here -->
 				<Distro>
+					<Name>SSU1604P</Name>
+					<OsImage></OsImage>
+					<!-- <OsImage>b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu-16_04-LTS-amd64-server-20160907.1-en-us-30GB</OsImage> -->
+					<ARMImage>
+						<Publisher></Publisher>
+						<!-- <Publisher>Canonical</Publisher> -->
+						<Offer></Offer>
+						<!-- <Offer>UbuntuServer</Offer> -->
+						<Sku></Sku>
+						<!-- <Sku>16.04.0-LTS</Sku> -->
+						<Version></Version>
+						<!-- <Version>latest</Version> -->
+					</ARMImage>
+					<OsVHD></OsVHD>
+					<!-- <OsVHD>VHD_NAME.vhd</OsVHD> -->
+				</Distro>				
+				<Distro>
 					<Name>SSU1510P</Name>
-					<OsImage>b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu_DAILY_BUILD-wily-15_10-amd64-server-20160217.2-en-us-30GB</OsImage>
+					<OsImage>b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu_DAILY_BUILD-wily-15_10-amd64-server-20160217.2-en-us-30GB</OsImage><!-- To run the tests in ASM mode, you need to provide the ImageName name. You can get the available ImageNames by executing Get-AzureVMImage command.-->
+					<OsVHD></OsVHD> <!-- To run the tests in ARM mode, you need to provide the VHD name, which should be uploaded to "vhds" container of your storage account.-->
 				</Distro> 
 				<Distro>
 					<Name>U1410</Name>
 					<OsImage>b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu_DAILY_BUILD-utopic-14_10-amd64-server-20150620-en-us-30GB</OsImage>
+					<OsVHD></OsVHD>
 				</Distro> 
 				<Distro>
 					<Name>Ubuntu1404Daily</Name>
 					<OsImage>b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu_DAILY_BUILD-utopic-14_10-amd64-server-20140720-en-us-30GB</OsImage>
+					<OsVHD></OsVHD>
 				</Distro>
 
 				<Distro>
@@ -516,7 +544,22 @@
 					</VirtualMachine>
 				</HostedService>
 			</E2ESingleVM>
-
+			<SingleVM>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>ExtraSmall</InstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</SingleVM>
 			<ExtraSmallVM>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -1940,6 +1983,22 @@
 					</VirtualMachine>
 				</HostedService>
 			</D14V2>
+			<D15V2>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D15_v2</InstanceSize>
+						<ARMInstanceSize>Standard_D15_v2</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+					</VirtualMachine>
+				</HostedService>
+			</D15V2>
 			<DS11V2>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -2004,6 +2063,22 @@
 					</VirtualMachine>
 				</HostedService>
 			</DS14V2>
+			<DS15V2>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS15_v2</InstanceSize>
+						<ARMInstanceSize>Standard_DS15_v2</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+					</VirtualMachine>
+				</HostedService>
+			</DS15V2>
 			<D1>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -2446,7 +2521,27 @@
 					</VirtualMachine>
 				</HostedService>
 			</GS5>
-
+			<GS5DISK1>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_GS5</InstanceSize>
+						<ARMInstanceSize>Standard_GS5</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk>
+							<LUN>0</LUN>
+							<DiskSizeInGB>1023</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>						
+					</VirtualMachine>
+				</HostedService>
+			</GS5DISK1>
 			<BasicA0>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -2532,7 +2627,176 @@
 					</VirtualMachine>
 				</HostedService>
 			</BasicA4>
-			
+			<F1>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_F1</InstanceSize>
+						<ARMInstanceSize>Standard_F1</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</F1>			
+			<F2>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_F2</InstanceSize>
+						<ARMInstanceSize>Standard_F2</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</F2>			
+			<F4>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_F4</InstanceSize>
+						<ARMInstanceSize>Standard_F4</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</F4>			
+			<F8>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_F8</InstanceSize>
+						<ARMInstanceSize>Standard_F8</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</F8>	
+			<F16>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_F16</InstanceSize>
+						<ARMInstanceSize>Standard_F16</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</F16>				
+			<F1s>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_F1s</InstanceSize>
+						<ARMInstanceSize>Standard_F1s</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</F1s>			
+			<F2s>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_F2s</InstanceSize>
+						<ARMInstanceSize>Standard_F2s</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</F2s>			
+			<F4s>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_F4s</InstanceSize>
+						<ARMInstanceSize>Standard_F4s</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</F4s>			
+			<F8s>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_F8s</InstanceSize>
+						<ARMInstanceSize>Standard_F8s</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</F8s>		
+			<F16s>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_F16s</InstanceSize>
+						<ARMInstanceSize>Standard_F16s</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</F16s>			
 			<A0>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -2767,7 +3031,83 @@
 				<HostedService>
 					<VirtualMachine>
 						<state></state>
-						<InstanceSize>Standard_DS2</InstanceSize>
+						<InstanceSize>Standard_DS14</InstanceSize>
+						<ARMInstanceSize>Standard_DS14</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk>
+							<LUN>0</LUN>
+							<DiskSizeInGB>1023</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>1</LUN>
+							<DiskSizeInGB>1023</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>2</LUN>
+							<DiskSizeInGB>1023</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>3</LUN>
+							<DiskSizeInGB>1023</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>4</LUN>
+							<DiskSizeInGB>1023</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>5</LUN>
+							<DiskSizeInGB>1023</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>6</LUN>
+							<DiskSizeInGB>1023</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>7</LUN>
+							<DiskSizeInGB>1023</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>8</LUN>
+							<DiskSizeInGB>1023</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>9</LUN>
+							<DiskSizeInGB>1023</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>10</LUN>
+							<DiskSizeInGB>1023</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+						<DataDisk>
+							<LUN>11</LUN>
+							<DiskSizeInGB>1023</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</DS14DISK12>
+			<D14DISK12>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_DS14</InstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -2836,7 +3176,7 @@
 						</DataDisk>
 					</VirtualMachine>
 				</HostedService>
-			</DS14DISK12>
+			</D14DISK12>
 			<DS14DISK32>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -3320,6 +3660,253 @@
 					</VirtualMachine>					
 				</HostedService>
 			</M1S5>	
+			<M1S15>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Large</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<RoleName>master-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12122</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Large</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<RoleName>slave-vm-1</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12222</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Large</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<RoleName>slave-vm-2</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12322</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Large</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<RoleName>slave-vm-3</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12422</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Large</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<RoleName>slave-vm-4</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12522</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Large</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<RoleName>slave-vm-5</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12622</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Large</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<RoleName>slave-vm-6</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12722</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Large</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<RoleName>slave-vm-7</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12822</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Large</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<RoleName>slave-vm-8</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12922</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Large</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<RoleName>slave-vm-9</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>11022</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Large</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<RoleName>slave-vm-10</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>11122</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Large</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<RoleName>slave-vm-11</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>11222</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Large</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<RoleName>slave-vm-12</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>11322</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Large</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<RoleName>slave-vm-13</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>11422</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Large</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<RoleName>slave-vm-14</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>11522</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Large</InstanceSize>
+						<ARMInstanceSize>Standard_D2</ARMInstanceSize>
+						<RoleName>slave-vm-15</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>11622</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+				</HostedService>
+			</M1S15>						
+			<M1D1S1>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_GS5</InstanceSize>
+						<ARMInstanceSize>Standard_GS5</ARMInstanceSize>
+						<RoleName>server-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12122</PublicPort>
+						</EndPoints>
+						<DataDisk>
+							<LUN>0</LUN>
+							<DiskSizeInGB>1023</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_GS5</InstanceSize>
+						<ARMInstanceSize>Standard_GS5</ARMInstanceSize>
+						<RoleName>client-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12222</PublicPort>
+						</EndPoints>
+					</VirtualMachine>					
+				</HostedService>
+			</M1D1S1>			
 			<S2C1>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -3364,6 +3951,587 @@
 					</VirtualMachine>					
 				</HostedService>
 			</S2C1>			
+			<S1C1LBIPv4>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VnetName></VnetName>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<RoleName>client-vm</RoleName>
+						<ARMInstanceSize>Standard_DS1</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>750</LocalPort>
+							<PublicPort>750</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest1</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>751</LocalPort>
+							<PublicPort>751</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest2</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>752</LocalPort>
+							<PublicPort>752</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest3</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>753</LocalPort>
+							<PublicPort>753</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest4</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>754</LocalPort>
+							<PublicPort>754</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest5</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>755</LocalPort>
+							<PublicPort>755</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest6</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>756</LocalPort>
+							<PublicPort>756</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest7</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>757</LocalPort>
+							<PublicPort>757</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest8</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>758</LocalPort>
+							<PublicPort>758</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest9</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>759</LocalPort>
+							<PublicPort>759</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest10</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>760</LocalPort>
+							<PublicPort>760</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest11</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>761</LocalPort>
+							<PublicPort>761</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest12</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>762</LocalPort>
+							<PublicPort>762</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest13</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>763</LocalPort>
+							<PublicPort>763</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest14</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>764</LocalPort>
+							<PublicPort>764</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest15</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>765</LocalPort>
+							<PublicPort>765</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>						
+						<EndPoints>
+							<Name>UDPtest</Name>
+							<Protocol>udp</Protocol>
+							<LocalPort>990</LocalPort>
+							<PublicPort>990</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>						
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+				<HostedService>
+					<VnetName></VnetName>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<RoleName>server-vm</RoleName>
+						<ARMInstanceSize>Standard_DS1</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>750</LocalPort>
+							<PublicPort>750</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest1</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>751</LocalPort>
+							<PublicPort>751</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest2</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>752</LocalPort>
+							<PublicPort>752</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest3</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>753</LocalPort>
+							<PublicPort>753</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest4</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>754</LocalPort>
+							<PublicPort>754</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest5</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>755</LocalPort>
+							<PublicPort>755</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest6</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>756</LocalPort>
+							<PublicPort>756</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest7</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>757</LocalPort>
+							<PublicPort>757</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest8</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>758</LocalPort>
+							<PublicPort>758</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest9</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>759</LocalPort>
+							<PublicPort>759</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest10</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>760</LocalPort>
+							<PublicPort>760</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest11</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>761</LocalPort>
+							<PublicPort>761</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest12</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>762</LocalPort>
+							<PublicPort>762</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest13</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>763</LocalPort>
+							<PublicPort>763</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest14</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>764</LocalPort>
+							<PublicPort>764</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest15</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>765</LocalPort>
+							<PublicPort>765</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>						
+						<EndPoints>
+							<Name>UDPtest</Name>
+							<Protocol>udp</Protocol>
+							<LocalPort>990</LocalPort>
+							<PublicPort>990</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+						</EndPoints>						
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</S1C1LBIPv4>			
+			<!-- IPv6 Enabled Deployments -->
+			<S1C1LBIPv6>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VnetName></VnetName>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<RoleName>client-vm</RoleName>
+						<ARMInstanceSize>Standard_DS1</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>750</LocalPort>
+							<PublicPort>750</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest1</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>751</LocalPort>
+							<PublicPort>751</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest2</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>752</LocalPort>
+							<PublicPort>752</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest3</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>753</LocalPort>
+							<PublicPort>753</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest4</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>754</LocalPort>
+							<PublicPort>754</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest5</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>755</LocalPort>
+							<PublicPort>755</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest6</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>756</LocalPort>
+							<PublicPort>756</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest7</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>757</LocalPort>
+							<PublicPort>757</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest8</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>758</LocalPort>
+							<PublicPort>758</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest9</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>759</LocalPort>
+							<PublicPort>759</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest10</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>760</LocalPort>
+							<PublicPort>760</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest11</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>761</LocalPort>
+							<PublicPort>761</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest12</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>762</LocalPort>
+							<PublicPort>762</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest13</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>763</LocalPort>
+							<PublicPort>763</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest14</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>764</LocalPort>
+							<PublicPort>764</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest15</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>765</LocalPort>
+							<PublicPort>765</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>						
+						<EndPoints>
+							<Name>UDPtest</Name>
+							<Protocol>udp</Protocol>
+							<LocalPort>990</LocalPort>
+							<PublicPort>990</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+				<HostedService>
+					<VnetName></VnetName>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Small</InstanceSize>
+						<RoleName>server-vm</RoleName>
+						<ARMInstanceSize>Standard_DS1</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>750</LocalPort>
+							<PublicPort>750</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest1</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>751</LocalPort>
+							<PublicPort>751</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest2</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>752</LocalPort>
+							<PublicPort>752</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest3</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>753</LocalPort>
+							<PublicPort>753</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest4</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>754</LocalPort>
+							<PublicPort>754</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest5</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>755</LocalPort>
+							<PublicPort>755</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest6</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>756</LocalPort>
+							<PublicPort>756</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest7</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>757</LocalPort>
+							<PublicPort>757</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest8</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>758</LocalPort>
+							<PublicPort>758</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest9</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>759</LocalPort>
+							<PublicPort>759</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest10</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>760</LocalPort>
+							<PublicPort>760</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest11</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>761</LocalPort>
+							<PublicPort>761</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest12</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>762</LocalPort>
+							<PublicPort>762</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest13</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>763</LocalPort>
+							<PublicPort>763</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest14</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>764</LocalPort>
+							<PublicPort>764</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>
+						<EndPoints>
+							<Name>TCPtest15</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>765</LocalPort>
+							<PublicPort>765</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>						
+						<EndPoints>
+							<Name>UDPtest</Name>
+							<Protocol>udp</Protocol>
+							<LocalPort>990</LocalPort>
+							<PublicPort>990</PublicPort>
+							<LoadBalanced>True</LoadBalanced>
+							<EnableIPv6>True</EnableIPv6>
+						</EndPoints>						
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</S1C1LBIPv6>			
 		</Deployment>
 		
 
@@ -4809,11 +5977,25 @@
 			<Priority>P0</Priority>
 		</test>
 		<test>
-			<testName>ICA-IO-DISK-PERF-TEST-RAID</testName>
+			<testName>ICA-IO-DISK-PERF-TEST-RAID-D</testName>
 			<testScript>io-test-setup.sh</testScript>
 			<testScriptps1>ICA-IO-DISK-PERF-TEST.ps1</testScriptps1>
 			<files>.\remote-scripts\sysbench-full-io-test.sh,.\remote-scripts\azuremodules.sh,.\remote-scripts\sysbench-log-parser.sh,.\remote-scripts\io-test-setup.sh,.\remote-scripts\keep_cmds_in_startup.sh</files>
-			<setupType>D14DISK32</setupType>
+			<setupType>D14DISK12</setupType>
+			<!-- <setupType>DS14DISK32</setupType> -->
+			<TestType></TestType>
+			<DiskType>RAID</DiskType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<TestID>Perf_004</TestID>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-IO-DISK-PERF-TEST-RAID-DS</testName>
+			<testScript>io-test-setup.sh</testScript>
+			<testScriptps1>ICA-IO-DISK-PERF-TEST.ps1</testScriptps1>
+			<files>.\remote-scripts\sysbench-full-io-test.sh,.\remote-scripts\azuremodules.sh,.\remote-scripts\sysbench-log-parser.sh,.\remote-scripts\io-test-setup.sh,.\remote-scripts\keep_cmds_in_startup.sh</files>
+			<setupType>DS14DISK12</setupType>
 			<!-- <setupType>DS14DISK32</setupType> -->
 			<TestType></TestType>
 			<DiskType>RAID</DiskType>
@@ -4841,11 +6023,25 @@
 			<testScript>NetPerf_setup_startup.sh</testScript>
 			<testScriptps1>ICA-NETWORK-PERF-TEST.ps1</testScriptps1>
 			<files>.\remote-scripts\NetPerf_setup_startup.sh,.\remote-scripts\client_start.sh,.\remote-scripts\server_start.sh,.\remote-scripts\keep_cmds_in_startup.sh,.\remote-scripts\azuremodules.sh,.\remote-scripts\sar-top.sh,.\remote-scripts\generate_csvs.sh</files>
-			<setupType>NetPerf1HS2VM</setupType>
-			<TestType></TestType>
+			<setupType>M1S1</setupType>
+			<TestType>TCP</TestType>
 			<TestFeature></TestFeature>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID>Perf_005</TestID>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-PERF-NETWORK-UDP-TEST</testName>
+			<testScript>NetPerf_setup_startup.sh</testScript>
+			<testScriptps1>ICA-PERF-NETWORK-UDP-TEST.ps1</testScriptps1>
+			<files>.\remote-scripts\NetPerf_setup_startup.sh,.\remote-scripts\client_start.sh,.\remote-scripts\server_start.sh,.\remote-scripts\keep_cmds_in_startup.sh,.\remote-scripts\azuremodules.sh,.\remote-scripts\sar-top.sh,.\remote-scripts\generate_csvs.sh</files>
+			<setupType>M1S1</setupType>
+			<TestType>UDP</TestType>
+			<BufferLength>1K,8K</BufferLength>
+			<TestFeature></TestFeature>
+			<SubtestValues>Here_some_text_is_required_due_to_automation_structure</SubtestValues>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<TestID>Perf_008</TestID>
 			<Priority>P0</Priority>
 		</test>
 		<test>
@@ -4865,15 +6061,15 @@
 			<testScript></testScript>
 			<testScriptps1>ICA-FIO-TEST.ps1</testScriptps1>
 			<files>.\remote-scripts\start-fio.py,.\remote-scripts\azuremodules.py,SetupScripts\packageInstall.sh</files>
-			<setupType>ExtraLargeVM</setupType>
+			<setupType>D14DISK12</setupType>
 			<!-- ioSizes in kiloBytes only 1,2,4,8,16,32,... ,1024. Don't add "k" after integer-->
 			<ioSizes>4,8,16,32,64,128,256</ioSizes>
 			<!-- you can specifiy que depths with commaa separated integer values. 1,2,4,16......-->
-			<queueDepths>16</queueDepths>
+			<queueDepths>8</queueDepths>
 			<TestFileSizeinGB>8</TestFileSizeinGB>
 			<!-- if ioengine is empty here, libaio will be used as default io engine-->
 			<ioengine></ioengine>
-			<runtimeSeconds>600</runtimeSeconds>
+			<runtimeSeconds>300</runtimeSeconds>
 			<SubtestValues>Here_some_text_is_required_due_to_automation_structure</SubtestValues>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -5521,8 +6717,42 @@
 				<remoteXML></remoteXML>
 				<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 				<Priority>P0</Priority>
-			</test>			
-		<test>
+			</test>	
+			<test>
+				<testName>ICA-PERF-MIDDLEWARE-MONGODB-BENCHMARK-TEST-2VM</testName>
+				<testScript></testScript>
+				<testScriptps1>ICA-PERF-MIDDLEWARE-MONGODB-BENCHMARK-TEST-2VM.ps1</testScriptps1>
+				<setupType>M1D1S1</setupType>
+				<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+				<!--Remote Files will be directly downloaded to test VM.-->
+				<remoteFiles></remoteFiles>
+				<!--Remote XML will be downloaded to automation server for analysis-->
+				<remoteXML></remoteXML>
+				<TestParameters>
+					<param>test_threads_collection=(1 2 4 8 16 32 64 128 256 512 1024)</param>
+				</TestParameters>
+				<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+				<Priority>P0</Priority>
+			</test>				
+			<test>
+				<testName>ICA-PERF-FIO-BENCHMARK-TEST</testName>
+				<testScript></testScript>
+				<testScriptps1>ICA-PERF-FIO-BENCHMARK-TEST.ps1</testScriptps1>
+				<setupType>GS5DISK1</setupType>
+				<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+				<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+				<TestParameters>
+					<param>ioDepths='1 2 4 8 16 32 64 128 256 512 1024'</param>
+					<!-- if you want to run test for multiple io sizes ioSizes='1 2 4' -->
+					<param>ioSizes=8</param>
+					<param>ioruntime=300</param>
+					<param>testmodes='read write'</param>
+					<param>testfilesize="16G"</param>
+				</TestParameters>
+				<remoteFiles></remoteFiles>
+				<Priority>P0</Priority>
+			</test>		
+			<test>
 			<testName>RHUI-CROSS-REGION-MIGRATION</testName>
 			<testScript></testScript>
 			<testScriptPs1>RHUI-CROSS-REGION-MIGRATION.ps1</testScriptPs1>
@@ -5651,6 +6881,7 @@
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<remoteFiles></remoteFiles>
+			<InitialWaitSeconds>300</InitialWaitSeconds>
 			<Priority>P0</Priority>
 		</test>			
 		<test>
@@ -5661,6 +6892,7 @@
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<remoteFiles></remoteFiles>
+			<InitialWaitSeconds>300</InitialWaitSeconds>
 			<Priority>P0</Priority>		
 		</test>
 		<test>
@@ -5679,7 +6911,174 @@
 			<TestID>UI_001</TestID>
 			<Priority>P0</Priority>
 		</test>
-	
+		<test>
+			<testName>ICA-PERF-ORION-BENCHMARK-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-ORION-BENCHMARK-TEST.ps1</testScriptps1>
+			<setupType>GS5DISK1</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<TestParameters>
+				<param>orionBinaryURL="http://konkasoft.blob.core.windows.net/linuxbinaries/orion_x86_64"</param>
+			</TestParameters>
+			<remoteFiles></remoteFiles>
+			<Priority>P0</Priority>
+		</test>			
+		<test>
+			<testName>ICA-PERF-NTTTCP-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-NTTTCP-TEST.ps1</testScriptps1>
+			<setupType>M1S1</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+				<param>testDuration=300</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>		
+		<test>
+			<testName>ICA-PERF-FIO-TEST-8K</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-FIO-TEST.ps1</testScriptps1>
+			<setupType>DS14DISK12</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>			
+			<TestParameters>
+				<param>modes='randread randwrite read write'</param>
+				<param>startThread=1</param>
+				<param>maxThread=1024</param>
+				<param>startIO=8</param>
+				<param>numjobs=1</param>
+				<param>ioruntime=300</param>
+				<param>maxIO=8</param>
+				<param>fileSize=134G</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>		
+		<test>
+			<testName>ICA-PERF-FIO-TEST-1024K</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-FIO-TEST.ps1</testScriptps1>
+			<setupType>DS14DISK12</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>			
+			<TestParameters>
+				<param>modes='randread randwrite read write'</param>
+				<param>startThread=1</param>
+				<param>maxThread=1024</param>
+				<param>startIO=1024</param>
+				<param>numjobs=1</param>
+				<param>ioruntime=300</param>
+				<param>maxIO=1024</param>		
+				<param>fileSize=134G</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>		
+		
+		<test>
+			<testName>ICA-PERF-UDP-LOSS-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-UDP-LOSS-TEST.ps1</testScriptps1>
+			<setupType>M1S1</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>			
+			<TestParameters>
+				<param>testDuration=300</param>
+				<param>testType=udp</param>
+				<param>max_parallel_connections_per_instance=64</param>
+				<param>connections=(1 2 4 8 16 32 64 128 256 512 1024)</param>
+				<param>bufferLenghs=(1 8)</param>
+				<param>IPversion=4</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>		
+		<test>
+			<testName>ICA-IPERF3-TCP-IPV6-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-IPERF3-TCPv4v6-xREGION-TEST.ps1</testScriptps1>
+			<setupType>S1C1LBIPv6</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>			
+			<TestParameters>
+				<param>testDuration=300</param>
+				<param>testType=tcp</param>
+				<param>max_parallel_connections_per_instance=64</param>
+				<param>connections=(1 2 4 8 16 32 64 128 256 512 1024)</param>
+				<param>bufferLenghs=(1024)</param>
+				<param>IPversion=6</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-IPERF3-TCP-IPV4-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-IPERF3-TCPv4v6-xREGION-TEST.ps1</testScriptps1>
+			<setupType>S1C1LBIPv4</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>			
+			<TestParameters>
+				<param>testDuration=300</param>
+				<param>testType=tcp</param>
+				<param>max_parallel_connections_per_instance=64</param>
+				<param>connections=(1 2 4 8 16 32 64 128 256 512 1024)</param>
+				<param>bufferLenghs=(1024)</param>
+				<param>IPversion=4</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>		
+		<test>
+			<testName>ICA-IPERF3-TCP-IPV4-SAMEVNET-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-IPERF3-TCPv4v6-xREGION-TEST.ps1</testScriptps1>
+			<setupType>M1S1</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>			
+			<TestParameters>
+				<param>testDuration=300</param>
+				<param>testType=tcp</param>
+				<param>max_parallel_connections_per_instance=64</param>
+				<param>connections=(1 2 4 8 16 32 64 128 256 512 1024)</param>
+				<param>bufferLenghs=(1024)</param>
+				<param>IPversion=4</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>		
+		<test>
+			<testName>ICA-PERF-REDIS-MIDDLEWARE-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-REDIS-MIDDLEWARE-TEST.ps1</testScriptps1>
+			<setupType>M1S1</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<TestParameters>
+				<param>test_pipeline_collection=(1 8 16 32 64 128)</param>
+				<param>redisVersion=2.8.17</param>
+				<param>redis_test_suites="get,set"</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>			
+		<test>
+			<testName>ICA-BUILD-LINUX-NEXT-DEB-PACKAGE</testName>
+			<testScript>build_deb_from_linux_next.sh</testScript>
+			<testScriptps1>ICA-BUILD-LINUX-NEXT-DEB-PACKAGE.ps1</testScriptps1>
+			<setupType>F16</setupType>
+			<!-- standard or daily images in gallery -->
+			<imageType>Standard</imageType>
+			<remoteSA>ubuntulinuxnextkernels</remoteSA>
+			<remoteSAContainer>debs</remoteSAContainer>
+			<remoteDEBPath>http://ubuntulinuxnextkernels.blob.core.windows.net/debs</remoteDEBPath>
+			<files>.\remote-scripts\azuremodules.sh,.\remote-scripts\build_deb_from_linux_next.sh</files>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<Priority>P0</Priority>
+		</test>			
 	</testsDefinition>
 
 	<testCycles>
@@ -6219,6 +7618,12 @@
 			</test>
 		</Cycle>
 		<Cycle>
+			<cycleName>NETPERF-UDP</cycleName>
+			<test>
+				<Name>ICA-PERF-NETWORK-UDP-TEST</Name>
+			</test>
+		</Cycle>
+		<Cycle>
 			<cycleName>LISA-MARIADB-PERF</cycleName>
 			<test>
 				<Name>ICA-MYSQLDB-PERF-TEST</Name>
@@ -6226,11 +7631,24 @@
 		</Cycle>		
 		
 		<Cycle>
-			<cycleName>IOPERF-RAID</cycleName>
+			<cycleName>IOPERF-RAID-XIO</cycleName>
 			<test>
-				<Name>ICA-IO-DISK-PERF-TEST-RAID</Name>
+				<Name>ICA-IO-DISK-PERF-TEST-RAID-DS</Name>
 			</test>
 		</Cycle>
+		<Cycle>
+			<cycleName>IOPERF-RAID-FIO</cycleName>
+			<test>
+				<Name>ICA-FIO-TEST</Name>
+			</test>
+		</Cycle>
+
+		<Cycle>
+			<cycleName>IOPERF-RAID-NON-XIO</cycleName>
+			<test>
+				<Name>ICA-IO-DISK-PERF-TEST-RAID-D</Name>
+			</test>
+		</Cycle>		
 		<Cycle>
 			<cycleName>IOPERF-LVM</cycleName>
 			<test>
@@ -6442,9 +7860,29 @@
 		<Cycle>
 			<cycleName>LISA-MONGODB2VM-PERF</cycleName>
 			<test>
-				<Name>ICA-PERF-MONGODB-BENCHMARK-TEST-2VM </Name>
+				<Name>ICA-PERF-MONGODB-BENCHMARK-TEST-2VM</Name>
 			</test>			
 		</Cycle>
+		<Cycle>
+			<cycleName>LISA-ORION-PERF</cycleName>
+			<test>
+				<Name>ICA-PERF-ORION-BENCHMARK-TEST</Name>
+			</test>			
+		</Cycle>
+
+		<Cycle>
+			<cycleName>PERF-MONGODB-M</cycleName>
+			<test>
+				<Name>ICA-PERF-MIDDLEWARE-MONGODB-BENCHMARK-TEST-2VM</Name>
+			</test>			
+		</Cycle>
+		<Cycle>
+			<cycleName>PERF-FIO-M</cycleName>
+			<test>
+				<Name>ICA-PERF-FIO-BENCHMARK-TEST</Name>
+			</test>			
+		</Cycle>
+		
 		<Cycle>
 			<cycleName>LISA-PERF</cycleName>
 			<test>
@@ -6476,7 +7914,18 @@
 				<Name>RHUI-BVT-VERIFY-RPM-SOURCE</Name>
 			</test>
         </Cycle>	
-        
+		<Cycle>
+			<cycleName>RDMA2VM</cycleName>
+			<test>
+				<Name>ICA-RDMA-TEST-2VM</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>RDMA16VM</cycleName>
+			<test>
+				<Name>ICA-RDMA-TEST-16VM</Name>
+			</test>			
+		</Cycle>        
 		<Cycle>
 			<cycleName>RHUI-Stress</cycleName>
 			<test>
@@ -6513,10 +7962,82 @@
 		</Cycle>
 
 		<Cycle>
+			<cycleName>PERF-ORION</cycleName>
+			<test>
+				<Name>ICA-PERF-ORION-BENCHMARK-TEST</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>PERF-NTTTCP</cycleName>
+			<test>
+				<Name>ICA-PERF-NTTTCP-TEST</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>PERF-TCPv6</cycleName>
+			<test>
+				<Name>ICA-PERF-TCP-IPV6-TEST</Name>
+			</test>
+		</Cycle>		
+		<Cycle>
+			<cycleName>PERF-FIO</cycleName>
+			<test>
+				<Name>ICA-PERF-FIO-TEST-8K</Name>
+			</test>
+			<test>
+				<Name>ICA-PERF-FIO-TEST-1024K</Name>
+			</test>			
+		</Cycle>		
+		<Cycle>
+			<cycleName>PERF-REDIS-M</cycleName>
+			<test>
+				<Name>ICA-PERF-REDIS-MIDDLEWARE-TEST</Name>
+			</test>			
+		</Cycle>
+		<Cycle>
+			<cycleName>LINUX-NEXT-DEB</cycleName>
+			<test>
+				<Name>ICA-BUILD-LINUX-NEXT-DEB-PACKAGE</Name>
+			</test>
+		</Cycle>	
+		<Cycle>
+			<cycleName>PERF-UDPLOSS</cycleName>
+			<test>
+				<Name>ICA-PERF-UDP-LOSS-TEST</Name>
+			</test>
+		</Cycle>	
+		<Cycle>
+			<cycleName>IPERF3TCPv4</cycleName>
+			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
+			<test>
+				<Name>ICA-IPERF3-TCP-IPV4-TEST</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>IPERF3TCPv6</cycleName>
+			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
+			<test>
+				<Name>ICA-IPERF3-TCP-IPV6-TEST</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>IPERF3TCPv4SAMEVNET</cycleName>
+			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
+			<test>
+				<Name>ICA-IPERF3-TCP-IPV4-SAMEVNET-TEST</Name>
+			</test>
+		</Cycle>		
+		<Cycle>
 			<cycleName>DEBUG</cycleName>
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
 			<test>
-				<Name>ICA-DOCKER-EXTENSION-TEST</Name>
+				<Name>BVT-VERIFY-HOSTNAME</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>PROVISION</cycleName>
+			<test>
+				<Name>BVT-VERIFY-DEPLOYMENT-PROVISION</Name>
 			</test>
 		</Cycle>
 	</testCycles>

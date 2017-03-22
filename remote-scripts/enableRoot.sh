@@ -14,12 +14,16 @@ sshd_configFilePath="/etc/ssh/sshd_config"
 sshdServiceName="sshd"
 usermod --password $(echo $password | openssl passwd -1 -stdin) root
 if [ $? == 0 ]; then
-    sed -i 's/PermitRootLogin/#PermitRootLogin/g' $sshd_configFilePath
+    sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/g' $sshd_configFilePath
     if [ $? == 0 ]; then
         echo "$sshd_configFilePath verifed for root login."
         echo "ROOT_PASSWRD_SET"
-        service $sshdServiceName restart
+        service $sshdServiceName restart || systemctl restart sshd.service
         sshdServiceStatus=$?
+        if [ $sshdServiceStatus != 0 ]; then
+                service ssh restart
+                sshdServiceStatus=$?
+        fi
     else
         echo "$sshd_configFilePath verification failed for root login."
         echo "ROOT_PASSWORD_SET_SSHD_CONFIG_FAIL"

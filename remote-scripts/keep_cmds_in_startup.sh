@@ -15,7 +15,9 @@ then
 		sed "/^\s*exit 0/i ${testcommand}" /etc/rc.d/rc.local -i
 		if ! grep -q "${testcommand}" /etc/rc.d/rc.local
 		then
+			cp /etc/rc.d/rc.local /etc/rc.d/rc.local.bkp
 			echo $testcommand >> /etc/rc.d/rc.local
+			chmod +x /etc/rc.d/rc.local
 		fi
 	fi
 fi
@@ -27,7 +29,9 @@ then
 		sed "/^\s*exit 0/i ${testcommand}" /etc/rc.local -i
 		if ! grep -q "${testcommand}" /etc/rc.local
 		then
+			cp /etc/rc.local /etc/rc.local.bkp
 			echo $testcommand >> /etc/rc.local
+			chmod +x /etc/rc.local
 		fi
 	fi
 fi
@@ -36,7 +40,9 @@ if [[ -f /etc/SuSE-release ]]
 then
 	if ! grep -q "${testcommand}" after.local
 	then
+		cp /etc/rc.d/after.local /etc/rc.d/after.local.bkp
 		echo $testcommand >> /etc/rc.d/after.local
+		chmod +x /etc/rc.d/after.local
 	fi
 fi 
 # ===
