@@ -48,7 +48,7 @@
 			<PrivateConfiguration>
 				<username>VMAccessUser</username>
 				<password>VMAccessPassword</password>
-				<expiration>2017-12-12</expiration>
+				<expiration>2026-01-01</expiration>
 			</PrivateConfiguration>	
 			<Version>1.*</Version>
 			<LatestVersion>1.4</LatestVersion>

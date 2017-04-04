@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # 
 # 
 # This program is distributed in the hope that it will be useful,
@@ -167,9 +167,9 @@ RunFIO()
 
 ConfigCentOS7()
 {			
-	fioCentOS7pkg="fio-2.1.10-1.el7.rf.x86_64.rpm"
+	fioCentOS7pkg="fio-2.2.8-2.el7.x86_64.rpm"
 	LogMsg "INFO: CentOS7: installing required packages"
-	yum install -y wget sysstat mdadm blktrace
+	yum install -y wget sysstat mdadm blktrace libaio
 	mount -t debugfs none /sys/kernel/debug
 	
 	installed=`which fio`
@@ -178,7 +178,7 @@ ConfigCentOS7()
 
 		fiolPkg=$(ls | grep ${fioCentOS7pkg})
 		if [ -z "$fiolPkg" ]; then
-			wget "http://pkgs.repoforge.org/fio/${fioCentOS7pkg}"
+			wget "https://konkasoftpackages.blob.core.windows.net/linuxbinaries/${fioCentOS7pkg}"
 		fi
 		yum install -y ${fioCentOS7pkg}
         if [ $? -ne 0 ]; then
@@ -192,7 +192,7 @@ ConfigCentOS6()
 {			
 	fioCentOS6pkg="fio-2.1.10-1.el6.rf.x86_64.rpm"
 	LogMsg "INFO: CentOS6: installing required packages"
-	yum install -y wget sysstat mdadm blktrace
+	yum install -y wget sysstat mdadm blktrace libaio
 	mount -t debugfs none /sys/kernel/debug
 	
 	installed=`which fio`
@@ -201,7 +201,7 @@ ConfigCentOS6()
 
 		fiolPkg=$(ls | grep ${fioCentOS6pkg})
 		if [ -z "$fiolPkg" ]; then			
-			wget "http://pkgs.repoforge.org/fio/${fioCentOS6pkg}"
+			wget "https://konkasoftpackages.blob.core.windows.net/linuxbinaries/${fioCentOS6pkg}"
 		fi
 		yum install -y libibverbs.x86_64
 		yum install -y ${fioCentOS6pkg}
@@ -347,7 +347,8 @@ mountDir="/data"
 cd ${HOMEDIR}
 
 #DISTRO=`grep -ihs "Ubuntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux" /etc/{issue,*release,*version} | grep DISTRIB_ID= | sed s/DISTRIB_ID=//`
-DISTRO="Ubuntu"
+DISTRO=`grep -ihs "Ubuntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux" /etc/{issue,*release,*version}`
+#DISTRO="Ubuntu"
 echo "###############$DISTRO########################"
 case $DISTRO in
 	Ubuntu*)

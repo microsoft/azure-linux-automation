@@ -145,25 +145,33 @@
 				<sshPublicKey>myCert.cer</sshPublicKey>
 				<WaagentVersion>"2.0.8"</WaagentVersion>
 				<dnsServer>
-					<IP>192.168.3.120</IP>
-					<Hostname>ubuntudns</Hostname>
-					<Username>root</Username>
-					<Password>redhat</Password>
+					<IP>10.1.0.4</IP>
+					<Hostname>andyDNSServer</Hostname>
+					<Username>azureuser</Username>
+					<Password>P@ssw0rd01</Password>
 				</dnsServer>
+				<ARMdnsServer>
+					<IP>10.9.0.4</IP>
+					<Hostname>ARMDNSServer</Hostname>
+					<Username>azureuser</Username>
+					<Password>P@ssw0rd01</Password>
+				</ARMdnsServer>
 				<mysqlServer>
-					<IP>192.168.3.127</IP>
-					<Hostname>ubuntumysqlserver</Hostname>
-					<Username>root</Username>
-					<Password>redhat</Password>
+					<IP>10.1.0.5</IP>
+					<Hostname>MySQLServer</Hostname>
+					<Username>azureuser</Username>
+					<Password>P@ssw0rd01</Password>
 					<MysqlUsername>test</MysqlUsername>
 					<MysqlPassword>redhat</MysqlPassword>
 				</mysqlServer>
-				<nfsServer>
-					<IP>192.168.3.125</IP>
-					<Hostname>ubuntunfsserver</Hostname>
-					<Username>root</Username>
-					<Password>redhat</Password>
-				</nfsServer>
+				<ARMmysqlServer>
+					<IP>10.9.0.5</IP>
+					<Hostname>ARMMySQLServer</Hostname>
+					<Username>azureuser</Username>
+					<Password>P@ssw0rd01</Password>
+					<MysqlUsername>test</MysqlUsername>
+					<MysqlPassword>redhat</MysqlPassword>
+				</ARMmysqlServer>
 			</Data>
 			<PublicEndpoint>
 				<isDeployed>NO</isDeployed>
@@ -971,17 +979,18 @@
 			<VNETVMPR>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
-					<VnetName>AzureDTAP02Net</VnetName>
+					<VnetName>VNET02</VnetName>
 					<VnetDomainDBFilePath>/etc/bind/zones/lisvnetlab.com.db</VnetDomainDBFilePath>
 					<VnetDomainRevFilePath>/etc/bind/zones/rev.4.168.192.in-addr.arpa</VnetDomainRevFilePath>
-					<Subnet1Range>192.168.2.0/27</Subnet1Range>
-					<Subnet2Range>192.168.2.32/27</Subnet2Range>
-					<ARMVnetName>DTAPWestUSvn</ARMVnetName>
+					<Subnet1Range>10.2.0.0/19</Subnet1Range>
+					<Subnet2Range>10.2.32.0/19</Subnet2Range>
+					<ARMVnetName>ARMVNET</ARMVnetName>
 					<ARMVnetDomainDBFilePath>/etc/bind/zones/dtaparm01.com.db</ARMVnetDomainDBFilePath>
-					<ARMVnetDomainRevFilePath>/etc/bind/zones/rev.3.168.192.in-addr.arpa</ARMVnetDomainRevFilePath>
-					<ARMSubnet1Range>10.0.2.0/24</ARMSubnet1Range>
-					<ARMSubnet2Range>10.0.3.0/24</ARMSubnet2Range>					
-					<DnsServerIP>192.168.3.120</DnsServerIP>
+					<ARMVnetDomainRevFilePath>/etc/bind/zones/rev.4.168.192.in-addr.arpa</ARMVnetDomainRevFilePath>
+					<ARMSubnet1Range>10.10.0.0/19</ARMSubnet1Range>
+					<ARMSubnet2Range>10.10.32.0/19</ARMSubnet2Range>
+					<DnsServerIP>10.1.0.4</DnsServerIP>
+					<ARMDnsServerIP>10.9.0.4</ARMDnsServerIP>
 					<VirtualMachine>
 						<state></state>
 						<SubnetName>Subnet1</SubnetName>
@@ -1040,17 +1049,18 @@
 					</VirtualMachine>
 				</HostedService>
 				<HostedService>
-					<VnetName>AzureDTAP02Net</VnetName>
+					<VnetName>VNET02</VnetName>
 					<VnetDomainDBFilePath>/etc/bind/zones/lisvnetlab.com.db</VnetDomainDBFilePath>
 					<VnetDomainRevFilePath>/etc/bind/zones/rev.4.168.192.in-addr.arpa</VnetDomainRevFilePath>
-					<Subnet1Range>192.168.2.0/27</Subnet1Range>
-					<Subnet2Range>192.168.2.32/27</Subnet2Range>
-					<ARMVnetName>DTAPWestUSvn</ARMVnetName>
+					<Subnet1Range>10.2.0.0/19</Subnet1Range>
+					<Subnet2Range>10.2.32.0/19</Subnet2Range>
+					<ARMVnetName>ARMVNET</ARMVnetName>
 					<ARMVnetDomainDBFilePath>/etc/bind/zones/dtaparm01.com.db</ARMVnetDomainDBFilePath>
-					<ARMVnetDomainRevFilePath>/etc/bind/zones/rev.3.168.192.in-addr.arpa</ARMVnetDomainRevFilePath>
-					<ARMSubnet1Range>10.0.2.0/24</ARMSubnet1Range>
-					<ARMSubnet2Range>10.0.3.0/24</ARMSubnet2Range>					
-					<DnsServerIP>192.168.3.120</DnsServerIP>
+					<ARMVnetDomainRevFilePath>/etc/bind/zones/rev.4.168.192.in-addr.arpa</ARMVnetDomainRevFilePath>
+					<ARMSubnet1Range>10.10.0.0/19</ARMSubnet1Range>
+					<ARMSubnet2Range>10.10.32.0/19</ARMSubnet2Range>
+					<DnsServerIP>10.1.0.4</DnsServerIP>
+					<ARMDnsServerIP>10.9.0.4</ARMDnsServerIP>
 					<VirtualMachine>
 						<state></state>
 						<SubnetName>Subnet2</SubnetName>
@@ -1112,17 +1122,18 @@
 			<VNETVM-EXT>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
-					<VnetName>AzureDTAP02Net</VnetName>
+					<VnetName>VNET02</VnetName>
 					<VnetDomainDBFilePath>/etc/bind/zones/lisvnetlab.com.db</VnetDomainDBFilePath>
 					<VnetDomainRevFilePath>/etc/bind/zones/rev.4.168.192.in-addr.arpa</VnetDomainRevFilePath>
-					<Subnet1Range>192.168.2.0/27</Subnet1Range>
-					<Subnet2Range>192.168.2.32/27</Subnet2Range>
-					<ARMVnetName>DTAPWestUSvn</ARMVnetName>
+					<Subnet1Range>10.2.0.0/19</Subnet1Range>
+					<Subnet2Range>10.2.32.0/19</Subnet2Range>
+					<ARMVnetName>ARMVNET</ARMVnetName>
 					<ARMVnetDomainDBFilePath>/etc/bind/zones/dtaparm01.com.db</ARMVnetDomainDBFilePath>
-					<ARMVnetDomainRevFilePath>/etc/bind/zones/rev.3.168.192.in-addr.arpa</ARMVnetDomainRevFilePath>
-					<ARMSubnet1Range>10.0.2.0/24</ARMSubnet1Range>
-					<ARMSubnet2Range>10.0.3.0/24</ARMSubnet2Range>					
-					<DnsServerIP>192.168.3.120</DnsServerIP>
+					<ARMVnetDomainRevFilePath>/etc/bind/zones/rev.4.168.192.in-addr.arpa</ARMVnetDomainRevFilePath>
+					<ARMSubnet1Range>10.10.0.0/19</ARMSubnet1Range>
+					<ARMSubnet2Range>10.10.32.0/19</ARMSubnet2Range>
+					<DnsServerIP>10.1.0.4</DnsServerIP>
+					<ARMDnsServerIP>10.9.0.4</ARMDnsServerIP>
 					<VirtualMachine>
 						<state></state>
 						<SubnetName>Subnet1</SubnetName>
@@ -1181,17 +1192,18 @@
 					</VirtualMachine>
 				</HostedService>
 				<HostedService>
-					<VnetName>AzureDTAP02Net</VnetName>
+					<VnetName>VNET02</VnetName>
 					<VnetDomainDBFilePath>/etc/bind/zones/lisvnetlab.com.db</VnetDomainDBFilePath>
 					<VnetDomainRevFilePath>/etc/bind/zones/rev.4.168.192.in-addr.arpa</VnetDomainRevFilePath>
-					<Subnet1Range>192.168.4.192/26</Subnet1Range>
-					<Subnet2Range>192.168.4.128/26</Subnet2Range>
-					<ARMVnetName>DTAPWestUSvn</ARMVnetName>
+					<Subnet1Range>10.2.0.0/19</Subnet1Range>
+					<Subnet2Range>10.2.32.0/19</Subnet2Range>
+					<ARMVnetName>ARMVNET</ARMVnetName>
 					<ARMVnetDomainDBFilePath>/etc/bind/zones/dtaparm01.com.db</ARMVnetDomainDBFilePath>
-					<ARMVnetDomainRevFilePath>/etc/bind/zones/rev.3.168.192.in-addr.arpa</ARMVnetDomainRevFilePath>
-					<ARMSubnet1Range>10.0.2.0/24</ARMSubnet1Range>
-					<ARMSubnet2Range>10.0.3.0/24</ARMSubnet2Range>					
-					<DnsServerIP>192.168.3.120</DnsServerIP>
+					<ARMVnetDomainRevFilePath>/etc/bind/zones/rev.4.168.192.in-addr.arpa</ARMVnetDomainRevFilePath>
+					<ARMSubnet1Range>10.10.0.0/19</ARMSubnet1Range>
+					<ARMSubnet2Range>10.10.32.0/19</ARMSubnet2Range>
+					<DnsServerIP>10.1.0.4</DnsServerIP>
+					<ARMDnsServerIP>10.9.0.4</ARMDnsServerIP>
 					<VirtualMachine>
 						<state></state>
 						<SubnetName>Subnet2</SubnetName>
@@ -8204,6 +8216,12 @@
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
 			<test>
 				<Name>BVT-VERIFY-HOSTNAME</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>PROVISION</cycleName>
+			<test>
+				<Name>BVT-VERIFY-DEPLOYMENT-PROVISION</Name>
 			</test>
 		</Cycle>
 	</testCycles>

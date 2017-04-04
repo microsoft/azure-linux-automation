@@ -350,11 +350,13 @@ if ( $NewARMStorageAccountType )
     $StorageAccountName = $($NewARMStorageAccountType.ToLower().Replace("_","")) + "$RGRandomNumber"
     #$StorageAccountName = "$LocationLower" + "$RGRandomNumber"
     LogMsg "Using New ARM Storage Account : $StorageAccountName"
+    $StorageAccountType= $NewARMStorageAccountType
 }
 else
 {
     LogMsg "Using ARM Storage Account : $StorageAccountName"
 }
+$bootDiagnosticsSA = "icadiagnostic$RGRandomNumber"
 LogMsg "Using API VERSION : $apiVersion"
 $ExistingVnet = $null
 if ($RGXMLData.ARMVnetName -ne $null)
@@ -597,6 +599,22 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
         Add-Content -Value "$($indents[2])}," -Path $jsonFile
         LogMsg "Added New Storage Account $StorageAccountName.."
     }
+    #endregion
+
+    #region New ARM Bood Diagnostic Account
+    
+        Add-Content -Value "$($indents[2]){" -Path $jsonFile
+            Add-Content -Value "$($indents[3])^apiVersion^: ^2015-06-15^," -Path $jsonFile
+            Add-Content -Value "$($indents[3])^type^: ^Microsoft.Storage/storageAccounts^," -Path $jsonFile
+            Add-Content -Value "$($indents[3])^name^: ^$bootDiagnosticsSA^," -Path $jsonFile
+            Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
+            Add-Content -Value "$($indents[3])^properties^:" -Path $jsonFile
+            Add-Content -Value "$($indents[3]){" -Path $jsonFile
+                Add-Content -Value "$($indents[4])^accountType^: ^Standard_LRS^" -Path $jsonFile
+            Add-Content -Value "$($indents[3])}" -Path $jsonFile
+        Add-Content -Value "$($indents[2])}," -Path $jsonFile
+        LogMsg "Added boot diagnostic Storage Account $bootDiagnosticsSA.."
+
     #endregion
 
         #region virtualNetworks
@@ -1171,20 +1189,21 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                             Add-Content -Value "$($indents[7])^id^: ^[resourceId('Microsoft.Network/networkInterfaces','$NIC')]^" -Path $jsonFile
                         Add-Content -Value "$($indents[6])}" -Path $jsonFile
                     Add-Content -Value "$($indents[5])]" -Path $jsonFile
-                Add-Content -Value "$($indents[4])}," -Path $jsonFile
+                Add-Content -Value "$($indents[4])}" -Path $jsonFile
                 #endregion
 
                 #region Enable boot dignostics.
+				Add-Content -Value "$($indents[4])," -Path $jsonFile
                 Add-Content -Value "$($indents[4])^diagnosticsProfile^: " -Path $jsonFile
                 Add-Content -Value "$($indents[4]){" -Path $jsonFile
                     Add-Content -Value "$($indents[5])^bootDiagnostics^: " -Path $jsonFile
                     Add-Content -Value "$($indents[5]){" -Path $jsonFile
                         Add-Content -Value "$($indents[6])^enabled^: true," -Path $jsonFile
-                        Add-Content -Value "$($indents[6])^storageUri^: ^[reference(resourceId('$StorageAccountRG', 'Microsoft.Storage/storageAccounts', '$StorageAccountName'), '2015-06-15').primaryEndpoints['blob']]^" -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^storageUri^: ^[reference(resourceId('$RGName', 'Microsoft.Storage/storageAccounts', '$bootDiagnosticsSA'), '2015-06-15').primaryEndpoints['blob']]^" -Path $jsonFile
                     Add-Content -Value "$($indents[5])}" -Path $jsonFile
                 Add-Content -Value "$($indents[4])}" -Path $jsonFile
                 #endregion
-
+			
             Add-Content -Value "$($indents[3])}" -Path $jsonFile
             LogMsg "Attached Network Interface Card `"$NIC`" to Virtual Machine `"$vmName`"."
             #endregion
@@ -1474,8 +1493,25 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
 
                 Add-Content -Value "$($indents[4])}" -Path $jsonFile
                 #endregion
+                LogMsg "Added Network Profile."
+
+                
+                #region Enable boot dignostics.
+				Add-Content -Value "$($indents[4])," -Path $jsonFile
+                Add-Content -Value "$($indents[4])^diagnosticsProfile^: " -Path $jsonFile
+                Add-Content -Value "$($indents[4]){" -Path $jsonFile
+                    Add-Content -Value "$($indents[5])^bootDiagnostics^: " -Path $jsonFile
+                    Add-Content -Value "$($indents[5]){" -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^enabled^: true," -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^storageUri^: ^[reference(resourceId('$RGName', 'Microsoft.Storage/storageAccounts', '$bootDiagnosticsSA'), '2015-06-15').primaryEndpoints['blob']]^" -Path $jsonFile
+                    Add-Content -Value "$($indents[5])}" -Path $jsonFile
+                Add-Content -Value "$($indents[4])}" -Path $jsonFile
+				LogMsg "Added Diagnostics Profile."
+			    #endregion
+                
+
             Add-Content -Value "$($indents[3])}" -Path $jsonFile
-            LogMsg "Added Network Profile."
+            
             #endregion
         LogMsg "Added Virtual Machine $vmName"
         Add-Content -Value "$($indents[2])}" -Path $jsonFile

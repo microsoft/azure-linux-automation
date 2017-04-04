@@ -12,7 +12,8 @@ ICA_TESTFAILED="TestFailed"        # Error during running of test
 
 CONSTANTS_FILE="constants.sh"
 
-username=`cat /var/log/cloud-init.log | grep Adding| sed "s/.*user //"`
+#username=`cat /var/log/cloud-init.log | grep Adding| sed "s/.*user //"`
+username=$1
 current_kernel=`uname -r`
 code_path="/home/$username/code"
 . $code_path/azuremodules.sh

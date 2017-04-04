@@ -142,7 +142,7 @@ function InstallCustomKernel ($customKernel, $allVMData, [switch]$RestartAfterUp
     try
     {
         $customKernel = $customKernel.Trim()
-        if( ($customKernel -ne "linuxnext") -and ($customKernel -ne "netnext") -and !($customKernel.EndsWith(".deb")))
+        if( ($customKernel -ne "linuxnext") -and ($customKernel -ne "netnext") -and !($customKernel.EndsWith(".deb"))  -and !($customKernel.EndsWith(".rpm")) )
         {
             LogErr "Only linuxnext and netnext version is supported. Other version will be added soon. Use -customKernel linuxnext. Or use -customKernel <link to deb file>"
         }
@@ -158,7 +158,7 @@ function InstallCustomKernel ($customKernel, $allVMData, [switch]$RestartAfterUp
                 $out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "chmod +x *.sh" -runAsSudo
                 $currentKernelVersion = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "uname -r"
 		        LogMsg "Executing $scriptName ..."
-		        $jobID = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/home/$user/$scriptName -customKernel $customKernel" -RunInBackground -runAsSudo
+		        $jobID = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/home/$user/$scriptName -customKernel $customKernel -logFolder /home/$user" -RunInBackground -runAsSudo
 		        $packageInstallObj = New-Object PSObject
 		        Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name ID -Value $jobID
 		        Add-member -InputObject $packageInstallObj -MemberType NoteProperty -Name RoleName -Value $vmData.RoleName
@@ -214,7 +214,15 @@ function InstallCustomKernel ($customKernel, $allVMData, [switch]$RestartAfterUp
                         LogMsg "New kernel: $upgradedKernelVersion"
                         Add-Content -Value "Old kernel: $currentKernelVersion" -Path .\report\AdditionalInfo.html -Force
                         Add-Content -Value "New kernel: $upgradedKernelVersion" -Path .\report\AdditionalInfo.html -Force
-                        return $true
+                        if ($currentKernelVersion -eq $upgradedKernelVersion)
+                        {
+                            LogErr "Kernel version is same after restarting VMs."
+                            return $false
+                        }
+                        else
+                        {
+                            return $true
+                        }
                     }
                     else
                     {

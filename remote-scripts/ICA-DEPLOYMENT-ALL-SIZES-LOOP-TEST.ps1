@@ -31,13 +31,20 @@ else
 	}
 	foreach($size in $SupportSizes)
 	{
-		if($size -match 'DS' -or $size -match 'GS' -or ($size.Trim().EndsWith("s")) )
+		if ($size -imatch 'Promo')
 		{
-			$XioSizes += $size.Trim()
+		    LogMsg "Skipping $size"
 		}
 		else
 		{
-            $StandardSizes += $size.Trim()
+		    if(($size -match 'DS') -or ($size -match 'GS') -or ($size.Trim().EndsWith("s")))
+		    {
+			$XioSizes += $size.Trim()
+		    }
+		    else
+		    {
+			$StandardSizes += $size.Trim()
+		    }
 		}
 	}
 	if($AccountType -match 'Premium')
