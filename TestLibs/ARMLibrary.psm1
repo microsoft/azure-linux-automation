@@ -1,4 +1,239 @@
-﻿Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro, [string]$region = "", [string]$storageAccount = "")
+﻿Function ValidateSubscriptionUsage($subscriptionID, $RGXMLData, $SubscriptionUsageLimits)
+{
+    #region VM Cores...
+    Try
+    {
+        Function SetUsage($currentStatus, $text, $usage)
+        {
+            $counter = 0
+            foreach ($item in $currentStatus)
+            {
+                if ($item.Name.LocalizedValue -imatch $text)
+                {
+                    LogMsg "Current VM Core Estimated use: $($currentStatus[$counter].CurrentValue) + $usage = $($($currentStatus[$counter].CurrentValue) + $usage) VM cores."
+                    $currentStatus[$counter].CurrentValue = $currentStatus[$counter].CurrentValue + $usage
+                }
+                $counter++
+            }
+            return $currentStatus
+        }
+
+        Function TestUsage($currentStatus, $text, $AllowedUsagePercentage)
+        {
+            $counter = 0
+            foreach ($item in $currentStatus)
+            {
+                if ($item.Name.LocalizedValue -imatch $text)
+                {
+                    $allowedCount = [int](($currentStatus[$counter].Limit)*($AllowedUsagePercentage/100))
+                    LogMsg "$($item.Name.LocalizedValue) allowed: $allowedCount out of $(($currentStatus[$counter].Limit))."
+                    if ($currentStatus[$counter].CurrentValue -le $allowedCount)
+                    {
+                        #LogMsg "Current Estimated use: $($currentStatus[$counter].CurrentValue)"
+                        return 0
+                    }
+                    else
+                    {
+                        #LogErr "Current Estimated use: $($currentStatus[$counter].CurrentValue)"
+                        return 1
+                    }
+                }
+                $counter++
+            }
+        }
+        #Get the region
+        $Location = ($xmlConfig.config.Azure.General.Location).Replace('"',"").Replace(' ',"").ToLower()
+        $currentStatus = Get-AzureRmVMUsage -Location $Location
+        $overFlowErrors = 0
+        $requiredVMCores = 0
+        $premiumVMs = 0
+        foreach ($VM in $RGXMLData)
+        {
+
+            if ($OverrideVMSize)
+            {
+                $testVMSize = $overrideVMSize
+            }
+            else
+            {
+                $testVMSize = $VM.VirtualMachine.ARMInstanceSize
+            }
+            
+            $testVMUsage = (Get-AzureRmVMSize -Location $Location | Where { $_.Name -eq $testVMSize}).NumberOfCores
+
+            $testVMSize = $testVMSize.Replace("Standard_","")
+
+            #region D-Series postmartem
+            if ( $testVMSize.StartsWith("DS") -and $testVMSize.EndsWith("v2"))
+            {
+                $identifierText = "Standard DSv2 Family Cores"
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage 95
+                $premiumVMs += 1
+            }
+            elseif ( $testVMSize.StartsWith("DS") -and !$testVMSize.EndsWith("v2"))
+            {
+                $identifierText = "Standard DS Family Cores" 
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage 95
+                $premiumVMs += 1
+            }
+            elseif ( $testVMSize.StartsWith("D") -and $testVMSize.EndsWith("v2"))
+            {
+                $identifierText = "Standard Dv2 Family Cores" 
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage 95
+            }
+            elseif ( $testVMSize.StartsWith("D") -and !$testVMSize.EndsWith("v2"))
+            {
+                $identifierText = "Standard DSv2 Family Cores" 
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage 95
+            }
+            #endregion
+
+            #region Standard A series postmartem
+
+            elseif ( ( $testVMSize -eq "Standard_A8") -or ( $testVMSize -eq "Standard_A9") -or ( $testVMSize -eq "Standard_A10") -or ( $testVMSize -eq "Standard_A11") )
+            {
+                $identifierText = "Standard A8-A11 Family Cores"
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage 95
+            }
+            elseif ( $testVMSize.StartsWith("A") -and $testVMSize.EndsWith("v2"))
+            {
+                $identifierText = "Standard Av2 Family Cores" 
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage 95
+            }
+            elseif ( $testVMSize.StartsWith("A") -and !$testVMSize.EndsWith("v2"))
+            {
+                $identifierText = "Standard A0-A7 Family Cores" 
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage 95
+            }
+            #endregion
+
+            #region Standard F series postamartem
+            elseif ( $testVMSize.StartsWith("FS"))
+            {
+                $identifierText = "Standard FS Family Cores" 
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage 95
+                $premiumVMs += 1
+            }
+            elseif ( $testVMSize.StartsWith("F"))
+            {
+                $identifierText = "Standard F Family Cores"
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage 95
+            }
+            elseif ( $testVMSize.StartsWith("GS"))
+            {
+                $identifierText = "Standard GS Family Cores" 
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage 95
+                $premiumVMs += 1
+            }
+            elseif ( $testVMSize.StartsWith("G"))
+            {
+                $identifierText = "Standard G Family Cores"
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage 95
+            }
+            elseif ( $testVMSize.StartsWith("NV"))
+            {
+                $identifierText = "Standard NV Family Cores"
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage 95
+            }
+            elseif ( $testVMSize.StartsWith("NC"))
+            {
+                $identifierText = "Standard NC Family Cores"
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage 95
+            }
+            elseif ( $testVMSize.StartsWith("H"))
+            {
+                $identifierText = "Standard H Family Cores"
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage 95
+            }
+            elseif ( $testVMSize.StartsWith("Basic"))
+            {
+                $identifierText = "Basic A Family Cores"
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage 95
+            }
+        
+            else
+            {
+                LogMsg "Your VM size in not yet registered. Usage will be ignored."
+            }
+            #endregion
+        }
+        #Check the max core quota
+
+        #Get the current usage for current region
+        #$currentStorageAccounts = (Get-AzureRmStorageAccount).Count
+
+        #Decide
+
+    }
+    catch
+    {
+        $line = $_.InvocationInfo.ScriptLineNumber
+        $script_name = ($_.InvocationInfo.ScriptName).Replace($PWD,".")
+        $ErrorMessage =  $_.Exception.Message
+        LogErr "EXCEPTION : $ErrorMessage"
+        LogErr "Source : Line $line in script $script_name."  
+    }
+
+    #endregion
+
+
+    #region Storage Accounts
+    $currentStorageStatus = Get-AzureRmStorageUsage
+    if ( ($premiumVMs -gt 0 ) -and ($xmlConfig.config.Azure.General.StorageAccount -imatch "NewStorage_"))
+    {
+        $requiredStorageAccounts = 2
+    }
+    elseif( ($premiumVMs -gt 0 ) -and !($xmlConfig.config.Azure.General.StorageAccount -imatch "NewStorage_"))
+    {
+        $requiredStorageAccounts = 1
+    }
+    elseif( !($premiumVMs -gt 0 ) -and !($xmlConfig.config.Azure.General.StorageAccount -imatch "NewStorage_"))
+    {
+        $requiredStorageAccounts = 0
+    }
+    $AllowedUsagePercentage = 95
+    $allowedStorageCount = [int]($currentStorageStatus.Limit*($AllowedUsagePercentage/100))
+
+    
+    if (($currentStorageStatus.CurrentValue + $requiredStorageAccounts) -le $allowedStorageCount)
+    {
+        LogMsg "Current Storage Estimated use: $($currentStorageStatus.CurrentValue) + $requiredStorageAccounts = $($currentStorageStatus.CurrentValue + $requiredStorageAccounts)"
+    }
+    else
+    {
+        LogErr "Current Storage Estimated use: $($currentStatus[$counter].CurrentValue)"
+        $overFlowErrors += 1
+    }
+    LogMsg "Storage accounts allowed: $allowedStorageCount out of $(($currentStorageStatus.Limit))."
+    #endregion
+
+    if($overFlowErrors -eq 0)
+    {
+        return $true
+    }
+    else
+    {
+        return $false
+    }
+}
+
+
+Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro, [string]$region = "", [string]$storageAccount = "")
 {
     $resourceGroupCount = 0
     $xml = $xmlConfig
@@ -43,6 +278,15 @@
     }
     foreach ($RG in $setupTypeData.HostedService )
     {
+        if (Test-Path .\XML\SubscriptionUsageLimits.xml)
+        {
+            LogMsg "Checking the subscription usage..."
+            $readyToDeploy = $false
+            while (!$readyToDeploy)
+            {
+                $readyToDeploy = ValidateSubscriptionUsage -subscriptionID $xmlConfig.config.Azure.General.SubscriptionID -RGXMLData $RG -SubscriptionUsageLimits ([xml](Get-Content .\XML\SubscriptionUsageLimits.xml))
+            }
+        }
         $curtime = Get-Date
         $randomNumber = Get-Random -Maximum 9999 -Minimum 1111
         $isServiceDeployed = "False"
@@ -601,8 +845,10 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
     }
     #endregion
 
-    #region New ARM Bood Diagnostic Account
+    #region New ARM Bood Diagnostic Account if Storage Account Type is Premium LRS.
     
+    if ($StorageAccountType -imatch "Premium_LRS")
+    {
         Add-Content -Value "$($indents[2]){" -Path $jsonFile
             Add-Content -Value "$($indents[3])^apiVersion^: ^2015-06-15^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^type^: ^Microsoft.Storage/storageAccounts^," -Path $jsonFile
@@ -613,8 +859,14 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
                 Add-Content -Value "$($indents[4])^accountType^: ^Standard_LRS^" -Path $jsonFile
             Add-Content -Value "$($indents[3])}" -Path $jsonFile
         Add-Content -Value "$($indents[2])}," -Path $jsonFile
+        $diagnosticRG = $RGName
         LogMsg "Added boot diagnostic Storage Account $bootDiagnosticsSA.."
-
+    }
+    else
+    {
+        $bootDiagnosticsSA = $StorageAccountName
+        $diagnosticRG = $StorageAccountRG
+    }
     #endregion
 
         #region virtualNetworks
@@ -1199,7 +1451,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                     Add-Content -Value "$($indents[5])^bootDiagnostics^: " -Path $jsonFile
                     Add-Content -Value "$($indents[5]){" -Path $jsonFile
                         Add-Content -Value "$($indents[6])^enabled^: true," -Path $jsonFile
-                        Add-Content -Value "$($indents[6])^storageUri^: ^[reference(resourceId('$RGName', 'Microsoft.Storage/storageAccounts', '$bootDiagnosticsSA'), '2015-06-15').primaryEndpoints['blob']]^" -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^storageUri^: ^[reference(resourceId('$diagnosticRG', 'Microsoft.Storage/storageAccounts', '$bootDiagnosticsSA'), '2015-06-15').primaryEndpoints['blob']]^" -Path $jsonFile
                     Add-Content -Value "$($indents[5])}" -Path $jsonFile
                 Add-Content -Value "$($indents[4])}" -Path $jsonFile
                 #endregion
@@ -1503,7 +1755,7 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
                     Add-Content -Value "$($indents[5])^bootDiagnostics^: " -Path $jsonFile
                     Add-Content -Value "$($indents[5]){" -Path $jsonFile
                         Add-Content -Value "$($indents[6])^enabled^: true," -Path $jsonFile
-                        Add-Content -Value "$($indents[6])^storageUri^: ^[reference(resourceId('$RGName', 'Microsoft.Storage/storageAccounts', '$bootDiagnosticsSA'), '2015-06-15').primaryEndpoints['blob']]^" -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^storageUri^: ^[reference(resourceId('$diagnosticRG', 'Microsoft.Storage/storageAccounts', '$bootDiagnosticsSA'), '2015-06-15').primaryEndpoints['blob']]^" -Path $jsonFile
                     Add-Content -Value "$($indents[5])}" -Path $jsonFile
                 Add-Content -Value "$($indents[4])}" -Path $jsonFile
 				LogMsg "Added Diagnostics Profile."
@@ -1627,6 +1879,7 @@ Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed
     {
         try
         {
+
             $VerifiedGroups =  $NULL
             $retValue = $NULL
             #$ExistingGroups = RetryOperation -operation { Get-AzureRmResourceGroup } -description "Getting information of existing resource groups.." -retryInterval 5 -maxRetryCount 5
