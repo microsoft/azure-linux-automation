@@ -10,11 +10,21 @@
             {
                 if ($item.Name.LocalizedValue -imatch $text)
                 {
-                    LogMsg "Current VM Core Estimated use: $($currentStatus[$counter].CurrentValue) + $usage = $($($currentStatus[$counter].CurrentValue) + $usage) VM cores."
+                    $allowedCount = [int](($currentStatus[$counter].Limit)*(95/100))
+                    LogMsg "  Current $text usage : $($currentStatus[$counter].CurrentValue) cores. Requested:$usage. Estimated usage=$($($currentStatus[$counter].CurrentValue) + $usage). Max Allowed cores:$allowedCount/$(($currentStatus[$counter].Limit))"
+                    #LogMsg "Current VM Core Estimated use: $($currentStatus[$counter].CurrentValue) + $usage = $($($currentStatus[$counter].CurrentValue) + $usage) VM cores."
+                    $currentStatus[$counter].CurrentValue = $currentStatus[$counter].CurrentValue + $usage
+                }
+                if ($item.Name.LocalizedValue -imatch "Total Regional Cores")
+                {
+                    $allowedCount = [int](($currentStatus[$counter].Limit)*(95/100))
+                    LogMsg "  Current Regional Cores usage : $($currentStatus[$counter].CurrentValue) cores. Requested:$usage. Estimated usage=$($($currentStatus[$counter].CurrentValue) + $usage). Max Allowed cores:$allowedCount/$(($currentStatus[$counter].Limit))"
+                    #LogMsg "Current VM Core Estimated use: $($currentStatus[$counter].CurrentValue) + $usage = $($($currentStatus[$counter].CurrentValue) + $usage) VM cores."
                     $currentStatus[$counter].CurrentValue = $currentStatus[$counter].CurrentValue + $usage
                 }
                 $counter++
             }
+
             return $currentStatus
         }
 
@@ -26,15 +36,28 @@
                 if ($item.Name.LocalizedValue -imatch $text)
                 {
                     $allowedCount = [int](($currentStatus[$counter].Limit)*($AllowedUsagePercentage/100))
-                    LogMsg "$($item.Name.LocalizedValue) allowed: $allowedCount out of $(($currentStatus[$counter].Limit))."
+                    #LogMsg "Max allowed $($item.Name.LocalizedValue) usage : $allowedCount out of $(($currentStatus[$counter].Limit))."
                     if ($currentStatus[$counter].CurrentValue -le $allowedCount)
                     {
-                        #LogMsg "Current Estimated use: $($currentStatus[$counter].CurrentValue)"
                         return 0
                     }
                     else
                     {
-                        #LogErr "Current Estimated use: $($currentStatus[$counter].CurrentValue)"
+                        LogErr "  Current $text Estimated use: $($currentStatus[$counter].CurrentValue)"
+                        return 1
+                    }
+                }
+                if ($item.Name.LocalizedValue -imatch "Total Regional Cores")
+                {
+                    $allowedCount = [int](($currentStatus[$counter].Limit)*($AllowedUsagePercentage/100))
+                    #LogMsg "Max allowed $($item.Name.LocalizedValue) usage : $allowedCount out of $(($currentStatus[$counter].Limit))."
+                    if ($currentStatus[$counter].CurrentValue -le $allowedCount)
+                    {
+                        return 0
+                    }
+                    else
+                    {
+                        LogErr "  Current Regional Cores Estimated use: $($currentStatus[$counter].CurrentValue)"
                         return 1
                     }
                 }
@@ -43,12 +66,18 @@
         }
         #Get the region
         $Location = ($xmlConfig.config.Azure.General.Location).Replace('"',"").Replace(' ',"").ToLower()
+        
         $currentStatus = Get-AzureRmVMUsage -Location $Location
         $overFlowErrors = 0
         $requiredVMCores = 0
         $premiumVMs = 0
-        foreach ($VM in $RGXMLData)
+        $vmCounter = 0
+        foreach ($VM in $RGXMLData.VirtualMachine)
         {
+            $vmCounter += 1
+            
+
+            LogMsg "Estimating VM #$vmCounter usage."
 
             if ($OverrideVMSize)
             {
@@ -56,10 +85,18 @@
             }
             else
             {
-                $testVMSize = $VM.VirtualMachine.ARMInstanceSize
+                $testVMSize = $VM.ARMInstanceSize
             }
             
-            $testVMUsage = (Get-AzureRmVMSize -Location $Location | Where { $_.Name -eq $testVMSize}).NumberOfCores
+            if ($OverrideVMSize -and ($testVMUsage -gt 0))
+            {
+
+            }
+            else
+            {
+                $testVMUsage = (Get-AzureRmVMSize -Location $Location | Where { $_.Name -eq $testVMSize}).NumberOfCores
+            }
+            
 
             $testVMSize = $testVMSize.Replace("Standard_","")
 
@@ -94,7 +131,7 @@
 
             #region Standard A series postmartem
 
-            elseif ( ( $testVMSize -eq "Standard_A8") -or ( $testVMSize -eq "Standard_A9") -or ( $testVMSize -eq "Standard_A10") -or ( $testVMSize -eq "Standard_A11") )
+            elseif ( ( $testVMSize -eq "A8") -or ( $testVMSize -eq "A9") -or ( $testVMSize -eq "A10") -or ( $testVMSize -eq "A11") )
             {
                 $identifierText = "Standard A8-A11 Family Cores"
                 $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage
@@ -168,10 +205,11 @@
         
             else
             {
-                LogMsg "Your VM size in not yet registered. Usage will be ignored."
+                LogMsg "Requested VM size: $testVMSize is not yet registered to monitor. Usage simulation skipped."
             }
             #endregion
         }
+
         #Check the max core quota
 
         #Get the current usage for current region
@@ -193,6 +231,7 @@
 
 
     #region Storage Accounts
+    LogMsg "Estimating storage account usage..."
     $currentStorageStatus = Get-AzureRmStorageUsage
     if ( ($premiumVMs -gt 0 ) -and ($xmlConfig.config.Azure.General.StorageAccount -imatch "NewStorage_"))
     {
@@ -212,22 +251,23 @@
     
     if (($currentStorageStatus.CurrentValue + $requiredStorageAccounts) -le $allowedStorageCount)
     {
-        LogMsg "Current Storage Estimated use: $($currentStorageStatus.CurrentValue) + $requiredStorageAccounts = $($currentStorageStatus.CurrentValue + $requiredStorageAccounts)"
+        LogMsg "Current Storage Accounts usage:$($currentStorageStatus.CurrentValue). Requested:$requiredStorageAccounts. Estimated usage:$($currentStorageStatus.CurrentValue + $requiredStorageAccounts). Maximum allowed:$allowedStorageCount/$(($currentStorageStatus.Limit))."
     }
     else
     {
-        LogErr "Current Storage Estimated use: $($currentStatus[$counter].CurrentValue)"
+        LogErr "Current Storage Accounts usage:$($currentStorageStatus.CurrentValue). Requested:$requiredStorageAccounts. Estimated usage:$($currentStorageStatus.CurrentValue + $requiredStorageAccounts). Maximum allowed:$allowedStorageCount/$(($currentStorageStatus.Limit))."
         $overFlowErrors += 1
     }
-    LogMsg "Storage accounts allowed: $allowedStorageCount out of $(($currentStorageStatus.Limit))."
     #endregion
 
     if($overFlowErrors -eq 0)
     {
+        LogMsg "Estimated subscription usage is under allowed limits."
         return $true
     }
     else
     {
+        LogErr "Estimated subscription usage exceeded allowed limits."
         return $false
     }
 }
