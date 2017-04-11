@@ -1221,8 +1221,17 @@ Function GetAndCheckKernelLogs($allDeployedVMs, $status, $vmUser, $vmPassword)
 			{
 				if ( $UseAzureResourceManager )
 				{
-					LogMsg "Adding preserve tag to $($VM.ResourceGroup) .."
-					$out = Set-AzureRmResourceGroup -Name $($VM.ResourceGroup) -Tag @{Name =$preserveKeyword; Value = "yes"},@{Name ="callTrace"; Value = "yes"}
+					LogMsg "Preserving the Resource Group(s) $group"
+					LogMsg "Setting tags : $preserveKeyword = yes; testName = $testName"
+					$hash = @{}
+					$hash.Add($preserveKeyword,"yes")
+					$hash.Add("testName","$testName")
+					$out = Set-AzureRmResourceGroup -Name $group -Tag $hash
+					LogMsg "Setting tags : calltrace = yes; testName = $testName"
+					$hash = @{}
+					$hash.Add("calltrace","yes")
+					$hash.Add("testName","$testName")
+					$out = Set-AzureRmResourceGroup -Name $group -Tag $hash
 				}
 				else
 				{
