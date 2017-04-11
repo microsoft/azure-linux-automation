@@ -325,6 +325,11 @@ Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro, [str
             while (!$readyToDeploy)
             {
                 $readyToDeploy = ValidateSubscriptionUsage -subscriptionID $xmlConfig.config.Azure.General.SubscriptionID -RGXMLData $RG -SubscriptionUsageLimits ([xml](Get-Content .\XML\SubscriptionUsageLimits.xml))
+                if (!$readyToDeploy)
+                {
+                    LogMsg "Waiting 5 minutes..."
+                    sleep -Seconds 300
+                }
             }
         }
         $curtime = Get-Date
