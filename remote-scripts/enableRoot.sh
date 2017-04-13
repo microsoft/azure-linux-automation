@@ -18,7 +18,7 @@ if [ $? == 0 ]; then
     if [ $? == 0 ]; then
         echo "$sshd_configFilePath verifed for root login."
         echo "ROOT_PASSWRD_SET"
-        service $sshdServiceName restart || systemctl restart sshd.service
+        service $sshdServiceName restart
         sshdServiceStatus=$?
         if [ $sshdServiceStatus != 0 ]; then
                 service ssh restart

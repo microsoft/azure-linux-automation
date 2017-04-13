@@ -2,14 +2,14 @@
 	<Extensions>
 		<Extension>
 			<Name>CustomScriptTouchCommand</Name>
-			<OfficialName>CustomScript</OfficialName>
-			<Publisher>Microsoft.Azure.Extensions</Publisher>
+			<OfficialName>CustomScriptForLinux</OfficialName>
+			<Publisher>Microsoft.OSTCExtensions</Publisher>
 			<PublicConfiguration>
 				<timestamp>EXECUTE-PS-(Get-Date).ticks</timestamp>
 				<commandToExecute>touch /var/log/CustomExtensionSuccessful</commandToExecute>
 			</PublicConfiguration>
-			<Version>2.*</Version>
-			<LatestVersion>2.0</LatestVersion>
+			<Version>1.*</Version>
+			<LatestVersion>1.4</LatestVersion>
 		</Extension>
 		<Extension>
 			<Name>OsPatching</Name>
@@ -48,7 +48,7 @@
 			<PrivateConfiguration>
 				<username>VMAccessUser</username>
 				<password>VMAccessPassword</password>
-				<expiration>2026-01-01</expiration>
+				<expiration>2016-01-01</expiration>
 			</PrivateConfiguration>	
 			<Version>1.*</Version>
 			<LatestVersion>1.4</LatestVersion>

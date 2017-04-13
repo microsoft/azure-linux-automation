@@ -31,20 +31,36 @@ else
 	}
 	foreach($size in $SupportSizes)
 	{
-		if ($size -imatch 'Promo')
+		if($size -match 'DS' -or $size -match 'GS' -or ($size.Trim().EndsWith("s")) )
 		{
-		    LogMsg "Skipping $size"
+			$XioSizes += $size.Replace('Standard','').Replace('_','')
 		}
 		else
 		{
-		    if(($size -match 'DS') -or ($size -match 'GS') -or ($size.Trim().EndsWith("s")))
-		    {
-			$XioSizes += $size.Trim()
-		    }
-		    else
-		    {
-			$StandardSizes += $size.Trim()
-		    }
+			if($size -eq 'ExtraSmall')
+			{
+				$StandardSizes += 'A0'
+			}
+			elseif($size -eq 'Small')
+			{
+				$StandardSizes += 'A1'
+			}
+			elseif($size -eq 'Medium')
+			{
+				$StandardSizes += 'A2'
+			}
+			elseif($size -eq 'Large')
+			{
+				$StandardSizes += 'A3'
+			}
+			elseif($size -eq 'ExtraLarge')
+			{
+				$StandardSizes += 'A4'
+			}
+			else
+			{
+				$StandardSizes += $size.Replace('Standard','').Replace('_','')	
+			}
 		}
 	}
 	if($AccountType -match 'Premium')
@@ -58,8 +74,7 @@ else
 }
 LogMsg "test VM sizes: $VMSizes"
 $NumberOfSizes = $VMSizes.Count
-$DeploymentCount = $NumberOfSizes*5
-
+$DeploymentCount = $currentTestData.DeploymentCount
 #Test Starts Here..
     try
     {
@@ -92,8 +107,7 @@ $DeploymentCount = $NumberOfSizes*5
             $DeploymentStatistics = CreateDeploymentResultObject
             #Create A VM here and Wait for the VM to come up.
             LogMsg "ATTEMPT : $count/$DeploymentCount : Deploying $($VMSizes[$VMSizeNumber]) VM.."
-            Set-Variable -Name OverrideVMSize -Value $($VMSizes[$VMSizeNumber]) -Scope Global -Force 
-            $isDeployed = DeployVMS -setupType "SingleVM" -Distro $Distro -xmlConfig $xmlConfig -GetDeploymentStatistics $True
+            $isDeployed = DeployVMS -setupType $($VMSizes[$VMSizeNumber]) -Distro $Distro -xmlConfig $xmlConfig -GetDeploymentStatistics $True
             $DeploymentStatistics.VMSize = $($VMSizes[$VMSizeNumber])
             $DeploymentStatistics.attempt = $count
             if ( !$UseAzureResourceManager )

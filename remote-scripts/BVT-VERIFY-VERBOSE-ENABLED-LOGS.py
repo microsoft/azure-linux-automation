@@ -14,27 +14,11 @@ parser.add_argument('-p', '--passwd', help='specify password of vm', required=Tr
 args = parser.parse_args()
 
 passwd = args.passwd
-distro = platform.dist()
 
 def RunTest():
     UpdateState("TestRunning")
-    if(distro[0] == "CoreOS"):
-        versionOutPut = Run("waagent --version")
-    else:
-        output = Run("ps aux | grep waagent | grep python | grep -v 'ps aux | grep waagent | grep python'")
-        if ("python3" in output) :
-            versionOutPut = Run("/usr/bin/python3 /usr/sbin/waagent --version")
-        else :
-            versionOutPut = Run("/usr/sbin/waagent --version")
-
     RunLog.info("Checking log waagent.log...")
-    if("2.0." in versionOutPut):
-        output = Run("grep -i 'iptables -I INPUT -p udp --dport' /var/log/waagent* | wc -l | tr -d '\n'")
-        RunLog.info("agent version is 2.0")
-    else:
-        output = Run("grep -i 'VERBOSE' /var/log/waagent* | wc -l | tr -d '\n'")
-        RunLog.info("agent version > 2.0")
-
+    output = Run("grep -i 'iptables -I INPUT -p udp --dport' /var/log/waagent* | wc -l | tr -d '\n'")
     if not (output == "0") :
         RunLog.info('The log file contains the verbose logs')
         ResultLog.info('PASS')
@@ -45,6 +29,7 @@ def RunTest():
         UpdateState("TestCompleted")
 
 def Restartwaagent():
+    distro = platform.dist()
     if (distro[0] == "CoreOS") :
         Run("echo '"+passwd+"' | sudo -S sed -i s/Logs.Verbose=n/Logs.Verbose=y/g  /usr/share/oem/waagent.conf")
     else :

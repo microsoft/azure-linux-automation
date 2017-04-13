@@ -1,22 +1,22 @@
-S.No.,Region,VMSize,StorageAccount (Classic),StorageAccount (ARM)
-1,East US 2,Standard_GS4,konkacieastus2,konkacieastus2v2
-2,West US,Standard_G5,konkaciwestus1,konkaciwestusv2
-3,West Europe,Standard_DS14,konkaciwesteurope,konkaciwesteuropev2
-4,Southeast Asia,Standard_D13,konkacisoutheastasia,
-5,Australia East,Standard_D5_v2,konkaciaustraliaeast1,konkaciaustraliaeastv2
-6,Canada Central,Basic_A4,konkacicanadacentral1,konkacicanadacentral
-7,Canada East,Standard_D13_v2,konkacicanadaeast1,konkacicanadaeast
-8,Central US,Standard_D4,konkacicentralus,konkacicentralusv2
-9,West Central US,Standard_F8,konkaciwestcentralus1,konkaciwestcentralus
-10,South India,Standard_D14_v2,konkacisouthindia1,konkacisouthindia
-11,East Asia,Standard_D14,konkacieastasia,konkacieastasiav2
-12,Brazil South,Standard_D4_v2,konkacibrazilsouth1,konkacibrazilsouth
-13,Australia Southeast,A7,knkaciaustraliasouthest,konkaciaustraliasouthest
-14,South India,Standard_F16,konkacisouthindia1,
-15,East US,Standard_DS13,konkacieastus,konkacieastusv2
-16,North Central US,A9,konkacinorthcentralus1,konkacinorthcentralus
-17,South Central US,A8,konkacisouthcentralus,
-18,UK WEST,Standard_DS4_v2,konkaciukwest1,konkaciukwest
-19,North Europe,A10,konkacinortheurope,konkacineuropev2
-20,West Europe,Standard_G3,konkaciwesteurope,konkaciwesteuropev2
-21,Japan East,A11,konkacijapaneast1,konkacijapaneast
+S.No.,Region,VMSize,StorageAccount
+1,East US 2,Standard_GS4,konkacieastus2
+2,West US,Standard_G5,konkaciwestus1
+3,West Europe,Standard_DS14,konkaciwesteurope
+4,Southeast Asia,Standard_D13,konkacisoutheastasia
+5,Australia East,Standard_D5_v2,konkaciaustraliaeast1
+6,Canada Central,Basic_A4,konkacicanadacentral1
+7,Canada East,Standard_D13_v2,konkacicanadaeast1
+8,Central US,Standard_D4,konkacicentralus
+9,West Central US,Standard_F8,konkaciwestcentralus1
+10,South India,Standard_D14_v2,konkacisouthindia1
+11,East Asia,Standard_D14,konkacieastasia
+12,Brazil South,Standard_D4_v2,konkacibrazilsouth1
+13,Australia Southeast,A7,knkaciaustraliasouthest
+14,South India,Standard_F16,konkacisouthindia1
+15,East US,Standard_DS13,konkacieastus
+16,North Central US,A9,konkacinorthcentralus1
+17,South Central US,A8,konkacisouthcentralus
+18,UK WEST,Standard_DS4_v2,konkaciukwest1
+19,North Europe,A10,konkacinortheurope
+20,West Europe,Standard_G3,konkaciwesteurope
+21,Japan East,A11,konkacijapaneast1

@@ -59,7 +59,7 @@ Function VerfiyAddUserScenario ($vmData, $PublicConfigString, $PrivateConfigStri
 			$LogFilesPaths = $FoundFiles[0]
 			$LogFiles = $FoundFiles[1]
 			$retryCount = 1
-			$maxRetryCount = 3
+			$maxRetryCount = 10
 			if ($LogFilesPaths)
 			{   
 				do
@@ -72,11 +72,11 @@ Function VerfiyAddUserScenario ($vmData, $PublicConfigString, $PrivateConfigStri
 
 					if ( $extensionLog  -imatch "Succeeded in create the account" )
 					{
-						LogMsg "extension.log reported Succeeded in create the account."
+						LogMsg "extesnsion.log reported Succeeded in create the account."
 					}
 					else
 					{
-						LogErr "extension.log NOT reported Succeeded in create the account."
+						LogErr "extesnsion.log NOT reported Succeeded in create the account."
 						$errorCount += 1
 					}
 
@@ -207,11 +207,11 @@ Function VerfiyResetPasswordScenario ($vmData, $PublicConfigString, $PrivateConf
 
 					if (( $extensionLog  -imatch "Will update password" ) -and ( $extensionLog  -imatch "Succeeded in create the account or set the password" ))
 					{
-						LogMsg "extension.log reported Succeeded in reset password."
+						LogMsg "extesnsion.log reported Succeeded in reset password."
 					}
 					else
 					{
-						LogErr "extension.log NOT reported Succeeded in reset password."
+						LogErr "extesnsion.log NOT reported Succeeded in reset password."
 						$errorCount += 1
 					}
 
@@ -510,11 +510,11 @@ Function VerfiyResetSSHConfigScenario ($vmData, $PublicConfigString, $PrivateCon
 					$extensionLog = [string]( Get-Content "$LogDir\extension.log.$metaData.txt" )
 					if  ( $extensionLog -imatch "Succeeded in reset sshd_config" )
 					{
-						LogMsg "extension.log reported Succeeded in reset sshd_config."
+						LogMsg "extesnsion.log reported Succeeded in reset sshd_config."
 					}
 					else
 					{
-						LogErr "extension.log NOT reported Succeeded in reset sshd_config."
+						LogErr "extesnsion.log NOT reported Succeeded in reset sshd_config."
 						$errorCount += 1
 					}
 

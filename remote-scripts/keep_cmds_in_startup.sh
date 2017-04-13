@@ -17,7 +17,6 @@ then
 		then
 			cp /etc/rc.d/rc.local /etc/rc.d/rc.local.bkp
 			echo $testcommand >> /etc/rc.d/rc.local
-			chmod +x /etc/rc.d/rc.local
 		fi
 	fi
 fi
@@ -31,7 +30,6 @@ then
 		then
 			cp /etc/rc.local /etc/rc.local.bkp
 			echo $testcommand >> /etc/rc.local
-			chmod +x /etc/rc.local
 		fi
 	fi
 fi
@@ -42,7 +40,6 @@ then
 	then
 		cp /etc/rc.d/after.local /etc/rc.d/after.local.bkp
 		echo $testcommand >> /etc/rc.d/after.local
-		chmod +x /etc/rc.d/after.local
 	fi
 fi 
 # ===

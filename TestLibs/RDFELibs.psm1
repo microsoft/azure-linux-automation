@@ -841,6 +841,7 @@ Function CreateAllDeployments($setupType, $xmlConfig, $Distro, [string]$region =
       $AffinityGroup = ""
       $currentStorageAccount = $storageAccount
     }
+	$Prefix = Get-Content -Path .\Prefix.txt -Force
 	foreach ($HS in $setupTypeData.HostedService )
 	{
         foreach ($img in $osImage)
@@ -851,11 +852,13 @@ Function CreateAllDeployments($setupType, $xmlConfig, $Distro, [string]$region =
 		    $retryDeployment = 0
 		    if ( $HS.Tag -ne $null )
 		    {
-			    $serviceName = "ICA-HS-" + $HS.Tag + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $randomNumber
+				#Don't change
+			    $serviceName = "$Prefix-HS-" + $HS.Tag + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second + "-" + $randomNumber
 		    }
 		    else
 		    {
-			    $serviceName = "ICA-HS-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $randomNumber
+				#Don't change
+			    $serviceName = "$Prefix-HS-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second + "-" + $randomNumber
 		    }
 		    if($isMultiple -eq "True")
 		    {
@@ -1306,7 +1309,10 @@ Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFa
 						$xmlConfig.config.Azure.Deployment.$setupType.isDeployed = $retValue
 					#Collecting Initial Kernel
 						$user=$xmlConfig.config.Azure.Deployment.Data.UserName
-						$KernelLogOutput= GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Initial"
+                        if ( $GuestOS -imatch "Linux" )
+                        {
+						    $KernelLogOutput= GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Initial"
+                        }
 					}
 					else
 					{
@@ -1359,7 +1365,10 @@ Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFa
 	else
 	{
 		$retValue = $xmlConfig.config.Azure.Deployment.$setupType.isDeployed
-		$KernelLogOutput= GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Initial"
+        if ( $GuestOS -imatch "Linux" )
+        {
+		    $KernelLogOutput= GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Initial"
+        }
 	}
 	Set-Variable -Name setupType -Value $setupType -Scope Global
 	if ( $GetDeploymentStatistics )
@@ -1397,16 +1406,6 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, 
         LogMsg "Custom kernel: $customKernel will be installed on all machines..."
         $kernelUpgradeStatus = InstallCustomKernel -customKernel $customKernel -allVMData $allVMData -RestartAfterUpgrade
         if ( !$kernelUpgradeStatus )
-        {
-            LogErr "Custom Kernel: $customKernel installation FAIL. Aborting tests."
-            $retValue = ""
-        }
-    }
-    if ( $retValue -and $customLIS)
-    {
-        LogMsg "Custom LIS: $customLIS will be installed on all machines..."
-        $LISUpgradeStatus = InstallCustomLIS -customLIS $customLIS -allVMData $allVMData -customLISBranch $customLISBranch -RestartAfterUpgrade
-        if ( !$LISUpgradeStatus )
         {
             LogErr "Custom Kernel: $customKernel installation FAIL. Aborting tests."
             $retValue = ""
@@ -1948,7 +1947,7 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 				if ( $CompressCount -eq $fileCounter )
 				{
 					$retry=1
-					$maxRetry=3
+					$maxRetry=10
 					while($retry -le $maxRetry)
 					{
 						if($usePrivateKey)
@@ -2558,14 +2557,16 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 				#Removal of background 
 				LogMsg "Removing Background Job ID : $taskID..."
 				Remove-Job -Id $taskID -Force
-				Remove-Item $LogDir\CurrentTestBackgroundJobs.txt -ErrorAction SilentlyContinue
 			}
 			$user=$xmlConfig.config.Azure.Deployment.Data.UserName
 			if ( !$SkipVerifyKernelLogs )
 			{
 				try
 				{
-					$KernelLogOutput=GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Final" #Collecting kernel logs after execution of test case : v-sirebb
+                    if ( $GuestOS -imatch "Linux")
+                    {
+					    $KernelLogOutput=GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Final" #Collecting kernel logs after execution of test case : v-sirebb
+                    }
 				}
 				catch 
 				{
@@ -4566,14 +4567,6 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 					{
 						Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($securityRule.name)Port" -Value $securityRule.properties.destinationPortRange -Force
 					}
-					if($AllEndpoints.Length -eq 0)
-					{
-						$sg = Get-AzureRmNetworkSecurityGroup -ResourceGroupName $testVM.ResourceGroupName
-						foreach($rule in $sg.SecurityRules)
-						{
-							Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($rule.Name)Port" -Value $rule.DestinationPortRange -Force
-						}
-					}
 				}
 				foreach ( $nic in $NICdata )
 				{
@@ -4664,10 +4657,8 @@ Function ConfigureDnsServer($intermediateVM, $DnsServer, $HostnameDIPDetails, $v
 {
 #Get VNETVM details using - Get-AllVMHostnameAndDIP() function. This will generate the string of all VMs IP and hostname.
 	$HostnameDIP = $HostnameDIPDetails
-	$DnsConfigureCommand = "echo $($dnsServer.password) | sudo -S python /home/$user/ConfigureDnsServer.py -v `"$HostnameDIP`" -D $vnetDomainDBFilePath -r $vnetDomainREVFilePath" 
+	$DnsConfigureCommand = "python /home/$user/ConfigureDnsServer.py -v `"$HostnameDIP`" -D $vnetDomainDBFilePath -r $vnetDomainREVFilePath" 
 	$out = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $DnsServer -remoteCommand $DnsConfigureCommand
-	#Add time interval for changes to take effect
-	sleep 60
 	if($out -imatch 'CONFIGURATION_SUCCESSFUL')
 	{
 		LogMsg  "DNS server configured successfully."
@@ -5515,13 +5506,13 @@ Function DoSSHTestFromLocalVM($intermediateVM, $LocalVM, $toVM,[switch]$hostname
 	if($hostnameMode)
 	{
 		LogMsg "Executing - date - command on $($toVM.Hostname) .."
-		$sshOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "$python_cmd /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'echo $($LocalVM.password) | sudo -S python /home/$user/RunSSHCmd.py -s `"$($toVM.hostname)`" -u $user -p $($toVM.password)  -P 22 -c `"date`" -o yes`'"
+		$sshOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "$python_cmd /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RunSSHCmd.py -s `"$($toVM.hostname)`" -u $user -p $($toVM.password)  -P 22 -c `"date`" -o yes`'"
 
 	}
 	else
 	{
 		LogMsg "Executing - date - command on $($toVM.DIP) .."
-		$sshOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "$python_cmd /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'echo $($LocalVM.password) | sudo -S python /home/$user/RunSSHCmd.py -s `"$($toVM.dip)`" -u $user -p $($toVM.password)  -P 22 -c `"date`" -o yes`'"
+		$sshOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "$python_cmd /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RunSSHCmd.py -s `"$($toVM.dip)`" -u $user -p $($toVM.password)  -P 22 -c `"date`" -o yes`'"
 	}
 	LogMsg "Verifying output.."
 	$logfilepath = $toVM.logDir + "\sshOutput.log"
@@ -5549,12 +5540,12 @@ Function DoSCPTestFromLocalVM( $intermediateVM, $LocalVM, $toVM, [switch]$hostna
 	if($hostnameMode)
 	{
 		LogMsg "File Created. Now copying it to $($toVM.Hostname) ..."
-		$scpOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "$python_cmd /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'echo $($LocalVM.password) | sudo -S python /home/$user/RemoteCopy.py -c `"$($toVM.Hostname)`" -m upload -u `"$($toVM.user)`" -p $($toVM.password) -P 22 -r `"/home/$user`" -f `"/home/$user/testfile`"`'"
+		$scpOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "$python_cmd /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RemoteCopy.py -c `"$($toVM.Hostname)`" -m upload -u `"$($toVM.user)`" -p $($toVM.password) -P 22 -r `"/home/$user`" -f `"/home/$user/testfile`"`'"
 	}
 	else
 	{
 		LogMsg "File Created. Now copying it to $($toVM.DIP) ..."
-		$scpOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "$python_cmd /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'echo $($LocalVM.password) | sudo -S python /home/$user/RemoteCopy.py -c `"$($toVM.DIP)`" -m upload -u `"$($toVM.user)`" -p $($toVM.password) -P 22 -r `"/home/$user`" -f `"/home/$user/testfile`"`'"
+		$scpOutput = RunLinuxCmd -username $intermediateVM.user -password $intermediateVM.password -ip $intermediateVM.ip -port $intermediateVM.sshport -runAsSudo -command "$python_cmd /home/$user/RunSSHCmd.py -s `'$($LocalVM.ip)`' -u $($LocalVM.user) -p`'$($LocalVM.password)`' -P $($LocalVM.sshPort) -c `'python /home/$user/RemoteCopy.py -c `"$($toVM.DIP)`" -m upload -u `"$($toVM.user)`" -p $($toVM.password) -P 22 -r `"/home/$user`" -f `"/home/$user/testfile`"`'"
 	}
 	LogMsg "Writing output to $logfilepath ..."
 	Set-Content -Path $logFilepath -Value $scpOutput
@@ -5576,7 +5567,7 @@ Function StartIperfServerOnRemoteVM($remoteVM, $intermediateVM, $expectedServerI
 	$NewremoteVMcmd = $remoteVM.cmd
 	Write-Host $NewremoteVMcmd 
 	LogMsg "Deleting any previous server logs ..."
-	$DeletePreviousLogs = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "rm -rf /home/$($remoteVM.User)/*.txt /home/$($remoteVM.User)/*.log" -runAsSudo
+	$DeletePreviousLogs = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "rm -rf /root/*.txt /root/*.log" -runAsSudo
 	$CommandOutput = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand $NewremoteVMcmd -runAsSudo -RunInBackGround
 	LogMsg "Checking if server started successfully or not ..."
 	$isServerStarted = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "ps -ef | grep iperf -s | grep -v grep | wc -l" -runAsSudo
@@ -5614,15 +5605,15 @@ Function StartIperfClientOnRemoteVM($remoteVM, $intermediateVM)
 	$NewremoteVMcmd = $remoteVM.cmd
 	Write-Host $NewremoteVMcmd 
 	LogMsg "Deleting any previous client logs ..."
-	$DeletePreviousLogs = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "rm -rf /home/$($remoteVM.User)/*.txt /home/$($remoteVM.User)/*.log" -runAsSudo
+	$DeletePreviousLogs = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "rm -rf /root/*.txt /root/*.log" -runAsSudo
 	$CommandOutput = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand $NewremoteVMcmd -runAsSudo
 	LogMsg "Checking if client connected successfully or not ..."
 
-	$DeletePreviousLogs = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cp /home/$($remoteVM.User)/Runtime.log /home/$($remoteVM.User)/start-client.py.log" -runAsSudo
+	$DeletePreviousLogs = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cp /root/Runtime.log /root/start-client.py.log" -runAsSudo
 
-	Set-Content -Value (RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cat /home/$($remoteVM.User)/start-client.py.log" -runAsSudo -RunMaxAllowedTime 60) -Path ("$($remoteVM.logDir)" + "\start-client.py.log")
-	Set-Content -Value (RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cat /home/$($remoteVM.User)/state.txt" -runAsSudo -RunMaxAllowedTime 60 ) -Path ("$($remoteVM.logDir)" + "\state.txt")
-	Set-Content -Value (RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cat /home/$($remoteVM.User)/Summary.log" -runAsSudo -RunMaxAllowedTime 60 ) -Path ("$($remoteVM.logDir)" + "\Summary.log")
+	Set-Content -Value (RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cat /root/start-client.py.log" -runAsSudo -RunMaxAllowedTime 60) -Path ("$($remoteVM.logDir)" + "\start-client.py.log")
+	Set-Content -Value (RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cat /root/state.txt" -runAsSudo -RunMaxAllowedTime 60 ) -Path ("$($remoteVM.logDir)" + "\state.txt")
+	Set-Content -Value (RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $remoteVM -remoteCommand "cat /root/Summary.log" -runAsSudo -RunMaxAllowedTime 60 ) -Path ("$($remoteVM.logDir)" + "\Summary.log")
 
 
 	$clientState = Get-Content "$($remoteVM.Logdir)\state.txt"
@@ -5696,7 +5687,7 @@ Function IperfVnetToLocalUdpTest ($vnetAsClient, $localAsServer)
 		if ($isClientConnected -eq $true)
 		{
 			LogMsg "Checking if server received connections from client of not ..."
-			$temp = RunLinuxCmdOnRemoteVM -intermediateVM $vnetAsClient -remoteVM $localAsServer -runAsSudo -remoteCommand "cp /home/$($localAsServer.user)/iperf-server.txt /home/$user/"
+			$temp = RunLinuxCmdOnRemoteVM -intermediateVM $vnetAsClient -remoteVM $localAsServer -runAsSudo -remoteCommand "cp /root/iperf-server.txt /home/$user/"
 			$checkServer = RunLinuxCmdOnRemoteVM -intermediateVM $vnetAsClient -remoteVM $localAsServer -runAsSudo -remoteCommand "/home/$user/check-server.py"
 			$checkServerSummary = RunLinuxCmdOnRemoteVM -intermediateVM $vnetAsClient -remoteVM $localAsServer -runAsSudo -remoteCommand "cat ~/Summary.log"		
 			if($checkServerSummary -imatch "PASS")
@@ -6763,7 +6754,6 @@ Function GetVNETDetailsFromXMLDeploymentData([string]$deploymentType)
 		$subnet2Range = $allVnetData.ARMSubnet2Range
 		$vnetDomainDBFilePath = $allVnetData.ARMVnetDomainDBFilePath
 		$vnetDomainRevFilePath = $allVnetData.ARMVnetDomainRevFilePath
-		$dnsServerIP = $allVnetData.ARMDnsServerIP
 	}
 	else
 	{
@@ -6772,8 +6762,8 @@ Function GetVNETDetailsFromXMLDeploymentData([string]$deploymentType)
 		$subnet2Range = $allVnetData.Subnet2Range
 		$vnetDomainDBFilePath = $allVnetData.VnetDomainDBFilePath
 		$vnetDomainRevFilePath = $allVnetData.VnetDomainRevFilePath
-		$dnsServerIP = $allVnetData.DnsServerIP
 	}
+	$dnsServerIP = $allVnetData.DnsServerIP
 	return $vnetName,$subnet1Range,$subnet2Range,$vnetDomainDBFilePath,$vnetDomainRevFilePath,$dnsServerIP
 }
 #endregion  

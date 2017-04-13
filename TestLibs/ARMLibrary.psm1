@@ -31,6 +31,7 @@
     {
       $location = $region;
     }
+    $Prefix = Get-Content -Path .\Prefix.txt -Force
 
     if ( $location -imatch "-" )
     {
@@ -44,7 +45,7 @@
     foreach ($RG in $setupTypeData.HostedService )
     {
         $curtime = Get-Date
-        $randomNumber = Get-Random -Maximum 9999 -Minimum 1111
+        $randomNumber = Get-Random -Maximum 999 -Minimum 111 -SetSeed (Get-Random -Maximum 999 -Minimum 111 )
         $isServiceDeployed = "False"
         $retryDeployment = 0
         if ( $RG.Tag -ne $null )
@@ -60,11 +61,30 @@
             $groupName = $groupName + "-" + $resourceGroupCount
         }
 
+		$groupName = $ExistingRG
         while (($isServiceDeployed -eq "False") -and ($retryDeployment -lt 1))
         {
-            LogMsg "Creating Resource Group : $groupName."
-            LogMsg "Verifying that Resource group name is not in use."
-            $isRGDeleted = DeleteResourceGroup -RGName $groupName 
+			if ($ExistingRG)
+			{
+				LogMsg "Using existing Resource Group : $ExistingRG"
+				if ($CleanupExistingRG)
+				{
+					LogMsg "CleanupExistingRG flag is Set. All resources except availibility set will be cleaned."
+					LogMsg "If you do not wish to cleanup $ExistingRG, abort NOW. Sleeping 30 Seconds."
+					Sleep 30
+					$isRGDeleted = DeleteResourceGroup -RGName $groupName 
+				}
+				else
+				{
+					$isRGDeleted  = $true
+				}
+			}
+			else
+			{
+	            LogMsg "Creating Resource Group : $groupName."
+	            LogMsg "Verifying that Resource group name is not in use."
+	            $isRGDeleted = DeleteResourceGroup -RGName $groupName 
+			}
             if ($isRGDeleted)
             {    
                 if ( $xRegionTest )
@@ -72,8 +92,17 @@
                     $location = $xRegionLocations[$locationCounter]
                     $locationCounter += 1
                 }
-
-                $isServiceCreated = CreateResourceGroup -RGName $groupName -location $location
+				if ($ExistingRG)
+				{
+					$isServiceCreated = "True"
+					LogMsg "Detecting $ExistingRG region..."
+					$location=(Get-AzureRmResourceGroup -Name $ExistingRG).Location
+					LogMsg "Region: $location..."
+				}
+				else
+				{				
+                	$isServiceCreated = CreateResourceGroup -RGName $groupName -location $location
+				}
                 if ($isServiceCreated -eq "True")
                 {
                     $azureDeployJSONFilePath = "$LogDir\$groupName.json"
@@ -136,17 +165,45 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
     }
     if ($ResourceGroup)
     {
-        Remove-AzureRmResourceGroup -Name $RGName -Force -Verbose
-        $retValue = $?
-        $ARMStorageAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
-        if ( $NewARMStorageAccountType )
-        {
-            LogMsg "No need to remove residual VHDs, as storage account in $RGName is deleted."
-        }
-        else
-        {
-            RemoveResidualResourceGroupVHDs -ResourceGroup $RGName -storageAccount $ARMStorageAccount
-        }
+		if ($ExistingRG)
+		{
+			$CurrentResources = @()
+	        $CurrentResources += Get-AzureRmResource | Where {$_.ResourceGroupName -eq  $ResourceGroup.ResourceGroupName}
+	        while ( $CurrentResources.Count -ne 1 )
+	        {
+	            foreach ($resource in $CurrentResources) 
+	            {
+	                Write-Host $resource.ResourceType
+	                if ( $resource.ResourceType -imatch "availabilitySets" )
+	                {
+	                    LogMsg "Skipping $($resource.ResourceName)"
+	                }
+	                else
+	                {
+	                    LogMsg "Removing $($resource.ResourceName)"
+	                    $out = Remove-AzureRmResource -ResourceId $resource.ResourceId -Force -Verbose
+	                }
+	            }
+	            $CurrentResources = @()
+	            $CurrentResources += Get-AzureRmResource | Where {$_.ResourceGroupName -eq  $ResourceGroup.ResourceGroupName}
+	        }
+	        LogMsg "$($ResourceGroup.ResourceGroupName) is cleaned."
+			$retValue = $?
+		}
+		else
+		{
+	        Remove-AzureRmResourceGroup -Name $RGName -Force -Verbose
+	        $retValue = $?
+	        $ARMStorageAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
+	        if ( $NewARMStorageAccountType )
+	        {
+	            LogMsg "No need to remove residual VHDs, as storage account in $RGName is deleted."
+	        }
+	        else
+	        {
+	            RemoveResidualResourceGroupVHDs -ResourceGroup $RGName -storageAccount $ARMStorageAccount
+	        }
+		}
     }
     else
     {
@@ -269,13 +326,11 @@ if($storageAccount)
 if ( $NewARMStorageAccountType )
 {
     LogMsg "New storage account of type : $NewARMStorageAccountType will be created in $RGName."
-    $StorageAccountRG = $RGName
 }
 else
 {
     LogMsg "Getting Existing Storage Account : $StorageAccountName details ..."
     $StorageAccountType = (Get-AzureRmStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).Sku.Tier.ToString()
-    $StorageAccountRG = (Get-AzureRmStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).ResourceGroupName.ToString()
     if($StorageAccountType -match 'Premium')
     {
         $StorageAccountType = "Premium_LRS"
@@ -296,10 +351,10 @@ $indents = @()
 $indent = ""
 $singleIndent = ""
 $indents += $indent
-$RGRandomNumber = $((Get-Random -Maximum 999999 -Minimum 100000))
+$RGRandomNumber = $GlobalRandom
 $RGrandomWord = ([System.IO.Path]::GetRandomFileName() -replace '[^a-z]')
-$dnsNameForPublicIP = $($RGName.ToLower() -replace '[^a-z0-9]')
-$dnsNameForPublicIPv6 = $($RGName.ToLower() -replace '[^a-z0-9]') + "v6"
+$dnsNameForPublicIP = $($RGName.ToLower() -replace '[^a-z0-9]') + "$GlobalRandom"
+$dnsNameForPublicIPv6 = $($RGName.ToLower() -replace '[^a-z0-9]')  + "$GlobalRandom" + "v6"
 #$virtualNetworkName = $($RGName.ToUpper() -replace '[^a-z]') + "VNET"
 $virtualNetworkName = "VirtualNetwork"
 $defaultSubnetName = "Subnet1"
@@ -309,11 +364,12 @@ $availibilitySetName = "AvailibilitySet"
 $LoadBalancerName =  "LoadBalancer"
 $apiVersion = "2016-03-30"
 #$PublicIPName = $($RGName.ToUpper() -replace '[^a-z]') + "PublicIPv4"
-$PublicIPName = "PublicIPv4"
+$PublicIPName = "PublicIPv4" + "$GlobalRandom"
 #$PublicIPv6Name = $($RGName.ToUpper() -replace '[^a-z]') + "PublicIPv6"
 $PublicIPv6Name = "PublicIPv6"
 $sshPath = '/home/' + $user + '/.ssh/authorized_keys'
 $sshKeyData = ""
+$customAVSetName = (Get-AzureRmResource | Where { (( $_.ResourceGroupName -eq  $RGName ) -and  ( $_.ResourceType -imatch  "availabilitySets" ))}).ResourceName
 if ( $CurrentTestData.ProvisionTimeExtensions )
 {
 	$extensionString = (Get-Content .\XML\Extensions.xml)
@@ -350,13 +406,11 @@ if ( $NewARMStorageAccountType )
     $StorageAccountName = $($NewARMStorageAccountType.ToLower().Replace("_","")) + "$RGRandomNumber"
     #$StorageAccountName = "$LocationLower" + "$RGRandomNumber"
     LogMsg "Using New ARM Storage Account : $StorageAccountName"
-    $StorageAccountType= $NewARMStorageAccountType
 }
 else
 {
     LogMsg "Using ARM Storage Account : $StorageAccountName"
 }
-$bootDiagnosticsSA = "icadiagnostic$RGRandomNumber"
 LogMsg "Using API VERSION : $apiVersion"
 $ExistingVnet = $null
 if ($RGXMLData.ARMVnetName -ne $null)
@@ -542,7 +596,14 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
         Add-Content -Value "$($indents[2])^defaultSubnetID^: ^[concat(variables('vnetID'),'/subnets/', variables('defaultSubnet'))]^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^vnetID^: ^[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]^," -Path $jsonFile
     }
+		if ($ExistingRG)
+		{
+		Add-Content -Value "$($indents[2])^availabilitySetName^: ^$customAVSetName^," -Path $jsonFile
+		}
+		else
+		{
         Add-Content -Value "$($indents[2])^availabilitySetName^: ^$availibilitySetName^," -Path $jsonFile
+		}
         Add-Content -Value "$($indents[2])^lbName^: ^$LoadBalancerName^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^lbID^: ^[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^frontEndIPv4ConfigID^: ^[concat(variables('lbID'),'/frontendIPConfigurations/LoadBalancerFrontEndIPv4')]^," -Path $jsonFile
@@ -558,7 +619,6 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
     LogMsg "Added Variables.."
 
     #endregion
-
     #region Define Resources
     Add-Content -Value "$($indents[1])^resources^:" -Path $jsonFile
     Add-Content -Value "$($indents[1])[" -Path $jsonFile
@@ -571,7 +631,8 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
             Add-Content -Value "$($indents[3])^type^: ^Microsoft.Network/publicIPAddresses^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^name^: ^[variables('publicIPv4AddressName')]^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
-            Add-Content -Value "$($indents[3])^properties^:" -Path $jsonFile
+            Add-Content -Value "$($indents[3])^tags^: {^GlobalRandom^: ^$GlobalRandom^}," -Path $jsonFile
+			Add-Content -Value "$($indents[3])^properties^:" -Path $jsonFile
             Add-Content -Value "$($indents[3]){" -Path $jsonFile
                 Add-Content -Value "$($indents[4])^publicIPAllocationMethod^: ^[variables('publicIPAddressType')]^," -Path $jsonFile
                 Add-Content -Value "$($indents[4])^dnsSettings^: " -Path $jsonFile
@@ -599,22 +660,6 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
         Add-Content -Value "$($indents[2])}," -Path $jsonFile
         LogMsg "Added New Storage Account $StorageAccountName.."
     }
-    #endregion
-
-    #region New ARM Bood Diagnostic Account
-    
-        Add-Content -Value "$($indents[2]){" -Path $jsonFile
-            Add-Content -Value "$($indents[3])^apiVersion^: ^2015-06-15^," -Path $jsonFile
-            Add-Content -Value "$($indents[3])^type^: ^Microsoft.Storage/storageAccounts^," -Path $jsonFile
-            Add-Content -Value "$($indents[3])^name^: ^$bootDiagnosticsSA^," -Path $jsonFile
-            Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
-            Add-Content -Value "$($indents[3])^properties^:" -Path $jsonFile
-            Add-Content -Value "$($indents[3]){" -Path $jsonFile
-                Add-Content -Value "$($indents[4])^accountType^: ^Standard_LRS^" -Path $jsonFile
-            Add-Content -Value "$($indents[3])}" -Path $jsonFile
-        Add-Content -Value "$($indents[2])}," -Path $jsonFile
-        LogMsg "Added boot diagnostic Storage Account $bootDiagnosticsSA.."
-
     #endregion
 
         #region virtualNetworks
@@ -669,7 +714,8 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
             Add-Content -Value "$($indents[3])^type^: ^Microsoft.Network/publicIPAddresses^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^name^: ^[variables('publicIPv6AddressName')]^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
-            Add-Content -Value "$($indents[3])^properties^:" -Path $jsonFile
+            Add-Content -Value "$($indents[3])^tags^: {^GlobalRandom^: ^$GlobalRandom^}," -Path $jsonFile
+			Add-Content -Value "$($indents[3])^properties^:" -Path $jsonFile
             Add-Content -Value "$($indents[3]){" -Path $jsonFile
                 Add-Content -Value "$($indents[4])^publicIPAllocationMethod^: ^[variables('publicIPAddressType')]^," -Path $jsonFile
                 Add-Content -Value "$($indents[4])^publicIPAddressVersion^: ^IPv6^," -Path $jsonFile
@@ -688,16 +734,24 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
     if ( ($numberOfVMs -gt 1) -or ($EnableIPv6) -or ($ForceLoadBalancerForSingleVM) )
     {     
         #region availabilitySets
+		if ($ExistingRG)
+		{
+			LogMsg "Using existing Availibility Set: $customAVSetName"
+		}
+		else
+		{
         Add-Content -Value "$($indents[2]){" -Path $jsonFile
             Add-Content -Value "$($indents[3])^apiVersion^: ^$apiVersion^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^type^: ^Microsoft.Compute/availabilitySets^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^name^: ^[variables('availabilitySetName')]^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
-            Add-Content -Value "$($indents[3])^properties^:" -Path $jsonFile
+			Add-Content -Value "$($indents[3])^tags^: {^GlobalRandom^: ^$GlobalRandom^}," -Path $jsonFile            
+			Add-Content -Value "$($indents[3])^properties^:" -Path $jsonFile
             Add-Content -Value "$($indents[3]){" -Path $jsonFile
             Add-Content -Value "$($indents[3])}" -Path $jsonFile
         Add-Content -Value "$($indents[2])}," -Path $jsonFile
         LogMsg "Added availabilitySet $availibilitySetName.."
+		}
         #endregion
        
         #region LoadBalancer
@@ -707,7 +761,8 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
             Add-Content -Value "$($indents[3])^type^: ^Microsoft.Network/loadBalancers^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^name^: ^[variables('lbName')]^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
-            Add-Content -Value "$($indents[3])^dependsOn^: " -Path $jsonFile
+            Add-Content -Value "$($indents[3])^tags^: {^GlobalRandom^: ^$GlobalRandom^}," -Path $jsonFile
+			Add-Content -Value "$($indents[3])^dependsOn^: " -Path $jsonFile
             Add-Content -Value "$($indents[3])[" -Path $jsonFile
             if ( $EnableIPv6 )
             {
@@ -989,7 +1044,8 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
     }
     else
     {
-		$instanceSize = $newVM.ARMInstanceSize
+		#Don't change this one...
+		$instanceSize = $newVM.InstanceSize
     }
     
     $ExistingSubnet = $newVM.ARMSubnetName
@@ -1087,8 +1143,6 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                     Add-Content -Value "$($indents[5])}" -Path $jsonFile
                 #endregion
 
-
-
                 #region IPv6 Config...
                 if ( $EnableIPv6 )
                 {
@@ -1122,9 +1176,17 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
             Add-Content -Value "$($indents[3])^type^: ^Microsoft.Compute/virtualMachines^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^name^: ^$vmName^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
+			Add-Content -Value "$($indents[3])^tags^: {^GlobalRandom^: ^$GlobalRandom^}," -Path $jsonFile
             Add-Content -Value "$($indents[3])^dependsOn^: " -Path $jsonFile
             Add-Content -Value "$($indents[3])[" -Path $jsonFile
+			if ($ExistingRG)
+			{
+				#Add-Content -Value "$($indents[4])^[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]^," -Path $jsonFile
+			}
+			else
+			{
                 Add-Content -Value "$($indents[4])^[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]^," -Path $jsonFile
+			}
             if ( $NewARMStorageAccountType) 
             {
                 Add-Content -Value "$($indents[4])^[concat('Microsoft.Storage/storageAccounts/', variables('StorageAccountName'))]^," -Path $jsonFile
@@ -1138,7 +1200,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                 #region availabilitySet
                 Add-Content -Value "$($indents[4])^availabilitySet^: " -Path $jsonFile
                 Add-Content -Value "$($indents[4]){" -Path $jsonFile
-                    Add-Content -Value "$($indents[5])^id^: ^[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]^" -Path $jsonFile
+                    Add-Content -Value "$($indents[5])^id^: ^[resourceId('Microsoft.Compute/availabilitySets','$customAVSetName')]^" -Path $jsonFile
                 Add-Content -Value "$($indents[4])}," -Path $jsonFile
                 #endregion
 
@@ -1192,18 +1254,6 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                 Add-Content -Value "$($indents[4])}" -Path $jsonFile
                 #endregion
 
-                #region Enable boot dignostics.
-				Add-Content -Value "$($indents[4])," -Path $jsonFile
-                Add-Content -Value "$($indents[4])^diagnosticsProfile^: " -Path $jsonFile
-                Add-Content -Value "$($indents[4]){" -Path $jsonFile
-                    Add-Content -Value "$($indents[5])^bootDiagnostics^: " -Path $jsonFile
-                    Add-Content -Value "$($indents[5]){" -Path $jsonFile
-                        Add-Content -Value "$($indents[6])^enabled^: true," -Path $jsonFile
-                        Add-Content -Value "$($indents[6])^storageUri^: ^[reference(resourceId('$RGName', 'Microsoft.Storage/storageAccounts', '$bootDiagnosticsSA'), '2015-06-15').primaryEndpoints['blob']]^" -Path $jsonFile
-                    Add-Content -Value "$($indents[5])}" -Path $jsonFile
-                Add-Content -Value "$($indents[4])}" -Path $jsonFile
-                #endregion
-			
             Add-Content -Value "$($indents[3])}" -Path $jsonFile
             LogMsg "Attached Network Interface Card `"$NIC`" to Virtual Machine `"$vmName`"."
             #endregion
@@ -1240,7 +1290,7 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
     }
     else
     {
-		$instanceSize = $newVM.ARMInstanceSize
+		$instanceSize = $newVM.InstanceSize
     }
     $SubnetName = $newVM.ARMSubnetName
     $DnsServerIP = $RGXMLData.DnsServerIP
@@ -1254,6 +1304,7 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
             Add-Content -Value "$($indents[3])^type^: ^Microsoft.Network/networkInterfaces^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^name^: ^$NIC^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
+			Add-Content -Value "$($indents[3])^tags^: {^GlobalRandom^: ^$GlobalRandom^}," -Path $jsonFile
             Add-Content -Value "$($indents[3])^dependsOn^: " -Path $jsonFile
             Add-Content -Value "$($indents[3])[" -Path $jsonFile
                 Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPv4AddressName'))]^," -Path $jsonFile
@@ -1487,31 +1538,21 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
                         $EndPointAdded = $true
                     }
                     #endregion 
-                    
+
                     Add-Content -Value "$($indents[5])]" -Path $jsonFile
-                    #>
-
+					#>
                 Add-Content -Value "$($indents[4])}" -Path $jsonFile
-                #endregion
-                LogMsg "Added Network Profile."
-
-                
-                #region Enable boot dignostics.
-				Add-Content -Value "$($indents[4])," -Path $jsonFile
-                Add-Content -Value "$($indents[4])^diagnosticsProfile^: " -Path $jsonFile
+				if ($ExistingRG)
+				{
+				Add-Content -Value "," -Path $jsonFile
+                Add-Content -Value "$($indents[4])^availabilitySet^: " -Path $jsonFile
                 Add-Content -Value "$($indents[4]){" -Path $jsonFile
-                    Add-Content -Value "$($indents[5])^bootDiagnostics^: " -Path $jsonFile
-                    Add-Content -Value "$($indents[5]){" -Path $jsonFile
-                        Add-Content -Value "$($indents[6])^enabled^: true," -Path $jsonFile
-                        Add-Content -Value "$($indents[6])^storageUri^: ^[reference(resourceId('$RGName', 'Microsoft.Storage/storageAccounts', '$bootDiagnosticsSA'), '2015-06-15').primaryEndpoints['blob']]^" -Path $jsonFile
-                    Add-Content -Value "$($indents[5])}" -Path $jsonFile
+                    Add-Content -Value "$($indents[5])^id^:^[resourceId('Microsoft.Compute/availabilitySets', '$customAVSetName')]^" -Path $jsonFile
                 Add-Content -Value "$($indents[4])}" -Path $jsonFile
-				LogMsg "Added Diagnostics Profile."
-			    #endregion
-                
-
+				}
+                #endregion
             Add-Content -Value "$($indents[3])}" -Path $jsonFile
-            
+            LogMsg "Added Network Profile."
             #endregion
         LogMsg "Added Virtual Machine $vmName"
         Add-Content -Value "$($indents[2])}" -Path $jsonFile
@@ -1666,7 +1707,10 @@ Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed
                         #$vnetIsAllConfigured = $false
                         $xmlConfig.config.Azure.Deployment.$setupType.isDeployed = $retValue
                         #Collecting Initial Kernel
-                        $KernelLogOutput= GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Initial"
+                        if ( $GuestOS -imatch "Linux")
+                        {
+                            $KernelLogOutput= GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Initial"
+                        }
                     }
                     else
                     {
@@ -1733,8 +1777,16 @@ Function isAllSSHPortsEnabledRG($AllVMDataObject)
         $WaitingForConnect = 0
         foreach ( $vm in $AllVMDataObject)
         {
-            Write-Host "Connecting to  $($vm.PublicIP) : $($vm.SSHPort)" -NoNewline
-            $out = Test-TCP  -testIP $($vm.PublicIP) -testport $($vm.SSHPort)
+            if ( $GuestOS -imatch "Linux" )
+            {
+                Write-Host "Connecting to  $($vm.PublicIP) : $($vm.SSHPort)" -NoNewline
+                $out = Test-TCP  -testIP $($vm.PublicIP) -testport $($vm.SSHPort)
+            }
+            else
+            {
+                Write-Host "Connecting to  $($vm.PublicIP) : $($vm.RDPPort)" -NoNewline
+                $out = Test-TCP  -testIP $($vm.PublicIP) -testport $($vm.RDPPort)
+            }
             if ($out -ne "True")
             { 
                 Write-Host " : Failed"
@@ -1804,7 +1856,8 @@ Function CreateAllRGDeploymentsWithTempParameters($templateName, $location, $Tem
     $curtime = Get-Date
     $isServiceDeployed = "False"
     $retryDeployment = 0
-    $groupName = "ICA-RG-" + $templateName + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
+    $Prefix = Get-Content -Path .\Prefix.txt -Force
+    $groupName = "$Prefix-RG-" + $templateName + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $curtime.Second
 
     while (($isServiceDeployed -eq "False") -and ($retryDeployment -lt 3))
     {

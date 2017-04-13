@@ -12,8 +12,7 @@ ICA_TESTFAILED="TestFailed"        # Error during running of test
 
 CONSTANTS_FILE="constants.sh"
 
-#username=`cat /var/log/cloud-init.log | grep Adding| sed "s/.*user //"`
-username=$1
+username=`cat /var/log/cloud-init.log | grep Adding| sed "s/.*user //"`
 current_kernel=`uname -r`
 code_path="/home/$username/code"
 . $code_path/azuremodules.sh
@@ -39,12 +38,12 @@ if [ -e $code_path/summary.log ]; then
     rm -f $code_path/summary.log
 fi
 
-echo "build not is started.. " > $code_path/build.log
+echo "build not started.. " > $code_path/build.log
 cd $code_path
 
 updaterepos
 install_package git-core sysstat gcc make libssl-dev kernel-package
-LogMsg "linux next git clone is RUNNING.."
+LogMsg "linux next git clone STARTED.."
 git clone git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git  
 if [ $? -ne 0 ]; then
     LogMsg "Error in linux next git clone"
@@ -54,19 +53,13 @@ if [ $? -ne 0 ]; then
 fi
 
 cd linux-next
-touch Documentation/Changes
+
 ## Make config file
-LogMsg "Make .config file is RUNNING.."
+LogMsg "Make .config file STARTED.."
 cp /boot/config-$current_kernel .config
 
 CONFIG_FILE=.config
 yes "" | make oldconfig
-if [ $? -ne 0 ]; then
-    LogMsg "Error in mkaing .config file"
-    echo "make .config: Failed" >> $code_path/summary.log
-    UpdateTestState $ICA_TESTFAILED
-    exit 80
-fi
 sed --in-place=.orig -e s:"# CONFIG_HYPERVISOR_GUEST is not set":"CONFIG_HYPERVISOR_GUEST=y\nCONFIG_HYPERV=y\nCONFIG_HYPERV_UTILS=y\nCONFIG_HYPERV_BALLOON=y\nCONFIG_HYPERV_STORAGE=y\nCONFIG_HYPERV_NET=y\nCONFIG_HYPERV_KEYBOARD=y\nCONFIG_FB_HYPERV=y\nCONFIG_HID_HYPERV_MOUSE=y": ${CONFIG_FILE}
 sed --in-place -e s:"CONFIG_PREEMPT_VOLUNTARY=y":"# CONFIG_PREEMPT_VOLUNTARY is not set": ${CONFIG_FILE}
 sed --in-place -e s:"# CONFIG_EXT4_FS is not set":"CONFIG_EXT4_FS=y\nCONFIG_EXT4_FS_XATTR=y\nCONFIG_EXT4_FS_POSIX_ACL=y\nCONFIG_EXT4_FS_SECURITY=y": ${CONFIG_FILE}
@@ -107,3 +100,4 @@ cd $code_path; tar -cvf logs.tar *.*
 #
 LogMsg "Updating test case state to completed"
 UpdateTestState $ICA_TESTCOMPLETED
+

@@ -48,32 +48,22 @@ ICA_TESTFAILED="TestFailed"        # Error occurred during the test
 # LogMsg()
 #
 #######################################################################
+LogMsg()
+{
+    echo `date "+%b %d %Y %T"` : "${1}"    # Add the time stamp to the log message
+    echo "${1}" >> ~/build-customKernel.txt
+}
+
+UpdateTestState()
+{
+    echo "${1}" > ~/state.txt
+}
 
 if [ -z "$customKernel" ]; then
 	echo "Please mention -customKernel next"
 	exit 1
 fi
-if [ -z "$logFolder" ]; then
-	logFolder="~/"
-	echo "-logFolder is not mentioned. Using ~/"
-else
-	echo "Using Log Folder $logFolder"
-fi
-
-LogMsg()
-{
-    echo `date "+%b %d %Y %T"` : "${1}"    # Add the time stamp to the log message
-    echo "${1}" >> /$logFolder/build-customKernel.txt
-}
-
-UpdateTestState()
-{
-    echo "${1}" > /$logFolder/state.txt
-}
-
-
-touch /$logFolder/build-customKernel.txt
-
+touch ~/build-customKernel.txt
 if [ "${customKernel}" == "linuxnext" ]; then
 	kernelSource="https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git"
 	sourceDir="linux-next"
@@ -98,27 +88,10 @@ elif [[ $customKernel == *.deb ]]; then
 		UpdateTestState $ICA_TESTCOMPLETED
 	fi
 	exit 0
-elif [[ $customKernel == *.rpm ]]; then
-	LogMsg "Custom Kernel:$customKernel"
-	yum -y install wget
-	LogMsg "RPM package web link detected. Downloading $customKernel"
-	wget $customKernel
-	LogMsg "Installing ${customKernel##*/}"
-	rpm -ivh "${customKernel##*/}"
-	kernelInstallStatus=$?
-	UpdateTestState $ICA_TESTCOMPLETED
-	if [ $kernelInstallStatus -ne 0 ]; then
-		LogMsg "CUSTOM_KERNEL_FAIL"
-		UpdateTestState $ICA_TESTFAILED
-	else
-		LogMsg "CUSTOM_KERNEL_SUCCESS"
-		UpdateTestState $ICA_TESTCOMPLETED
-	fi
-	exit 0
 fi
 LogMsg "Custom Kernel:$customKernel"
-chmod +x /$logFolder/DetectLinuxDistro.sh
-LinuxDistro=`/$logFolder/DetectLinuxDistro.sh`
+chmod +x ~/DetectLinuxDistro.sh
+LinuxDistro=`~/DetectLinuxDistro.sh`
 if [ $LinuxDistro == "SLES" -o $LinuxDistro == "SUSE" ]; then
     #zypper update
 	zypper --non-interactive install git-core make tar gcc bc patch dos2unix wget xz 
@@ -136,12 +109,12 @@ elif [ $LinuxDistro == "UBUNTU" ]; then
 	LogMsg "Updating distro..."
 	apt-get update
 	LogMsg "Installing packages git make tar gcc bc patch dos2unix wget ..."
-	apt-get install -y git make tar gcc bc patch dos2unix wget >> /$logFolder/build-customKernel.txt 2>&1
+	apt-get install -y git make tar gcc bc patch dos2unix wget >> ~/build-customKernel.txt 2>&1
 	LogMsg "Installing kernel-package ..."
-	apt-get -o Dpkg::Options::="--force-confnew" -y install kernel-package >> /$logFolder/build-customKernel.txt 2>&1
+	apt-get -o Dpkg::Options::="--force-confnew" -y install kernel-package >> ~/build-customKernel.txt 2>&1
 	rm -rf linux-next
 	LogMsg "Downloading kernel source..."
-	git clone ${kernelSource} >> /$logFolder/build-customKernel.txt 2>&1
+	git clone ${kernelSource} >> ~/build-customKernel.txt 2>&1
 	cd ${sourceDir}
 	
 	#Download kernel build shell script...
@@ -149,7 +122,7 @@ elif [ $LinuxDistro == "UBUNTU" ]; then
 	chmod +x build-ubuntu.sh
 	#Start installing kernel
 	LogMsg "Building and Installing kernel..."
-	./build-ubuntu.sh  >> /$logFolder/build-customKernel.txt 2>&1
+	./build-ubuntu.sh  >> ~/build-customKernel.txt 2>&1
 	if [ $? -ne 0 ]; then
 		LogMsg "CUSTOM_KERNEL_FAIL"
 		UpdateTestState $ICA_TESTFAILED

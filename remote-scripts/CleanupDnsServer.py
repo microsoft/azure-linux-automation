@@ -3,7 +3,7 @@
 import argparse
 import sys
 from azuremodules import *
-#import paramiko
+import paramiko
 parser = argparse.ArgumentParser()
 parser.add_argument('-D', '--vnetDomain_db_filepath', help='VNET Domain db filepath', required=True)
 parser.add_argument('-r', '--vnetDomain_rev_filepath', help='VNET rev filepath',required=True)

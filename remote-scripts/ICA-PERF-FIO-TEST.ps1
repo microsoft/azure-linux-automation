@@ -42,32 +42,34 @@ wget https://konkaciwestus1.blob.core.windows.net/scriptfiles/JSON.awk
 wget https://konkaciwestus1.blob.core.windows.net/scriptfiles/gawk
 wget https://konkaciwestus1.blob.core.windows.net/scriptfiles/fio_jason_parser.sh
 chmod +x *.sh
-cp fio_jason_parser.sh gawk JSON.awk /root/FIOLog/jsonLog/
-cd /root/FIOLog/jsonLog/
+cp fio_jason_parser.sh gawk JSON.awk /home/$user/FIOLog/jsonLog/
+cd /home/$user/FIOLog/jsonLog/
 ./fio_jason_parser.sh
-cp perf_fio.csv /root
-chmod 666 /root/perf_fio.csv
+cp perf_fio.csv /home/$user
+chmod 666 /home/$user/perf_fio.csv
 "@
 		Set-Content "$LogDir\StartFioTest.sh" $myString
 		Set-Content "$LogDir\ParseFioTestLogs.sh" $myString2		
-		RemoteCopy -uploadTo $testVMData.PublicIP -port $testVMData.SSHPort -files ".\$constantsFile,.\remote-scripts\azuremodules.sh,.\remote-scripts\perf_fio.sh,.\$LogDir\StartFioTest.sh,.\$LogDir\ParseFioTestLogs.sh" -username "root" -password $password -upload
-		RemoteCopy -uploadTo $testVMData.PublicIP -port $testVMData.SSHPort -files $currentTestData.files -username "root" -password $password -upload
-		$out = RunLinuxCmd -ip $testVMData.PublicIP -port $testVMData.SSHPort -username "root" -password $password -command "chmod +x *.sh" -runAsSudo
-		$testJob = RunLinuxCmd -ip $testVMData.PublicIP -port $testVMData.SSHPort -username "root" -password $password -command "./StartFioTest.sh" -RunInBackground -runAsSudo
+		RemoteCopy -uploadTo $testVMData.PublicIP -port $testVMData.SSHPort -files ".\$constantsFile,.\remote-scripts\azuremodules.sh,.\remote-scripts\perf_fio.sh,.\$LogDir\StartFioTest.sh,.\$LogDir\ParseFioTestLogs.sh" -username $user -password $password -upload
+		RemoteCopy -uploadTo $testVMData.PublicIP -port $testVMData.SSHPort -files $currentTestData.files -username $user -password $password -upload
 
+		$out = RunLinuxCmd -ip $testVMData.PublicIP -port $testVMData.SSHPort -username $user -password $password -command "chmod +x *.sh" -runAsSudo
+
+
+		$testJob = RunLinuxCmd -ip $testVMData.PublicIP -port $testVMData.SSHPort -username $user -password $password -command "./StartFioTest.sh" -RunInBackground -runAsSudo
 		#endregion
 
 		#region MONITOR TEST
 		while ( (Get-Job -Id $testJob).State -eq "Running" )
 		{
-			$currentStatus = RunLinuxCmd -ip $testVMData.PublicIP -port $testVMData.SSHPort -username "root" -password $password -command "tail -1 runlog.txt"-runAsSudo
+			$currentStatus = RunLinuxCmd -ip $testVMData.PublicIP -port $testVMData.SSHPort -username $user -password $password -command "tail -1 runlog.txt"-runAsSudo
 			LogMsg "Current Test Staus : $currentStatus"
 			WaitFor -seconds 20
 		}
 
-		$finalStatus = RunLinuxCmd -ip $testVMData.PublicIP -port $testVMData.SSHPort -username "root" -password $password -command "cat state.txt"
-		RemoteCopy -downloadFrom $testVMData.PublicIP -port $testVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "FIOTest-*.tar.gz"
-		RemoteCopy -downloadFrom $testVMData.PublicIP -port $testVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "VM_properties.csv"
+		$finalStatus = RunLinuxCmd -ip $testVMData.PublicIP -port $testVMData.SSHPort -username $user -password $password -command "cat state.txt"
+		RemoteCopy -downloadFrom $testVMData.PublicIP -port $testVMData.SSHPort -username $user -password $password -download -downloadTo $LogDir -files "FIOTest-*.tar.gz"
+		RemoteCopy -downloadFrom $testVMData.PublicIP -port $testVMData.SSHPort -username $user -password $password -download -downloadTo $LogDir -files "VM_properties.csv"
 		
 		$testSummary = $null
 
@@ -85,8 +87,8 @@ chmod 666 /root/perf_fio.csv
 		}
 		elseif ( $finalStatus -imatch "TestCompleted")
 		{
-			$out = RunLinuxCmd -ip $testVMData.PublicIP -port $testVMData.SSHPort -username "root" -password $password -command "/root/ParseFioTestLogs.sh"
-			RemoteCopy -downloadFrom $testVMData.PublicIP -port $testVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "perf_fio.csv"
+			$out = RunLinuxCmd -ip $testVMData.PublicIP -port $testVMData.SSHPort -username "root" -password $password -command "/home/$user/ParseFioTestLogs.sh"
+			RemoteCopy -downloadFrom $testVMData.PublicIP -port $testVMData.SSHPort -username $user -password $password -download -downloadTo $LogDir -files "perf_fio.csv"
 			LogMsg "Test Completed."
 			$testResult = "PASS"
 		}
@@ -150,6 +152,8 @@ chmod 666 /root/perf_fio.csv
 			if ($dataSource -And $DBuser -And $DBpassword -And $database -And $dataTableName) 
 			{
 				$GuestDistro	= cat "$LogDir\VM_properties.csv" | Select-String "OS type"| %{$_ -replace ",OS type,",""}
+			
+				$TestCaseName	= "FIO-TEST"
 				if ( $UseAzureResourceManager )
 				{
 					$HostType	= "Azure-ARM"

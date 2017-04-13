@@ -27,9 +27,6 @@ def set_variables_OS_dependent():
         global current_distro
         global distro_version
         global startup_file
-        global python_cmd
-        global waagent_cmd
-        global waagent_bin_path
 
         RunLog.info ("\nset_variables_OS_dependent ..")
         [current_distro, distro_version] = DetectDistro()
@@ -41,20 +38,14 @@ def set_variables_OS_dependent():
                 startup_file = '/etc/rc.local'
         elif(current_distro == "centos" or current_distro == "rhel" or current_distro == "fedora" or current_distro == "Oracle"):
                 startup_file = '/etc/rc.d/rc.local'
-        elif(current_distro == "SUSE" or "sles" in current_distro or current_distro == "opensuse"):
+        elif(current_distro == "SUSE" or current_distro == "sles" or current_distro == "opensuse"):
                 startup_file = '/etc/rc.d/after.local'
         
         if(current_distro == "coreos"):
                 python_cmd="/usr/share/oem/python/bin/python"
                 waagent_bin_path="/usr/share/oem/bin/python"
                 waagent_cmd= "{0} {1}".format(python_cmd, waagent_bin_path)
-
-        Run("echo 'checking python version' >> PackageStatus.txt")
-        retcode, output = RunGetOutput('{0} --version | grep Python'.format(waagent_cmd))
-        if retcode == 0 and 'Python: 3.' in output:
-                python_cmd = 'python3'
-        Run("echo 'using [{0}]' >> PackageStatus.txt".format(python_cmd))
-
+                
         RunLog.info ("\nset_variables_OS_dependent ..[done]")
 
 def download_and_install_rpm(package):
@@ -163,6 +154,7 @@ def install_ez_setup():
                 RunLog.error("File not found: {0}".format(ez_setup))
                 return False
 
+
         output = Run("{0} {1}".format(python_cmd, ez_setup))
         return ("Finished" in output)
 
@@ -220,7 +212,7 @@ def install_waagent_from_github():
                 RunLog.error("Installing waagent from github...[failed]")
                 RunLog.error("{0}".format(e))
                 return False
-
+        
         waagentSrc = os.listdir(unzipPath)[0]
         waagentSrc = os.path.join(unzipPath, waagentSrc)
         binPath20 = os.path.join(waagentSrc, "waagent")
@@ -235,9 +227,9 @@ def install_waagent_from_github():
                 #For 2.1, use setup.py to install/uninstall package
                 os.chmod(binPath21, 0o755)
                 setup_py = os.path.join(waagentSrc, 'setup.py')
-
-                ExecMultiCmdsLocalSudo(["{0} {1} install --register-service --force".format(python_cmd, setup_py)])
-                return True
+                ExecMultiCmdsLocalSudo([
+                        "{0} {1} install --register-service --force".format(python_cmd, setup_py)])
+                return True                
         else:
                 RunLog.error("Installing waagent from github...[failed]")
                 RunLog.error("Unknown waagent verions")
@@ -254,7 +246,7 @@ def install_package(package):
                         return AptgetPackageInstall(package)
                 elif ((current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == 'centos') or (current_distro == 'fedora')):
                         return yum_package_install(package)
-                elif (current_distro == "SUSE") or (current_distro == "openSUSE") or ("sles" in current_distro) or (current_distro == "opensuse"):
+                elif (current_distro == "SUSE") or (current_distro == "openSUSE") or (current_distro == "sles") or (current_distro == "opensuse"):
                         return zypper_package_install(package)
                 else:
                         RunLog.error (package + ": package installation failed!")
@@ -380,14 +372,14 @@ def RunTest():
         xml_root = packages_xml_file.getroot()
 
         parse_success = False
-        Run("echo '** Installing Packages for '"+current_distro+"' Started.. **' >> PackageStatus.txt")
+        Run("echo '** Installing Packages for '"+current_distro+"' Started.. **' > PackageStatus.txt")
         for branch in xml_root:
                 for node in branch:
                         if (node.tag == "packages"):
                                 # Get the requisite package list from 'universal' node, that's must have on system
                                 if(node.attrib['distro'] == 'universal'):
                                         required_packages_list = node.text.split(',')
-                                elif(node.attrib["distro"] in current_distro):
+                                elif(current_distro == node.attrib["distro"]):
                                         packages_list = node.text.split(",")
                         elif node.tag == "waLinuxAgent_link":
                                 tar_link[node.attrib["name"]] = node.text
@@ -419,7 +411,7 @@ def RunTest():
                 else:
                         Run("echo 'coreos support tools installed successfully' >> PackageStatus.txt")                
 
-        if (current_distro == "SUSE") or (current_distro == "openSUSE") or ("sles" in current_distro) or (current_distro == "opensuse"):
+        if (current_distro == "SUSE") or (current_distro == "openSUSE") or (current_distro == "sles") or (current_distro == "opensuse"):
                 iperf_cmd = Run("command -v iperf")
                 iperf3_cmd = Run("command -v iperf3")
                 if not iperf_cmd and iperf3_cmd:

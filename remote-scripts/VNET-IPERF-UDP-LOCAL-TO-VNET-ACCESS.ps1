@@ -81,16 +81,16 @@ if($isDeployed)
 #region DEFINE LOCAL NET VMS
 		if ($UseAzureResourceManager)
 		{
-			$dnsServerInfo = $xmlConfig.config.Azure.Deployment.Data.ARMdnsServer
-			$mysqlServerInfo = $xmlConfig.config.Azure.Deployment.Data.ARMmysqlServer
+			$dnsServer = CreateVMNode -nodeIp "192.168.3.120" -nodeSshPort 22 -user "root" -password "redhat" -nodeHostname "dns-srv-01-arm"
+			$nfsServer = CreateVMNode -nodeIp "192.168.3.125" -nodeSshPort 22 -user "root" -password "redhat" -nodeHostname "nfs-srv-01-arm"
+			$mysqlServer = CreateVMNode -nodeIp "192.168.3.127" -nodeSshPort 22 -user "root" -password "redhat" -nodeHostname "mysql-srv-01-arm"
 		}
 		else
 		{
-			$dnsServerInfo = $xmlConfig.config.Azure.Deployment.Data.dnsServer
-			$mysqlServerInfo = $xmlConfig.config.Azure.Deployment.Data.mysqlServer
+			$dnsServer = CreateVMNode -nodeIp "192.168.3.120" -nodeSshPort 22 -user "root" -password "redhat" -nodeHostname "ubuntudns"
+			$nfsServer = CreateVMNode -nodeIp "192.168.3.125" -nodeSshPort 22 -user "root" -password "redhat" -nodeHostname "ubuntunfsserver"
+			$mysqlServer = CreateVMNode -nodeIp "192.168.3.127" -nodeSshPort 22 -user "root" -password "redhat" -nodeHostname "ubuntumysql"
 		}
-		$dnsServer = CreateVMNode -nodeIp $dnsServerInfo.IP -nodeSshPort 22 -user $dnsServerInfo.Username -password $dnsServerInfo.Password -nodeHostname $dnsServerInfo.Hostname
-		$mysqlServer = CreateVMNode -nodeIp $mysqlServerInfo.IP -nodeSshPort 22 -user $mysqlServerInfo.Username -password $mysqlServerInfo.Password -nodeHostname $mysqlServerInfo.Hostname
 #endregion
 
 #region DEFINE A INTERMEDIATE VM THAT WILL BE USED FOR ALL OPERATIONS DONE ON THE LOCAL NET VMS [DNS SERVER, NFSSERVER, MYSQL SERVER]
@@ -108,11 +108,11 @@ if($isDeployed)
 		$currentLinuxFiles = ConvertFileNames -ToLinux -currentWindowsFiles $currentTestData.files -expectedLinuxPath "/home/$user"
 		
 		RemoteCopyRemoteVM -upload -intermediateVM $intermediateVM -remoteVM $dnsServer  -remoteFiles $currentLinuxFiles
-		RemoteCopyRemoteVM -upload -intermediateVM $intermediateVM -remoteVM $mysqlServer  -remoteFiles $currentLinuxFiles
+		RemoteCopyRemoteVM -upload -intermediateVM $intermediateVM -remoteVM $nfsServer  -remoteFiles $currentLinuxFiles
 
 		# Make them executable..
 		RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $dnsServer -remoteCommand "chmod +x /home/$user/*.py" -runAsSudo
-		RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $mysqlServer -remoteCommand "chmod +x /home/$user/*.py" -runAsSudo
+		RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $nfsServer -remoteCommand "chmod +x /home/$user/*.py" -runAsSudo
 
 #endregion
 
@@ -132,7 +132,9 @@ if($isDeployed)
 	if ($isAllConfigured -eq "True")
 	{
 #region TEST EXECUTION  
-		$udpClient = $mysqlServer
+		$udpClient = CreateIperfNode -user "root" -password "redhat" -nodeIp "192.168.3.125" -nodeSshPort 22 -nodeUdpPort 990
+		Write-Host "111"
+
 		$resultArr = @()
 		foreach ($Value in $SubtestValues) 
 		{
@@ -223,7 +225,7 @@ else
 $result = GetFinalResultHeader -resultarr $resultArr
 
 #region Clenup the DNS server.
-$dnsServer.cmd = "echo $($dnsServer.password) | sudo -S /home/$user/CleanupDnsServer.py -D $vnetDomainDBFilePath -r $vnetDomainRevFilePath"
+$dnsServer.cmd = "/home/$user/CleanupDnsServer.py -D $vnetDomainDBFilePath -r $vnetDomainRevFilePath"
 RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $dnsServer -runAsSudo -remoteCommand $dnsServer.cmd
 #endregion
 

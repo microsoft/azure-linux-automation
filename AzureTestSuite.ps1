@@ -123,12 +123,16 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
                     #    $ARMImage.Version = [string](($armTempImages[$armTempImages.Count - 1]).Version)
                     #}
                     LogMsg "ARMImage name - $($ARMImage.Publisher) : $($ARMImage.Offer) : $($ARMImage.Sku) : $($ARMImage.Version)"
-		        }
-		        if ( $tempDistro.OsVHD )
-		        { 
-			        $BaseOsVHD = $tempDistro.OsVHD.ToUpper() 
-			        Set-Variable -Name BaseOsVHD -Value $BaseOsVHD -Scope Global
-			        LogMsg "Base VHD name - $BaseOsVHD"
+                    if ($ARMImage.Publisher -imatch "microsoft")
+                    {
+                        Set-Variable -Name GuestOS -Value "Windows" -Scope Global
+                        LogMsg "Set GuestOS = $GuestOS."
+                    }
+                    else
+                    {
+                        Set-Variable -Name GuestOS -Value "Linux" -Scope Global
+                        LogMsg "Set GuestOS = $GuestOS."
+                    }
 		        }
             }
             else
@@ -138,6 +142,24 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 			        $BaseOsImage = $tempDistro.OsImage.ToUpper() 
 			        Set-Variable -Name BaseOsImage -Value $BaseOsImage -Scope Global
 			        LogMsg "Base image name - $BaseOsImage"
+                    if ( ( Get-AzureVMImage -ImageName $BaseOsImage ).OS -imatch "Linux" )
+                    {
+                        Set-Variable -Name GuestOS -Value "Linux" -Scope Global
+                        LogMsg "Set GuestOS = $GuestOS."
+                    }
+                    else
+                    {
+                        Set-Variable -Name GuestOS -Value "Windows" -Scope Global
+                        LogMsg "Set GuestOS = $GuestOS."
+                    }
+		        }
+		        if ( $tempDistro.OsVHD )
+		        { 
+			        $BaseOsVHD = $tempDistro.OsVHD.ToUpper() 
+			        Set-Variable -Name BaseOsVHD -Value $BaseOsVHD -Scope Global
+			        LogMsg "Base VHD name - $BaseOsVHD"
+                    Set-Variable -Name GuestOS -Value "Linux" -Scope Global
+                    LogMsg "Set GuestOS = $GuestOS."
 		        }
             }
         }

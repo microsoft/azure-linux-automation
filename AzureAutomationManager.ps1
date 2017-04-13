@@ -10,7 +10,7 @@
 ## Author : v-shisav@microsoft.com
 ## Author : v-ampaw@microsoft.com
 ###############################################################################################
-param ([string] $xmlConfigFile, [switch] $eMail, [string] $logFilename="azure_ica.log", [switch] $runtests, [switch]$onCloud, [switch] $vhdprep, [switch]$upload, [switch] $help, [string] $Distro, [string] $cycleName, [string] $TestPriority, [string]$osImage, [switch]$EconomyMode, [switch]$keepReproInact, [string] $DebugDistro, [switch]$UseAzureResourceManager, [string] $OverrideVMSize, [string]$customKernel, [string] $customLIS, [string]$customLISBranch)
+param ([string] $xmlConfigFile, [switch] $eMail, [string] $logFilename="azure_ica.log", [switch] $runtests, [switch]$onCloud, [switch] $vhdprep, [switch]$upload, [switch] $help, [string] $Distro, [string] $cycleName, [string] $TestPriority, [string]$osImage, [switch]$EconomyMode, [switch]$keepReproInact, [string] $DebugDistro, [switch]$UseAzureResourceManager, [string] $OverrideVMSize, [string]$customKernel, [string]$ExistingResourceGroup, [switch]$CleanupExistingRG)
 
 Import-Module .\TestLibs\AzureWinUtils.psm1 -Force -Scope Global
 Import-Module .\TestLibs\RDFELibs.psm1 -Force -Scope Global
@@ -32,6 +32,8 @@ Set-Variable -Name PublicConfiguration -Value @() -Scope Global
 Set-Variable -Name PrivateConfiguration -Value @() -Scope Global
 Set-Variable -Name CurrentTestData -Value $CurrentTestData -Scope Global
 Set-Variable -Name preserveKeyword -Value "preserving" -Scope Global
+$GlobalRandom = Get-Random -Maximum 999999 -Minimum 111111
+Set-Variable -Name GlobalRandom -Value $GlobalRandom  -Scope Global
 if ( $OverrideVMSize )
 {
     Set-Variable -Name OverrideVMSize -Value $OverrideVMSize -Scope Global
@@ -39,14 +41,6 @@ if ( $OverrideVMSize )
 if ( $customKernel )
 {
     Set-Variable -Name customKernel -Value $customKernel -Scope Global
-}
-if ( $customLIS )
-{
-    Set-Variable -Name customLIS -Value $customLIS -Scope Global
-}
-if ( $customLISBranch )
-{
-    Set-Variable -Name customLISBranch -Value $customLISBranch -Scope Global
 }
 if ( $xmlConfig.config.Azure.General.StorageAccount -imatch "NewStorage_" )
 {
@@ -58,7 +52,6 @@ if ( $xmlConfig.config.Azure.General.ARMStorageAccount -imatch "NewStorage_" )
     $NewARMStorageAccountType = ($xmlConfig.config.Azure.General.ARMStorageAccount).Replace("NewStorage_","")
     Set-Variable -Name NewARMStorageAccountType -Value $NewASMStorageAccountType -Scope Global
 }
-
 
 try
 {
@@ -117,8 +110,16 @@ try
     Set-Variable -Name Distro -Value $Distro -Scope Global
     Set-Variable -Name onCloud -Value $onCloud -Scope Global
     Set-Variable -Name xmlConfig -Value $xmlConfig -Scope Global
-	Set-Content -Path .\report\lastLogDirectory.txt -Value $testDir
     Set-Variable -Name vnetIsAllConfigured -Value $false -Scope Global
+	Set-Variable -Name ExistingRG -Value $ExistingResourceGroup -Scope Global
+	if ($CleanupExistingRG)
+	{
+		Set-Variable -Name CleanupExistingRG -Value $true -Scope Global
+	}
+	else
+	{
+		Set-Variable -Name CleanupExistingRG -Value $false -Scope Global
+	}
     if($EconomyMode)
     {
         Set-Variable -Name EconomyMode -Value $true -Scope Global

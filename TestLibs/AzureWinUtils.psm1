@@ -100,18 +100,7 @@ function GetTestSummary($testCycle, [DateTime] $StartTime, [string] $xmlFilename
 	$testSuiteRunDuration=$testSuiteRunDuration.Days.ToString() + ":" +  $testSuiteRunDuration.hours.ToString() + ":" + $testSuiteRunDuration.minutes.ToString()
     $str = "<br />Test Results Summary<br />"
     $str += "ICA test run on " + $startTime
-    if ( $BaseOsImage )
-    {
-        $str += "<br />Image under test " + $BaseOsImage
-    }
-    if ( $BaseOSVHD )
-    {
-        $str += "<br />VHD under test " + $BaseOSVHD
-    }
-    if ( $ARMImage )
-    {
-        $str += "<br />ARM Image under test " + "$($ARMImage.Publisher) : $($ARMImage.Offer) : $($ARMImage.Sku) : $($ARMImage.Version)"
-    }
+    $str += "<br />Image under test " + $BaseOsImage
 	$str += "<br />Total Executed TestCases " + $testSuiteResultDetails.totalTc + " (" + $testSuiteResultDetails.totalPassTc + " Pass" + ", " + $testSuiteResultDetails.totalFailTc + " Fail" + ", " + $testSuiteResultDetails.totalAbortedTc + " Abort)"
 	$str += "<br />Total Execution Time(dd:hh:mm) " + $testSuiteRunDuration.ToString()
     $str += "<br />XML file: $xmlFilename<br /><br />"
@@ -133,18 +122,7 @@ function GetTestSummary($testCycle, [DateTime] $StartTime, [string] $xmlFilename
             "<body style = 'font-family:sans-serif;font-size:13px;color:#000000;margin:0px;padding:30px'>" +
             "<br/><h1 style='background-color:lightblue;width:1024'>Test Results Summary</h1>"
     $strHtml += "<h2 style='background-color:lightblue;width:1024'>ICA test run on - " + $startTime + "</h2><span style='font-size: medium'>"
-    if ( $BaseOsImage )
-    {
-        $strHtml += '<p>Image under test - <span style="font-family:courier new,courier,monospace;">' + "$BaseOsImage</span></p>"
-    }
-    if ( $BaseOSVHD )
-    {
-        $strHtml += '<p>VHD under test - <span style="font-family:courier new,courier,monospace;">' + "$BaseOsVHD</span></p>"
-    }
-    if ( $ARMImage )
-    {
-        $strHtml += '<p>ARM Image under test - <span style="font-family:courier new,courier,monospace;">' + "$($ARMImage.Publisher) : $($ARMImage.Offer) : $($ARMImage.Sku) : $($ARMImage.Version)</span></p>"
-    }
+    $strHtml += '<p>Image under test - <span style="font-family:courier new,courier,monospace;">' + "$BaseOsImage</span></p>"
 
     $strHtml += '<p>Total Executed TestCases - <strong><span style="font-size:16px;">' + "$($testSuiteResultDetails.totalTc)" + '</span></strong><br />' + '[&nbsp;<span style="font-size:16px;"><span style="color:#008000;"><strong>' +  $testSuiteResultDetails.totalPassTc + ' </strong></span></span> - PASS, <span style="font-size:16px;"><span style="color:#ff0000;"><strong>' + "$($testSuiteResultDetails.totalFailTc)" + '</strong></span></span>- FAIL, <span style="font-size:16px;"><span style="color:#ff0000;"><strong><span style="background-color:#ffff00;">' + "$($testSuiteResultDetails.totalAbortedTc)" +'</span></strong></span></span> - ABORTED ]</p>'
     $strHtml += "<br /><br/>Total Execution Time(dd:hh:mm) " + $testSuiteRunDuration.ToString()
@@ -155,7 +133,7 @@ function GetTestSummary($testCycle, [DateTime] $StartTime, [string] $xmlFilename
     $strHtml += $testCycle.htmlSummary
     $strHtml += "</table>"
     $currentNWPath = (hostname) + "\" + (pwd).Path.Replace(":", "$")
-    $strHtml += "<br /><br/> <a href='\\${currentNWPath}\TestResults\" + $xmlFilename + "-" + $StartTime.ToString("yyyyMMdd-HHmmss") + "'>Logs can be found here </a><br /><br />"
+    #$strHtml += "<br /><br/> <a href='\\${currentNWPath}\TestResults\" + $xmlFilename + "-" + $StartTime.ToString("yyyyMMdd-HHmmss") + "'>Logs can be found here </a><br /><br />"
     $strHtml += "</body></Html>"
 
     if (-not (Test-Path(".\temp\CI"))) {

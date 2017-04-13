@@ -70,25 +70,25 @@ if($isDeployed)
 		ConfigureVNETVms -SSHDetails $SSHDetails -vnetDomainDBFilePath $vnetDomainDBFilePath -dnsServerIP $dnsServerIP
 		if ($UseAzureResourceManager)
 		{
-			$dnsServerInfo = $xmlConfig.config.Azure.Deployment.Data.ARMdnsServer
-			$mysqlServerInfo = $xmlConfig.config.Azure.Deployment.Data.ARMmysqlServer
+			$dnsServer = CreateVMNode -nodeIp "192.168.3.120" -nodeSshPort 22 -user "root" -password "redhat" -nodeHostname "dns-srv-01-arm"
+			$nfsServer = CreateVMNode -nodeIp "192.168.3.125" -nodeSshPort 22 -user "root" -password "redhat" -nodeHostname "nfs-srv-01-arm"
+			$mysqlServer = CreateVMNode -nodeIp "192.168.3.127" -nodeSshPort 22 -user "root" -password "redhat" -nodeHostname "mysql-srv-01-arm"
 		}
 		else
 		{
-			$dnsServerInfo = $xmlConfig.config.Azure.Deployment.Data.dnsServer
-			$mysqlServerInfo = $xmlConfig.config.Azure.Deployment.Data.mysqlServer
+			$dnsServer = CreateVMNode -nodeIp "192.168.3.120" -nodeSshPort 22 -user "root" -password "redhat" -nodeHostname "ubuntudns"
+			$nfsServer = CreateVMNode -nodeIp "192.168.3.125" -nodeSshPort 22 -user "root" -password "redhat" -nodeHostname "ubuntunfsserver"
+			$mysqlServer = CreateVMNode -nodeIp "192.168.3.127" -nodeSshPort 22 -user "root" -password "redhat" -nodeHostname "ubuntumysql"
 		}
-		$dnsServer = CreateVMNode -nodeIp $dnsServerInfo.IP -nodeSshPort 22 -user $dnsServerInfo.Username -password $dnsServerInfo.Password -nodeHostname $dnsServerInfo.Hostname
-		$mysqlServer = CreateVMNode -nodeIp $mysqlServerInfo.IP -nodeSshPort 22 -user $mysqlServerInfo.Username -password $mysqlServerInfo.Password -nodeHostname $mysqlServerInfo.Hostname
 		$intermediateVM = CreateVMNode -nodeIp $hs1VIP -nodeSshPort $hs1vm1sshport -user $user -password $password -nodeDip $hs1vm1IP -nodeHostname $hs1vm1Hostname		
 		UploadFilesToAllDeployedVMs -SSHDetails $SSHDetails -files $currentTestData.files
 		RunLinuxCmdOnAllDeployedVMs -SSHDetails $SSHDetails -command "chmod +x *"
 		$currentWindowsfiles = $currentTestData.files
 		$currentLinuxFiles = ConvertFileNames -ToLinux -currentWindowsFiles $currentTestData.files -expectedLinuxPath "/home/$user"
 		RemoteCopyRemoteVM -upload -intermediateVM $intermediateVM -remoteVM $dnsServer  -remoteFiles $currentLinuxFiles
-		RemoteCopyRemoteVM -upload -intermediateVM $intermediateVM -remoteVM $mysqlServer  -remoteFiles $currentLinuxFiles
+		RemoteCopyRemoteVM -upload -intermediateVM $intermediateVM -remoteVM $nfsServer  -remoteFiles $currentLinuxFiles
 		RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $dnsServer -remoteCommand "chmod +x /home/$user/*.py" -runAsSudo 
-		RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $mysqlServer -remoteCommand "chmod +x /home/$user/*.py" -runAsSudo			   
+		RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $nfsServer -remoteCommand "chmod +x /home/$user/*.py" -runAsSudo			   
 		ConfigureDnsServer -intermediateVM $intermediateVM -DnsServer $dnsServer -HostnameDIPDetails $HostnameDIPDetails -vnetDomainDBFilePath $vnetDomainDBFilePath -vnetDomainREVFilePath $vnetDomainRevFilePath
 		$isAllConfigured = "True"
 	}
@@ -133,16 +133,16 @@ if($isDeployed)
 					if(($mode -eq "IP") -or ($mode -eq "VIP") -or ($mode -eq "DIP"))
 					{
 						LogMsg "SSH Test Started from LocaVM to $Value in $mode mode.."
-						$sshResult = DoSSHTestFromLocalVM -intermediateVM $intermediateVM -LocalVM $mysqlServer -toVM  $ToVM 
+						$sshResult = DoSSHTestFromLocalVM -intermediateVM $intermediateVM -LocalVM $dnsServer -toVM  $ToVM 
 						LogMsg "SCP Test Started from LocaVM to $Value in $mode mode.."
-						$scpResult = DoSCPTestFromLocalVM -intermediateVM $intermediateVM -LocalVM $mysqlServer -toVM  $ToVM
+						$scpResult = DoSCPTestFromLocalVM -intermediateVM $intermediateVM -LocalVM $dnsServer -toVM  $ToVM
 					}
 					if(($mode -eq "URL") -or ($mode -eq "Hostname"))
 					{
 						LogMsg "SSH Test Started from LocaVM to $Value in $mode mode.."
-						$sshResult = DoSSHTestFromLocalVM -intermediateVM $intermediateVM -LocalVM $mysqlServer -toVM  $ToVM -hostnameMode
+						$sshResult = DoSSHTestFromLocalVM -intermediateVM $intermediateVM -LocalVM $dnsServer -toVM  $ToVM -hostnameMode
 						LogMsg "SCP Test Started from LocaVM to $Value in $mode mode.."
-						$scpResult = DoSCPTestFromLocalVM -intermediateVM $intermediateVM -LocalVM $mysqlServer -toVM  $ToVM -hostnameMode
+						$scpResult = DoSCPTestFromLocalVM -intermediateVM $intermediateVM -LocalVM $dnsServer -toVM  $ToVM -hostnameMode
 					}
 					LogMsg "SSH result : $sshResult"
 					LogMsg "SCP result : $scpResult"
@@ -191,7 +191,7 @@ else
 }
 $result = GetFinalResultHeader -resultarr $resultArr
 #region Clenup the DNS server.
-$dnsServer.cmd = "echo $($dnsServer.password) | sudo -S /home/$user/CleanupDnsServer.py -D $vnetDomainDBFilePath -r $vnetDomainRevFilePath"
+$dnsServer.cmd = "/home/$user/CleanupDnsServer.py -D $vnetDomainDBFilePath -r $vnetDomainRevFilePath"
 RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $dnsServer -runAsSudo -remoteCommand $dnsServer.cmd
 #endregion
 #Clean up the setup
