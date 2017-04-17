@@ -292,40 +292,55 @@ else
 	LogMsg "Info : Skipping RDMA preparation. (Source : constants.sh)"
 fi
 
-if [ "${rdmaRun}" == "yes" ]
+if [ "${rdmaRun}" == "yes" ];
 then
 	mpirunPath=`find / -name mpirun | grep intel64`
 	imb_mpi1Path=`find / -name IMB-MPI1 | grep intel64`
-	service NetworkManager status
-	if [ $? -eq 0 ]; then
-		LogMsg "Info: NetworkManager is running. Stopping it."
-		service NetworkManager stop
-		sleep 5
-		service waagent restart
-		sleep 5
-		ssh root@${slaves} "service NetworkManager stop"
-		sleep 5
-		service waagent restart
-		ssh root@${slaves} "service waagent restart"
-		sleep 5
-	fi	
+	eth1server=`ifconfig eth1 | grep "inet "`
+	eth1ServerStatus=$?
+	eth1client=`ssh root@${slaves} "ifconfig eth1 | grep 'inet '"`
+	eth1ClientStatus=$?
+	eth1Status=$(( $eth1ServerStatus + $eth1ClientStatus ))
+	if [ $eth1Status -eq 0 ];
+	then
+		LogMsg "eth1 IP detected for server and client."
+	else
+		LogMsg "Error: eth1 failed to get IP address."
+		LogMsg "Checking if NetworkManager is running..."
+		service NetworkManager status
+		if [ $? -eq 0 ]; then
+			LogMsg "Info: NetworkManager is running. Stopping it."
+			service NetworkManager stop
+			sleep 5
+			ssh root@${slaves} "service NetworkManager stop"
+			sleep 5
+			LogMsg "Info: restart waagent service..."
+			service waagent restart
+			sleep 5
+			service waagent restart
+			ssh root@${slaves} "service waagent restart"
+			sleep 5
+		fi		
+	fi
 	LogMsg "Executing test command : ${mpirunPath} -hosts ${master},${slaves} -ppn 2 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 ${imb_mpi1Path} pingpong > pingPongTestIntraNodeTestOut.txt 2>&1"
 	#MPI-pingpong intra node
 	$mpirunPath -hosts ${master} -ppn 2 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 $imb_mpi1Path pingpong > pingPongTestIntraNodeTestOut.txt 2>&1
+	mpiStatus1=$?
 	sleep 10
 	#MPI-pingpong inter node
 	LogMsg "Executing test command : $mpirunPath -hosts ${master},${slaves} -ppn 1 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 $imb_mpi1Path pingpong > pingPongTestInterNodeTestOut.txt 2>&1"
 	$mpirunPath -hosts ${master},${slaves} -ppn 1 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 $imb_mpi1Path pingpong > pingPongTestInterNodeTestOut.txt 2>&1
-	
-	testExitCode=$?
-	if [ $testExitCode -ne 0 ]
+	mpiStatus2=$?
+	finalStatus=$(( $eth1Status + $mpiStatus1 + $mpiStatus2 ))
+	if [ $finalStatus -ne 0 ];
 	then
-		errMsg="Test execution returned exit code ${testExitCode}"
+		errMsg="Failures detected. eth1 Status: $eth1Status, IntraNodeTestStatus: $mpiStatus1, InterNodeTestStatus: $mpiStatus2"
 		LogMsg "${errMsg}"
 		echo "${errMsg}" >> ~/summary.log
 		UpdateTestState $ICA_TESTFAILED
 		exit 1
 	else
 		UpdateTestState $ICA_TESTCOMPLETED
+		LogMsg "eth1 Status: $eth1Status, IntraNodeTestStatus: $mpiStatus1, InterNodeTestStatus: $mpiStatus2"
 	fi
 fi
