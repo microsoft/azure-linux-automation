@@ -359,6 +359,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 				{
 					$runningJobsCount = 0
 					$isAllCleaned = $true
+					$cleanupJobList = Get-Job | where { $_.Name -imatch "DeleteResourceGroup"}
 					foreach ( $cleanupJob in $cleanupJobList )
 					{
 		
