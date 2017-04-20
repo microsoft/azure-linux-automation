@@ -554,7 +554,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>22</PublicPort>
+							<PublicPort>12122</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
@@ -4688,7 +4688,7 @@
 			<testScript></testScript>
 			<testScriptPs1>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</testScriptPs1>
 			<files></files>
-			<setupType>BVTDeployment</setupType>
+			<setupType>SingleVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>

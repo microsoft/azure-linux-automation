@@ -123,7 +123,7 @@
             }
             elseif ( $testVMSize.StartsWith("D") -and !$testVMSize.EndsWith("v2"))
             {
-                $identifierText = "Standard DSv2 Family Cores" 
+                $identifierText = "Standard D Family Cores" 
                 $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage -AllowedUsagePercentage $AllowedUsagePercentage 
                 $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage $AllowedUsagePercentage 
             }
