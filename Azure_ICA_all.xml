@@ -547,6 +547,7 @@
 			<SingleVM>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
+					<Tag></Tag>
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>ExtraSmall</InstanceSize>
