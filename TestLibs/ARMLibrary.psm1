@@ -425,16 +425,34 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
     }
     if ($ResourceGroup)
     {
-        Remove-AzureRmResourceGroup -Name $RGName -Force -Verbose
-        $retValue = $?
-        $ARMStorageAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
-        if ( $NewARMStorageAccountType )
+        if ( Test-Path .\tools\AddAzureRmAccount.ps1)
         {
-            LogMsg "No need to remove residual VHDs, as storage account in $RGName is deleted."
+            $cleanupRGScriptBlock = {
+                                
+                $RGName = $args[0]
+                $AuthenticatePSFullPath = $args[1]
+                Invoke-Expression -Command $AuthenticatePSFullPath 
+                Remove-AzureRmResourceGroup -Name $RGName -Verbose -Force
+            }
+
+            $AuthenticatePSFullPath = $(Get-Item .\tools\AddAzureRmAccount.ps1 | Select FullName).FullName
+            $cleanupJob = Start-Job -ScriptBlock $cleanupRGScriptBlock -ArgumentList $RGName,$AuthenticatePSFullPath -Name "DeleteResourceGroup-$RGName"
+            LogMsg "$RGName cleanup started in background."
+            $retValue = $true
         }
         else
         {
-            RemoveResidualResourceGroupVHDs -ResourceGroup $RGName -storageAccount $ARMStorageAccount
+            Remove-AzureRmResourceGroup -Name $RGName -Force -Verbose
+            $retValue = $?
+            $ARMStorageAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
+            if ( $NewARMStorageAccountType )
+            {
+                LogMsg "No need to remove residual VHDs, as storage account in $RGName is deleted."
+            }
+            else
+            {
+                RemoveResidualResourceGroupVHDs -ResourceGroup $RGName -storageAccount $ARMStorageAccount
+            }
         }
     }
     else

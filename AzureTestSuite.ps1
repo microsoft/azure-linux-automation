@@ -106,50 +106,50 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 	LogMsg "Starting the Cycle - $($CycleName.ToUpper())"
 	$executionCount = 0
 
-    foreach ( $tempDistro in $xmlConfig.config.Azure.Deployment.Data.Distro )
-    {
-        if ( ($tempDistro.Name).ToUpper() -eq ($Distro).ToUpper() )
-        {
-            if ( $UseAzureResourceManager )
-            {
-		        if ( $tempDistro.ARMImage )
-		        { 
-			        Set-Variable -Name ARMImage -Value $tempDistro.ARMImage -Scope Global
-			    
-                    #if ( $ARMImage.Version -imatch "latest" )
-                    #{
-                    #    LogMsg "Getting latest image details..."
-                    #    $armTempImages = Get-AzureRmVMImage -Location ($xmlConfig.config.Azure.General.Location).Replace('"','') -PublisherName $ARMImage.Publisher -Offer $ARMImage.Offer -Skus $ARMImage.Sku
-                    #    $ARMImage.Version = [string](($armTempImages[$armTempImages.Count - 1]).Version)
-                    #}
-                    LogMsg "ARMImage name - $($ARMImage.Publisher) : $($ARMImage.Offer) : $($ARMImage.Sku) : $($ARMImage.Version)"
-		        }
-		        if ( $tempDistro.OsVHD )
-		        { 
-			        $BaseOsVHD = $tempDistro.OsVHD.ToUpper() 
-			        Set-Variable -Name BaseOsVHD -Value $BaseOsVHD -Scope Global
-			        LogMsg "Base VHD name - $BaseOsVHD"
-		        }
-            }
-            else
-            {
-		        if ( $tempDistro.OsImage ) 
-		        { 
-			        $BaseOsImage = $tempDistro.OsImage.ToUpper() 
-			        Set-Variable -Name BaseOsImage -Value $BaseOsImage -Scope Global
-			        LogMsg "Base image name - $BaseOsImage"
-		        }
-            }
-        }
-    }
+	foreach ( $tempDistro in $xmlConfig.config.Azure.Deployment.Data.Distro )
+	{
+		if ( ($tempDistro.Name).ToUpper() -eq ($Distro).ToUpper() )
+		{
+			if ( $UseAzureResourceManager )
+			{
+				if ( $tempDistro.ARMImage )
+				{ 
+					Set-Variable -Name ARMImage -Value $tempDistro.ARMImage -Scope Global
+				
+					#if ( $ARMImage.Version -imatch "latest" )
+					#{
+					#	LogMsg "Getting latest image details..."
+					#	$armTempImages = Get-AzureRmVMImage -Location ($xmlConfig.config.Azure.General.Location).Replace('"','') -PublisherName $ARMImage.Publisher -Offer $ARMImage.Offer -Skus $ARMImage.Sku
+					#	$ARMImage.Version = [string](($armTempImages[$armTempImages.Count - 1]).Version)
+					#}
+					LogMsg "ARMImage name - $($ARMImage.Publisher) : $($ARMImage.Offer) : $($ARMImage.Sku) : $($ARMImage.Version)"
+				}
+				if ( $tempDistro.OsVHD )
+				{ 
+					$BaseOsVHD = $tempDistro.OsVHD.ToUpper() 
+					Set-Variable -Name BaseOsVHD -Value $BaseOsVHD -Scope Global
+					LogMsg "Base VHD name - $BaseOsVHD"
+				}
+			}
+			else
+			{
+				if ( $tempDistro.OsImage ) 
+				{ 
+					$BaseOsImage = $tempDistro.OsImage.ToUpper() 
+					Set-Variable -Name BaseOsImage -Value $BaseOsImage -Scope Global
+					LogMsg "Base image name - $BaseOsImage"
+				}
+			}
+		}
+	}
 	if (!$BaseOsImage  -and !$UseAzureResourceManager)
 	{
 		Throw "Please give ImageName or OsVHD for ASM deployment."
 	}
-    if (!$($ARMImage.Publisher) -and !$BaseOSVHD -and $UseAzureResourceManager)
-    {
-        Throw "Please give ARM Image / VHD for ARM deployment."
-    }
+	if (!$($ARMImage.Publisher) -and !$BaseOSVHD -and $UseAzureResourceManager)
+	{
+		Throw "Please give ARM Image / VHD for ARM deployment."
+	}
 
 	LogMsg "Loading the cycle Data..."
 
@@ -349,6 +349,41 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 					}
 					
 				} 
+				Write-Host $testSuiteResultDetails.totalPassTc,$testSuiteResultDetails.totalFailTc,$testSuiteResultDetails.totalAbortedTc
+				#Back to Test Suite Main Logging
+				$global:logFile = $testSuiteLogFile
+				LogMsg "Checking background cleanup jobs.."
+				$cleanupJobList = Get-Job | where { $_.Name -imatch "DeleteResourceGroup"}
+				$isAllCleaned = $false
+				while(!$isAllCleaned)
+				{
+					$runningJobsCount = 0
+					$isAllCleaned = $true
+					foreach ( $cleanupJob in $cleanupJobList )
+					{
+		
+						$jobStatus = Get-Job -Id $cleanupJob.ID
+						if ( $jobStatus.State -ne "Running" )
+						{
+
+							$tempRG = $($cleanupJob.Name).Replace("DeleteResourceGroup-ICA-RG-","")
+							LogMsg "$tempRG : Delete : $($jobStatus.State)"
+							Remove-Job -Id $cleanupJob.ID -Force
+						}
+						else
+						{
+							LogMsg "$($cleanupJob.Name) is running."
+							$isAllCleaned = $false
+							$runningJobsCount += 1
+						}
+					}
+					if ($runningJobsCount -gt 0)
+					{
+						Write-Host "$runningJobsCount background cleanup jobs still running. Waiting 30 seconds..."
+						sleep -Seconds 30
+					}
+				}
+				Write-Host "All background cleanup jobs finished."
 				$currentJobs = Get-Job
 				foreach ( $job in $currentJobs )
 				{
@@ -358,9 +393,6 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 						LogMsg "Removed background job ID $($job.Id)."
 					}
 				}
-				Write-Host $testSuiteResultDetails.totalPassTc,$testSuiteResultDetails.totalFailTc,$testSuiteResultDetails.totalAbortedTc
-				#Back to Test Suite Main Logging
-				$global:logFile = $testSuiteLogFile
 			}
 			else
 			{
