@@ -554,7 +554,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12122</PublicPort>
+							<PublicPort>22</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
