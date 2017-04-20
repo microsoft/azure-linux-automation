@@ -444,14 +444,15 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
                     # Remove VHD files
                     foreach($diskName in $vhdList.Name) 
                     {
-                        Remove-AzureStorageBlob -Blob $diskname -Container vhds -Context $storageContext -Verbose -ErrorAction SilentlyContinue
+                        Remove-AzureStorageBlob -Blob $diskname -Container vhds -Context $storageContext -ErrorAction SilentlyContinue
                     }
                 }
-
+                sleep -Seconds 1
             }
-
+            $ARMStorageAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
             $AuthenticatePSFullPath = $(Get-Item .\tools\AddAzureRmAccount.ps1 | Select FullName).FullName
             $cleanupJob = Start-Job -ScriptBlock $cleanupRGScriptBlock -ArgumentList $RGName,$AuthenticatePSFullPath,$ARMStorageAccount -Name "DeleteResourceGroup-$RGName"
+            
             LogMsg "$RGName cleanup started in background."
             $retValue = $true
         }
