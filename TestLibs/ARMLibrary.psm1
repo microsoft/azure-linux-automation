@@ -647,7 +647,7 @@ $dnsNameForPublicIPv6 = $($RGName.ToLower() -replace '[^a-z0-9]') + "v6"
 $virtualNetworkName = "VirtualNetwork"
 $defaultSubnetName = "Subnet1"
 #$availibilitySetName = $($RGName.ToUpper() -replace '[^a-z]') + "AvSet"
-$availibilitySetName = "AvailibilitySet"
+
 #$LoadBalancerName =  $($RGName.ToUpper() -replace '[^a-z]') + "LoadBalancer"
 $LoadBalancerName =  "LoadBalancer"
 $apiVersion = "2016-03-30"
@@ -657,7 +657,16 @@ $PublicIPName = "PublicIPv4"
 $PublicIPv6Name = "PublicIPv6"
 $sshPath = '/home/' + $user + '/.ssh/authorized_keys'
 $sshKeyData = ""
-$customAVSetName = (Get-AzureRmResource | Where { (( $_.ResourceGroupName -eq  $RGName ) -and  ( $_.ResourceType -imatch  "availabilitySets" ))}).ResourceName
+if($ExistingRG)
+{
+	$customAVSetName = (Get-AzureRmResource | Where { (( $_.ResourceGroupName -eq  $RGName ) -and  ( $_.ResourceType -imatch  "availabilitySets" ))}).ResourceName
+}
+else
+{
+	$availibilitySetName = "AvailibilitySet"
+	$customAVSetName = $availibilitySetName
+}
+
 if ( $CurrentTestData.ProvisionTimeExtensions )
 {
 	$extensionString = (Get-Content .\XML\Extensions.xml)
