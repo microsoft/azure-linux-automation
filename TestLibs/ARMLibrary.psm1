@@ -85,7 +85,7 @@
             }
             else
             {
-                $testVMSize = $VM.ARMInstanceSize
+                $testVMSize = $VM.InstanceSize
             }
             
             if ($OverrideVMSize -and ($testVMUsage -gt 0))
