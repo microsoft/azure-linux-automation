@@ -367,7 +367,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 						if ( $jobStatus.State -ne "Running" )
 						{
 
-							$tempRG = $($cleanupJob.Name).Replace("DeleteResourceGroup-ICA-RG-","")
+							$tempRG = $($cleanupJob.Name).Replace("DeleteResourceGroup-","")
 							LogMsg "$tempRG : Delete : $($jobStatus.State)"
 							Remove-Job -Id $cleanupJob.ID -Force
 						}

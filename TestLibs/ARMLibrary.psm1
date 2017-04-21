@@ -1343,7 +1343,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
         #region networkInterfaces
         LogMsg "Adding Network Interface Card $NIC"
         Add-Content -Value "$($indents[2]){" -Path $jsonFile
-            Add-Content -Value "$($indents[3])^apiVersion^: ^$apiVersion^," -Path $jsonFile
+            Add-Content -Value "$($indents[3])^apiVersion^: ^2016-09-01^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^type^: ^Microsoft.Network/networkInterfaces^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^name^: ^$NIC^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
@@ -1441,7 +1441,15 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                 }
                 #endregion
                 Add-Content -Value "$($indents[4])]" -Path $jsonFile
+            if ($EnableAcceleratedNetworking)
+            {
+                Add-Content -Value "$($indents[4])," -Path $jsonFile
+                Add-Content -Value "$($indents[4])^enableAcceleratedNetworking^: true" -Path $jsonFile
+                LogMsg "Enabled Accelerated Networking."
+            }
             Add-Content -Value "$($indents[3])}" -Path $jsonFile
+
+
         Add-Content -Value "$($indents[2])}," -Path $jsonFile
         LogMsg "Added NIC $NIC.."
         #endregion
@@ -1581,7 +1589,7 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
             #region networkInterfaces
         LogMsg "Adding Network Interface Card $NIC.."
         Add-Content -Value "$($indents[2]){" -Path $jsonFile
-            Add-Content -Value "$($indents[3])^apiVersion^: ^$apiVersion^," -Path $jsonFile
+            Add-Content -Value "$($indents[3])^apiVersion^: ^2016-09-01^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^type^: ^Microsoft.Network/networkInterfaces^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^name^: ^$NIC^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
@@ -1616,6 +1624,12 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
                 Add-Content -Value "$($indents[4]){" -Path $jsonFile
                     Add-Content -Value "$($indents[5])^id^: ^[resourceId('Microsoft.Network/networkSecurityGroups','$SecurityGroupName')]^" -Path $jsonFile
                 Add-Content -Value "$($indents[4])}" -Path $jsonFile
+            if ($EnableAcceleratedNetworking)
+            {
+                Add-Content -Value "$($indents[4])," -Path $jsonFile
+                Add-Content -Value "$($indents[4])^enableAcceleratedNetworking^: true" -Path $jsonFile
+                LogMsg "Enabled Accelerated Networking."
+            }
             Add-Content -Value "$($indents[3])}" -Path $jsonFile
         Add-Content -Value "$($indents[2])}," -Path $jsonFile
 		LogMsg "Added NIC $NIC.."

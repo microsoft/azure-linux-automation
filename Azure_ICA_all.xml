@@ -547,10 +547,11 @@
 			<SingleVM>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
-					<Tag></Tag>
+					<Tag>SingleVM</Tag>
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>ExtraSmall</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
