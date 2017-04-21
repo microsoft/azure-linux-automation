@@ -30,7 +30,9 @@ param (
 [switch] $EnableAcceleratedNetworking,
 [string] $customKernel, 
 [string] $customLIS, 
-[string] $customLISBranch
+[string] $customLISBranch,
+[string] $ExistingResourceGroup,
+[switch] $CleanupExistingRG
 )
 
 Import-Module .\TestLibs\AzureWinUtils.psm1 -Force -Scope Global
