@@ -1224,8 +1224,17 @@ Function GetAndCheckKernelLogs($allDeployedVMs, $status, $vmUser, $vmPassword)
 			{
 				if ( $UseAzureResourceManager )
 				{
-					LogMsg "Adding preserve tag to $($VM.ResourceGroup) .."
-					$out = Set-AzureRmResourceGroup -Name $($VM.ResourceGroup) -Tag @{Name =$preserveKeyword; Value = "yes"},@{Name ="callTrace"; Value = "yes"}
+					LogMsg "Preserving the Resource Group(s) $($VM.ResourceGroupName)"
+					LogMsg "Setting tags : $preserveKeyword = yes; testName = $testName"
+					$hash = @{}
+					$hash.Add($preserveKeyword,"yes")
+					$hash.Add("testName","$testName")
+					$out = Set-AzureRmResourceGroup -Name $($VM.ResourceGroupName) -Tag $hash
+					LogMsg "Setting tags : calltrace = yes; testName = $testName"
+					$hash = @{}
+					$hash.Add("calltrace","yes")
+					$hash.Add("testName","$testName")
+					$out = Set-AzureRmResourceGroup -Name $($VM.ResourceGroupName) -Tag $hash
 				}
 				else
 				{
@@ -1406,6 +1415,16 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, 
         LogMsg "Custom kernel: $customKernel will be installed on all machines..."
         $kernelUpgradeStatus = InstallCustomKernel -customKernel $customKernel -allVMData $allVMData -RestartAfterUpgrade
         if ( !$kernelUpgradeStatus )
+        {
+            LogErr "Custom Kernel: $customKernel installation FAIL. Aborting tests."
+            $retValue = ""
+        }
+    }
+    if ( $retValue -and $customLIS)
+    {
+        LogMsg "Custom LIS: $customLIS will be installed on all machines..."
+        $LISUpgradeStatus = InstallCustomLIS -customLIS $customLIS -allVMData $allVMData -customLISBranch $customLISBranch -RestartAfterUpgrade
+        if ( !$LISUpgradeStatus )
         {
             LogErr "Custom Kernel: $customKernel installation FAIL. Aborting tests."
             $retValue = ""
@@ -2557,6 +2576,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 				#Removal of background 
 				LogMsg "Removing Background Job ID : $taskID..."
 				Remove-Job -Id $taskID -Force
+				Remove-Item $LogDir\CurrentTestBackgroundJobs.txt -ErrorAction SilentlyContinue
 			}
 			$user=$xmlConfig.config.Azure.Deployment.Data.UserName
 			if ( !$SkipVerifyKernelLogs )
@@ -4567,6 +4587,14 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 					{
 						Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($securityRule.name)Port" -Value $securityRule.properties.destinationPortRange -Force
 					}
+					if($AllEndpoints.Length -eq 0)
+					{
+						$sg = Get-AzureRmNetworkSecurityGroup -ResourceGroupName $testVM.ResourceGroupName
+						foreach($rule in $sg.SecurityRules)
+						{
+							Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($rule.Name)Port" -Value $rule.DestinationPortRange -Force
+						}
+					}
 				}
 				foreach ( $nic in $NICdata )
 				{
@@ -4657,8 +4685,10 @@ Function ConfigureDnsServer($intermediateVM, $DnsServer, $HostnameDIPDetails, $v
 {
 #Get VNETVM details using - Get-AllVMHostnameAndDIP() function. This will generate the string of all VMs IP and hostname.
 	$HostnameDIP = $HostnameDIPDetails
-	$DnsConfigureCommand = "python /home/$user/ConfigureDnsServer.py -v `"$HostnameDIP`" -D $vnetDomainDBFilePath -r $vnetDomainREVFilePath" 
+	$DnsConfigureCommand = "echo $($dnsServer.password) | sudo -S python /home/$user/ConfigureDnsServer.py -v `"$HostnameDIP`" -D $vnetDomainDBFilePath -r $vnetDomainREVFilePath" 
 	$out = RunLinuxCmdOnRemoteVM -intermediateVM $intermediateVM -remoteVM $DnsServer -remoteCommand $DnsConfigureCommand
+	#Add time interval for changes to take effect
+	sleep 60
 	if($out -imatch 'CONFIGURATION_SUCCESSFUL')
 	{
 		LogMsg  "DNS server configured successfully."
