@@ -1316,17 +1316,6 @@ Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFa
 					#Collecting Initial Kernel
 						$user=$xmlConfig.config.Azure.Deployment.Data.UserName
 						$KernelLogOutput= GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Initial"
-						
-					#Enable SRIOV related settings.
-						$SRIOVStatus = EnableSRIOVInAllVMs -allDeployedVMs $allVMData
-						if ($SRIOVStatus)
-						{
-						
-						}
-						else
-						{
-							$retValue = $NULL
-						}
 					}
 					else
 					{
@@ -1431,6 +1420,15 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, 
             LogErr "Custom Kernel: $customKernel installation FAIL. Aborting tests."
             $retValue = ""
         }
+    }
+    if ( $retValue -and $EnableAcceleratedNetworking)
+    {
+		$SRIOVStatus = EnableSRIOVInAllVMs -allVMData $allVMData
+		if ( !$SRIOVStatus)
+		{
+            LogErr "Failed to enable Accelerated Networking. Aborting tests."
+            $retValue = ""
+		}
     }
 	return $retValue
 }
