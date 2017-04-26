@@ -370,7 +370,6 @@ function EnableSRIOVInAllVMs($allVMData)
 		            LogMsg "Mellanox Adapter detected in $($vmData.RoleName). Now executing $scriptName ..."
 		            $jobID = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/home/$user/$scriptName" -runAsSudo
                     $sriovDetectedCount += 1
-
                 }
                 else
                 {
@@ -378,7 +377,7 @@ function EnableSRIOVInAllVMs($allVMData)
                 }
 		        #endregion
 	        }
-            LogMsg "$scriptName executed successfully in all VMs."
+
             if ($sriovDetectedCount -gt 0)
             {
                 LogMsg "Now restarting VMs..."
