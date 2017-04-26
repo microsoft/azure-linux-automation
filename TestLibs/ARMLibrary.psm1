@@ -337,11 +337,11 @@ Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro, [str
         $retryDeployment = 0
         if ( $RG.Tag -ne $null )
         {
-            $groupName = "$Distro-" + $RG.Tag + "-" + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $randomNumber 
+            $groupName = "$Distro-" + $RG.Tag + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $randomNumber 
         }
         else
         {
-            $groupName = "$Distro-" + $setupType + "-" + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $randomNumber
+            $groupName = "$Distro-" + $setupType + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $randomNumber
         }
         if($isMultiple -eq "True")
         {
