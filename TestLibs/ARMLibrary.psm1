@@ -30,43 +30,46 @@
 
         Function TestUsage($currentStatus, $text, $AllowedUsagePercentage)
         {
+            $overFlowErrors = 0
             $counter = 0
             foreach ($item in $currentStatus)
             {
+                LogMsg "-$text-"
                 if ($item.Name.LocalizedValue -imatch $text)
                 {
                     $allowedCount = [int](($currentStatus[$counter].Limit)*($AllowedUsagePercentage/100))
-                    #LogMsg "Max allowed $($item.Name.LocalizedValue) usage : $allowedCount out of $(($currentStatus[$counter].Limit))."
+                    LogMsg "Max allowed $($item.Name.LocalizedValue) usage : $allowedCount out of $(($currentStatus[$counter].Limit))."
                     if ($currentStatus[$counter].CurrentValue -le $allowedCount)
                     {
-                        return 0
+                        
                     }
                     else
                     {
                         LogErr "  Current $text Estimated use: $($currentStatus[$counter].CurrentValue)"
-                        return 1
+                        $overFlowErrors += 1
                     }
                 }
                 if ($item.Name.LocalizedValue -imatch "Total Regional Cores")
                 {
                     $allowedCount = [int](($currentStatus[$counter].Limit)*($AllowedUsagePercentage/100))
-                    #LogMsg "Max allowed $($item.Name.LocalizedValue) usage : $allowedCount out of $(($currentStatus[$counter].Limit))."
+                    LogMsg "Max allowed $($item.Name.LocalizedValue) usage : $allowedCount out of $(($currentStatus[$counter].Limit))."
                     if ($currentStatus[$counter].CurrentValue -le $allowedCount)
                     {
-                        return 0
+                        
                     }
                     else
                     {
                         LogErr "  Current Regional Cores Estimated use: $($currentStatus[$counter].CurrentValue)"
-                        return 1
+                        $overFlowErrors += 1
                     }
                 }
                 $counter++
             }
+            return $overFlowErrors
         }
         #Get the region
         $Location = ($xmlConfig.config.Azure.General.Location).Replace('"',"").Replace(' ',"").ToLower()
-        $AllowedUsagePercentage = 95
+        $AllowedUsagePercentage = 100
         $currentStatus = Get-AzureRmVMUsage -Location $Location
         $overFlowErrors = 0
         $requiredVMCores = 0
