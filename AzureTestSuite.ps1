@@ -352,47 +352,22 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 				Write-Host $testSuiteResultDetails.totalPassTc,$testSuiteResultDetails.totalFailTc,$testSuiteResultDetails.totalAbortedTc
 				#Back to Test Suite Main Logging
 				$global:logFile = $testSuiteLogFile
-				LogMsg "Checking background cleanup jobs.."
-				$cleanupJobList = Get-Job | where { $_.Name -imatch "DeleteResourceGroup"}
-				$isAllCleaned = $false
-				while(!$isAllCleaned)
-				{
-					$runningJobsCount = 0
-					$isAllCleaned = $true
-					$cleanupJobList = Get-Job | where { $_.Name -imatch "DeleteResourceGroup"}
-					foreach ( $cleanupJob in $cleanupJobList )
-					{
-		
-						$jobStatus = Get-Job -Id $cleanupJob.ID
-						if ( $jobStatus.State -ne "Running" )
-						{
-
-							$tempRG = $($cleanupJob.Name).Replace("DeleteResourceGroup-","")
-							LogMsg "$tempRG : Delete : $($jobStatus.State)"
-							Remove-Job -Id $cleanupJob.ID -Force
-						}
-						else
-						{
-							LogMsg "$($cleanupJob.Name) is running."
-							$isAllCleaned = $false
-							$runningJobsCount += 1
-						}
-					}
-					if ($runningJobsCount -gt 0)
-					{
-						Write-Host "$runningJobsCount background cleanup jobs still running. Waiting 30 seconds..."
-						sleep -Seconds 30
-					}
-				}
-				Write-Host "All background cleanup jobs finished."
 				$currentJobs = Get-Job
 				foreach ( $job in $currentJobs )
 				{
-					$out = Remove-Job $job -Force -ErrorAction SilentlyContinue
-					if ( $? )
+					$jobStatus = Get-Job -Id $job.ID
+					if ( $jobStatus.State -ne "Running" )
 					{
-						LogMsg "Removed background job ID $($job.Id)."
+						Remove-Job -Id $job.ID -Force
+						if ( $? )
+						{
+							LogMsg "Removed $($job.State) background job ID $($job.Id)."
+						}
 					}
+					else
+					{
+						LogMsg "$($job.Name) is running."
+					}				
 				}
 			}
 			else
@@ -405,6 +380,40 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 			LogErr "No Test Data found for $($test.Name).."
 		}
 	}
+
+	LogMsg "Checking background cleanup jobs.."
+	$cleanupJobList = Get-Job | where { $_.Name -imatch "DeleteResourceGroup"}
+	$isAllCleaned = $false
+	while(!$isAllCleaned)
+	{
+		$runningJobsCount = 0
+		$isAllCleaned = $true
+		$cleanupJobList = Get-Job | where { $_.Name -imatch "DeleteResourceGroup"}
+		foreach ( $cleanupJob in $cleanupJobList )
+		{
+
+			$jobStatus = Get-Job -Id $cleanupJob.ID
+			if ( $jobStatus.State -ne "Running" )
+			{
+
+				$tempRG = $($cleanupJob.Name).Replace("DeleteResourceGroup-","")
+				LogMsg "$tempRG : Delete : $($jobStatus.State)"
+				Remove-Job -Id $cleanupJob.ID -Force
+			}
+			else
+			{
+				LogMsg "$($cleanupJob.Name) is running."
+				$isAllCleaned = $false
+				$runningJobsCount += 1
+			}
+		}
+		if ($runningJobsCount -gt 0)
+		{
+			Write-Host "$runningJobsCount background cleanup jobs still running. Waiting 30 seconds..."
+			sleep -Seconds 30
+		}
+	}
+	Write-Host "All background cleanup jobs finished."
 	
 	LogMsg "Cycle Finished.. $($CycleName.ToUpper())"
 	$EndTime =  [Datetime]::Now.ToUniversalTime()
