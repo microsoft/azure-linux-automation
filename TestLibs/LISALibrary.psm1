@@ -395,12 +395,12 @@ function EnableSRIOVInAllVMs($allVMData)
                     $AfterIfConfigStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "ifconfig -a"
                     if ($AfterIfConfigStatus -imatch "bond")
                     {
-                        LogMsg "New bond detected in $($vmData.PublicIP)"
+                        LogMsg "New bond detected in $($vmData.RoleName)"
                         $bondSuccess += 1
                     }
                     else
                     {
-                        LogErr "New bond not detected in $($vmData.PublicIP)"
+                        LogErr "New bond not detected in $($vmData.RoleName)"
                         $bondError += 1 
                     }
                 }
