@@ -2013,6 +2013,15 @@ Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed
                         $xmlConfig.config.Azure.Deployment.$setupType.isDeployed = $retValue
                         #Collecting Initial Kernel
                         $KernelLogOutput= GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Initial"
+						$SRIOVStatus = EnableSRIOVInAllVMs -allDeployedVMs $allVMData
+						if ($SRIOVStatus)
+						{
+						
+						}
+						else
+						{
+							$retValue = $NULL
+						}
                     }
                     else
                     {

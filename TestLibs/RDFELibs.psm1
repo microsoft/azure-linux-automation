@@ -1316,6 +1316,17 @@ Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFa
 					#Collecting Initial Kernel
 						$user=$xmlConfig.config.Azure.Deployment.Data.UserName
 						$KernelLogOutput= GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Initial"
+						
+					#Enable SRIOV related settings.
+						$SRIOVStatus = EnableSRIOVInAllVMs -allDeployedVMs $allVMData
+						if ($SRIOVStatus)
+						{
+						
+						}
+						else
+						{
+							$retValue = $NULL
+						}
 					}
 					else
 					{
