@@ -34,11 +34,10 @@
             $counter = 0
             foreach ($item in $currentStatus)
             {
-                LogMsg "-$text-"
                 if ($item.Name.LocalizedValue -imatch $text)
                 {
                     $allowedCount = [int](($currentStatus[$counter].Limit)*($AllowedUsagePercentage/100))
-                    LogMsg "Max allowed $($item.Name.LocalizedValue) usage : $allowedCount out of $(($currentStatus[$counter].Limit))."
+                    #LogMsg "Max allowed $($item.Name.LocalizedValue) usage : $allowedCount out of $(($currentStatus[$counter].Limit))."
                     if ($currentStatus[$counter].CurrentValue -le $allowedCount)
                     {
                         
@@ -52,7 +51,7 @@
                 if ($item.Name.LocalizedValue -imatch "Total Regional Cores")
                 {
                     $allowedCount = [int](($currentStatus[$counter].Limit)*($AllowedUsagePercentage/100))
-                    LogMsg "Max allowed $($item.Name.LocalizedValue) usage : $allowedCount out of $(($currentStatus[$counter].Limit))."
+                    #LogMsg "Max allowed $($item.Name.LocalizedValue) usage : $allowedCount out of $(($currentStatus[$counter].Limit))."
                     if ($currentStatus[$counter].CurrentValue -le $allowedCount)
                     {
                         
