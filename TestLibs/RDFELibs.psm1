@@ -1430,6 +1430,18 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, 
             $retValue = ""
 		}
     }
+
+
+
+    if ( $retValue -and $resizeVMsAfterDeployment)
+    {
+		$SRIOVStatus = EnableSRIOVInAllVMs -allVMData $allVMData
+		if ( $SRIOVStatus -ne "True" )
+		{
+            LogErr "Failed to enable Accelerated Networking. Aborting tests."
+            $retValue = ""
+		}
+    }
 	return $retValue
 }
 
@@ -5058,6 +5070,44 @@ Function RestartAllDeployments($allVMData)
 	$isSSHOpened = isAllSSHPortsEnabledRG -AllVMDataObject $AllVMData
 	return $isSSHOpened
 }
+
+Function ResizeAllVMs($allVMData, $newVMSize)
+{
+	foreach ( $vmData in $AllVMData )
+	{
+		if ( $UseAzureResourceManager)
+		{
+			$currentVM = Get-AzureRmVM -ResourceGroupName $vmData.ResourceGroupName -Name $vmData.RoleName -Verbose
+            $oldSize = $currentVM.HardwareProfile.VmSize 
+            $currentVM.HardwareProfile.VmSize = $newVMSize
+            $resizeVM = Update-AzureRmVM -VM $currentVM -ResourceGroupName $vmData.ResourceGroupName -Verbose
+			if ( $resizeVM.StatusCode -eq "OK" )
+			{
+				LogMsg "Resized $($vmData.RoleName) from $oldSize --> $newVMSize : $($vmData.RoleName)"
+			}
+			else
+			{
+				LogErr "FAILED TO RESIZE : $($vmData.RoleName)"
+				$retryCount = $retryCount + 1
+				if ($retryCount -gt 0)
+				{
+					LogMsg "Retrying..."
+				}
+				if ($retryCount -eq 0)
+				{
+					Throw "Unable to Restart : $($vmData.RoleName)"
+				}
+			}
+		}
+		else
+		{
+            #TBD
+		}
+	}
+	$isSSHOpened = isAllSSHPortsEnabledRG -AllVMDataObject $AllVMData
+	return $isSSHOpened
+}
+
 
 Function StopAllDeployments($DeployedServices)
 {

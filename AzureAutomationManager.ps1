@@ -30,7 +30,8 @@ param (
 [switch] $EnableAcceleratedNetworking,
 [string] $customKernel, 
 [string] $customLIS, 
-[string] $customLISBranch
+[string] $customLISBranch,
+[string] $resizeVMsAfterDeployment
 )
 
 Import-Module .\TestLibs\AzureWinUtils.psm1 -Force -Scope Global
@@ -57,6 +58,10 @@ Set-Variable -Name preserveKeyword -Value "preserving" -Scope Global
 if($EnableAcceleratedNetworking)
 {
     Set-Variable -Name EnableAcceleratedNetworking -Value $true -Scope Global
+}
+if($resizeVMsAfterDeployment)
+{
+    Set-Variable -Name resizeVMsAfterDeployment -Value $resizeVMsAfterDeployment -Scope Global
 }
 
 if ( $OverrideVMSize )
