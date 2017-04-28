@@ -112,7 +112,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
         {
             if ( $UseAzureResourceManager )
             {
-		        if ( $tempDistro.ARMImage )
+		        if ( $tempDistro.ARMImage.Publisher )
 		        { 
 			        Set-Variable -Name ARMImage -Value $tempDistro.ARMImage -Scope Global
 			    
