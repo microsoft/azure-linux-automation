@@ -134,6 +134,14 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
                         LogMsg "Set GuestOS = $GuestOS."
                     }
 		        }
+		        if ( $tempDistro.OsVHD )
+		        { 
+			        $BaseOsVHD = $tempDistro.OsVHD.ToUpper() 
+			        Set-Variable -Name BaseOsVHD -Value $BaseOsVHD -Scope Global
+			        LogMsg "Base VHD name - $BaseOsVHD"
+                    Set-Variable -Name GuestOS -Value "Linux" -Scope Global
+                    LogMsg "Set GuestOS = $GuestOS."
+		        }
             }
             else
             {
@@ -152,14 +160,6 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
                         Set-Variable -Name GuestOS -Value "Windows" -Scope Global
                         LogMsg "Set GuestOS = $GuestOS."
                     }
-		        }
-		        if ( $tempDistro.OsVHD )
-		        { 
-			        $BaseOsVHD = $tempDistro.OsVHD.ToUpper() 
-			        Set-Variable -Name BaseOsVHD -Value $BaseOsVHD -Scope Global
-			        LogMsg "Base VHD name - $BaseOsVHD"
-                    Set-Variable -Name GuestOS -Value "Linux" -Scope Global
-                    LogMsg "Set GuestOS = $GuestOS."
 		        }
             }
         }
