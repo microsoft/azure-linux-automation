@@ -237,16 +237,25 @@ for current_buffer in "${bufferLenghs[@]}"
 		done
 		LogMsg "Iperf3 running buffer ${current_buffer}K $num_threads_P X $num_threads_n ..."
 		sleep ${testDuration}
+		timeoutSeconds=900
 		sleep 5
 		var=`ps -C "iperf3 -c" --no-headers | wc -l`
 		while [ $var -gt 0 ]
 		do
-			sleep 1
-			var=`ps -C "iperf3 -c" --no-headers | wc -l`
-			LogMsg "Iperf3 running buffer ${current_buffer}K $num_threads_P X $num_threads_n. Waiting to finish $var instances."
+			timeoutSeconds=`expr $timeoutSeconds - 1`
+			if [ $timeoutSeconds -eq 0 ]; then
+				LogMsg "Iperf3 running buffer ${current_buffer}K $num_threads_P X $num_threads_n. Timeout."
+				LogMsg "killing all iperf3 client threads."
+				killall iperf3
+				sleep 1
+			else
+				sleep 1
+				var=`ps -C "iperf3 -c" --no-headers | wc -l`
+				LogMsg "Iperf3 running buffer ${current_buffer}K $num_threads_P X $num_threads_n. Waiting to finish $var instances."
+			fi			
 		done
 		#Sleep extra 5 seconds.
-		sleep 1
+		sleep 5
 		LogMsg "Iperf3 Finished buffer ${current_buffer}K  $num_threads_P X $num_threads_n ..."
 	done
 done

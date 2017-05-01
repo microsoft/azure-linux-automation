@@ -547,9 +547,11 @@
 			<SingleVM>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
+					<Tag>SingleVM</Tag>
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>ExtraSmall</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -3576,6 +3578,130 @@
 					</VirtualMachine>					
 				</HostedService>
 			</M1S1>			
+			<RDMA2VMA8>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_A8</InstanceSize>
+						<ARMInstanceSize>Standard_A8</ARMInstanceSize>
+						<RoleName>server-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12122</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_A8</InstanceSize>
+						<ARMInstanceSize>Standard_A8</ARMInstanceSize>
+						<RoleName>client-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12222</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+				</HostedService>
+			</RDMA2VMA8>						
+			<RDMA2VMA9>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_A9</InstanceSize>
+						<ARMInstanceSize>Standard_A9</ARMInstanceSize>
+						<RoleName>server-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12122</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_A9</InstanceSize>
+						<ARMInstanceSize>Standard_A9</ARMInstanceSize>
+						<RoleName>client-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12222</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+				</HostedService>
+			</RDMA2VMA9>						
+			<RDMA2VMH16r>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_H16r</InstanceSize>
+						<ARMInstanceSize>Standard_H16r</ARMInstanceSize>
+						<RoleName>server-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12122</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_H16r</InstanceSize>
+						<ARMInstanceSize>Standard_H16r</ARMInstanceSize>
+						<RoleName>client-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12222</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+				</HostedService>
+			</RDMA2VMH16r>						
+			<RDMA2VMH16mr>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_H16mr</InstanceSize>
+						<ARMInstanceSize>Standard_H16mr</ARMInstanceSize>
+						<RoleName>server-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12122</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_H16mr</InstanceSize>
+						<ARMInstanceSize>Standard_H16mr</ARMInstanceSize>
+						<RoleName>client-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>12222</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+				</HostedService>
+			</RDMA2VMH16mr>									
 			<M1S5>
 				<!-- This setup type defines One Master and Three slave machines. Hence name is M(aster)1S(lave)3. -->
 				<isDeployed>NO</isDeployed>
@@ -4564,7 +4690,7 @@
 			<testScript></testScript>
 			<testScriptPs1>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</testScriptPs1>
 			<files></files>
-			<setupType>BVTDeployment</setupType>
+			<setupType>SingleVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
@@ -6885,6 +7011,51 @@
 			<Priority>P0</Priority>
 		</test>			
 		<test>
+			<testName>ICA-RDMA-TEST-2VM-A8</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-RDMA-TEST-2VM.ps1</testScriptps1>
+			<setupType>RDMA2VMA8</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<remoteFiles></remoteFiles>
+			<InitialWaitSeconds>60</InitialWaitSeconds>
+			<Priority>P0</Priority>
+		</test>			
+		<test>
+			<testName>ICA-RDMA-TEST-2VM-A9</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-RDMA-TEST-2VM.ps1</testScriptps1>
+			<setupType>RDMA2VMA9</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<remoteFiles></remoteFiles>
+			<InitialWaitSeconds>60</InitialWaitSeconds>
+			<Priority>P0</Priority>
+		</test>			
+		<test>
+			<testName>ICA-RDMA-TEST-2VM-H16r</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-RDMA-TEST-2VM.ps1</testScriptps1>
+			<setupType>RDMA2VMH16r</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<remoteFiles></remoteFiles>
+			<InitialWaitSeconds>60</InitialWaitSeconds>
+			<Priority>P0</Priority>
+		</test>			
+		<test>
+			<testName>ICA-RDMA-TEST-2VM-H16mr</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-RDMA-TEST-2VM.ps1</testScriptps1>
+			<setupType>RDMA2VMH16mr</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<remoteFiles></remoteFiles>
+			<InitialWaitSeconds>60</InitialWaitSeconds>
+			<Priority>P0</Priority>
+		</test>			
+		
+		<test>
 			<testName>ICA-RDMA-TEST-16VM</testName>
 			<testScript></testScript>
 			<testScriptps1>ICA-RDMA-TEST-16VM.ps1</testScriptps1>
@@ -6934,6 +7105,26 @@
 			<files>.\remote-scripts\azuremodules.sh</files>
 			<TestParameters>
 				<param>testDuration=300</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>		
+		<test>
+			<testName>ICA-PERF-FIO-TEST-4K</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-FIO-TEST.ps1</testScriptps1>
+			<setupType>DS14DISK12</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>			
+			<TestParameters>
+				<param>modes='randread randwrite read write'</param>
+				<param>startThread=1</param>
+				<param>maxThread=1024</param>
+				<param>startIO=4</param>
+				<param>numjobs=1</param>
+				<param>ioruntime=300</param>
+				<param>maxIO=4</param>
+				<param>fileSize=134G</param>
 			</TestParameters>
 			<Priority>P0</Priority>
 		</test>		
@@ -7921,6 +8112,21 @@
 			</test>
 		</Cycle>
 		<Cycle>
+			<cycleName>RDMA2VM-ALL-SIZES</cycleName>
+			<test>
+				<Name>ICA-RDMA-TEST-2VM-A8</Name>
+			</test>
+			<test>
+				<Name>ICA-RDMA-TEST-2VM-A9</Name>
+			</test>
+			<test>
+				<Name>ICA-RDMA-TEST-2VM-H16r</Name>
+			</test>
+			<test>
+				<Name>ICA-RDMA-TEST-2VM-H16mr</Name>
+			</test>
+		</Cycle>
+		<Cycle>
 			<cycleName>RDMA16VM</cycleName>
 			<test>
 				<Name>ICA-RDMA-TEST-16VM</Name>
@@ -7982,12 +8188,15 @@
 		<Cycle>
 			<cycleName>PERF-FIO</cycleName>
 			<test>
+				<Name>ICA-PERF-FIO-TEST-4K</Name>
+			</test>
+			<test>
 				<Name>ICA-PERF-FIO-TEST-8K</Name>
 			</test>
 			<test>
 				<Name>ICA-PERF-FIO-TEST-1024K</Name>
 			</test>			
-		</Cycle>		
+		</Cycle>
 		<Cycle>
 			<cycleName>PERF-REDIS-M</cycleName>
 			<test>

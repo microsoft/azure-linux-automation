@@ -1,0 +1,13 @@
+<Default>
+	<!-- Please mention below values in allowed percentage use of subscription. -->
+	<!-- If you have 200 ARMStorage limit and want to limit the usage to 190 Storage accounts, then mention 95 -->
+	<Global>
+		<ARMStorage>95</ARMStorage>
+		<ARMVMCores>95</ARMVMCores>
+	</Global>
+	<Regional>
+		<westus>
+			<ARMVMCores>90</ARMVMCores>
+		</westus>
+	</Regional>
+</Default>

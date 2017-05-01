@@ -345,3 +345,91 @@ function InstallcustomLIS ($customLIS, $customLISBranch, $allVMData, [switch]$Re
         return $false
     }
 }
+
+function EnableSRIOVInAllVMs($allVMData)
+{
+    try
+    {
+        if( $EnableAcceleratedNetworking)
+        {
+            $scriptName = "bondvf.sh"
+            $jobCount = 0
+            $kernelSuccess = 0
+	        $packageInstallJobs = @()
+            $sriovDetectedCount = 0
+            $vmCount = 0
+	        foreach ( $vmData in $allVMData )
+	        {
+                $vmCount += 1 
+                RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\remote-scripts\$scriptName" -username $user -password $password -upload
+                $out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "chmod +x *.sh" -runAsSudo
+                $currentIfConfigStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "ifconfig -a"
+                $pciDevices = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "lspci"
+                if ( $pciDevices -imatch "Mellanox")
+                {
+		            LogMsg "Mellanox Adapter detected in $($vmData.RoleName). Now executing $scriptName ..."
+		            $jobID = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/home/$user/$scriptName" -runAsSudo
+                    $sriovDetectedCount += 1
+                }
+                else
+                {
+                    LogErr "Mellanox Adapter not detected in $($vmData.RoleName)."
+                }
+		        #endregion
+	        }
+
+            if ($sriovDetectedCount -gt 0)
+            {
+                LogMsg "Now restarting VMs..."
+                $restartStatus = RestartAllDeployments -allVMData $allVMData
+            }
+            $vmCount = 0
+            $bondSuccess = 0
+            $bondError = 0
+            if ( $restartStatus -eq "True")
+            {
+	            foreach ( $vmData in $allVMData )
+	            {
+                    $vmCount += 1
+                    $AfterIfConfigStatus = $null
+                    $AfterIfConfigStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "ifconfig -a"
+                    if ($AfterIfConfigStatus -imatch "bond")
+                    {
+                        LogMsg "New bond detected in $($vmData.RoleName)"
+                        $bondSuccess += 1
+                    }
+                    else
+                    {
+                        LogErr "New bond not detected in $($vmData.RoleName)"
+                        $bondError += 1 
+                    }
+                }
+            }
+            else
+            {
+                return $false
+            }
+            if ($vmCount -eq $bondSuccess)
+            {
+                return $true
+            }
+            else
+            {
+                return $false
+            }
+        }
+        else
+        {
+            return $true
+        }
+    }
+    catch
+    {
+        $line = $_.InvocationInfo.ScriptLineNumber
+        $script_name = ($_.InvocationInfo.ScriptName).Replace($PWD,".")
+        $ErrorMessage =  $_.Exception.Message
+        LogErr "EXCEPTION : $ErrorMessage"
+        LogErr "Source : Line $line in script $script_name." 
+        return $false
+    }
+}
