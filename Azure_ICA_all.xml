@@ -7269,7 +7269,20 @@
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<Priority>P0</Priority>
-		</test>			
+		</test>		
+		<test>
+			<testName>ICA-LTP-BASIC-TEST</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-LTP-BASIC-TEST.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>		
 	</testsDefinition>
 
 	<testCycles>
@@ -8249,5 +8262,11 @@
 				<Name>BVT-VERIFY-DEPLOYMENT-PROVISION</Name>
 			</test>
 		</Cycle>
+		<Cycle>
+			<cycleName>LTP-BASIC</cycleName>
+			<test>
+				<Name>ICA-LTP-BASIC-TEST</Name>
+			</test>
+		</Cycle>		
 	</testCycles>
 </config>
