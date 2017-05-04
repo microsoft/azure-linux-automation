@@ -7283,6 +7283,51 @@
 			</TestParameters>
 			<Priority>P0</Priority>
 		</test>		
+		<test>
+			<testName>ICA-N-Series-GPU-TEST-NC6</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-N-Series-GPU-TEST.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<OverrideVMSize>Standard_NC6</OverrideVMSize>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+			  <param>enableProposedRepo=yes</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-N-Series-GPU-TEST-NC12</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-N-Series-GPU-TEST.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<OverrideVMSize>Standard_NC12</OverrideVMSize>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+			  <param>enableProposedRepo=yes</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-N-Series-GPU-TEST-NC24</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-N-Series-GPU-TEST.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<OverrideVMSize>Standard_NC24</OverrideVMSize>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+			  <param>enableProposedRepo=yes</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
 	</testsDefinition>
 
 	<testCycles>
@@ -8267,6 +8312,20 @@
 			<test>
 				<Name>ICA-LTP-BASIC-TEST</Name>
 			</test>
-		</Cycle>		
+		</Cycle>	
+		<Cycle>
+			<cycleName>GPU-BASIC</cycleName>
+			<test>
+				<Name>ICA-N-Series-GPU-TEST-NC6</Name>
+			</test>
+			<test>
+				<Name>ICA-N-Series-GPU-TEST-NC12</Name>
+			</test>
+			<test>
+				<Name>ICA-N-Series-GPU-TEST-NC24</Name>
+			</test>
+		</Cycle>	
+
+		
 	</testCycles>
 </config>
