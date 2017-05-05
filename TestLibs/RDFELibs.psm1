@@ -1522,6 +1522,10 @@ Function Test-TCP($testIP, $testport)
 	{
 		$isConnected = "True"
 	}
+	else
+	{
+		$isConnected = "False"
+	}
 	$socket.Close()
 	return $isConnected
 }

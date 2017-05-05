@@ -2139,6 +2139,7 @@ Function isAllSSHPortsEnabledRG($AllVMDataObject)
         $WaitingForConnect = 0
         foreach ( $vm in $AllVMDataObject)
         {
+            $out = $null
             if ( $GuestOS -imatch "Linux" )
             {
                 Write-Host "Connecting to  $($vm.PublicIP) : $($vm.SSHPort)" -NoNewline
@@ -2158,6 +2159,7 @@ Function isAllSSHPortsEnabledRG($AllVMDataObject)
             {
                 Write-Host " : Connected"
             }
+            sleep -Milliseconds 100
         }
         if($WaitingForConnect -gt 0)
         {
