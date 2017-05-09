@@ -145,6 +145,7 @@ elif [[ $customKernel == *.rpm ]]; then
 	else
 		LogMsg "CUSTOM_KERNEL_SUCCESS"
 		UpdateTestState $ICA_TESTCOMPLETED
+		grub2-set-default 0
 	fi
 	exit 0
 fi
