@@ -1,5 +1,6 @@
 ﻿<#-------------Create Deployment Start------------------#>
 Import-Module .\TestLibs\RDFELibs.psm1 -Force
+Import-Module .\TestLibs\LISALibrary.psm1 -Force
 $result = ""
 $testResult = ""
 $resultArr = @()
@@ -47,7 +48,7 @@ if ($isDeployed)
 		#
 		# PROVISION VMS FOR LISA WILL ENABLE ROOT USER AND WILL MAKE ENABLE PASSWORDLESS AUTHENTICATION ACROSS ALL VMS IN SAME HOSTED SERVICE.	
 		#
-		##ProvisionVMsForLisa -allVMData $allVMData
+		ProvisionVMsForLisa -allVMData $allVMData
 		
 		#endregion
 		
