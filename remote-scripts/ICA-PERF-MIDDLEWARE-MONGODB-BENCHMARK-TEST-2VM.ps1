@@ -48,7 +48,7 @@ if ($isDeployed)
 		#
 		# PROVISION VMS FOR LISA WILL ENABLE ROOT USER AND WILL MAKE ENABLE PASSWORDLESS AUTHENTICATION ACROSS ALL VMS IN SAME HOSTED SERVICE.	
 		#
-		ProvisionVMsForLisa -allVMData $allVMData
+		ProvisionVMsForLisa -allVMData $allVMData -installPackagesOnRoleNames "none"
 		
 		#endregion
 		
