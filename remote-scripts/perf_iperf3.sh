@@ -41,16 +41,34 @@ ICA_TESTABORTED="TestAborted"      # Error during the setup of the test
 ICA_TESTFAILED="TestFailed"        # Error occurred during the test
 touch ./IPERF3Test.log
 
-ConfigureIperf3Ubuntu()
+InstallIPERF3()
 {
-	LogMsg "Configuring ${1} for IPERF3 test..."
-	ssh ${1} "apt-get update"
-	ssh ${1} "apt-get -y install iperf3 sysstat bc "
-	if [ $IPversion -eq 6 ]; then	
-		scp ConfigureUbuntu1604IPv6.sh ${1}:
-		ssh ${1} "chmod +x ConfigureUbuntu1604IPv6.sh"
-		ssh ${1} "./ConfigureUbuntu1604IPv6.sh"
-	fi
+		DISTRO=`grep -ihs "buntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux" /etc/{issue,*release,*version}`
+        if [[ $DISTRO =~ "Ubuntu" ]];
+        then
+			
+			LogMsg "Detected Ubuntu"
+			ssh ${1} "apt-get update"
+			ssh ${1} "apt-get -y install iperf3 sysstat bc"
+			if [ $IPversion -eq 6 ]; then	
+				scp ConfigureUbuntu1604IPv6.sh ${1}:
+				ssh ${1} "chmod +x ConfigureUbuntu1604IPv6.sh"
+				ssh ${1} "./ConfigureUbuntu1604IPv6.sh"
+			fi
+				
+        elif [[ $DISTRO =~ "Red Hat Enterprise Linux Server release 7.3" ]];
+        then
+                LogMsg "Detected Redhat 7.3"
+				ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+				ssh ${1} "yum -y --nogpgcheck install iperf3 sysstat bc"
+				ssh ${1} "iptables -F"
+		else
+                LogMsg "Unknown Distro"
+                UpdateTestState "TestAborted"
+                UpdateSummary "Unknown Distro, test aborted"
+                return 1
+        fi
+
 }
 
 LogMsg()
@@ -161,10 +179,10 @@ fi
 #Make & build IPERF3 on client and server Machine
 
 LogMsg "Configuring client ${client}..."
-ConfigureIperf3Ubuntu ${client}
+InstallIPERF3 ${client}
 
 LogMsg "Configuring server ${server}..."
-ConfigureIperf3Ubuntu ${server}
+InstallIPERF3 ${server}
 
 ssh ${server} "rm -rf iperf-server-*"
 ssh ${client} "rm -rf iperf-client-*"
