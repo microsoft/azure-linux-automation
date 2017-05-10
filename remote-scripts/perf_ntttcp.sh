@@ -41,19 +41,42 @@ ICA_TESTABORTED="TestAborted"      # Error during the setup of the test
 ICA_TESTFAILED="TestFailed"        # Error occurred during the test
 touch ./ntttcpTest.log
 
-ConfigureNtttcpUbuntu()
-{
-	LogMsg "Configuring ${1} for ntttcp test..."
-	ssh ${1} "apt-get update"
-	ssh ${1} "apt-get -y install libaio1 sysstat git bc make gcc"
-	ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
-	ssh ${1} "cd ntttcp-for-linux/src/ && make && make install"
-	ssh ${1} "cp ntttcp-for-linux/src/ntttcp ."
-	ssh ${1} "rm -rf lagscope"
-	ssh ${1} "git clone https://github.com/Microsoft/lagscope"
-	ssh ${1} "cd lagscope/src && make && make install"
-}
 
+InstallNTTTCP() {
+		DISTRO=`grep -ihs "buntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux" /etc/{issue,*release,*version}`
+
+        if [[ $DISTRO =~ "Ubuntu" ]];
+        then
+                LogMsg "Detected UBUNTU"
+				LogMsg "Configuring ${1} for ntttcp test..."
+				ssh ${1} "apt-get update"
+				ssh ${1} "apt-get -y install libaio1 sysstat git bc make gcc"
+				ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
+				ssh ${1} "cd ntttcp-for-linux/src/ && make && make install"
+				ssh ${1} "cp ntttcp-for-linux/src/ntttcp ."
+				ssh ${1} "rm -rf lagscope"
+				ssh ${1} "git clone https://github.com/Microsoft/lagscope"
+				ssh ${1} "cd lagscope/src && make && make install"
+				
+        elif [[ $DISTRO =~ "Red Hat Enterprise Linux Server release 7.3" ]];
+        then
+                LogMsg "Detected Redhat 7.3"
+				ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+				ssh ${1} "yum -y --nogpgcheck install libaio1 sysstat git bc make gcc"
+				ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
+				ssh ${1} "cd ntttcp-for-linux/src/ && make && make install"
+				ssh ${1} "cp ntttcp-for-linux/src/ntttcp ."
+				ssh ${1} "rm -rf lagscope"
+				ssh ${1} "git clone https://github.com/Microsoft/lagscope"
+				ssh ${1} "cd lagscope/src && make && make install"
+				ssh ${1} "iptables -F"
+       else
+                LogMsg "Unknown Distro"
+                UpdateTestState "TestAborted"
+                UpdateSummary "Unknown Distro, test aborted"
+                return 1
+        fi
+}
 LogMsg()
 {
     echo `date "+%b %d %Y %T"` : "${1}"    # Add the time stamp to the log message
@@ -63,13 +86,6 @@ LogMsg()
 UpdateTestState()
 {
     echo "${1}" > ./state.txt
-}
-
-ConfigUbuntu1604()
-{
-    LogMsg "Running ConfigUbuntu..."
-	apt-get update
-	apt-get -y install libaio1 sysstat git
 }
 
 if [ -e ${CONSTANTS_FILE} ]; then
@@ -107,10 +123,10 @@ fi
 #Make & build ntttcp on client and server Machine
 
 LogMsg "Configuring client ${client}..."
-ConfigureNtttcpUbuntu ${client}
+InstallNTTTCP ${client}
 
 LogMsg "Configuring server ${server}..."
-ConfigureNtttcpUbuntu ${server}
+InstallNTTTCP ${server}
 
 #Now, start the ntttcp client on client VM.
 
