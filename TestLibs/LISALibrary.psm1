@@ -141,6 +141,8 @@ function InstallCustomKernel ($customKernel, $allVMData, [switch]$RestartAfterUp
 {
     try
     {
+        $currentKernelVersion = ""
+        $upgradedKernelVersion = ""
         $customKernel = $customKernel.Trim()
         if( ($customKernel -ne "linuxnext") -and ($customKernel -ne "netnext") -and ($customKernel -ne "proposed") -and !($customKernel.EndsWith(".deb"))  -and !($customKernel.EndsWith(".rpm")) )
         {
@@ -199,7 +201,6 @@ function InstallCustomKernel ($customKernel, $allVMData, [switch]$RestartAfterUp
 			        WaitFor -seconds 10
 		        }
 	        }
-    
             if ( $kernelSuccess -eq $jobCount )
             {
                 LogMsg "Kernel upgraded to `"$customKernel`" successfully in all VMs."
@@ -209,19 +210,26 @@ function InstallCustomKernel ($customKernel, $allVMData, [switch]$RestartAfterUp
                     $restartStatus = RestartAllDeployments -allVMData $allVMData
                     if ( $restartStatus -eq "True")
                     {
-                        $upgradedKernelVersion = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "uname -r"
-                        LogMsg "Old kernel: $currentKernelVersion"
-                        LogMsg "New kernel: $upgradedKernelVersion"
-                        Add-Content -Value "Old kernel: $currentKernelVersion" -Path .\report\AdditionalInfo.html -Force
-                        Add-Content -Value "New kernel: $upgradedKernelVersion" -Path .\report\AdditionalInfo.html -Force
-                        if ($currentKernelVersion -eq $upgradedKernelVersion)
+                        $retryAttempts = 5
+                        $isKernelUpgraded = $false
+                        while ( !$isKernelUpgraded -and ($retryAttempts -gt 0) )
                         {
-                            LogErr "Kernel version is same after restarting VMs."
-                            return $false
-                        }
-                        else
-                        {
-                            return $true
+                            $retryAttempts -= 1
+                            $upgradedKernelVersion = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "uname -r"
+                            LogMsg "Old kernel: $currentKernelVersion"
+                            LogMsg "New kernel: $upgradedKernelVersion"
+                            if ($currentKernelVersion -eq $upgradedKernelVersion)
+                            {
+                                LogErr "Kernel version is same after restarting VMs."
+                                $isKernelUpgraded = $false
+                            }
+                            else
+                            {
+                                $isKernelUpgraded = $true
+                            }
+                            Add-Content -Value "Old kernel: $currentKernelVersion" -Path .\report\AdditionalInfo.html -Force
+                            Add-Content -Value "New kernel: $upgradedKernelVersion" -Path .\report\AdditionalInfo.html -Force
+                            return $isKernelUpgraded
                         }
                     }
                     else
