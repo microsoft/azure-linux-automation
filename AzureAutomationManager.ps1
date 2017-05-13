@@ -186,7 +186,7 @@ try
         Set-Variable -Name UseAzureResourceManager -Value $true -Scope Global
         $selectSubscription = Select-AzureRmSubscription -SubscriptionId $AzureSetup.SubscriptionID
         LogMsg "SubscriptionName       : $($AzureSetup.SubscriptionName)"
-        LogMsg "SubscriptionId         : $($selectSubscription.Subscription.SubscriptionId)"
+        LogMsg "SubscriptionId         : $($selectSubscription.Subscription.ID)"
         LogMsg "User                   : $($selectSubscription.Account.Id)"
         LogMsg "ServiceEndpoint        : $($selectSubscription.Environment.ActiveDirectoryServiceEndpointResourceId)"
         LogMsg "CurrentStorageAccount  : $($AzureSetup.ARMStorageAccount)"
