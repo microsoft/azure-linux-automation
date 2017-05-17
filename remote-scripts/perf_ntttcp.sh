@@ -58,9 +58,23 @@ InstallNTTTCP() {
 				ssh ${1} "git clone https://github.com/Microsoft/lagscope"
 				ssh ${1} "cd lagscope/src && make && make install"
 				
-        elif [[ $DISTRO =~ "Red Hat Enterprise Linux Server release 7.3" ]];
+        elif [[ $DISTRO =~ "Red Hat Enterprise Linux Server release 6" ]];
         then
-                LogMsg "Detected Redhat 7.3"
+                LogMsg "Detected Redhat 6.x"
+				ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm"
+				ssh ${1} "yum -y --nogpgcheck install libaio1 sysstat git bc make gcc"
+				ssh ${1} "yum -y --nogpgcheck install gcc-c++"
+				ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
+				ssh ${1} "cd ntttcp-for-linux/src/ && make && make install"
+				ssh ${1} "cp ntttcp-for-linux/src/ntttcp ."
+				ssh ${1} "rm -rf lagscope"
+				ssh ${1} "git clone https://github.com/Microsoft/lagscope"
+				ssh ${1} "cd lagscope/src && make && make install"
+				ssh ${1} "iptables -F"
+
+		elif [[ $DISTRO =~ "Red Hat Enterprise Linux Server release 7" ]];
+        then
+                LogMsg "Detected Redhat 7.x"
 				ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
 				ssh ${1} "yum -y --nogpgcheck install libaio1 sysstat git bc make gcc"
 				ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
