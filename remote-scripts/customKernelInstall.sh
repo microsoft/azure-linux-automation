@@ -86,7 +86,7 @@ elif [ "${customKernel}" == "proposed" ]; then
 		rm -rf /etc/apt/preferences.d/proposed-updates
 		LogMsg "Installing linux-image-generic from proposed repository."
 		apt -y update >> $logFolder/build-customKernel.txt 2>&1
-		apt -y upgrade >> $logFolder/build-customKernel.txt 2>&1
+		apt -y --fix-missing upgrade >> $logFolder/build-customKernel.txt 2>&1
 		kernelInstallStatus=$?
 									
 	elif [[ $DISTRO =~ "Trusty" ]];
@@ -96,7 +96,7 @@ elif [ "${customKernel}" == "proposed" ]; then
 		rm -rf /etc/apt/preferences.d/proposed-updates
 		LogMsg "Installing linux-image-generic from proposed repository."
 		apt -y update >> $logFolder/build-customKernel.txt 2>&1
-		apt -y upgrade >> $logFolder/build-customKernel.txt 2>&1
+		apt -y --fix-missing upgrade >> $logFolder/build-customKernel.txt 2>&1
 		kernelInstallStatus=$?
 		
 	fi
