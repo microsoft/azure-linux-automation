@@ -104,7 +104,7 @@ InstallGPUDrivers() {
 		elif [[ $DISTRO =~ "CentOS Linux release 7.3" ]];
 		then
 				LogMsg "Detected CENTOS73"
-				#sed -i '/# OS.EnableRDMA=y/c\  OS.EnableRDMA=y' /etc/waagent.conf
+				sed -i "/^exclude=kernel/c\#exclude=kernel*" /etc/yum.conf
 				yum -y update
 				yum -y --nogpgcheck install kernel-devel
 				rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm				
