@@ -100,7 +100,7 @@ InstallNTTTCP() {
 				ssh ${1} "iptables -F"
 				
 		elif [[ $DISTRO =~ "CentOS Linux release 7" ]];
-        then
+		then
                 LogMsg "Detected CentOS 7.x"
 				ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
 				ssh ${1} "yum -y --nogpgcheck install libaio1 sysstat git bc make gcc"
