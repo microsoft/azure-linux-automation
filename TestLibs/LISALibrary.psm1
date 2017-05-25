@@ -360,7 +360,7 @@ function EnableSRIOVInAllVMs($allVMData)
     {
         if( $EnableAcceleratedNetworking)
         {
-            $scriptName = "bondvf.sh"
+            $scriptName = "ConfigureSRIOV.sh"
             $jobCount = 0
             $kernelSuccess = 0
 	        $packageInstallJobs = @()
