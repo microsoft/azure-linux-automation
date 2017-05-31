@@ -7078,7 +7078,118 @@
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<Priority>P0</Priority>
-		</test>			
+		</test>
+		<!-- LIS BUILD TEST -->
+		<test>
+			<!-- Install Latest LIS -> reboot and Verify it Installed Successfully with out any errors and warnings. -->
+			<testName>ICA-LIS-BUILD-TEST-SCENARIO-1</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
+			<CurrentLISVersion>LATEST</CurrentLISVersion>
+			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<setupType>A2</setupType>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<SubtestValues>TestID2</SubtestValues>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<!-- Install Previous LIS, reboot and Upgrade to latest LIS, reboot. Verify that LIS install/upgrade Successful with out any errors and warnings. -->
+			<testName>ICA-LIS-BUILD-TEST-SCENARIO-2</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
+			<PreviousLISVersion>PREVIOUS</PreviousLISVersion>
+			<PreviousLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/previous-lis-rpms.tar.gz^tar -xzf previous-lis-rpms.tar.gz^cp -ar LISISO/* . </PreviousLISExtractCommand>
+			<CurrentLISVersion>LATEST</CurrentLISVersion>
+			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<setupType>A2</setupType>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<SubtestValues>TestID1,TestID3</SubtestValues>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<!-- Install Previous LIS -> Upgrade to latest LIS -> Uninstall LIS -> ReInstall Prevous LIS. Verify that LIS install/upgrade/uninstall Successful with out any errors and warnings. -->
+			<testName>ICA-LIS-BUILD-TEST-SCENARIO-3</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
+			<PreviousLISVersion>PREVIOUS</PreviousLISVersion>
+			<PreviousLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/previous-lis-rpms.tar.gz^tar -xzf previous-lis-rpms.tar.gz^cp -ar LISISO/* . </PreviousLISExtractCommand>
+			<CurrentLISVersion>LATEST</CurrentLISVersion>
+			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<setupType>A2</setupType>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<SubtestValues>TestID1,TestID3,TestID4,TestID5</SubtestValues>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<!-- Upgrade Kernel (don't reboot) -> Install Current LIS and  Verify that LIS aborting install (LIS negative scenario test) -->
+			<testName>ICA-LIS-BUILD-TEST-SCENARIO-4</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
+			<CurrentLISVersion>LATEST</CurrentLISVersion>
+			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<setupType>A2</setupType>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<SubtestValues>TestID7,TestID8</SubtestValues>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<!-- Install Current LIS and Upgrade Kernel with reboot. Verify that install/upgrade Successful with out any errors and warnings and boot with Inbuilt LIS drives. -->
+			<testName>ICA-LIS-BUILD-TEST-SCENARIO-5</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
+			<CurrentLISVersion>LATEST</CurrentLISVersion>
+			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<setupType>A2</setupType>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<SubtestValues>TestID2,TestID6</SubtestValues>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<!-- Install Previous LIS -> upgrade to Current LIS -> Upgrade Kernel with reboot. Verify that install/upgrade Successful with out any errors and warnings and boot with Inbuilt LIS drives. -->
+			<testName>ICA-LIS-BUILD-TEST-SCENARIO-6</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
+			<PreviousLISVersion>PREVIOUS</PreviousLISVersion>
+			<PreviousLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/previous-lis-rpms.tar.gz^tar -xzf previous-lis-rpms.tar.gz^cp -ar LISISO/* . </PreviousLISExtractCommand>
+			<CurrentLISVersion>LATEST</CurrentLISVersion>
+			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<setupType>A2</setupType>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<SubtestValues>TestID1,TestID3,TestID6</SubtestValues>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<!-- Upgrade Kernel -> reboot -> Install Current LIS and  Verify that LIS installed successful -->
+			<testName>ICA-LIS-BUILD-TEST-SCENARIO-7</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
+			<CurrentLISVersion>LATEST</CurrentLISVersion>
+			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<setupType>A2</setupType>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<SubtestValues>TestID6,TestID2</SubtestValues>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<!-- Install Current LIS -> Uninstall LIS. Verify that install/uninstall Successful with out any errors and warnings,microsoft-hyper-v lib modules should be Empty and boot with Inbuilt LIS drives. -->
+			<testName>ICA-LIS-BUILD-TEST-SCENARIO-8</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
+			<CurrentLISVersion>LATEST</CurrentLISVersion>
+			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<setupType>A2</setupType>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<SubtestValues>TestID2,TestID4</SubtestValues>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<Priority>P0</Priority>
+		</test>		
 	</testsDefinition>
 
 	<testCycles>
@@ -8025,6 +8136,33 @@
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
 			<test>
 				<Name>ICA-IPERF3-TCP-IPV4-SAMEVNET-TEST</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>LIS-BUILD</cycleName>
+			<test>
+				<Name>ICA-LIS-BUILD-TEST-SCENARIO-1</Name>
+			</test>
+			<test>
+				<Name>ICA-LIS-BUILD-TEST-SCENARIO-2</Name>
+			</test>
+			<test>
+				<Name>ICA-LIS-BUILD-TEST-SCENARIO-3</Name>
+			</test>
+			<test>
+				<Name>ICA-LIS-BUILD-TEST-SCENARIO-4</Name>
+			</test>
+			<test>
+				<Name>ICA-LIS-BUILD-TEST-SCENARIO-5</Name>
+			</test>
+			<test>
+				<Name>ICA-LIS-BUILD-TEST-SCENARIO-6</Name>
+			</test>
+			<test>
+				<Name>ICA-LIS-BUILD-TEST-SCENARIO-7</Name>
+			</test>			
+			<test>
+				<Name>ICA-LIS-BUILD-TEST-SCENARIO-8</Name>
 			</test>
 		</Cycle>		
 		<Cycle>
