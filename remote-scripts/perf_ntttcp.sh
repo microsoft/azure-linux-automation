@@ -64,6 +64,11 @@ InstallNTTTCP() {
 				ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm"
 				ssh ${1} "yum -y --nogpgcheck install libaio1 sysstat git bc make gcc"
 				ssh ${1} "yum -y --nogpgcheck install gcc-c++"
+
+				ssh ${1} "wget http://ftp.heanet.ie/mirrors/gnu/libc/glibc-2.14.1.tar.gz"
+				ssh ${1} "tar xvf glibc-2.14.1.tar.gz"
+				ssh ${1} "mv glibc-2.14.1 glibc-2.14 && cd glibc-2.14 && mkdir build && cd build && ../configure --prefix=/opt/glibc-2.14 && make && make install && export LD_LIBRARY_PATH=/opt/glibc-2.14/lib:$LD_LIBRARY_PATH"
+				
 				ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
 				ssh ${1} "cd ntttcp-for-linux/src/ && make && make install"
 				ssh ${1} "cp ntttcp-for-linux/src/ntttcp ."
