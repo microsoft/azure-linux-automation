@@ -20,3 +20,4 @@ S.No.,Region,VMSize,StorageAccount (Classic),StorageAccount (ARM)
 19,North Europe,A10,konkacinortheurope,konkacineuropev2
 20,West Europe,Standard_G3,konkaciwesteurope,konkaciwesteuropev2
 21,Japan East,A11,konkacijapaneast1,konkacijapaneast
+22,West US 2,,,konkaciwestus2v2
