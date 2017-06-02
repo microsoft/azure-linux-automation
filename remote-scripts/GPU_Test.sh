@@ -114,6 +114,7 @@ InstallGPUDrivers() {
 				wget http://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64/${CUDA_REPO_PKG} -O /tmp/${CUDA_REPO_PKG}
 				rpm -ivh /tmp/${CUDA_REPO_PKG}
 				rm -f /tmp/${CUDA_REPO_PKG} 
+				yum --nogpgcheck -y install lshw
 				yum --nogpgcheck -y install cuda-drivers
 		else
 				LogMsg "Unknown Distro"
