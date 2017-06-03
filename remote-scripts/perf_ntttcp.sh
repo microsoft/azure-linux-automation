@@ -35,19 +35,19 @@
 #######################################################################
 
 CONSTANTS_FILE="./constants.sh"
-ICA_TESTRUNNING="TestRunning"      # The test is running
-ICA_TESTCOMPLETED="TestCompleted"  # The test completed successfully
-ICA_TESTABORTED="TestAborted"      # Error during the setup of the test
-ICA_TESTFAILED="TestFailed"        # Error occurred during the test
+ICA_TESTRUNNING="TestRunning"		# The test is running
+ICA_TESTCOMPLETED="TestCompleted"	# The test completed successfully
+ICA_TESTABORTED="TestAborted"		# Error during the setup of the test
+ICA_TESTFAILED="TestFailed"			# Error occurred during the test
 touch ./ntttcpTest.log
 
 
 InstallNTTTCP() {
 		DISTRO=`grep -ihs "buntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux" /etc/{issue,*release,*version}`
 
-        if [[ $DISTRO =~ "Ubuntu" ]];
-        then
-                LogMsg "Detected UBUNTU"
+		if [[ $DISTRO =~ "Ubuntu" ]];
+		then
+			LogMsg "Detected UBUNTU"
 				LogMsg "Configuring ${1} for ntttcp test..."
 				ssh ${1} "apt-get update"
 				ssh ${1} "apt-get -y install libaio1 sysstat git bc make gcc"
@@ -58,9 +58,9 @@ InstallNTTTCP() {
 				ssh ${1} "git clone https://github.com/Microsoft/lagscope"
 				ssh ${1} "cd lagscope/src && make && make install"
 				
-        elif [[ $DISTRO =~ "Red Hat Enterprise Linux Server release 6" ]];
-        then
-                LogMsg "Detected Redhat 6.x"
+		elif [[ $DISTRO =~ "Red Hat Enterprise Linux Server release 6" ]];
+		then
+				LogMsg "Detected Redhat 6.x"
 				ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm"
 				ssh ${1} "yum -y --nogpgcheck install libaio1 sysstat git bc make gcc"
 				ssh ${1} "yum -y --nogpgcheck install gcc-c++"
@@ -78,8 +78,8 @@ InstallNTTTCP() {
 				ssh ${1} "iptables -F"
 
 		elif [[ $DISTRO =~ "Red Hat Enterprise Linux Server release 7" ]];
-        then
-                LogMsg "Detected Redhat 7.x"
+		then
+				LogMsg "Detected Redhat 7.x"
 				ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
 				ssh ${1} "yum -y --nogpgcheck install libaio1 sysstat git bc make gcc"
 				ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
@@ -90,9 +90,9 @@ InstallNTTTCP() {
 				ssh ${1} "cd lagscope/src && make && make install"
 				ssh ${1} "iptables -F"
 				
-        elif [[ $DISTRO =~ "CentOS Linux release 6" ]];
-        then
-                LogMsg "Detected CentOS 6.x"
+		elif [[ $DISTRO =~ "CentOS Linux release 6" ]];
+		then
+				LogMsg "Detected CentOS 6.x"
 				ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm"
 				ssh ${1} "yum -y --nogpgcheck install libaio1 sysstat git bc make gcc"
 				ssh ${1} "yum -y --nogpgcheck install gcc-c++"
@@ -106,7 +106,7 @@ InstallNTTTCP() {
 				
 		elif [[ $DISTRO =~ "CentOS Linux release 7" ]];
 		then
-                LogMsg "Detected CentOS 7.x"
+				LogMsg "Detected CentOS 7.x"
 				ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
 				ssh ${1} "yum -y --nogpgcheck install libaio1 sysstat git bc make gcc"
 				ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
@@ -116,13 +116,26 @@ InstallNTTTCP() {
 				ssh ${1} "git clone https://github.com/Microsoft/lagscope"
 				ssh ${1} "cd lagscope/src && make && make install"
 				ssh ${1} "iptables -F"
+
+		elif [[ $DISTRO =~ "SUSE Linux Enterprise Server 12" ]];
+		then
+		LogMsg "Detected SLES12"
+				ssh ${1} "zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys remove gettext-runtime-mini*"
+				ssh ${1} "zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys install sysstat git bc make gcc grub2"
+				ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
+				ssh ${1} "cd ntttcp-for-linux/src/ && make && make install"
+				ssh ${1} "cp ntttcp-for-linux/src/ntttcp ."
+				ssh ${1} "rm -rf lagscope"
+				ssh ${1} "git clone https://github.com/Microsoft/lagscope"
+				ssh ${1} "cd lagscope/src && make && make install"
+				ssh ${1} "iptables -F"
 				
-       else
-                LogMsg "Unknown Distro"
-                UpdateTestState "TestAborted"
-                UpdateSummary "Unknown Distro, test aborted"
-                return 1
-        fi
+		else
+				LogMsg "Unknown Distro"
+				UpdateTestState "TestAborted"
+				UpdateSummary "Unknown Distro, test aborted"
+				return 1
+	fi
 }
 LogMsg()
 {
