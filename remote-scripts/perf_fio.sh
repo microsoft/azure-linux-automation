@@ -270,19 +270,22 @@ CreateRAID0()
 		mdadm --zero-superblock /dev/sd[c-z][1-5]
 	fi
 	
-	LogMsg "INFO: Creating Partition"
+	LogMsg "INFO: Creating Partitions"
 	count=0
 	for disk in ${disks}
 	do		
 		echo "formatting disk /dev/${disk}"
 		(echo d; echo n; echo p; echo 1; echo; echo; echo t; echo fd; echo w;) | fdisk /dev/${disk}
-		count=$(( $count + 1 )) 
+		count=$(( $count + 1 ))
+		sleep 1
 	done
-	
-	LogMsg "INFO: Creating RAID"
+	LogMsg "INFO: Creating RAID of ${count} devices."
+	sleep 1
 	mdadm --create ${mdVolume} --level 0 --raid-devices ${count} /dev/sd[c-z][1-5]
+	sleep 1
 	time mkfs -t $1 -F ${mdVolume}
 	mkdir ${mountDir}
+	sleep 1
 	mount -o nobarrier ${mdVolume} ${mountDir}
 	if [ $? -ne 0 ]; then
             LogMsg "Error: Unable to create raid"            
