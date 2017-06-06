@@ -7,3 +7,4 @@ chmod +x ./bondvf.sh
 ./bondvf.sh
 cp bondvf.sh /etc/init.d
 update-rc.d bondvf.sh defaults
+exit 0

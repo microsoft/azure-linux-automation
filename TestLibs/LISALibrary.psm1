@@ -371,8 +371,8 @@ function EnableSRIOVInAllVMs($allVMData)
                 $vmCount += 1 
                 RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\remote-scripts\$scriptName" -username $user -password $password -upload
                 $out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "chmod +x *.sh" -runAsSudo
-                $currentIfConfigStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "ifconfig -a"
-                $pciDevices = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "lspci"
+                $currentIfConfigStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/sbin/ifconfig -a" -runAsSudo
+                $pciDevices = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "lspci" -runAsSudo
                 if ( $pciDevices -imatch "Mellanox")
                 {
 		            LogMsg "Mellanox Adapter detected in $($vmData.RoleName). Now executing $scriptName ..."
@@ -400,7 +400,7 @@ function EnableSRIOVInAllVMs($allVMData)
 	            {
                     $vmCount += 1
                     $AfterIfConfigStatus = $null
-                    $AfterIfConfigStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "ifconfig -a"
+                    $AfterIfConfigStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/sbin/ifconfig -a" -runAsSudo
                     if ($AfterIfConfigStatus -imatch "bond")
                     {
                         LogMsg "New bond detected in $($vmData.RoleName)"
