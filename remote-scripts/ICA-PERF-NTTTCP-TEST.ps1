@@ -167,15 +167,22 @@ collect_VM_properties
 			$KernelVersion	= cat "$LogDir\VM_properties.csv" | Select-String "Kernel version"| %{$_ -replace ",Kernel version,",""}
 			$IPVersion = "IPv4"
 			$ProtocolType = "TCP"
-
+			if($EnableAcceleratedNetworking)
+			{
+				$DataPath = "SRIOV"
+			}
+			else
+			{
+				$DataPath = "Synthetic"    
+			}
 			$connectionString = "Server=$dataSource;uid=$user; pwd=$password;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 			$LogContents = Get-Content -Path "$LogDir\report.log"
-			$SQLQuery = "INSERT INTO $dataTableName (TestCaseName,TestDate,HostType,HostBy,HostOS,GuestOSType,GuestDistro,GuestSize,KernelVersion,IPVersion,ProtocolType,NumberOfConnections,Throughput_Gbps,Latency_ms) VALUES "
+			$SQLQuery = "INSERT INTO $dataTableName (TestCaseName,TestDate,HostType,HostBy,HostOS,GuestOSType,GuestDistro,GuestSize,KernelVersion,IPVersion,ProtocolType,DataPath,NumberOfConnections,Throughput_Gbps,Latency_ms) VALUES "
 
 			for($i = 1; $i -lt $LogContents.Count; $i++)
 			{
 				$Line = $LogContents[$i].Trim() -split '\s+'
-				$SQLQuery += "('$TestCaseName','$(Get-Date -Format yyyy-MM-dd)','$HostType','$HostBy','$HostOS','$GuestOSType','$GuestDistro','$GuestSize','$KernelVersion','$IPVersion','$ProtocolType',$($Line[0]),$($Line[1]),$($Line[2])),"    
+				$SQLQuery += "('$TestCaseName','$(Get-Date -Format yyyy-MM-dd)','$HostType','$HostBy','$HostOS','$GuestOSType','$GuestDistro','$GuestSize','$KernelVersion','$IPVersion','$ProtocolType','$DataPath',$($Line[0]),$($Line[1]),$($Line[2])),"
 			}
 			$SQLQuery = $SQLQuery.TrimEnd(',')
 			LogMsg $SQLQuery
