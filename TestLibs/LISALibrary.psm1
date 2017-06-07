@@ -366,6 +366,7 @@ function EnableSRIOVInAllVMs($allVMData)
 	        $packageInstallJobs = @()
             $sriovDetectedCount = 0
             $vmCount = 0
+
 	        foreach ( $vmData in $allVMData )
 	        {
                 $vmCount += 1 
@@ -375,7 +376,22 @@ function EnableSRIOVInAllVMs($allVMData)
                 $pciDevices = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "lspci" -runAsSudo
                 if ( $pciDevices -imatch "Mellanox")
                 {
-		            LogMsg "Mellanox Adapter detected in $($vmData.RoleName). Now executing $scriptName ..."
+                    LogMsg "Mellanox Adapter detected in $($vmData.RoleName)."
+                    #SRIOV-Workaround for Ubuntu.
+                    RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\remote-scripts\ConfigureSRIOV-workaround.sh" -username $user -password $password -upload
+                    $out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "chmod +x ConfigureSRIOV-workaround.sh" -runAsSudo
+                    $isRestartNeeded=""
+                    $isRestartNeeded= RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "./ConfigureSRIOV-workaround.sh" -runAsSudo
+                    if ($isRestartNeeded -imatch "SYSTEM_RESTART_REQUIRED")
+                    {
+                        LogMsg "SRIOV workaround applied for $($vmData.RoleName). Restart required."
+                        $restartStatus = RestartAllDeployments -allVMData $vmData
+                    }
+                    else
+                    {
+                        LogMsg "SRIOV workaround is not needed."
+                    }
+		            LogMsg "Now executing $scriptName ..."
 		            $jobID = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/home/$user/$scriptName" -runAsSudo
                     $sriovDetectedCount += 1
                 }
