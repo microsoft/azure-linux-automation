@@ -46,6 +46,137 @@ UpdateTestState()
     echo "${1}" > $HOMEDIR/state.txt
 }
 
+InstallFIO() {
+		DISTRO=`grep -ihs "buntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux" /etc/{issue,*release,*version}`
+
+		if [[ $DISTRO =~ "Ubuntu" ]];
+		then
+			LogMsg "Detected UBUNTU"
+			apt-get update
+			apt-get install -y wget sysstat blktrace bc
+			mount -t debugfs none /sys/kernel/debug
+			
+			installed=`which fio`
+			if [ ! $installed ]; then
+				LogMsg "INFO: Installing fio"
+
+				apt-get install -y fio ;
+				if [ $? -ne 0 ]; then
+					LogMsg "Error: Unable to install fio"
+					exit 1
+				fi
+			fi
+				
+		elif [[ $DISTRO =~ "Red Hat Enterprise Linux Server release 6" ]];
+		then
+				LogMsg "Detected Redhat 6.x"
+				fioCentOS6pkg="fio-2.1.10-1.el6.rf.x86_64.rpm"
+				LogMsg "INFO: installing required packages"
+				yum install -y wget sysstat mdadm blktrace libaio
+				mount -t debugfs none /sys/kernel/debug				
+				installed=`which fio`
+				if [ ! $installed ]; then
+					LogMsg "INFO: Installing fio"
+
+					fiolPkg=$(ls | grep ${fioCentOS6pkg})
+					if [ -z "$fiolPkg" ]; then			
+						wget "https://konkasoftpackages.blob.core.windows.net/linuxbinaries/${fioCentOS6pkg}"
+					fi
+					yum install -y libibverbs.x86_64
+					yum install -y ${fioCentOS6pkg}
+					if [ $? -ne 0 ]; then
+						LogMsg "Error: Unable to install fio"
+						exit 1
+					fi
+				fi
+
+		elif [[ $DISTRO =~ "Red Hat Enterprise Linux Server release 7" ]];
+		then
+			fioCentOS7pkg="fio-2.2.8-2.el7.x86_64.rpm"
+			LogMsg "INFO: installing required packages"
+			yum install -y wget sysstat mdadm blktrace libaio
+			mount -t debugfs none /sys/kernel/debug
+			
+			installed=`which fio`
+			if [ ! $installed ]; then
+				LogMsg "INFO: Installing fio"
+
+				fiolPkg=$(ls | grep ${fioCentOS7pkg})
+				if [ -z "$fiolPkg" ]; then
+					wget "https://konkasoftpackages.blob.core.windows.net/linuxbinaries/${fioCentOS7pkg}"
+				fi
+				yum install -y ${fioCentOS7pkg}
+				if [ $? -ne 0 ]; then
+					LogMsg "Error: Unable to install fio"
+					exit 1
+				fi
+			fi
+				
+		elif [[ $DISTRO =~ "CentOS Linux release 6" ]];
+		then
+				LogMsg "Detected CentOS 6.x"
+				fioCentOS6pkg="fio-2.1.10-1.el6.rf.x86_64.rpm"
+				LogMsg "INFO: installing required packages"
+				yum install -y wget sysstat mdadm blktrace libaio
+				mount -t debugfs none /sys/kernel/debug
+				
+				installed=`which fio`
+				if [ ! $installed ]; then
+					LogMsg "INFO: Installing fio"
+
+					fiolPkg=$(ls | grep ${fioCentOS6pkg})
+					if [ -z "$fiolPkg" ]; then			
+						wget "https://konkasoftpackages.blob.core.windows.net/linuxbinaries/${fioCentOS6pkg}"
+					fi
+					yum install -y libibverbs.x86_64
+					yum install -y ${fioCentOS6pkg}
+					if [ $? -ne 0 ]; then
+						LogMsg "Error: Unable to install fio"
+						exit 1
+					fi
+				fi
+				
+		elif [[ $DISTRO =~ "CentOS Linux release 7" ]];
+		then
+			fioCentOS7pkg="fio-2.2.8-2.el7.x86_64.rpm"
+			LogMsg "INFO: installing required packages"
+			yum install -y wget sysstat mdadm blktrace libaio
+			mount -t debugfs none /sys/kernel/debug
+			
+			installed=`which fio`
+			if [ ! $installed ]; then
+				LogMsg "INFO: Installing fio"
+
+				fiolPkg=$(ls | grep ${fioCentOS7pkg})
+				if [ -z "$fiolPkg" ]; then
+					wget "https://konkasoftpackages.blob.core.windows.net/linuxbinaries/${fioCentOS7pkg}"
+				fi
+				yum install -y ${fioCentOS7pkg}
+				if [ $? -ne 0 ]; then
+					LogMsg "Error: Unable to install fio"
+					exit 1
+				fi
+			fi	
+
+		elif [[ $DISTRO =~ "SUSE Linux Enterprise Server 12" ]];
+		then
+			LogMsg "Detected SLES12"
+			zypper addrepo http://download.opensuse.org/repositories/benchmark/SLE_12_SP2_Backports/benchmark.repo
+			zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys refresh
+			zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys remove gettext-runtime-mini-0.19.2-1.103.x86_64
+			zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys install sysstat
+			zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys install grub2
+			zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys install wget mdadm blktrace libaio1 fio
+			
+
+		else
+				LogMsg "Unknown Distro"
+				UpdateTestState "TestAborted"
+				UpdateSummary "Unknown Distro, test aborted"
+				return 1
+	fi
+}
+
 RunFIO()
 {
 	UpdateTestState ICA_TESTRUNNING
@@ -165,95 +296,6 @@ RunFIO()
 	UpdateTestState ICA_TESTCOMPLETED
 }
 
-ConfigCentOS7()
-{			
-	fioCentOS7pkg="fio-2.2.8-2.el7.x86_64.rpm"
-	LogMsg "INFO: CentOS7: installing required packages"
-	yum install -y wget sysstat mdadm blktrace libaio
-	mount -t debugfs none /sys/kernel/debug
-	
-	installed=`which fio`
-	if [ ! $installed ]; then
-        LogMsg "INFO: Installing fio"
-
-		fiolPkg=$(ls | grep ${fioCentOS7pkg})
-		if [ -z "$fiolPkg" ]; then
-			wget "https://konkasoftpackages.blob.core.windows.net/linuxbinaries/${fioCentOS7pkg}"
-		fi
-		yum install -y ${fioCentOS7pkg}
-        if [ $? -ne 0 ]; then
-            LogMsg "Error: Unable to install fio"
-            exit 1
-        fi
-    fi	
-}
-
-ConfigCentOS6()
-{			
-	fioCentOS6pkg="fio-2.1.10-1.el6.rf.x86_64.rpm"
-	LogMsg "INFO: CentOS6: installing required packages"
-	yum install -y wget sysstat mdadm blktrace libaio
-	mount -t debugfs none /sys/kernel/debug
-	
-	installed=`which fio`
-	if [ ! $installed ]; then
-        LogMsg "INFO: Installing fio"
-
-		fiolPkg=$(ls | grep ${fioCentOS6pkg})
-		if [ -z "$fiolPkg" ]; then			
-			wget "https://konkasoftpackages.blob.core.windows.net/linuxbinaries/${fioCentOS6pkg}"
-		fi
-		yum install -y libibverbs.x86_64
-		yum install -y ${fioCentOS6pkg}
-        if [ $? -ne 0 ]; then
-            LogMsg "Error: Unable to install fio"
-            exit 1
-        fi
-    fi	
-}
-
-ConfigUbuntu()
-{
-	LogMsg "INFO: Ubuntu installing required packages"
-	
-	apt-get update
-	apt-get install -y wget sysstat blktrace bc
-	mount -t debugfs none /sys/kernel/debug
-	
-	installed=`which fio`
-	if [ ! $installed ]; then
-        LogMsg "INFO: Installing fio"
-
-		apt-get install -y fio ;
-        if [ $? -ne 0 ]; then
-            LogMsg "Error: Unable to install fio"
-            exit 1
-        fi
-    fi
-}
-
-ConfigSLES()
-{
-	fioCentOS6pkg="fio-2.1.2-2.1.3.x86_64.rpm"
-	LogMsg "INFO: SLES: installing required packages"
-	zypper --non-interactive install wget sysstat mdadm blktrace
-	mount -t debugfs none /sys/kernel/debug
-	
-	installed=`which fio`
-	if [ ! $installed ]; then
-        LogMsg "INFO: Installing fio"
-
-		fiolPkg=$(ls | grep ${fioCentOS6pkg})
-		if [ -z "$fiolPkg" ]; then			
-			wget "ftp://195.220.108.108/linux/opensuse/distribution/13.1/repo/oss/suse/x86_64/${fioCentOS6pkg}"
-		fi		
-		(echo i;) | zypper --non-interactive install ${fioCentOS6pkg}
-        if [ $? -ne 0 ]; then
-            LogMsg "Error: Unable to install fio"
-            exit 1
-        fi
-    fi	
-}
 
 CreateRAID0()
 {	
@@ -344,39 +386,19 @@ HOMEDIR=$HOME
 mv $HOMEDIR/FIOLog/ $HOMEDIR/FIOLog-$(date +"%m%d%Y-%H%M%S")/
 mkdir $HOMEDIR/FIOLog
 LOGDIR="${HOMEDIR}/FIOLog"
-mdVolume="/dev/md0"
+DISTRO=`grep -ihs "buntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux" /etc/{issue,*release,*version}`
+if [[ $DISTRO =~ "SUSE Linux Enterprise Server 12" ]];
+then
+	mdVolume="/dev/md/mdauto0"
+else
+	mdVolume="/dev/md0"
+fi
 vggroup="vg1"
 mountDir="/data"
 cd ${HOMEDIR}
 
-#DISTRO=`grep -ihs "Ubuntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux" /etc/{issue,*release,*version} | grep DISTRIB_ID= | sed s/DISTRIB_ID=//`
-DISTRO=`grep -ihs "Ubuntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux" /etc/{issue,*release,*version}`
-#DISTRO="Ubuntu"
-echo "###############$DISTRO########################"
-case $DISTRO in
-	Ubuntu*)
-		echo "UBUNTU"
-		ConfigUbuntu
-		;;
-	Fedora*)
-		echo "FEDORA";;
-	*release*7.*)
-		echo "CENTOS 7.*"
-		ConfigCentOS7
-		;;
-	*release*6.*)
-		echo "CENTOS 6.*"
-		ConfigCentOS6
-		;;
-	*SUSE*)
-		echo "SLES"
-		ConfigSLES
-		;;
-	Red*Hat*)
-		echo "RHEL";;
-	Debian*)
-		echo "DEBIAN";;
-esac
+InstallFIO
+
 #Creating RAID before triggering test
 CreateRAID0 ext4
 #CreateLVM ext4
