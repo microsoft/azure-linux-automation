@@ -213,6 +213,7 @@ Function UpgradeLIS($VMObject, $PrevTestStatus, $metaData)
             $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command $LISExtractCommand -runAsSudo
         }
         $upgradelLISConsoleOutput = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "./upgrade.sh" -runAsSudo -runMaxAllowedTime 1200
+        LogMsg "`n$upgradelLISConsoleOutput"
         Set-Content -Value $upgradelLISConsoleOutput -Path "$($VMObject.logDir)\UpgradeLISConsoleOutput.txt"
         if($upgradelLISConsoleOutput -imatch "is already installed")
         {
@@ -292,6 +293,7 @@ Function UninstallLIS($VMObject, $PrevTestStatus, $metaData)
             $out = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command $LISExtractCommand -runAsSudo
         }
         $uninstallLISConsoleOutput = RunLinuxCmd -username $VMObject.username -password $VMObject.password -ip $VMObject.VIP -port $VMObject.SSHPort -command "./uninstall.sh" -runAsSudo -runMaxAllowedTime 1200
+        LogMsg "`n$uninstallLISConsoleOutput"
         Set-Content -Value $uninstallLISConsoleOutput -Path "$($VMObject.logDir)\uninstallLISConsoleOutput.txt"
         if($uninstallLISConsoleOutput -imatch "No LIS RPM's are present")
         {
