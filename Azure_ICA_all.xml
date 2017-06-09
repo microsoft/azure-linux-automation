@@ -7107,6 +7107,20 @@
 				<param>testDuration=300</param>
 			</TestParameters>
 			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-PERF-LAGSCOPE-TEST</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-PERF-LAGSCOPE-TEST.ps1</testScriptps1>
+			<setupType>M1S1</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+				<param>pingIteration=1000000</param>
+			</TestParameters>
+			<Priority>P0</Priority>
 		</test>		
 		<test>
 			<testName>ICA-PERF-FIO-TEST-4K</testName>
@@ -8250,6 +8264,12 @@
 			<cycleName>PERF-NTTTCP</cycleName>
 			<test>
 				<Name>ICA-PERF-NTTTCP-TEST</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>PERF-LAGSCOPE</cycleName>
+			<test>
+				<Name>ICA-PERF-LAGSCOPE-TEST</Name>
 			</test>
 		</Cycle>
 		<Cycle>
