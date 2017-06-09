@@ -92,7 +92,6 @@ collect_VM_properties
 		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "lagscope-n$pingIteration-output.txt"
 		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "VM_properties.csv"
 		
-        $out=Read-Host -Prompt "Continue?"
 		$testSummary = $null
 		$lagscopeReportLog = Get-Content -Path "$LogDir\lagscope-n$pingIteration-output.txt"
         LogMsg $lagscopeReportLog
