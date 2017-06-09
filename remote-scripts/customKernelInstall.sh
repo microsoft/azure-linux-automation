@@ -109,6 +109,27 @@ elif [ "${customKernel}" == "proposed" ]; then
 		UpdateTestState $ICA_TESTCOMPLETED
 	fi
 	exit 0
+elif [ "${customKernel}" == "latest" ]; then
+	DISTRO=`grep -ihs "buntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux" /etc/{issue,*release,*version}`
+	if [[ $DISTRO =~ "Ubuntu" ]];
+	then
+		LogMsg "Installing linux-image-generic from repository."	
+		apt -y update >> $logFolder/build-customKernel.txt 2>&1
+		apt -y --fix-missing upgrade >> $logFolder/build-customKernel.txt 2>&1		
+		LogMsg "Installing linux-image-generic from proposed repository."
+		apt -y update >> $logFolder/build-customKernel.txt 2>&1
+		apt -y --fix-missing upgrade >> $logFolder/build-customKernel.txt 2>&1
+		kernelInstallStatus=$?
+	fi
+	UpdateTestState $ICA_TESTCOMPLETED
+	if [ $kernelInstallStatus -ne 0 ]; then
+		LogMsg "CUSTOM_KERNEL_FAIL"
+		UpdateTestState $ICA_TESTFAILED
+	else
+		LogMsg "CUSTOM_KERNEL_SUCCESS"
+		UpdateTestState $ICA_TESTCOMPLETED
+	fi
+	exit 0	
 elif [ "${customKernel}" == "netnext" ]; then
 	kernelSource="https://git.kernel.org/pub/scm/linux/kernel/git/davem/net-next.git"
 	sourceDir="net-next"
