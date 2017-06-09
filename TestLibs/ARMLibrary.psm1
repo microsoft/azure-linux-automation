@@ -1473,6 +1473,48 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
         LogMsg "Added NIC $NIC.."
         #endregion
 
+		#region multiple Nics
+		[System.Collections.ArrayList]$NicNameList= @()
+		foreach ($NetworkInterface in $newVM.NetworkInterfaces)
+		{
+			$NicName = $NetworkInterface.Name
+			$NicNameList.add($NicName)
+			Add-Content -Value "$($indents[2]){" -Path $jsonFile
+				Add-Content -Value "$($indents[3])^apiVersion^: ^2016-09-01^," -Path $jsonFile
+				Add-Content -Value "$($indents[3])^type^: ^Microsoft.Network/networkInterfaces^," -Path $jsonFile
+				Add-Content -Value "$($indents[3])^name^: ^$NicName^," -Path $jsonFile
+				Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
+				Add-Content -Value "$($indents[3])^dependsOn^: " -Path $jsonFile
+				Add-Content -Value "$($indents[3])[" -Path $jsonFile
+					Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]^," -Path $jsonFile
+                    Add-Content -Value "$($indents[4])^[variables('lbID')]^" -Path $jsonFile
+				Add-Content -Value "$($indents[3])]," -Path $jsonFile
+
+				Add-Content -Value "$($indents[3])^properties^:" -Path $jsonFile
+				Add-Content -Value "$($indents[3]){" -Path $jsonFile
+					Add-Content -Value "$($indents[4])^ipConfigurations^: " -Path $jsonFile
+					Add-Content -Value "$($indents[4])[" -Path $jsonFile
+						Add-Content -Value "$($indents[5]){" -Path $jsonFile
+							Add-Content -Value "$($indents[6])^name^: ^IPv4Config1^," -Path $jsonFile
+							Add-Content -Value "$($indents[6])^properties^: " -Path $jsonFile
+							Add-Content -Value "$($indents[6]){" -Path $jsonFile
+								Add-Content -Value "$($indents[7])^subnet^:" -Path $jsonFile
+								Add-Content -Value "$($indents[7]){" -Path $jsonFile
+									Add-Content -Value "$($indents[8])^id^: ^[variables('defaultSubnetID')]^" -Path $jsonFile
+								Add-Content -Value "$($indents[7])}" -Path $jsonFile
+							Add-Content -Value "$($indents[6])}" -Path $jsonFile
+						Add-Content -Value "$($indents[5])}" -Path $jsonFile
+					Add-Content -Value "$($indents[4])]" -Path $jsonFile
+            if ($EnableAcceleratedNetworking)
+            {
+                Add-Content -Value "$($indents[4])," -Path $jsonFile
+                Add-Content -Value "$($indents[4])^enableAcceleratedNetworking^: true" -Path $jsonFile
+                LogMsg "Enabled Accelerated Networking for $NicName."
+            }
+				Add-Content -Value "$($indents[3])}" -Path $jsonFile
+			Add-Content -Value "$($indents[2])}," -Path $jsonFile
+		}
+		#endregion
         #region virtualMachines
         LogMsg "Adding Virtual Machine $vmName"
         Add-Content -Value "$($indents[2]){" -Path $jsonFile
@@ -1487,6 +1529,13 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
             {
                 Add-Content -Value "$($indents[4])^[concat('Microsoft.Storage/storageAccounts/', variables('StorageAccountName'))]^," -Path $jsonFile
             }
+		if($NicNameList)
+		{
+			foreach($NicName in $NicNameList)
+			{
+                Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/networkInterfaces/', '$NicName')]^," -Path $jsonFile
+			}
+        }
                 Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/networkInterfaces/', '$NIC')]^" -Path $jsonFile
             Add-Content -Value "$($indents[3])]," -Path $jsonFile
 
@@ -1543,12 +1592,33 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                 Add-Content -Value "$($indents[4]){" -Path $jsonFile
                     Add-Content -Value "$($indents[5])^networkInterfaces^: " -Path $jsonFile
                     Add-Content -Value "$($indents[5])[" -Path $jsonFile
+					#region configure multiple Nics to networkProfile
+					if($NicNameList)
+					{
+						foreach($NicName in $NicNameList)
+						{
+							Add-Content -Value "$($indents[6]){" -Path $jsonFile
+								Add-Content -Value "$($indents[7])^id^: ^[resourceId('Microsoft.Network/networkInterfaces','$NicName')]^," -Path $jsonFile
+								Add-Content -Value "$($indents[7])^properties^: { ^primary^: false }" -Path $jsonFile
+							Add-Content -Value "$($indents[6])}," -Path $jsonFile
+                            LogMsg "Attached Network Interface Card `"$NicName`" to Virtual Machine `"$vmName`"."
+						}							
+						Add-Content -Value "$($indents[6]){" -Path $jsonFile
+							Add-Content -Value "$($indents[7])^id^: ^[resourceId('Microsoft.Network/networkInterfaces','$NIC')]^," -Path $jsonFile
+							Add-Content -Value "$($indents[7])^properties^: { ^primary^: true }" -Path $jsonFile
+						Add-Content -Value "$($indents[6])}" -Path $jsonFile
+                        LogMsg "Attached Network Interface Card `"$NIC`" to Virtual Machine `"$vmName`"."
+					}
+					else
+					{
                         Add-Content -Value "$($indents[6]){" -Path $jsonFile
                             Add-Content -Value "$($indents[7])^id^: ^[resourceId('Microsoft.Network/networkInterfaces','$NIC')]^" -Path $jsonFile
                         Add-Content -Value "$($indents[6])}" -Path $jsonFile
+					}	
+					#endregion
                     Add-Content -Value "$($indents[5])]" -Path $jsonFile
                 Add-Content -Value "$($indents[4])}" -Path $jsonFile
-                #endregion
+               
 
                 #region Enable boot dignostics.
 				Add-Content -Value "$($indents[4])," -Path $jsonFile
@@ -1563,7 +1633,6 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                 #endregion
 			
             Add-Content -Value "$($indents[3])}" -Path $jsonFile
-            LogMsg "Attached Network Interface Card `"$NIC`" to Virtual Machine `"$vmName`"."
             #endregion
 
         Add-Content -Value "$($indents[2])}" -Path $jsonFile
@@ -1647,7 +1716,7 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
             {
                 Add-Content -Value "$($indents[4])," -Path $jsonFile
                 Add-Content -Value "$($indents[4])^enableAcceleratedNetworking^: true" -Path $jsonFile
-                LogMsg "Enabled Accelerated Networking."
+                LogMsg "Enabled Accelerated Networking for $NIC."
             }
             Add-Content -Value "$($indents[3])}" -Path $jsonFile
         Add-Content -Value "$($indents[2])}," -Path $jsonFile
@@ -1659,7 +1728,7 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
 			$NicName = $NetworkInterface.Name
 			$NicNameList.add($NicName)
 			Add-Content -Value "$($indents[2]){" -Path $jsonFile
-				Add-Content -Value "$($indents[3])^apiVersion^: ^$apiVersion^," -Path $jsonFile
+				Add-Content -Value "$($indents[3])^apiVersion^: ^2016-09-01^," -Path $jsonFile
 				Add-Content -Value "$($indents[3])^type^: ^Microsoft.Network/networkInterfaces^," -Path $jsonFile
 				Add-Content -Value "$($indents[3])^name^: ^$NicName^," -Path $jsonFile
 				Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
@@ -1682,7 +1751,13 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
 								Add-Content -Value "$($indents[7])}" -Path $jsonFile
 							Add-Content -Value "$($indents[6])}" -Path $jsonFile
 						Add-Content -Value "$($indents[5])}" -Path $jsonFile
-					Add-Content -Value "$($indents[4])]," -Path $jsonFile
+					Add-Content -Value "$($indents[4])]" -Path $jsonFile
+            if ($EnableAcceleratedNetworking)
+            {
+                Add-Content -Value "$($indents[4])," -Path $jsonFile
+                Add-Content -Value "$($indents[4])^enableAcceleratedNetworking^: true" -Path $jsonFile
+                LogMsg "Enabled Accelerated Networking for $NicName."
+            }
 				Add-Content -Value "$($indents[3])}" -Path $jsonFile
 			Add-Content -Value "$($indents[2])}," -Path $jsonFile
 		}
