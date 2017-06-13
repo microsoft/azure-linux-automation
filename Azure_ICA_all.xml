@@ -7357,6 +7357,66 @@
 			</TestParameters>
 			<Priority>P0</Priority>
 		</test>
+		<test>
+			<testName>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM-NEXT</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<OverrideVMSize>Standard_A2</OverrideVMSize>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+			<param>NEXT</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>		
+		<test>
+			<testName>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM-BLUESTONE</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<OverrideVMSize>Standard_A2</OverrideVMSize>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+			<param>BLUESTONE</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM-LIS</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<OverrideVMSize>Standard_A2</OverrideVMSize>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+			<param>LIS</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM-LATEST</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<OverrideVMSize>Standard_A2</OverrideVMSize>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+			<param>LATEST</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>			
 	</testsDefinition>
 
 	<testCycles>
@@ -8363,7 +8423,30 @@
 				<Name>ICA-N-Series-GPU-TEST-NC24r</Name>
 			</test>
 		</Cycle>	
-
+		<Cycle>
+			<cycleName>CAPTURE-VHD-NEXT</cycleName>
+			<test>
+				<Name>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM-NEXT</Name>
+			</test>
+		</Cycle>  
+		<Cycle>
+			<cycleName>CAPTURE-VHD-BLUESTONE</cycleName>
+			<test>
+				<Name>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM-BLUESTONE</Name>
+			</test>
+		</Cycle>  
+		<Cycle>
+			<cycleName>CAPTURE-VHD-LIS</cycleName>
+			<test>
+				<Name>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM-LIS</Name>
+			</test>
+		</Cycle>  
+		<Cycle>
+			<cycleName>CAPTURE-VHD-LATEST</cycleName>
+			<test>
+				<Name>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM-LATEST</Name>
+			</test>
+		</Cycle>
 		
 	</testCycles>
 </config>
