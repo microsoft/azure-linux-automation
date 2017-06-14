@@ -49,6 +49,7 @@ InstallNTTTCP() {
 		then
 			LogMsg "Detected UBUNTU"
 				LogMsg "Configuring ${1} for ntttcp test..."
+				ssh ${1} "dpkg --force-all --configure -a"
 				ssh ${1} "apt-get update"
 				ssh ${1} "apt-get -y install libaio1 sysstat git bc make gcc"
 				ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"

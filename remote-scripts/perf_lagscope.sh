@@ -49,6 +49,7 @@ InstallLAGSCOPE() {
 		then
 			LogMsg "Detected UBUNTU"
 				LogMsg "Configuring ${1} for lagscope test..."
+				ssh ${1} "dpkg --force-all --configure -a"
 				ssh ${1} "apt-get update"
 				ssh ${1} "apt-get -y install libaio1 sysstat git bc make gcc"
 				ssh ${1} "rm -rf lagscope"
