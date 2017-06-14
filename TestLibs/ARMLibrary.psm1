@@ -1545,7 +1545,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
 
         #Add Bulk NICs
         $currentVMNics = 0
-		while ($currentVMNics -lt $newVM.TotalNICs)
+		while ($currentVMNics -lt $newVM.ExtraNICs)
 		{
 			$NicName = "ExtraNetworkCard-$totalRGNics"
 			$NicNameList.add($NicName)
@@ -1848,7 +1848,7 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
 
         #Add Bulk NICs
         $currentVMNics = 0
-		while ($currentVMNics -lt $newVM.TotalNICs)
+		while ($currentVMNics -lt $newVM.ExtraNICs)
 		{
 			$NicName = "ExtraNetworkCard-$totalRGNics"
 			$NicNameList.add($NicName)
