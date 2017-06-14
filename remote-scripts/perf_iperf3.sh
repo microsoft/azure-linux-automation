@@ -48,7 +48,7 @@ InstallIPERF3()
 		then
 			
 			LogMsg "Detected Ubuntu"
-			ssh ${1} "dpkg --force-all --configure -a"
+			ssh ${1} "until dpkg --force-all --configure -a; sleep 10; do echo 'Trying again...'; done"
 			ssh ${1} "apt-get update"
 			ssh ${1} "apt-get -y install iperf3 sysstat bc"
 			if [ $IPversion -eq 6 ]; then	

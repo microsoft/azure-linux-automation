@@ -52,7 +52,7 @@ InstallFIO() {
 		if [[ $DISTRO =~ "Ubuntu" ]];
 		then
 			LogMsg "Detected UBUNTU"
-			dpkg --force-all --configure -a
+			until dpkg --force-all --configure -a; sleep 10; do echo 'Trying again...'; done
 			apt-get update
 			apt-get install -y wget sysstat blktrace bc
 			mount -t debugfs none /sys/kernel/debug

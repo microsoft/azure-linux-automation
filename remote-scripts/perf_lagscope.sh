@@ -49,7 +49,7 @@ InstallLAGSCOPE() {
 		then
 			LogMsg "Detected UBUNTU"
 				LogMsg "Configuring ${1} for lagscope test..."
-				ssh ${1} "dpkg --force-all --configure -a"
+				ssh ${1} "until dpkg --force-all --configure -a; sleep 10; do echo 'Trying again...'; done"
 				ssh ${1} "apt-get update"
 				ssh ${1} "apt-get -y install libaio1 sysstat git bc make gcc"
 				ssh ${1} "rm -rf lagscope"
@@ -177,7 +177,7 @@ LogMsg "Now running Lagscope test"
 LogMsg "Starting server."
 ssh root@${server} "lagscope -r -D"
 sleep 1
-LogMsg "Starting client."
+LogMsg "lagscope client running..."
 ssh root@${client} "lagscope -s${server} -i0 -n${pingIteration} -H > lagscope-n${pingIteration}-output.txt"
 LogMsg "Test finsished."
 UpdateTestState ICA_TESTCOMPLETED

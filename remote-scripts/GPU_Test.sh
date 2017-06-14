@@ -85,7 +85,7 @@ InstallGPUDrivers() {
 				wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/${CUDA_REPO_PKG} -O /tmp/${CUDA_REPO_PKG}
 				dpkg -i /tmp/${CUDA_REPO_PKG}
 				rm -f /tmp/${CUDA_REPO_PKG}
-				dpkg --force-all --configure -a
+				until dpkg --force-all --configure -a; sleep 10; do echo 'Trying again...'; done
 				apt-get -y update
 				apt-get -y install linux-tools-generic linux-cloud-tools-generic
 				apt-get -y install cuda-drivers
