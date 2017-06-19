@@ -56,16 +56,16 @@ InstallIPERF3()
 				ssh ${1} "chmod +x ConfigureUbuntu1604IPv6.sh"
 				ssh ${1} "./ConfigureUbuntu1604IPv6.sh"
 			fi
-				
-		elif [[ $DISTRO =~ "Red Hat Enterprise Linux Server release 7.3" ]];
+		elif [[ $DISTRO =~ "Red Hat Enterprise Linux Server release 6" ]] || [[ $DISTRO =~ "CentOS Linux release 6" ]] || [[ $DISTRO =~ "CentOS release 6" ]];
 		then
-				LogMsg "Detected Redhat 7.x"
-				ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+				LogMsg "Detected Redhat/CentOS 6.x"
+				ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm"
 				ssh ${1} "yum -y --nogpgcheck install iperf3 sysstat bc"
-				ssh ${1} "iptables -F"
-		elif [[ $DISTRO =~ "CentOS Linux release 7" ]];
+				ssh ${1} "iptables -F"				
+				
+		elif [[ $DISTRO =~ "Red Hat Enterprise Linux Server release 7" ]] || [[ $DISTRO =~ "CentOS Linux release 7" ]];
 		then
-				LogMsg "Detected CentOS 7.x"
+				LogMsg "Detected Redhat/CentOS 7.x"
 				ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
 				ssh ${1} "yum -y --nogpgcheck install iperf3 sysstat bc"
 				ssh ${1} "iptables -F"

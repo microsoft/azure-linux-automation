@@ -70,94 +70,35 @@ InstallFIO() {
 				
 		elif [[ $DISTRO =~ "Red Hat Enterprise Linux Server release 6" ]];
 		then
-				LogMsg "Detected Redhat 6.x"
-				fioCentOS6pkg="fio-2.1.10-1.el6.rf.x86_64.rpm"
-				LogMsg "INFO: installing required packages"
-				yum install -y wget sysstat mdadm blktrace libaio
-				mount -t debugfs none /sys/kernel/debug				
-				installed=`which fio`
-				if [ ! $installed ]; then
-					LogMsg "INFO: Installing fio"
-
-					fiolPkg=$(ls | grep ${fioCentOS6pkg})
-					if [ -z "$fiolPkg" ]; then			
-						wget "https://konkasoftpackages.blob.core.windows.net/linuxbinaries/${fioCentOS6pkg}"
-					fi
-					yum install -y libibverbs.x86_64
-					yum install -y ${fioCentOS6pkg}
-					if [ $? -ne 0 ]; then
-						LogMsg "Error: Unable to install fio"
-						exit 1
-					fi
-				fi
+			LogMsg "Detected RHEL 6.x"
+			LogMsg "INFO: installing required packages"
+			rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+			yum -y --nogpgcheck install wget sysstat mdadm blktrace libaio fio
+			mount -t debugfs none /sys/kernel/debug
 
 		elif [[ $DISTRO =~ "Red Hat Enterprise Linux Server release 7" ]];
 		then
-			fioCentOS7pkg="fio-2.2.8-2.el7.x86_64.rpm"
+			LogMsg "Detected RHEL 7.x"
 			LogMsg "INFO: installing required packages"
-			yum install -y wget sysstat mdadm blktrace libaio
+			rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+			yum -y --nogpgcheck install wget sysstat mdadm blktrace libaio fio
 			mount -t debugfs none /sys/kernel/debug
-			
-			installed=`which fio`
-			if [ ! $installed ]; then
-				LogMsg "INFO: Installing fio"
-
-				fiolPkg=$(ls | grep ${fioCentOS7pkg})
-				if [ -z "$fiolPkg" ]; then
-					wget "https://konkasoftpackages.blob.core.windows.net/linuxbinaries/${fioCentOS7pkg}"
-				fi
-				yum install -y ${fioCentOS7pkg}
-				if [ $? -ne 0 ]; then
-					LogMsg "Error: Unable to install fio"
-					exit 1
-				fi
-			fi
 				
-		elif [[ $DISTRO =~ "CentOS Linux release 6" ]];
+		elif [[ $DISTRO =~ "CentOS Linux release 6" ]] || [[ $DISTRO =~ "CentOS release 6" ]];
 		then
-				LogMsg "Detected CentOS 6.x"
-				fioCentOS6pkg="fio-2.1.10-1.el6.rf.x86_64.rpm"
-				LogMsg "INFO: installing required packages"
-				yum install -y wget sysstat mdadm blktrace libaio
-				mount -t debugfs none /sys/kernel/debug
-				
-				installed=`which fio`
-				if [ ! $installed ]; then
-					LogMsg "INFO: Installing fio"
-
-					fiolPkg=$(ls | grep ${fioCentOS6pkg})
-					if [ -z "$fiolPkg" ]; then			
-						wget "https://konkasoftpackages.blob.core.windows.net/linuxbinaries/${fioCentOS6pkg}"
-					fi
-					yum install -y libibverbs.x86_64
-					yum install -y ${fioCentOS6pkg}
-					if [ $? -ne 0 ]; then
-						LogMsg "Error: Unable to install fio"
-						exit 1
-					fi
-				fi
+			LogMsg "Detected CentOS 6.x"
+			LogMsg "INFO: installing required packages"
+			rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+			yum -y --nogpgcheck install wget sysstat mdadm blktrace libaio fio
+			mount -t debugfs none /sys/kernel/debug
 				
 		elif [[ $DISTRO =~ "CentOS Linux release 7" ]];
 		then
-			fioCentOS7pkg="fio-2.2.8-2.el7.x86_64.rpm"
+			LogMsg "Detected CentOS 7.x"
 			LogMsg "INFO: installing required packages"
-			yum install -y wget sysstat mdadm blktrace libaio
+			rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+			yum -y --nogpgcheck install wget sysstat mdadm blktrace libaio fio
 			mount -t debugfs none /sys/kernel/debug
-			
-			installed=`which fio`
-			if [ ! $installed ]; then
-				LogMsg "INFO: Installing fio"
-
-				fiolPkg=$(ls | grep ${fioCentOS7pkg})
-				if [ -z "$fiolPkg" ]; then
-					wget "https://konkasoftpackages.blob.core.windows.net/linuxbinaries/${fioCentOS7pkg}"
-				fi
-				yum install -y ${fioCentOS7pkg}
-				if [ $? -ne 0 ]; then
-					LogMsg "Error: Unable to install fio"
-					exit 1
-				fi
-			fi	
 
 		elif [[ $DISTRO =~ "SUSE Linux Enterprise Server 12" ]];
 		then
