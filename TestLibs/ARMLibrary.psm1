@@ -335,7 +335,7 @@ Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro, [str
             }
         }
         $curtime = Get-Date
-        $randomNumber = Get-Random -Maximum 9999 -Minimum 1111
+        $randomNumber = $global4digitRandom
         $isServiceDeployed = "False"
         $retryDeployment = 0
         if ( $RG.Tag -ne $null )
