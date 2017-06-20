@@ -91,7 +91,7 @@ InstallNTTTCP() {
 				ssh ${1} "cd lagscope/src && make && make install"
 				ssh ${1} "iptables -F"
 				
-		elif [[ $DISTRO =~ "CentOS Linux release 6" ]];
+		elif [[ $DISTRO =~ "CentOS Linux release 6" ]] || [[ $DISTRO =~ "CentOS release 6" ]];
 		then
 				LogMsg "Detected CentOS 6.x"
 				ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm"
