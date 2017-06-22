@@ -291,17 +291,7 @@ Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro, [str
     {
         $isMultiple = 'False'
     }
-
-    foreach ($newDistro in $xml.config.Azure.Deployment.Data.Distro)
-    {
-
-        if ($newDistro.Name -eq $Distro)
-        {
-            $osImage = $newDistro.OsImage
-            $osVHD = $newDistro.OsVHD
-        }
-    }
-
+    $OsVHD = $BaseOsVHD
     $location = $xml.config.Azure.General.Location
     $AffinityGroup = $xml.config.Azure.General.AffinityGroup
     if($region)
@@ -753,7 +743,7 @@ $StorageProfileScriptBlock = {
                 Add-Content -Value "$($indents[4]){" -Path $jsonFile
                 if ($ARMImage -and !$osVHD)
                 {
-                    LogMsg "├Using ARMImage : $($ARMImage.Publisher):$($ARMImage.Offer):$($ARMImage.Sku):$($ARMImage.Version)"
+                    LogMsg ">>Using ARMImage : $($ARMImage.Publisher):$($ARMImage.Offer):$($ARMImage.Sku):$($ARMImage.Version)"
                     Add-Content -Value "$($indents[5])^imageReference^ : " -Path $jsonFile
                     Add-Content -Value "$($indents[5]){" -Path $jsonFile
                         $publisher = $ARMImage.Publisher
@@ -784,7 +774,7 @@ $StorageProfileScriptBlock = {
                     Add-Content -Value "$($indents[5]){" -Path $jsonFile
                     if($osVHD)
                     {
-                        LogMsg "├Using VHD : $osVHD"
+                        LogMsg ">>Using VHD : $osVHD"
                         Add-Content -Value "$($indents[6])^image^: " -Path $jsonFile
                         Add-Content -Value "$($indents[6]){" -Path $jsonFile
                             Add-Content -Value "$($indents[7])^uri^: ^[concat('http://',variables('StorageAccountName'),'.blob.core.windows.net/vhds/','$osVHD')]^" -Path $jsonFile
@@ -2293,4 +2283,64 @@ Function CreateAllRGDeploymentsWithTempParameters($templateName, $location, $Tem
         }
     }
     return $retValue, $deployedGroups, $resourceGroupCount, $DeploymentElapsedTime
+}
+
+Function CopyVHDToAnotherStorageAccount ($sourceStorageAccount,$sourceStorageContainer,$destinationStorageAccount,$destinationStorageContainer,$vhdName)
+{
+    $retValue = $false
+    $GetAzureRmStorageAccount = Get-AzureRmStorageAccount    
+
+    LogMsg "Retrieving $sourceStorageAccount storage account key"
+    $SrcStorageAccountKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $(($GetAzureRmStorageAccount  | Where {$_.StorageAccountName -eq "$sourceStorageAccount"}).ResourceGroupName) -Name $sourceStorageAccount)[0].Value
+    [string]$SrcStorageAccount = $sourceStorageAccount
+    [string]$SrcStorageBlob = $vhdName
+    $SrcStorageContainer = $sourceStorageContainer
+
+
+    LogMsg "Retrieving $destinationStorageAccount storage account key"
+    $DestAccountKey= (Get-AzureRmStorageAccountKey -ResourceGroupName $(($GetAzureRmStorageAccount  | Where {$_.StorageAccountName -eq "$destinationStorageAccount"}).ResourceGroupName) -Name $destinationStorageAccount)[0].Value
+    [string]$DestAccountName =  $destinationStorageAccount
+    [string]$DestBlob = $vhdName
+    $DestContainer = $destinationStorageContainer
+
+    $context = New-AzureStorageContext -StorageAccountName $srcStorageAccount -StorageAccountKey $srcStorageAccountKey 
+    $expireTime = Get-Date
+    $expireTime = $expireTime.AddYears(1)
+    $SasUrl = New-AzureStorageBlobSASToken -container $srcStorageContainer -Blob $srcStorageBlob -Permission R -ExpiryTime $expireTime -FullUri -Context $Context 
+
+    $destContext = New-AzureStorageContext -StorageAccountName $destAccountName -StorageAccountKey $destAccountKey
+    $testContainer = Get-AzureStorageContainer -Name $destContainer -Context $destContext -ErrorAction Ignore
+    if ($testContainer -eq $null) 
+    {
+        $out = New-AzureStorageContainer -Name $destContainer -context $destContext
+    }
+    # Start the Copy
+    LogMsg "Copy $vhdName --> $($destContext.StorageAccountName) : Running"
+    $out = Start-AzureStorageBlobCopy -AbsoluteUri $SasUrl  -DestContainer $destContainer -DestContext $destContext -DestBlob $destBlob -Force
+    #
+    # Monitor replication status
+    #
+    $CopyingInProgress = $true
+    while($CopyingInProgress)
+    {
+        $CopyingInProgress = $false
+        $status = Get-AzureStorageBlobCopyState -Container $destContainer -Blob $destBlob -Context $destContext   
+        if ($status.Status -ne "Success") 
+        {
+            $CopyingInProgress = $true
+        }
+        else
+        {
+            LogMsg "Copy $DestBlob --> $($destContext.StorageAccountName) : Done"
+            $retValue = $true
+
+        }
+        if ($CopyingInProgress)
+        {
+            $copyPercentage = [math]::Round( $(($status.BytesCopied * 100 / $status.TotalBytes)) , 2 )
+            LogMsg "Bytes Copied:$($status.BytesCopied), Total Bytes:$($status.TotalBytes) [ $copyPercentage % ]"            
+            Sleep -Seconds 10
+        }
+    }
+    return $retValue
 }
