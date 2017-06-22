@@ -49,25 +49,18 @@ UpdateTestState()
 InstallFIO() {
 		DISTRO=`grep -ihs "buntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux" /etc/{issue,*release,*version}`
 
-		if [[ $DISTRO =~ "Ubuntu" ]];
+		if [[ $DISTRO =~ "Ubuntu" ]] || [[ $DISTRO =~ "Debian" ]];
 		then
-			LogMsg "Detected UBUNTU"
+			LogMsg "Detected UBUNTU/Debian"
 			until dpkg --force-all --configure -a; sleep 10; do echo 'Trying again...'; done
 			apt-get update
-			apt-get install -y wget sysstat blktrace bc
-			mount -t debugfs none /sys/kernel/debug
-			
-			installed=`which fio`
-			if [ ! $installed ]; then
-				LogMsg "INFO: Installing fio"
-
-				apt-get install -y fio ;
-				if [ $? -ne 0 ]; then
-					LogMsg "Error: Unable to install fio"
-					exit 1
-				fi
+			apt-get install -y wget sysstat blktrace bc gawk fio
+			if [ $? -ne 0 ]; then
+				LogMsg "Error: Unable to install fio"
+				exit 1
 			fi
-				
+			mount -t debugfs none /sys/kernel/debug
+							
 		elif [[ $DISTRO =~ "Red Hat Enterprise Linux Server release 6" ]];
 		then
 			LogMsg "Detected RHEL 6.x"
