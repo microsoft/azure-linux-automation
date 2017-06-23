@@ -61,17 +61,17 @@
 			<Data>
 				<!-- You can add your own distro and Image names here -->
 				<Distro>
-					<Name>SSU1604P</Name>
+					<Name>CK</Name>
 					<OsImage></OsImage>
 					<!-- <OsImage>b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu-16_04-LTS-amd64-server-20160907.1-en-us-30GB</OsImage> -->
 					<ARMImage>
-						<Publisher></Publisher>
+						<Publisher>Canonical</Publisher>
 						<!-- <Publisher>Canonical</Publisher> -->
-						<Offer></Offer>
+						<Offer>UbuntuServer</Offer>
 						<!-- <Offer>UbuntuServer</Offer> -->
-						<Sku></Sku>
+						<Sku>16.04.0-LTS</Sku>
 						<!-- <Sku>16.04.0-LTS</Sku> -->
-						<Version></Version>
+						<Version>latest</Version>
 						<!-- <Version>latest</Version> -->
 					</ARMImage>
 					<OsVHD></OsVHD>
@@ -7091,6 +7091,12 @@
 		</Cycle>
 		<Cycle>
 			<cycleName>DEPLOYMENT</cycleName>
+			<test>
+				<Name>ICA-DEPLOYMENT-ALL-SIZES-LOOP-TEST</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>LEGACY-DEPLOYMENT</cycleName>
 			<test>
 				<Name>ICA-DEPLOYMENT-ALL-SIZES-LOOP-TEST</Name>
 			</test>

@@ -1,2 +1,7 @@
 .idea/*
-
+TestResults*
+tools*
+report*
+report/AdditionalInfo.html
+Azure_ICA_all_*
+temp*
