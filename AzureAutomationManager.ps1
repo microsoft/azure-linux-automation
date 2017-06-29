@@ -10,7 +10,29 @@
 ## Author : v-shisav@microsoft.com
 ## Author : v-ampaw@microsoft.com
 ###############################################################################################
-param ([string] $xmlConfigFile, [switch] $eMail, [string] $logFilename="azure_ica.log", [switch] $runtests, [switch]$onCloud, [switch] $vhdprep, [switch]$upload, [switch] $help, [string] $Distro, [string] $cycleName, [string] $TestPriority, [string]$osImage, [switch]$EconomyMode, [switch]$keepReproInact, [string] $DebugDistro, [switch]$UseAzureResourceManager, [string] $OverrideVMSize, [string]$customKernel, [string] $customLIS, [string]$customLISBranch)
+param (
+[string] $xmlConfigFile, 
+[switch] $eMail, 
+[string] $logFilename="azure_ica.log", 
+[switch] $runtests, [switch]$onCloud, 
+[switch] $vhdprep, 
+[switch] $upload, 
+[switch] $help, 
+[string] $Distro, 
+[string] $cycleName, 
+[string] $TestPriority, 
+[string] $osImage, 
+[switch] $EconomyMode, 
+[switch] $keepReproInact, 
+[string] $DebugDistro, 
+[switch] $UseAzureResourceManager, 
+[string] $OverrideVMSize,
+[switch] $EnableAcceleratedNetworking,
+[string] $customKernel, 
+[string] $customLIS, 
+[string] $customLISBranch,
+[string] $resizeVMsAfterDeployment
+)
 
 Import-Module .\TestLibs\AzureWinUtils.psm1 -Force -Scope Global
 Import-Module .\TestLibs\RDFELibs.psm1 -Force -Scope Global
@@ -32,6 +54,19 @@ Set-Variable -Name PublicConfiguration -Value @() -Scope Global
 Set-Variable -Name PrivateConfiguration -Value @() -Scope Global
 Set-Variable -Name CurrentTestData -Value $CurrentTestData -Scope Global
 Set-Variable -Name preserveKeyword -Value "preserving" -Scope Global
+
+Set-Variable -Name global4digitRandom -Value $(Get-Random -SetSeed $(Get-Random) -Maximum 9999 -Minimum 1111) -Scope Global
+
+
+if($EnableAcceleratedNetworking)
+{
+    Set-Variable -Name EnableAcceleratedNetworking -Value $true -Scope Global
+}
+if($resizeVMsAfterDeployment)
+{
+    Set-Variable -Name resizeVMsAfterDeployment -Value $resizeVMsAfterDeployment -Scope Global
+}
+
 if ( $OverrideVMSize )
 {
     Set-Variable -Name OverrideVMSize -Value $OverrideVMSize -Scope Global

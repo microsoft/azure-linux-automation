@@ -55,6 +55,10 @@ if ($isDeployed)
 		Add-Content -Value "client=$($clientVMData.InternalIP)" -Path $constantsFile
 		foreach ( $param in $currentTestData.TestParameters.param)
 		{
+            if ($param -imatch "pingIteration")
+            {
+                $pingIteration=$param.Trim().Replace("pingIteration=","")
+            }
 			Add-Content -Value "$param" -Path $constantsFile
 		}
 		LogMsg "constanst.sh created successfully..."
@@ -65,54 +69,48 @@ if ($isDeployed)
 		#region EXECUTE TEST
 		$myString = @"
 cd /root/
-./perf_ntttcp.sh &> ntttcpConsoleLogs.txt
+./perf_lagscope.sh &> lagscopeConsoleLogs.txt
 . azuremodules.sh
 collect_VM_properties
 "@
-		Set-Content "$LogDir\StartNtttcpTest.sh" $myString
-		RemoteCopy -uploadTo $clientVMData.PublicIP -port $clientVMData.SSHPort -files ".\$constantsFile,.\remote-scripts\azuremodules.sh,.\remote-scripts\perf_ntttcp.sh,.\$LogDir\StartNtttcpTest.sh" -username "root" -password $password -upload
+		Set-Content "$LogDir\StartLagscopeTest.sh" $myString
+		RemoteCopy -uploadTo $clientVMData.PublicIP -port $clientVMData.SSHPort -files ".\$constantsFile,.\remote-scripts\azuremodules.sh,.\remote-scripts\perf_lagscope.sh,.\$LogDir\StartLagscopeTest.sh" -username "root" -password $password -upload
 		RemoteCopy -uploadTo $clientVMData.PublicIP -port $clientVMData.SSHPort -files $currentTestData.files -username "root" -password $password -upload
 
 		$out = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "chmod +x *.sh"
-		$testJob = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "/root/StartNtttcpTest.sh" -RunInBackground
+		$testJob = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "/root/StartLagscopeTest.sh" -RunInBackground
 		#endregion
 
 		#region MONITOR TEST
 		while ( (Get-Job -Id $testJob).State -eq "Running" )
 		{
-			$currentStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "tail -5 ntttcpConsoleLogs.txt | head -1"
+			$currentStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "tail -1 lagscopeConsoleLogs.txt"
 			LogMsg "Current Test Staus : $currentStatus"
 			WaitFor -seconds 20
 		}
 		$finalStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "cat /root/state.txt"
-		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/ntttcpConsoleLogs.txt"
-		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "lagscope-ntttcp-*"
-		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "ntttcp-p*"
-		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "report.log"
+		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "lagscope-n$pingIteration-output.txt"
 		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "VM_properties.csv"
 		
 		$testSummary = $null
-		$ntttcpReportLog = Get-Content -Path "$LogDir\report.log"
-		foreach ( $line in $ntttcpReportLog )
-		{
-            if ( $line -imatch "test_connections" )
-            {
-                continue;
-            }
+		$lagscopeReportLog = Get-Content -Path "$LogDir\lagscope-n$pingIteration-output.txt"
+        LogMsg $lagscopeReportLog
+
             try
             {
-                $test_connections = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[0]
-                $throughput_gbps = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[1]
-                $average_tcp_latency = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[2]
-                $metadata = "Connections=$test_connections"
-                $connResult = "throughput=$throughput_gbps`Gbps Avg_TCP_lat=$average_tcp_latency"
-                $resultSummary +=  CreateResultSummary -testResult $connResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+                $matchLine= (Select-String -Path "$LogDir\lagscope-n$pingIteration-output.txt" -Pattern "Average").Line
+                $minimumLat = $matchLine.Split(",").Split("=").Trim().Replace("us","")[1]
+                $maximumLat = $matchLine.Split(",").Split("=").Trim().Replace("us","")[3]
+                $averageLat = $matchLine.Split(",").Split("=").Trim().Replace("us","")[5]
+
+                $resultSummary +=  CreateResultSummary -testResult $minimumLat -metaData "Minimum Latency" -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+                $resultSummary +=  CreateResultSummary -testResult $maximumLat -metaData "Maximum Latency" -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+                $resultSummary +=  CreateResultSummary -testResult $averageLat -metaData "Average Latency" -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
             }
             catch
             {
-                $resultSummary +=  CreateResultSummary -testResult "Error in parsing logs." -metaData "NTTTCP" -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+                $resultSummary +=  CreateResultSummary -testResult "Error in parsing logs." -metaData "LAGSCOPE" -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
             }
-		}
 		#endregion
 
 		if ( $finalStatus -imatch "TestFailed")
@@ -176,14 +174,15 @@ collect_VM_properties
 				$DataPath = "Synthetic"    
 			}
 			$connectionString = "Server=$dataSource;uid=$user; pwd=$password;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
-			$LogContents = Get-Content -Path "$LogDir\report.log"
-			$SQLQuery = "INSERT INTO $dataTableName (TestCaseName,TestDate,HostType,HostBy,HostOS,GuestOSType,GuestDistro,GuestSize,KernelVersion,IPVersion,ProtocolType,DataPath,NumberOfConnections,Throughput_Gbps,Latency_ms) VALUES "
 
-			for($i = 1; $i -lt $LogContents.Count; $i++)
-			{
-				$Line = $LogContents[$i].Trim() -split '\s+'
-				$SQLQuery += "('$TestCaseName','$(Get-Date -Format yyyy-MM-dd)','$HostType','$HostBy','$HostOS','$GuestOSType','$GuestDistro','$GuestSize','$KernelVersion','$IPVersion','$ProtocolType','$DataPath',$($Line[0]),$($Line[1]),$($Line[2])),"
-			}
+			$SQLQuery = "INSERT INTO $dataTableName (TestCaseName,TestDate,HostType,HostBy,HostOS,GuestOSType,GuestDistro,GuestSize,KernelVersion,IPVersion,ProtocolType,DataPath,MaxLatency_us,AverageLatency_us,MinLatency_us,Latency95Percentile_us,Latency99Percentile_us) VALUES "
+            
+            #Percentile Values are not calculated yet. will be added in future.
+            $Latency95Percentile_us = 0
+            $Latency99Percentile_us = 0
+
+            $SQLQuery += "('$TestCaseName','$(Get-Date -Format yyyy-MM-dd)','$HostType','$HostBy','$HostOS','$GuestOSType','$GuestDistro','$GuestSize','$KernelVersion','$IPVersion','$ProtocolType','$DataPath','$maximumLat','$averageLat','$minimumLat','$Latency95Percentile_us','$Latency99Percentile_us'),"
+
 			$SQLQuery = $SQLQuery.TrimEnd(',')
 			LogMsg $SQLQuery
 			$connection = New-Object System.Data.SqlClient.SqlConnection
@@ -208,7 +207,7 @@ collect_VM_properties
 	}
 	Finally
 	{
-		$metaData = "NTTTCP RESULT"
+		$metaData = "LAGSCOPE RESULT"
 		if (!$testResult)
 		{
 			$testResult = "Aborted"

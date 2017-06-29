@@ -2,6 +2,7 @@
 TestResults*
 tools*
 report*
-report/AdditionalInfo.html
+Reload*
 Azure_ICA_all_*
-temp*
+start*
+.vscode/launch.json
