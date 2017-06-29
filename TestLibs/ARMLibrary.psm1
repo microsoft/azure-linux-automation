@@ -2285,9 +2285,13 @@ Function CreateAllRGDeploymentsWithTempParameters($templateName, $location, $Tem
     return $retValue, $deployedGroups, $resourceGroupCount, $DeploymentElapsedTime
 }
 
-Function CopyVHDToAnotherStorageAccount ($sourceStorageAccount,$sourceStorageContainer,$destinationStorageAccount,$destinationStorageContainer,$vhdName)
+Function CopyVHDToAnotherStorageAccount ($sourceStorageAccount,$sourceStorageContainer,$destinationStorageAccount,$destinationStorageContainer,$vhdName,$destVHDName)
 {
     $retValue = $false
+    if (!$destVHDName)
+    {
+        $destVHDName = $vhdName
+    }
     $GetAzureRmStorageAccount = Get-AzureRmStorageAccount    
 
     LogMsg "Retrieving $sourceStorageAccount storage account key"
@@ -2300,7 +2304,7 @@ Function CopyVHDToAnotherStorageAccount ($sourceStorageAccount,$sourceStorageCon
     LogMsg "Retrieving $destinationStorageAccount storage account key"
     $DestAccountKey= (Get-AzureRmStorageAccountKey -ResourceGroupName $(($GetAzureRmStorageAccount  | Where {$_.StorageAccountName -eq "$destinationStorageAccount"}).ResourceGroupName) -Name $destinationStorageAccount)[0].Value
     [string]$DestAccountName =  $destinationStorageAccount
-    [string]$DestBlob = $vhdName
+    [string]$DestBlob = $destVHDName
     $DestContainer = $destinationStorageContainer
 
     $context = New-AzureStorageContext -StorageAccountName $srcStorageAccount -StorageAccountKey $srcStorageAccountKey 
