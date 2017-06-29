@@ -123,7 +123,7 @@ LinuxRelease()
             echo "CENTOS";;
         *SUSE*)
             echo "SLES";;
-        Red*Hat*)
+        *Red*Hat*)
             echo "RHEL";;
         Debian*)
             echo "DEBIAN";;
@@ -164,14 +164,16 @@ ConfigRhel()
 
     javaConfig=`echo "" | update-alternatives --config java | grep "*"`
     tokens=( $javaConfig )
-    javaPath=${tokens[2]}
-    if [ ! -e $javaPath ]; then
+    javaPath=${tokens[3]}
+    javaPath2=${javaPath#"("}
+    javaPath2=${javaPath2%")"}
+    if [ ! -e $javaPath2 ]; then
         LogMsg "Error: Unable to find the Java install path"
         UpdateTestState $ICA_TESTFAILED
         exit 1
     fi
 
-    temp=`dirname $javaPath`
+    temp=`dirname $javaPath2`
     JAVA_HOME=`dirname $temp`
     if [ ! -e $JAVA_HOME ]; then
         LogMsg "Error: Invalid JAVA_HOME computed: ${JAVA_HOME}"

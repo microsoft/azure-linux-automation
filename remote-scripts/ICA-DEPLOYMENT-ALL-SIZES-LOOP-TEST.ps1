@@ -84,6 +84,44 @@ $DeploymentCount = $NumberOfSizes*5
             }
             return $DeploymentStatistics
         }
+
+        #Do this only when CustomKernel or CustomLIS is set 
+        if (($cycleName.ToUpper() -eq "DEPLOYMENT") -and ($customKernel -or $customLIS))
+        {
+            #create a resource group and use the VHD for Deployment Test
+            $isDeployed = DeployVMS -setupType "SingleVM" -Distro $Distro -xmlConfig $xmlConfig -GetDeploymentStatistics $True
+                
+            foreach ($VM in $allVMData)
+            {
+                $ResourceGroupUnderTest = $VM.ResourceGroupName
+                $VHDuri = (Get-AzureRMVM -ResourceGroupName $VM.ResourceGroupName).StorageProfile.OsDisk.Vhd.Uri
+                #Deprovision VM
+		        LogMsg "Executing: waagent -deprovision..."
+		        $DeprovisionInfo = RunLinuxCmd -username $user -password $password -ip $VM.PublicIP -port $VM.SSHPort -command "/usr/sbin/waagent -force -deprovision" -runAsSudo
+		        LogMsg $DeprovisionInfo
+		        LogMsg "Execution of waagent -deprovision done successfully"
+                LogMsg "Stopping Virtual Machine ...."
+                $out = Stop-AzureRmVM -ResourceGroupName $VM.ResourceGroupName -Name $VM.RoleName -Force
+                WaitFor -seconds 60
+            }
+            #get the VHD file name from the VHD uri
+            $VHDuri = Split-Path $VHDuri -Leaf
+            $Distros = @($xmlConfig.config.Azure.Deployment.Data.Distro)
+            #add OSVHD element to $xml so that deployment will pick the vhd 
+            foreach ($distroname in $Distros)
+	        {
+           		if ($distroname.Name -eq $Distro)
+		        {
+                    $xmlConfig.config.Azure.Deployment.Data.Distro[$Distros.IndexOf($distroname)].OsVHD = $VHDuri.ToString() 
+		        }
+	        }
+
+            #Finally set customKernl and customLIS to null which are not required to be installed after deploying Virtual machine
+            $customKernel = $null
+            Set-Variable -Name customKernel -Value $customKernel -Scope Global
+            $customLIS = $null
+            Set-Variable -Name customLIS -Value $customLIS -Scope Global
+        }
         While ($count -lt $DeploymentCount)
         {
             $count += 1
@@ -95,6 +133,7 @@ $DeploymentCount = $NumberOfSizes*5
             Set-Variable -Name OverrideVMSize -Value $($VMSizes[$VMSizeNumber]) -Scope Global -Force
             $xmlConfig.config.Azure.Deployment.SingleVM.HostedService.Tag = $($VMSizes[$VMSizeNumber]).Replace("_","-")
             $isDeployed = DeployVMS -setupType "SingleVM" -Distro $Distro -xmlConfig $xmlConfig -GetDeploymentStatistics $True
+                        
             $DeploymentStatistics.VMSize = $($VMSizes[$VMSizeNumber])
             $DeploymentStatistics.attempt = $count
             if ( !$UseAzureResourceManager )
@@ -113,10 +152,15 @@ $DeploymentCount = $NumberOfSizes*5
             {
                 if ( $UseAzureResourceManager )
                 {
-                        $successCount += 1
-                        LogMsg "ATTEMPT : $count/$DeploymentCount : Deploying $($VMSizes[$VMSizeNumber]) VM.. SUCCESS"
-                        LogMsg "deployment Time = $($DeploymentStatistics.DeploymentTime)"
-                        $deployResult = "PASS"
+                        #Added restart check for the deployment
+                        $isRestarted = RestartAllDeployments -allVMData $allVMData
+                        if($isRestarted)
+                        {
+                            $successCount += 1
+                            LogMsg "ATTEMPT : $count/$DeploymentCount : Deploying $($VMSizes[$VMSizeNumber]) VM.. SUCCESS"
+                            LogMsg "deployment Time = $($DeploymentStatistics.DeploymentTime)"
+                            $deployResult = "PASS"
+                        }
                 }
                 else
                 {
@@ -242,6 +286,11 @@ $DeploymentCount = $NumberOfSizes*5
         if (!$testResult)
         {
             $testResult = "Aborted"
+        }
+        #delete the resource group with captured VHD
+        elseif ($testResult -eq "PASS")
+        {
+            $out = DeleteResourceGroup -RGName $ResourceGroupUnderTest
         }
         $resultArr += $testResult
     }   
