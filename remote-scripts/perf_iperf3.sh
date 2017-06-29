@@ -76,8 +76,8 @@ InstallIPERF3()
 				UpdateSummary "Unknown Distro, test aborted"
 				return 1
 		fi
-
 }
+
 
 LogMsg()
 {
