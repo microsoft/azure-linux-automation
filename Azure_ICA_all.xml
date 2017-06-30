@@ -7643,7 +7643,30 @@
 				<Name>BVT-VERIFY-SHUTDOWN</Name>
 			</test>
 		</Cycle>
-
+		<Cycle>
+			<cycleName>BVTMK</cycleName>
+			<test>
+				<Name>BVT-VERIFY-NO-ERROR-IN-LOGS</Name>
+			</test>
+			<test>
+				<Name>BVT-VERIFY-VHD-PREREQUISITES</Name>
+			</test>
+			<test>
+				<Name>BVT-WA-PROC-CHECK</Name>
+			</test>
+			<test>
+				<Name>BVT-WA-VER-CHECK</Name>
+			</test>
+			<test>
+				<Name>BVT-SWAP-CHECK</Name>
+			</test>
+			<test>
+				<Name>BVT-VERIFY-RESTART</Name>
+			</test>
+			<test>
+				<Name>BVT-VERIFY-SHUTDOWN</Name>
+			</test>
+		</Cycle>
 		<!-- Network Outbound Access tests -->
 		<Cycle>
 			<cycleName>OutboundAccess</cycleName>
