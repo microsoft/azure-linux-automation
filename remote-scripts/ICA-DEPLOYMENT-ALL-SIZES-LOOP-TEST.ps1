@@ -129,6 +129,7 @@ $DeploymentCount = $NumberOfSizes*5
             $deployedResourceGroupName = $null
             $DeploymentStatistics = CreateDeploymentResultObject
             #Create A VM here and Wait for the VM to come up.
+            LogMsg "Current Progress : Success : $successCount, Fail : $failCount, Remaining : $($DeploymentCount - $successCount - $failCount)"
             LogMsg "ATTEMPT : $count/$DeploymentCount : Deploying $($VMSizes[$VMSizeNumber]) VM.."
             Set-Variable -Name OverrideVMSize -Value $($VMSizes[$VMSizeNumber]) -Scope Global -Force
             $xmlConfig.config.Azure.Deployment.SingleVM.HostedService.Tag = $($VMSizes[$VMSizeNumber]).Replace("_","-")
@@ -152,14 +153,22 @@ $DeploymentCount = $NumberOfSizes*5
             {
                 if ( $UseAzureResourceManager )
                 {
+                        LogMsg "ATTEMPT : $count/$DeploymentCount : Deploying $($VMSizes[$VMSizeNumber]) VM.. SUCCESS"
+                        LogMsg "deployment Time = $($DeploymentStatistics.DeploymentTime)"
                         #Added restart check for the deployment
                         $isRestarted = RestartAllDeployments -allVMData $allVMData
                         if($isRestarted)
                         {
+                            LogMsg "ATTEMPT : $count/$DeploymentCount : Reboot $($VMSizes[$VMSizeNumber]) VM.. SUCCESS"
                             $successCount += 1
-                            LogMsg "ATTEMPT : $count/$DeploymentCount : Deploying $($VMSizes[$VMSizeNumber]) VM.. SUCCESS"
-                            LogMsg "deployment Time = $($DeploymentStatistics.DeploymentTime)"
                             $deployResult = "PASS"
+                        }
+                        else 
+                        {
+                            $hash = @{}
+                            $hash.Add($preserveKeyword,"yes")
+                            $hash.Add("testName","$($currentTestData.testName)")
+                            $out = Set-AzureRmResourceGroup -Name $deployedServiceName -Tag $hash
                         }
                 }
                 else
