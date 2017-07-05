@@ -221,7 +221,7 @@ function InstallCustomKernel ($customKernel, $allVMData, [switch]$RestartAfterUp
                             if ($currentKernelVersion -eq $upgradedKernelVersion)
                             {
                                 LogErr "Kernel version is same after restarting VMs."
-                                if ($customKernel -imatch "latest")
+                                if ($customKernel -eq "latest")
                                 {
                                     LogMsg "Continuing the tests as default kernel is latest."
                                     $isKernelUpgraded = $true
