@@ -8485,9 +8485,6 @@
 				<Name>ICA-PERF-FIO-TEST-4K</Name>
 			</test>
 			<test>
-				<Name>ICA-PERF-FIO-TEST-8K</Name>
-			</test>
-			<test>
 				<Name>ICA-PERF-FIO-TEST-1024K</Name>
 			</test>			
 		</Cycle>
