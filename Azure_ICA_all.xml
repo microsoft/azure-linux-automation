@@ -505,25 +505,12 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
 							<PublicPort>22</PublicPort>
-						</EndPoints>
-						<EndPoints>
-							<Name>https-1</Name>
-							<Protocol>tcp</Protocol>
-							<LocalPort>8443</LocalPort>
-							<PublicPort>8443</PublicPort>
-							<LoadBalanced>False</LoadBalanced>
-						</EndPoints>
-						<EndPoints>
-							<Name>https-2</Name>
-							<Protocol>udp</Protocol>
-							<LocalPort>443</LocalPort>
-							<PublicPort>443</PublicPort>
-							<LoadBalanced>False</LoadBalanced>
 						</EndPoints>
 						<EndPoints>
 							<Name>http-1</Name>
@@ -666,6 +653,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Medium</InstanceSize>
+						<ARMInstanceSize>Standard_A2</ARMInstanceSize>
 						<RoleName>Backend</RoleName>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -678,6 +666,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<RoleName>Frontend1</RoleName>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -686,22 +675,6 @@
 							<PublicPort>222</PublicPort>
 						</EndPoints>
 						<EndPoints>
-							<Name>https-1</Name>
-							<Protocol>tcp</Protocol>
-							<LocalPort>8443</LocalPort>
-							<PublicPort>8443</PublicPort>
-							<ProbePort>8443</ProbePort>
-							<LoadBalanced>True</LoadBalanced>
-						</EndPoints>
-						<EndPoints>
-							<Name>https-2</Name>
-							<Protocol>udp</Protocol>
-							<LocalPort>443</LocalPort>
-							<PublicPort>443</PublicPort>
-							<ProbePort>443</ProbePort>
-							<LoadBalanced>True</LoadBalanced>
-						</EndPoints>
-						<EndPoints>
 							<Name>http-1</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>80</LocalPort>
@@ -722,6 +695,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<RoleName>Frontend2</RoleName>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -730,22 +704,6 @@
 							<PublicPort>322</PublicPort>
 						</EndPoints>
 						<EndPoints>
-							<Name>https-1</Name>
-							<Protocol>tcp</Protocol>
-							<LocalPort>8443</LocalPort>
-							<PublicPort>8443</PublicPort>
-							<ProbePort>8443</ProbePort>
-							<LoadBalanced>True</LoadBalanced>
-						</EndPoints>
-						<EndPoints>
-							<Name>https-2</Name>
-							<Protocol>udp</Protocol>
-							<LocalPort>443</LocalPort>
-							<PublicPort>443</PublicPort>
-							<ProbePort>443</ProbePort>
-							<LoadBalanced>True</LoadBalanced>
-						</EndPoints>
-						<EndPoints>
 							<Name>http-1</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>80</LocalPort>
@@ -766,28 +724,13 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<RoleName>Frontend3</RoleName>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
 							<PublicPort>422</PublicPort>
-						</EndPoints>
-						<EndPoints>
-							<Name>https-1</Name>
-							<Protocol>tcp</Protocol>
-							<LocalPort>8443</LocalPort>
-							<PublicPort>8443</PublicPort>
-							<ProbePort>8443</ProbePort>
-							<LoadBalanced>True</LoadBalanced>
-						</EndPoints>
-						<EndPoints>
-							<Name>https-2</Name>
-							<Protocol>udp</Protocol>
-							<LocalPort>443</LocalPort>
-							<PublicPort>443</PublicPort>
-							<ProbePort>443</ProbePort>
-							<LoadBalanced>True</LoadBalanced>
 						</EndPoints>
 						<EndPoints>
 							<Name>http-1</Name>
@@ -5968,12 +5911,12 @@
 			<testName>E2E-WORDPRESS-SINGLE-VM-SETUP</testName>
 			<testScript>E2E-WORDPRESS-SETUP.py</testScript>
 			<testScriptps1>E2E-WORDPRESS-SETUP.ps1</testScriptps1>
-			<files>.\remote-scripts\Packages\wordpress.zip,.\remote-scripts\Packages\Wordpress.DDL,.\remote-scripts\E2E-WORDPRESS-SETUP.py,.\remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\E2E-WORDPRESS-SETUP.py,.\remote-scripts\azuremodules.py,.\tools\packages\python-pexpect-3.1-1.1.noarch.rpm</files>
 			<setupType>E2ESingleVM</setupType>
 			<TestType></TestType>
 			<E2ESetupCmdLineArgument>singleVM_setup</E2ESetupCmdLineArgument>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID></TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -5999,12 +5942,12 @@
 			<testName>E2E-WORDPRESS-FOUR-VM-SETUP</testName>
 			<testScript>E2E-WORDPRESS-SETUP.py</testScript>
 			<testScriptps1>E2E-WORDPRESS-SETUP.ps1</testScriptps1>
-			<files>.\remote-scripts\Packages\wordpress.zip,.\remote-scripts\Packages\Wordpress.DDL,.\remote-scripts\E2E-WORDPRESS-SETUP.py,.\remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\E2E-WORDPRESS-SETUP.py,.\remote-scripts\azuremodules.py,.\tools\packages\python-pexpect-3.1-1.1.noarch.rpm</files>
 			<setupType>E2EFourVM</setupType>
 			<TestType></TestType>
 			<E2ESetupCmdLineArgument>loadbalancer_setup</E2ESetupCmdLineArgument>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID></TestID>
 			<Priority>P0</Priority>
 		</test>
