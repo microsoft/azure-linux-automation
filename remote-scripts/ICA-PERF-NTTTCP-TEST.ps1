@@ -90,7 +90,7 @@ collect_VM_properties
 		#region MONITOR TEST
 		while ( (Get-Job -Id $testJob).State -eq "Running" )
 		{
-			$currentStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "tail -5 ntttcpConsoleLogs.txt | head -1"
+			$currentStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "tail -2 ntttcpConsoleLogs.txt | head -1"
 			LogMsg "Current Test Staus : $currentStatus"
 			WaitFor -seconds 20
 		}
@@ -114,13 +114,19 @@ collect_VM_properties
             }
             try
             {
+				$uploadResults = $true
                 $test_connections = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[0]
                 $throughput_gbps = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[1]
 				$cycle_per_byte = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[2]
                 $average_tcp_latency = $line.Trim().Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Replace("  "," ").Split(" ")[3]
                 $metadata = "Connections=$test_connections"
-                $connResult = "throughput=$throughput_gbps`cyclePerBytet=$cycle_per_byte`Gbps Avg_TCP_lat=$average_tcp_latency"
+                $connResult = "throughput=$throughput_gbps`Gbps cyclePerBytet=$cycle_per_byte Avg_TCP_lat=$average_tcp_latency"
                 $resultSummary +=  CreateResultSummary -testResult $connResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+				if ($throughput_gbps -eq 0)
+				{
+					$uploadResults = $false
+					$testResult = "FAIL"
+				}
             }
             catch
             {
@@ -139,7 +145,7 @@ collect_VM_properties
 			LogErr "Test Aborted. Last known status : $currentStatus."
 			$testResult = "ABORTED"
 		}
-		elseif ( $finalStatus -imatch "TestCompleted")
+		elseif ( ($finalStatus -imatch "TestCompleted") -and $uploadResults )
 		{
 			LogMsg "Test Completed."
 			$testResult = "PASS"
@@ -150,7 +156,7 @@ collect_VM_properties
 			LogMsg "Contests of summary.log : $testSummary"
 			$testResult = "PASS"
 		}
-		LogMsg "Test result : $testResult"
+		
 		LogMsg "Test Completed"
 		
 		LogMsg "Uploading the test results.."
@@ -192,20 +198,30 @@ collect_VM_properties
 			}
 			$SQLQuery = $SQLQuery.TrimEnd(',')
 			LogMsg $SQLQuery
-			$connection = New-Object System.Data.SqlClient.SqlConnection
-			$connection.ConnectionString = $connectionString
-			$connection.Open()
+			if ($uploadResults)
+			{
+				$connection = New-Object System.Data.SqlClient.SqlConnection
+				$connection.ConnectionString = $connectionString
+				$connection.Open()
 
-			$command = $connection.CreateCommand()
-			$command.CommandText = $SQLQuery
-			$result = $command.executenonquery()
-			$connection.Close()
-			LogMsg "Uploading the test results done!!"
+				$command = $connection.CreateCommand()
+				$command.CommandText = $SQLQuery
+				$result = $command.executenonquery()
+				$connection.Close()
+				LogMsg "Uploading the test results done!!"
+			}
+			else 
+			{
+				LogErr "Uploading the test results cancelled due to zero throughput for some connections!!"
+				$testResult = "FAIL"
+			}
+
 		}
 		else
 		{
 			LogMsg "Invalid database details. Failed to upload result to database!"
 		}
+		LogMsg "Test result : $testResult"
 	}
 	catch
 	{
