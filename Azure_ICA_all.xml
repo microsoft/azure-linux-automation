@@ -7105,7 +7105,7 @@
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<files>.\remote-scripts\azuremodules.sh</files>
 			<TestParameters>
-				<param>testDuration=60</param>
+				<param>testDuration=300</param>
 			</TestParameters>
 			<Priority>P0</Priority>
 		</test>
