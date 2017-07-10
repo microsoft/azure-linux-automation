@@ -28,7 +28,6 @@ def RunTest(expectedHost):
 def CheckHostName(expectedHost):
     RunLog.info("Checking hostname...")
     output = Run("hostname")
-    if expectedHost in output:
         RunLog.info('Hostname is set successfully to {0}'.format(expectedHost))
         return True
     else:
