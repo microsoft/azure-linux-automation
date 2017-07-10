@@ -220,14 +220,28 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 		$testCount = 1
 	}
 
-	for ($counter = 0; $counter -lt $testCount; $counter++)
+	foreach ($test in $currentCycleData.test)
 	{
-		$test = $currentCycleData.test[$counter]
 		if (-not $test)
 		{
 			$test = $currentCycleData.test
 		}
-		$currentTestData = GetCurrentTestData -xmlConfig $xmlConfig -testName $test.Name
+		if ($RunSelectedTests)
+		{
+			if ($RunSelectedTests.Trim().Replace(" ","").Split(",") -contains $test.Name)
+			{
+				$currentTestData = GetCurrentTestData -xmlConfig $xmlConfig -testName $test.Name	
+			}
+			else 
+			{
+				LogMsg "Skipping $($test.Name) because it is not in selected tests to run."
+				Continue;
+			}
+		}
+		else 
+		{
+			$currentTestData = GetCurrentTestData -xmlConfig $xmlConfig -testName $test.Name	
+		}
 		# Generate Unique Test
 		$server = $xmlConfig.config.global.ServerEnv.Server		
 		$cluster = $xmlConfig.config.global.ClusterEnv.Cluster
