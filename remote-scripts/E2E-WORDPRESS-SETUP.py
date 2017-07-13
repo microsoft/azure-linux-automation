@@ -67,6 +67,7 @@ def set_variables_OS_dependent():
 		service_mysqld_name	= "mysql"
 		mysql_pkg_name		= "mysql-server"
 		frontend_packages_list = ["mysql-client","php", "php-mysql","libapache2-mod-php","apache2","wget","sendmail", "git"]
+		UpdateRepos()
 	elif (current_distro == "opensuse"):
 		pexpect_pkg_name	= "python-pexpect"
 		service_httpd_name	= "apache2"
@@ -84,8 +85,8 @@ def set_variables_OS_dependent():
 		pexpect_pkg_name	= "python-pexpect"					 
 		service_httpd_name	= "apache2"
 		service_mysqld_name	= "mysql"
-		mysql_pkg_name		= "mariadb"		 
-		frontend_packages_list = ["mariadb-client","apache2-mod_php5","apache2","php5", "php5-mysql","wget","sendmail", "git"]
+		mysql_pkg_name		= "mysql"		 
+		frontend_packages_list = ["mysql-client","php53", "php53-mysql","apache2-mod_php53","apache2","wget","sendmail", "git"]
 		if(distro_version >= 12):
 			service_mysqld_name	= "mysql"
 			mysql_pkg_name		= "mariadb"
@@ -1125,8 +1126,6 @@ def main():
 # Code execution Start from here
 get_username_password_from_xml()
 set_variables_OS_dependent()
-UpdateRepos()
-
 disable_selinux()
 disable_iptables()
 
