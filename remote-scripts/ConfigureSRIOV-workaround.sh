@@ -4,7 +4,7 @@ DISTRO=`grep -ihs "buntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux
 bootLogs=`dmesg`
 if [[ $bootLogs =~ "Data path switched to VF" ]];
 then
-	echo "Data path switched to VF. No configuration required."
+	echo "DATAPATH_SWITCHED_TO_VF"
 else
 	if [[ $DISTRO =~ "Ubuntu" ]];
 	then
