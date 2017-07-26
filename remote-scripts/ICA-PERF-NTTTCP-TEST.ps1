@@ -122,7 +122,7 @@ collect_VM_properties
                 $metadata = "Connections=$test_connections"
                 $connResult = "throughput=$throughput_gbps`Gbps cyclePerBytet=$cycle_per_byte Avg_TCP_lat=$average_tcp_latency"
                 $resultSummary +=  CreateResultSummary -testResult $connResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
-				if ($throughput_gbps -eq 0)
+				if ($throughput_gbps -eq "0.00")
 				{
 					$uploadResults = $false
 					$testResult = "FAIL"
