@@ -40,6 +40,14 @@ if ($isDeployed)
 		LogMsg "  RoleName : $($serverVMData.RoleName)"
 		LogMsg "  Public IP : $($serverVMData.PublicIP)"
 		LogMsg "  SSH Port : $($serverVMData.SSHPort)"
+
+		#
+		# PROVISION VMS FOR LISA WILL ENABLE ROOT USER AND WILL MAKE ENABLE PASSWORDLESS AUTHENTICATION ACROSS ALL VMS IN SAME HOSTED SERVICE.	
+		#
+		ProvisionVMsForLisa -allVMData $allVMData -installPackagesOnRoleNames "none"
+
+		#endregion
+
 		if($EnableAcceleratedNetworking)
 		{
 			$DataPath = "SRIOV"
@@ -52,12 +60,6 @@ if ($isDeployed)
 			$DataPath = "Synthetic"
 			$nicName = "eth0"    
 		}
-		#
-		# PROVISION VMS FOR LISA WILL ENABLE ROOT USER AND WILL MAKE ENABLE PASSWORDLESS AUTHENTICATION ACROSS ALL VMS IN SAME HOSTED SERVICE.	
-		#
-		ProvisionVMsForLisa -allVMData $allVMData -installPackagesOnRoleNames "none"
-
-		#endregion
 
 		LogMsg "Generating constansts.sh ..."
 		$constantsFile = "$LogDir\constants.sh"
