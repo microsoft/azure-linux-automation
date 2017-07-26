@@ -43,7 +43,9 @@ if ($isDeployed)
 		if($EnableAcceleratedNetworking)
 		{
 			$DataPath = "SRIOV"
-			$nicName = "bond0"
+            LogMsg "Getting SRIOV NIC Name."
+            $nicName = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "dmesg | grep 'Data path switched to VF' | tail -1 | awk '{ print `$NF }'"
+            LogMsg "SRIOV NIC: $nicName"
 		}
 		else
 		{
@@ -122,7 +124,7 @@ collect_VM_properties
                 $metadata = "Connections=$test_connections"
                 $connResult = "throughput=$throughput_gbps`Gbps cyclePerBytet=$cycle_per_byte Avg_TCP_lat=$average_tcp_latency"
                 $resultSummary +=  CreateResultSummary -testResult $connResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
-				if ($throughput_gbps -eq "0.00")
+				if ([string]$throughput_gbps -imatch "0.00")
 				{
 					$uploadResults = $false
 					$testResult = "FAIL"
