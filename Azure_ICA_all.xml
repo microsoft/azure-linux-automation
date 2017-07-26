@@ -7139,7 +7139,7 @@
 				<param>numjobs=1</param>
 				<param>ioruntime=300</param>
 				<param>maxIO=4</param>
-				<param>fileSize=134G</param>
+				<param>fileSize=1023G</param>
 			</TestParameters>
 			<Priority>P0</Priority>
 		</test>		
