@@ -52,7 +52,7 @@ if ($isDeployed)
 		{
 			$DataPath = "SRIOV"
             LogMsg "Getting SRIOV NIC Name."
-            $nicName = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "dmesg | grep 'Data path switched to VF' | tail -1 | awk '{ print `$NF }'"
+            $nicName = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "dmesg | grep 'VF registering' | tail -1 | awk '{ print `$NF }'"
             LogMsg "SRIOV NIC: $nicName"
 		}
 		else
