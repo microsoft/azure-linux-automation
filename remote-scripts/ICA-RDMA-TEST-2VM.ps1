@@ -230,10 +230,10 @@ if ($isDeployed)
 		else
 		{
 
-            $mpirunPath = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command 'find / -name mpirun | grep intel64'
-            $imb_mpi1Path = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command 'find / -name IMB-MPI1 | grep intel64'
-            $pingPongTestIntraNodeTestOut = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -command "$mpirunPath -hosts $($serverVMData.RoleName) -ppn 2 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 $imb_mpi1Path pingpong > /home/$user/pingPongTestIntraNodeTestOut.txt 2>&1" -ignoreLinuxExitCode
-			$pingPongTestInterNodeTestOut = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -command "$mpirunPath -hosts $($serverVMData.RoleName),$($clientVMData.RoleName) -ppn 1 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 $imb_mpi1Path pingpong > /home/$user/pingPongTestInterNodeTestOut.txt 2>&1" -ignoreLinuxExitCode
+            #$mpirunPath = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command 'find / -name mpirun | grep intel64'
+            #$imb_mpi1Path = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command 'find / -name IMB-MPI1 | grep intel64'
+            $pingPongTestIntraNodeTestOut = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -command "/opt/intel/impi/5.0.3.048/intel64/bin/mpirun -hosts server-vm -ppn 1 -n 1 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 /opt/intel/impi/5.0.3.048/intel64/bin/IMB-MPI1 pingpong > /home/$user/pingPongTestIntraNodeTestOut.txt 2>&1" -ignoreLinuxExitCode
+			$pingPongTestInterNodeTestOut = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -command "/opt/intel/impi/5.0.3.048/intel64/bin/mpirun -hosts server-vm,client-vm -ppn 1 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 /opt/intel/impi/5.0.3.048/intel64/bin/IMB-MPI1 pingpong > /home/$user/pingPongTestInterNodeTestOut.txt 2>&1" -ignoreLinuxExitCode
             #region EXECUTE TEST
 			#$testJob = RunLinuxCmd -runAsSudo -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -command "/home/$user/StartRDMA.sh" -RunInBackground
 			##endregion#
