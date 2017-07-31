@@ -14,7 +14,7 @@ Function ProvisionVMsForLisa($allVMData, $installPackagesOnRoleNames)
 	$start_time = Get-Date
 	$out = Invoke-WebRequest -Uri $scriptUrl -OutFile "$LogDir\$scriptName"
 	LogMsg "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
-
+    
     $keysGenerated = $false
 	foreach ( $vmData in $allVMData )
 	{
@@ -75,6 +75,59 @@ Function ProvisionVMsForLisa($allVMData, $installPackagesOnRoleNames)
         }
 
 	}
+
+    
+    $keysGenerated = $false
+	foreach ( $vmData in $allVMData )
+	{
+		LogMsg "Configuring $($vmData.RoleName) for LISA test..."
+		RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\remote-scripts\enablePasswordLessUserLogin.sh" -username $user -password $password -upload
+		$out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "chmod +x /home/$user/*.sh" -runAsSudo			
+
+        if ( $keysGenerated )
+        {
+            RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\$LogDir\sshFix.tar" -username $user -password $password -upload
+            $keyCopyOut = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/home/$user/enablePasswordLessUserLogin.sh -user $user" 
+            LogMsg $keyCopyOut
+            if ( $keyCopyOut -imatch "KEY_COPIED_SUCCESSFULLY" )
+            {
+                $keysGenerated = $true
+                LogMsg "SSH keys copied to $($vmData.RoleName)"
+                $md5sumCopy = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "md5sum /home/$user/.ssh/id_rsa"
+                if ( $md5sumGen -eq $md5sumCopy )
+                { 
+		            LogMsg "md5sum check success for /home/$user/.ssh/id_rsa."
+                }
+                else
+                {
+                    Throw "md5sum check failed for .ssh/id_rsa. Aborting test."
+                }
+            }
+            else
+            {
+                Throw "Error in copying SSH key to $($vmData.RoleName)"
+            }
+        }
+        else
+        {
+            $out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "rm -rf /home/$user/sshFix*" 
+            $keyGenOut = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/home/$user/enablePasswordLessUserLogin.sh -user $user" 
+            LogMsg $keyGenOut
+            if ( $keyGenOut -imatch "KEY_GENERATED_SUCCESSFULLY" )
+            {
+                $keysGenerated = $true
+                LogMsg "SSH keys generated in $($vmData.RoleName)"
+                RemoteCopy -download -downloadFrom $vmData.PublicIP -port $vmData.SSHPort  -files "/home/$user/sshFix.tar" -username $user -password $password -downloadTo $LogDir
+                $md5sumGen = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "md5sum /home/$user/.ssh/id_rsa"
+            }
+            else
+            {
+                Throw "Error in generating SSH key in $($vmData.RoleName)"
+            }
+        }
+
+	}
+
 	
 	$packageInstallJobs = @()
 	foreach ( $vmData in $allVMData )
@@ -378,18 +431,16 @@ function EnableSRIOVInAllVMs($allVMData)
 	        foreach ( $vmData in $allVMData )
 	        {
                 $vmCount += 1 
-                RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\remote-scripts\$scriptName" -username $user -password $password -upload
-                $out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "chmod +x *.sh" -runAsSudo
+                RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\remote-scripts\$scriptName,.\remote-scripts\ConfigureSRIOV-workaround.sh,.\remote-scripts\VerifySRIOV.sh" -username $user -password $password -upload
+                $out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "chmod +x /home/$user/*.sh" -runAsSudo
                 $currentIfConfigStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/sbin/ifconfig -a" -runAsSudo
                 $pciDevices = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "lspci" -runAsSudo
                 if ( $pciDevices -imatch "Mellanox")
                 {
                     LogMsg "Mellanox Adapter detected in $($vmData.RoleName)."
                     #SRIOV-Workaround for Ubuntu.
-                    RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\remote-scripts\ConfigureSRIOV-workaround.sh" -username $user -password $password -upload
-                    $out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "chmod +x ConfigureSRIOV-workaround.sh" -runAsSudo
                     $isRestartNeeded=""
-                    $isRestartNeeded= RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "./ConfigureSRIOV-workaround.sh" -runAsSudo
+                    $isRestartNeeded= RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/home/$user/ConfigureSRIOV-workaround.sh" -runAsSudo
                     if ($isRestartNeeded -imatch "SYSTEM_RESTART_REQUIRED")
                     {
                         LogMsg "SRIOV workaround applied for $($vmData.RoleName). Restart required."
@@ -420,6 +471,8 @@ function EnableSRIOVInAllVMs($allVMData)
                 if ($sriovOutput -imatch "DATAPATH_SWITCHED_TO_VF")
                 {
                     $restartStatus="True"
+                    LogMsg "Sleeping 350 seconds. (sometimes we see `"eth0: Closed port`" error between 300-350 seconds after the boot.)"
+                    WaitFor -seconds 350
                 }
             }
             $vmCount = 0
@@ -437,7 +490,17 @@ function EnableSRIOVInAllVMs($allVMData)
                         if ($AfterIfConfigStatus -imatch "Data path switched to VF")
                         {
                             LogMsg "Data path already switched to VF in $($vmData.RoleName)"
-                            $bondSuccess += 1
+                            #Verify SRIOV
+                            $sriovVerification = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/home/$user/VerifySRIOV.sh" -runAsSudo
+                            if ($sriovVerification -imatch "SRIOV_CHECK_PASS")
+                            {
+                                $bondSuccess += 1
+                            }
+                            else
+                            {
+                                LogErr "$($vmData.RoleName) : $sriovVerification"
+                                $bondError += 1 
+                            }
                         }
                         else
                         {

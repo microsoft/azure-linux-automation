@@ -4,11 +4,14 @@ Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""
 $resultArr = @()
+#$isDeployed = "ICA-RG-M1S1-SS-U16HPC-7-31-19-21-2052"
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
 	try
 	{
+#        $allVMData = GetAllDeployementData -ResourceGroups $isDeployed
+#        Set-Variable -Name allVMData -Value $allVMData -Scope Global
         $noServer = $true
 		$noClient = $true
 		$clientMachines = @()
@@ -107,7 +110,7 @@ if ($isDeployed)
 		#endregion
 
 		#region Upload files to master VM...
-		Set-Content -Value "/home/$user/TestRDMA.sh &> rdmaConsole.txt" -Path "$LogDir\StartRDMA.sh"
+		Set-Content -Value "/home/$user/TestRDMA.sh -user $user &> rdmaConsole.txt" -Path "$LogDir\StartRDMA.sh"
 		Set-Content -Value "*			   hard	memlock			unlimited" -Path "$LogDir\limits.conf"
 		Add-Content -Value "*			   soft	memlock			unlimited" -Path "$LogDir\limits.conf"
 		$out = .\tools\dos2unix.exe "$LogDir\limits.conf" 2>&1
@@ -226,38 +229,52 @@ if ($isDeployed)
 		}
 		else
 		{
-			#region EXECUTE TEST
-			$testJob = RunLinuxCmd -runAsSudo -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -command "/home/$user/StartRDMA.sh" -RunInBackground
-			#endregion
 
+            $mpirunPath = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command 'find / -name mpirun | grep intel64'
+            $imb_mpi1Path = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command 'find / -name IMB-MPI1 | grep intel64'
+            $pingPongTestIntraNodeTestOut = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -command "$mpirunPath -hosts $($serverVMData.RoleName) -ppn 2 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 $imb_mpi1Path pingpong > /home/$user/pingPongTestIntraNodeTestOut.txt 2>&1" -ignoreLinuxExitCode
+			$pingPongTestInterNodeTestOut = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -command "$mpirunPath -hosts $($serverVMData.RoleName),$($clientVMData.RoleName) -ppn 1 -n 2 -env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 $imb_mpi1Path pingpong > /home/$user/pingPongTestInterNodeTestOut.txt 2>&1" -ignoreLinuxExitCode
+            #region EXECUTE TEST
+			#$testJob = RunLinuxCmd -runAsSudo -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -command "/home/$user/StartRDMA.sh" -RunInBackground
+			##endregion#
+#`
 			#region MONITOR TEST
-			while ( (Get-Job -Id $testJob).State -eq "Running" )
-			{
-				$currentStatus = RunLinuxCmd -runAsSudo -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -command "tail -n 1 /home/$user/rdmaConsole.txt"
-				LogMsg "Current Test Staus : $currentStatus"
-				WaitFor -seconds 10
-			}
-		}		
-		RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -download -downloadTo $LogDir -files "/home/$user/rdmaConsole.txt"
-		RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -download -downloadTo $LogDir -files "/home/$user/summary.log"
+			#while ( (Get-Job -Id $testJob).State -eq "Running" )
+			#{
+		#		$currentStatus = RunLinuxCmd -runAsSudo -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -command "tail -n 1 /home/$user/rdmaConsole.txt"
+		#		LogMsg "Current Test Staus : $currentStatus"
+	    #		WaitFor -seconds 10
+		#	}
+		}
+
+		#RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -download -downloadTo $LogDir -files "/home/$user/rdmaConsole.txt"
+		#RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -download -downloadTo $LogDir -files "/home/$user/summary.log"
 		RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -download -downloadTo $LogDir -files "/home/$user/pingPongTestIntraNodeTestOut.txt"
         RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -download -downloadTo $LogDir -files "/home/$user/pingPongTestInterNodeTestOut.txt"
 
         RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -download -downloadTo $LogDir -files "/var/log/waagent.log"
         $out= RunLinuxCmd -runAsSudo -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -command "dmesg > /var/log/dmesg.txt"
         RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -download -downloadTo $LogDir -files "/var/log/dmesg.txt"
-		$finalStatus = RunLinuxCmd -runAsSudo -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -command "cat /home/$user/state.txt"
-		$rdmaSummary = Get-Content -Path "$LogDir\summary.log" -ErrorAction SilentlyContinue
+
+		$pingPongTestIntraNodeTestOut =  ( Get-Content -Path "$LogDir\pingPongTestIntraNodeTestOut.txt" | Out-String )
+		LogMsg $pingPongTestIntraNodeTestOut
+		LogMsg "PINGPONG INTER NODE TEST OUTPUT-"
+		$pingPongTestInterNodeTestOut =  ( Get-Content -Path "$LogDir\pingPongTestInterNodeTestOut.txt" | Out-String )
+		LogMsg $pingPongTestInterNodeTestOut
+        if ($pingPongTestIntraNodeTestOut -imatch "4194304" -and $pingPongTestInterNodeTestOut-imatch "4194304" )
+		{
+            $finalStatus = "TestCompleted"
+        }
+        else
+        {
+            $finalStatus = "TestFailed"
+        }		
+        #$finalStatus = RunLinuxCmd -runAsSudo -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -command "cat /home/$user/state.txt"
+		#$rdmaSummary = Get-Content -Path "$LogDir\summary.log" -ErrorAction SilentlyContinue
 		
 		if ($finalStatus -imatch "TestCompleted")
 		{
 			LogMsg "Test finished successfully."
-			LogMsg "PINGPONG INTRA NODE TEST OUTPUT-"
-			$pingPongTestIntraNodeTestOut =  ( Get-Content -Path "$LogDir\pingPongTestIntraNodeTestOut.txt" | Out-String )
-			LogMsg $pingPongTestIntraNodeTestOut
-			LogMsg "PINGPONG INTER NODE TEST OUTPUT-"
-			$pingPongTestInterNodeTestOut =  ( Get-Content -Path "$LogDir\pingPongTestInterNodeTestOut.txt" | Out-String )
-			LogMsg $pingPongTestInterNodeTestOut
 		}
 		else
 		{
@@ -289,7 +306,8 @@ if ($isDeployed)
 		}
 		LogMsg "Test result : $testResult"
 		LogMsg "Test Completed"
-	}
+	
+    }
 	catch
 	{
 		$ErrorMessage =  $_.Exception.Message
