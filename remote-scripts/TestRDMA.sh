@@ -42,12 +42,13 @@ slaves=$slaves
 #
 # Constants/Globals
 #
-CONSTANTS_FILE="/root/constants.sh"
+CONSTANTS_FILE="/home/$user/constants.sh"
 ICA_TESTRUNNING="TestRunning"      # The test is running
 ICA_TESTCOMPLETED="TestCompleted"  # The test completed successfully
 ICA_TESTABORTED="TestAborted"      # Error during the setup of the test
 ICA_TESTFAILED="TestFailed"        # Error occurred during the test
 CurrentMachine=""
+source ${CONSTANTS_FILE}
 #######################################################################
 #
 # LogMsg()
@@ -56,12 +57,12 @@ CurrentMachine=""
 LogMsg()
 {
     echo `date "+%b %d %Y %T"` : "${1}"    # Add the time stamp to the log message
-    echo "${1}" >> ~/rdmaPreparation.log
+    echo "${1}" >> /home/$user/rdmaPreparation.log
 }
 
 UpdateTestState()
 {
-    echo "${1}" > ~/state.txt
+    echo "${1}" > /home/$user/state.txt
 }
 
 PrepareForRDMA()
@@ -169,7 +170,7 @@ PrepareForRDMA()
 		ssh root@${1} ./l_mpi_p_5.1.3.181/install.sh --silent ./l_mpi_p_5.1.3.181/silent.cfg
 		if [ $? -ne 0 ]; then
 			LogMsg "${1} : Unable to install Intel MPI binaries."
-			cd /root
+			cd /home/$user
 			UpdateTestState $ICA_TESTFAILED
 			exit 1
 		fi
@@ -205,15 +206,15 @@ PrepareForRDMA()
 	ssh root@${1} touch rdmaPrepared
 }
 
-rm -f ~/summary.log
-touch ~/summary.log
+rm -f /home/$user/summary.log
+touch /home/$user/summary.log
 
 if [ -e ${CONSTANTS_FILE} ]; then
     source ${CONSTANTS_FILE}
 else
     errMsg="Error: missing ${CONSTANTS_FILE} file"
     LogMsg "${errMsg}"
-    echo "${errMsg}" >> ~/summary.log
+    echo "${errMsg}" >> /home/$user/summary.log
     UpdateTestState $ICA_TESTABORTED
     exit 10
 fi
@@ -222,14 +223,14 @@ if [ "${installLocal}" != "yes" ]; then
 	if [ ! ${master} ]; then
 		errMsg="Please add/provide value for master in constants.sh. master=<Master VM hostname>"
 		LogMsg "${errMsg}"
-		echo "${errMsg}" >> ~/summary.log
+		echo "${errMsg}" >> /home/$user/summary.log
 		UpdateTestState $ICA_TESTABORTED
 		exit 1
 	fi
 	if [ ! ${slaves} ]; then
 		errMsg="Please add/provide value for slaves in constants.sh. slaves=<hostname1,hostname2,hostname3>"
 		LogMsg "${errMsg}"
-		echo "${errMsg}" >> ~/summary.log
+		echo "${errMsg}" >> /home/$user/summary.log
 		UpdateTestState $ICA_TESTABORTED
 		exit 1
 	fi
@@ -238,14 +239,14 @@ fi
 if [ "${rdmaPrepare}" != "yes" ] && [ "${rdmaPrepare}" != "no" ]; then
 	errMsg="Please add/provide value for rdmaPrepare in constants.sh. rdmaPrepare=<yes>/<no>"
     LogMsg "${errMsg}"
-    echo "${errMsg}" >> ~/summary.log
+    echo "${errMsg}" >> /home/$user/summary.log
 	UpdateTestState $ICA_TESTABORTED
 	exit 1
 fi
 if [ "${rdmaRun}" != "yes" ] && [ "${rdmaRun}" != "no" ]; then
 	errMsg="Please add/provide value for rdmaRun in constants.sh. rdmaRun=<yes>/<no>"
     LogMsg "${errMsg}"
-    echo "${errMsg}" >> ~/summary.log
+    echo "${errMsg}" >> /home/$user/summary.log
 	UpdateTestState $ICA_TESTABORTED
 	exit 1
 fi
@@ -336,7 +337,7 @@ then
 	then
 		errMsg="Failures detected. eth1 Status: $eth1Status, IntraNodeTestStatus: $mpiStatus1, InterNodeTestStatus: $mpiStatus2"
 		LogMsg "${errMsg}"
-		echo "${errMsg}" >> ~/summary.log
+		echo "${errMsg}" >> /home/$user/summary.log
 		UpdateTestState $ICA_TESTFAILED
 		exit 1
 	else
