@@ -225,7 +225,7 @@ if ($isDeployed)
 		else
 		{
 			#region EXECUTE TEST
-			$testJob = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "/root/StartRDMA.sh" -RunInBackground
+			$testJob = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username $user -password $password -command "/root/StartRDMA.sh" -runAsSudo -RunInBackground
 			#endregion
 
 			#region MONITOR TEST
