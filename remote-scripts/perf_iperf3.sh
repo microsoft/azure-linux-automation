@@ -253,7 +253,7 @@ for current_buffer in "${bufferLenghs[@]}"
 			fi
 						if [[ "$testType" == "tcp" ]];
 						then
-								clientCommand="iperf3 -c $testServer -b 0 -J -f g -i10 -w ${current_buffer}K -t ${testDuration} -p ${currentPort} -P $num_threads_P -${IPversion} > iperf-client-${testType}-IPv${IPversion}-buffer-${current_buffer}K-conn-$current_test_connections-instance-${currentIperfInstanses}.txt 2>&1"
+								clientCommand="iperf3 -c $testServer -b 0 -J -f g -i10 -l ${current_buffer}K -t ${testDuration} -p ${currentPort} -P $num_threads_P -${IPversion} > iperf-client-${testType}-IPv${IPversion}-buffer-${current_buffer}K-conn-$current_test_connections-instance-${currentIperfInstanses}.txt 2>&1"
 						fi
 			
 			ssh ${client} $clientCommand &
