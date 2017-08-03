@@ -73,6 +73,10 @@ collect_VM_properties
                 {
                     $expectedCount = 4
                 }
+                elseif ($clientVMData.InstanceSize -eq "Standard_NC24r")
+                {
+                    $expectedCount = 4
+                }		
                 $errorCount = 0
                 #Adding sleep of 180 seconds, giving time to load nvidia drivers.
                 LogMsg "Waiting 3 minutes. (giving time to load nvidia drivers)"
