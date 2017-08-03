@@ -46,10 +46,10 @@ if ($isDeployed)
 		{
 			Throw "No any client VM defined. Be sure that, client machine role names matches with pattern `"*client*`" Aborting Test."
 		}
-		if ($serverVMData.InstanceSize -imatch "Standard_NC")
+		if ($currentTestData.InitialWaitSeconds)
 		{
-			LogMsg "Waiting 5 minutes to finish RDMA update for NC series VMs."
-			sleep -Seconds 300
+			LogMsg "Waiting $($currentTestData.InitialWaitSeconds) seconds to finish RDMA update."
+			sleep -Seconds $($currentTestData.InitialWaitSeconds)
 		}
 		#region CONFIGURE VMs for TEST
 
