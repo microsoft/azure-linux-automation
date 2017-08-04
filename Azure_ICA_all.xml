@@ -7104,7 +7104,20 @@
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<Priority>P0</Priority>
-		</test>			
+		</test>	
+		<test>
+			<testName>VERIFY-DISK-HOT-ADDREMOVE</testName>
+			<testScript></testScript>
+			<testScriptps1>DiskAddRemove.ps1</testScriptps1>
+			<setupType>A1</setupType>
+			<SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+				<param></param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>		
 	</testsDefinition>
 
 	<testCycles>
@@ -8078,6 +8091,12 @@
 			<cycleName>PROVISION</cycleName>
 			<test>
 				<Name>BVT-VERIFY-DEPLOYMENT-PROVISION</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>DISKHOTADDREMOVE</cycleName>
+			<test>
+				<Name>VERIFY-DISK-HOT-ADDREMOVE</Name>
 			</test>
 		</Cycle>
 	</testCycles>
