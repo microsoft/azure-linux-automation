@@ -618,18 +618,36 @@ if ( $NewARMStorageAccountType )
 }
 else
 {
-    LogMsg "Getting Existing Storage Account : $StorageAccountName details ..."
-    $StorageAccountType = (Get-AzureRmStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).Sku.Tier.ToString()
-    $StorageAccountRG = (Get-AzureRmStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).ResourceGroupName.ToString()
-    if($StorageAccountType -match 'Premium')
+    $saInfoCollected = $false
+    $retryCount = 0
+    $maxRetryCount = 999
+    while(!$saInfoCollected -and ($retryCount -lt $maxRetryCount))
     {
-        $StorageAccountType = "Premium_LRS"
+        try
+        {
+            $retryCount += 1
+            LogMsg "[Attempt $retryCount/$maxRetryCount] : Getting Existing Storage Account : $StorageAccountName details ..."
+            $GetAzureRMStorageAccount = Get-AzureRmStorageAccount
+            $StorageAccountType = ($GetAzureRMStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).Sku.Tier.ToString()
+            $StorageAccountRG = ($GetAzureRMStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).ResourceGroupName.ToString()
+            $saInfoCollected = $true
+            if($StorageAccountType -match 'Premium')
+            {
+                $StorageAccountType = "Premium_LRS"
+            }
+            else
+            {
+	            $StorageAccountType = "Standard_LRS"
+            }
+            LogMsg "Storage Account Type : $StorageAccountType"
+
+        }
+        catch
+        {
+            LogErr "Error in fetching Storage Account info. Retrying."
+            sleep -Seconds 10
+        }
     }
-    else
-    {
-	    $StorageAccountType = "Standard_LRS"
-    }
-    LogMsg "Storage Account Type : $StorageAccountType"
 }
 $HS = $RGXMLData
 $setupType = $Setup
