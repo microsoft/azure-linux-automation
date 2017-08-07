@@ -146,8 +146,8 @@ if [ ! ${connections} ]; then
 		exit 1
 fi
 
-if [ ! ${bufferLenghs} ]; then
-		errMsg="Please add/provide value for bufferLenghs in constants.sh. bufferLenghs=(1 8). Note buffer lenghs are in KB"
+if [ ! ${bufferLengths} ]; then
+		errMsg="Please add/provide value for bufferLengths in constants.sh. bufferLengths=(1 8). Note buffer lenghs are in Bytest"
 		LogMsg "${errMsg}"
 		echo "${errMsg}" >> ./summary.log
 		UpdateTestState $ICA_TESTABORTED
@@ -182,7 +182,7 @@ fi
 
 
 #connections=(64 128)
-#BufferLenghts are in K
+#BufferLenghts are in Bytes
 #max_parallel_connections_per_instance=64
 #Make & build IPERF3 on client and server Machine
 
@@ -201,7 +201,7 @@ ssh ${client} "rm -rf iperf-server-*"
 #BufferLenghts are in K
 #bufferLenghs=(1 8)
 
-for current_buffer in "${bufferLenghs[@]}"
+for current_buffer in "${bufferLengths[@]}"
 		do
 		for current_test_connections in "${connections[@]}"
 		do
@@ -223,7 +223,7 @@ for current_buffer in "${bufferLenghs[@]}"
 		while [ $currentIperfInstanses -lt $num_threads_n ]
 		do
 			currentIperfInstanses=$(($currentIperfInstanses+1))
-			serverCommand="iperf3 -s -1 -J -i10 -f g -p ${currentPort} > iperf-server-${testType}-IPv${IPversion}-buffer-${current_buffer}K-conn-$current_test_connections-instance-${currentIperfInstanses}.txt 2>&1"
+			serverCommand="iperf3 -s -1 -J -i10 -f g -p ${currentPort} > iperf-server-${testType}-IPv${IPversion}-buffer-${current_buffer}-conn-$current_test_connections-instance-${currentIperfInstanses}.txt 2>&1"
 			ssh ${server} $serverCommand &
 			LogMsg "Executed: $serverCommand"
 			currentPort=$(($currentPort+1))
@@ -249,11 +249,11 @@ for current_buffer in "${bufferLenghs[@]}"
 
 			if [[ "$testType" == "udp" ]];
 			then
-				clientCommand="iperf3 -c $testServer -u -b 0 -J -f g -i10 -l ${current_buffer}K -t ${testDuration} -p ${currentPort} -P $num_threads_P -${IPversion} > iperf-client-${testType}-IPv${IPversion}-buffer-${current_buffer}K-conn-$current_test_connections-instance-${currentIperfInstanses}.txt 2>&1"
+				clientCommand="iperf3 -c $testServer -u -b 0 -J -f g -i10 -l ${current_buffer} -t ${testDuration} -p ${currentPort} -P $num_threads_P -${IPversion} > iperf-client-${testType}-IPv${IPversion}-buffer-${current_buffer}-conn-$current_test_connections-instance-${currentIperfInstanses}.txt 2>&1"
 			fi
 						if [[ "$testType" == "tcp" ]];
 						then
-								clientCommand="iperf3 -c $testServer -b 0 -J -f g -i10 -l ${current_buffer}K -t ${testDuration} -p ${currentPort} -P $num_threads_P -${IPversion} > iperf-client-${testType}-IPv${IPversion}-buffer-${current_buffer}K-conn-$current_test_connections-instance-${currentIperfInstanses}.txt 2>&1"
+								clientCommand="iperf3 -c $testServer -b 0 -J -f g -i10 -l ${current_buffer} -t ${testDuration} -p ${currentPort} -P $num_threads_P -${IPversion} > iperf-client-${testType}-IPv${IPversion}-buffer-${current_buffer}-conn-$current_test_connections-instance-${currentIperfInstanses}.txt 2>&1"
 						fi
 			
 			ssh ${client} $clientCommand &
@@ -261,12 +261,13 @@ for current_buffer in "${bufferLenghs[@]}"
 			currentPort=$(($currentPort+1))
 			sleep 0.1
 		done
-		LogMsg "Iperf3 running buffer ${current_buffer}K $num_threads_P X $num_threads_n ..."
+		LogMsg "Iperf3 running buffer ${current_buffer}Bytes $num_threads_P X $num_threads_n ..."
 		sleep ${testDuration}
 		timeoutSeconds=900
 		sleep 5
 		var=`ps -C "iperf3 -c" --no-headers | wc -l`
-		while [ $var -gt 0 ]
+		echo $var
+		while [[ $var -gt 0 ]];
 		do
 			timeoutSeconds=`expr $timeoutSeconds - 1`
 			if [ $timeoutSeconds -eq 0 ]; then
@@ -282,7 +283,7 @@ for current_buffer in "${bufferLenghs[@]}"
 		done
 		#Sleep extra 5 seconds.
 		sleep 5
-		LogMsg "Iperf3 Finished buffer ${current_buffer}K  $num_threads_P X $num_threads_n ..."
+		LogMsg "Iperf3 Finished buffer ${current_buffer}  $num_threads_P X $num_threads_n ..."
 	done
 done
 scp ${server}:iperf-server-* ./

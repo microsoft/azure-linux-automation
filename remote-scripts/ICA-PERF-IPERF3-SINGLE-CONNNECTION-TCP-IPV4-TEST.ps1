@@ -215,6 +215,61 @@ collect_VM_properties
 						}
 					}
 				}
+
+				foreach ( $file in $files )
+				{
+					if ( $file.Name -imatch "iperf-server-tcp-$IPVersion-buffer-$($Buffer)-conn-$connection-instance-*" )
+					{
+						
+						$currentInstanceServerJsonText = $null
+						$currentInstanceServerJsonObj = $null
+						$currentInstanceServerPacketLoss = @()
+						$currentInstanceServerThroughput = $null
+						$fileName = $file.Name 
+						try
+						{
+							$currentInstanceServerJsonText = ([string]( Get-Content "$serverfolder\$fileName")).Replace("-nan","0")
+							$currentInstanceServerJsonObj = ConvertFrom-Json -InputObject $currentInstanceServerJsonText
+						}
+						catch 
+						{
+							LogErr "	$fileName : RETURNED NULL"
+						}
+						if ( $currentInstanceServerJsonObj.end.sum_sent )
+						{
+							$currentInstanceServerThroughput = $currentInstanceServerJsonObj.end.sum_sent.bits_per_second/1000000000
+						}
+						else
+						{
+							if ($currentInstanceServerJsonObj.error)
+							{
+								LogErr "	$fileName : Error Found : $($currentInstanceServerJsonObj.error)"
+							}
+							$totalStreams = 0
+							$totalBitsPerSecond = 0
+							foreach ( $interval in $currentInstanceServerJsonObj.intervals)
+							{
+								$totalBitsPerSecond += $interval.sum.bits_per_second
+								$totalStreams+=1
+							}
+							if ($totalStreams -ge 1)
+							{
+								LogMsg "	$fileName : Analysed $totalStreams intervals."
+								$currentInstanceServerThroughput = ($totalBitsPerSecond/$totalStreams)/1000000000
+							}
+							else
+							{
+								LogErr "	$fileName : Error : No connection intervals found."
+							}
+							#Write-Host "	$($currentJsonObj.error) $currentFileClientThroughput"
+						}
+						if($currentInstanceServerThroughput)
+						{
+							LogMsg "	$fileName : Data collected successfully."
+							$currentConnectionServerTxGbpsArr += $currentInstanceServerThroughput
+						}
+					}
+				}
 				$currentConnectionClientTxGbps = [math]::Round((($currentConnectionClientTxGbpsArr | Measure-Object -Average).Average),2)
 				Write-Host "Client: $Buffer . $connection . $currentConnectionClientTxGbps"
 				$FinalClientThroughputArr += $currentConnectionClientTxGbps
