@@ -6,7 +6,7 @@ if [[ $bootLogs =~ "Data path switched to VF" ]];
 then
 	echo "DATAPATH_SWITCHED_TO_VF"
 else
-	wget https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/plain/tools/hv/bondvf.sh
+	wget https://raw.githubusercontent.com/torvalds/linux/master/tools/hv/bondvf.sh
 	chmod +x ./bondvf.sh
 	./bondvf.sh
 	cp bondvf.sh /etc/init.d
