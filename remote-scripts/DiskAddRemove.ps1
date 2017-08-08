@@ -24,7 +24,7 @@ try
                 LogMsg "Successfully added an empty data disk to the resource group"
                 LogMsg "Verifying if data disk is added to the VM: Running fdisk on remote VM"
                 $fdiskOutput = RunLinuxCmd -username $user -password $password -ip $VM.PublicIP -port $VM.SSHPort -command "/sbin/fdisk -l | grep /dev/sdc" -runAsSudo
-                if($fdiskOutput -imatch "/dev/sdc: " + $disksizeinGB + " GiB")
+                if($fdiskOutput -imatch "/dev/sdc" -and (($fdiskOutput.Split()[2]) -ge $diskSizeinGB))
                 {
                     LogMsg "Data disk is successfully added to the VM"
                     #$testResult = "PASS"
