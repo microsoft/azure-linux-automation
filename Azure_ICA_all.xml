@@ -7111,7 +7111,7 @@
 			<testScriptps1>DiskAddRemove.ps1</testScriptps1>
 			<setupType>A1</setupType>
 			<SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
-			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<SubtestValues></SubtestValues>
 			<files>.\remote-scripts\azuremodules.sh</files>
 			<TestParameters>
 				<param></param>
