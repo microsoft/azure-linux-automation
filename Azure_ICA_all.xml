@@ -8563,6 +8563,7 @@
 				<Name>VERIFY-DISK-HOT-ADDREMOVE</Name>
 			</test>
 		</Cycle>
+		<Cycle>
 			<cycleName>LTP-BASIC</cycleName>
 			<test>
 				<Name>ICA-LTP-BASIC-TEST</Name>
