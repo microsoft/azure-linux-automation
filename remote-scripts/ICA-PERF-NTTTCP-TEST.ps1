@@ -52,13 +52,35 @@ if ($isDeployed)
 		{
 			$DataPath = "SRIOV"
             LogMsg "Getting SRIOV NIC Name."
-            $nicName = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "dmesg | grep 'VF registering' | tail -1 | awk '{ print `$NF }'"
-            LogMsg "SRIOV NIC: $nicName"
+            $clientNicName = (RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "route | grep '^default' | grep -o '[^ ]*$'").Trim()
+            LogMsg "CLIENT SRIOV NIC: $clientNicName"
+            $serverNicName = (RunLinuxCmd -ip $clientVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "route | grep '^default' | grep -o '[^ ]*$'").Trim()
+            LogMsg "SERVER SRIOV NIC: $serverNicName"
+            if ( $serverNicName -eq $clientNicName)
+            {
+                $nicName = $clientNicName
+            }
+            else
+            {
+                Throw "Server and client SRIOV NICs are not same."
+            }
 		}
 		else
 		{
 			$DataPath = "Synthetic"
-			$nicName = "eth0"    
+            LogMsg "Getting Active NIC Name."
+            $clientNicName = (RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "route | grep '^default' | grep -o '[^ ]*$'").Trim()
+            LogMsg "CLIENT NIC: $clientNicName"
+            $serverNicName = (RunLinuxCmd -ip $clientVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "route | grep '^default' | grep -o '[^ ]*$'").Trim()
+            LogMsg "SERVER NIC: $serverNicName"
+            if ( $serverNicName -eq $clientNicName)
+            {
+                $nicName = $clientNicName
+            }
+            else
+            {
+                Throw "Server and client NICs are not same."
+            }
 		}
 
 		LogMsg "Generating constansts.sh ..."
