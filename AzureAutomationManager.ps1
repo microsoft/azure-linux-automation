@@ -44,8 +44,7 @@ $user = $xmlConfig.config.Azure.Deployment.Data.UserName
 $password = $xmlConfig.config.Azure.Deployment.Data.Password
 $sshKey = $xmlConfig.config.Azure.Deployment.Data.sshKey
 $sshPublickey = $xmlConfig.config.Azure.Deployment.Data.sshPublicKey
-$LinuxSSHCertificate = Import-Certificate -FilePath .\ssh\$sshPublickey -CertStoreLocation Cert:\CurrentUser\My
-$sshPublicKeyThumbprint = $LinuxSSHCertificate.Thumbprint
+
 Set-Variable -Name user -Value $user -Scope Global
 Set-Variable -Name password -Value $password -Scope Global
 Set-Variable -Name sshKey -Value $sshKey -Scope Global
@@ -197,6 +196,8 @@ try
     }
     else
     {
+        $LinuxSSHCertificate = Import-Certificate -FilePath .\ssh\$sshPublickey -CertStoreLocation Cert:\CurrentUser\My
+        $sshPublicKeyThumbprint = $LinuxSSHCertificate.Thumbprint
         Set-Variable -Name UseAzureResourceManager -Value $false -Scope Global
         LogMsg "Setting Azure Subscription ..."
 		$out = SetSubscription -subscriptionID $AzureSetup.SubscriptionID -subscriptionName $AzureSetup.SubscriptionName -certificateThumbprint $AzureSetup.CertificateThumbprint -managementEndpoint $AzureSetup.ManagementEndpoint -storageAccount $AzureSetup.StorageAccount -environment $AzureSetup.Environment
