@@ -130,7 +130,8 @@ $DeploymentCount = $NumberOfSizes*5
             $DeploymentStatistics = CreateDeploymentResultObject
             #Create A VM here and Wait for the VM to come up.
             LogMsg "ATTEMPT : $count/$DeploymentCount : Deploying $($VMSizes[$VMSizeNumber]) VM.."
-            Set-Variable -Name OverrideVMSize -Value $($VMSizes[$VMSizeNumber]) -Scope Global -Force 
+            Set-Variable -Name OverrideVMSize -Value $($VMSizes[$VMSizeNumber]) -Scope Global -Force
+            $xmlConfig.config.Azure.Deployment.SingleVM.HostedService.Tag = $($VMSizes[$VMSizeNumber]).Replace("_","-")
             $isDeployed = DeployVMS -setupType "SingleVM" -Distro $Distro -xmlConfig $xmlConfig -GetDeploymentStatistics $True
                         
             $DeploymentStatistics.VMSize = $($VMSizes[$VMSizeNumber])

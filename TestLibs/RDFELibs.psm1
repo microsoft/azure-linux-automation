@@ -1221,8 +1221,17 @@ Function GetAndCheckKernelLogs($allDeployedVMs, $status, $vmUser, $vmPassword)
 			{
 				if ( $UseAzureResourceManager )
 				{
-					LogMsg "Adding preserve tag to $($VM.ResourceGroup) .."
-					$out = Set-AzureRmResourceGroup -Name $($VM.ResourceGroup) -Tag @{Name =$preserveKeyword; Value = "yes"},@{Name ="callTrace"; Value = "yes"}
+					LogMsg "Preserving the Resource Group(s) $($VM.ResourceGroupName)"
+					LogMsg "Setting tags : $preserveKeyword = yes; testName = $testName"
+					$hash = @{}
+					$hash.Add($preserveKeyword,"yes")
+					$hash.Add("testName","$testName")
+					$out = Set-AzureRmResourceGroup -Name $($VM.ResourceGroupName) -Tag $hash
+					LogMsg "Setting tags : calltrace = yes; testName = $testName"
+					$hash = @{}
+					$hash.Add("calltrace","yes")
+					$hash.Add("testName","$testName")
+					$out = Set-AzureRmResourceGroup -Name $($VM.ResourceGroupName) -Tag $hash
 				}
 				else
 				{
@@ -1411,6 +1420,27 @@ Function DeployVMs ($xmlConfig, $setupType, $Distro, $getLogsIfFailed = $false, 
             LogErr "Custom Kernel: $customKernel installation FAIL. Aborting tests."
             $retValue = ""
         }
+    }
+    if ( $retValue -and $EnableAcceleratedNetworking)
+    {
+		$SRIOVStatus = EnableSRIOVInAllVMs -allVMData $allVMData
+		if ( !$SRIOVStatus)
+		{
+            LogErr "Failed to enable Accelerated Networking. Aborting tests."
+            $retValue = ""
+		}
+    }
+
+
+
+    if ( $retValue -and $resizeVMsAfterDeployment)
+    {
+		$SRIOVStatus = EnableSRIOVInAllVMs -allVMData $allVMData
+		if ( $SRIOVStatus -ne "True" )
+		{
+            LogErr "Failed to enable Accelerated Networking. Aborting tests."
+            $retValue = ""
+		}
     }
 	return $retValue
 }
@@ -2221,7 +2251,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 		WrapperCommandsToFile $username $password $ip $command $port
 	}
 	$randomFileName = [System.IO.Path]::GetRandomFileName()
-	$maxRetryCount = 10
+	$maxRetryCount = 3
 	$currentDir = $PWD.Path
 	$RunStartTime = Get-Date
 	
@@ -2323,6 +2353,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 					$debugOutput += "$debugString`n"
 				}
 				Write-Progress -Activity "Attempt : $attemptswot+$attemptswt : Initiating command in Background Mode : $logCommand on $ip : $port" -Status "Timeout in $($RunMaxAllowedTime - $RunElaplsedTime) seconds.." -Id 87678 -PercentComplete (($RunElaplsedTime/$RunMaxAllowedTime)*100) -CurrentOperation "SSH ACTIVITY : $debugString"
+                #Write-Host "Attempt : $attemptswot+$attemptswt : Initiating command in Background Mode : $logCommand on $ip : $port"
 				$RunCurrentTime = Get-Date
 				$RunDiffTime = $RunCurrentTime - $RunStartTime
 				$RunElaplsedTime =  $RunDiffTime.TotalSeconds
@@ -2441,6 +2472,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 					$debugOutput += "$debugString`n"
 				}
 				Write-Progress -Activity "Attempt : $attemptswot+$attemptswt : Executing $logCommand on $ip : $port" -Status "Timeout in $($RunMaxAllowedTime - $RunElaplsedTime) seconds.." -Id 87678 -PercentComplete (($RunElaplsedTime/$RunMaxAllowedTime)*100) -CurrentOperation "SSH ACTIVITY : $debugString"
+                #Write-Host "Attempt : $attemptswot+$attemptswt : Executing $logCommand on $ip : $port" 
 				$RunCurrentTime = Get-Date
 				$RunDiffTime = $RunCurrentTime - $RunStartTime
 				$RunElaplsedTime =  $RunDiffTime.TotalSeconds
@@ -2481,7 +2513,8 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 				$debugOutput += "$debugString`n"
 			}
 			Write-Progress -Activity "Attempt : $attemptswot+$attemptswt : Executing $logCommand on $ip : $port" -Status $runLinuxCmdJob.State -Id 87678 -SecondsRemaining ($RunMaxAllowedTime - $RunElaplsedTime) -Completed
-			Remove-Job $runLinuxCmdJob 
+			#Write-Host "Attempt : $attemptswot+$attemptswt : Executing $logCommand on $ip : $port"
+            Remove-Job $runLinuxCmdJob 
 			Remove-Item $LogDir\$randomFileName -Force | Out-Null
 			if ($LinuxExitCode -imatch "AZURE-LINUX-EXIT-CODE-0") 
 			{
@@ -5037,6 +5070,44 @@ Function RestartAllDeployments($allVMData)
 	$isSSHOpened = isAllSSHPortsEnabledRG -AllVMDataObject $AllVMData
 	return $isSSHOpened
 }
+
+Function ResizeAllVMs($allVMData, $newVMSize)
+{
+	foreach ( $vmData in $AllVMData )
+	{
+		if ( $UseAzureResourceManager)
+		{
+			$currentVM = Get-AzureRmVM -ResourceGroupName $vmData.ResourceGroupName -Name $vmData.RoleName -Verbose
+            $oldSize = $currentVM.HardwareProfile.VmSize 
+            $currentVM.HardwareProfile.VmSize = $newVMSize
+            $resizeVM = Update-AzureRmVM -VM $currentVM -ResourceGroupName $vmData.ResourceGroupName -Verbose
+			if ( $resizeVM.StatusCode -eq "OK" )
+			{
+				LogMsg "Resized $($vmData.RoleName) from $oldSize --> $newVMSize : $($vmData.RoleName)"
+			}
+			else
+			{
+				LogErr "FAILED TO RESIZE : $($vmData.RoleName)"
+				$retryCount = $retryCount + 1
+				if ($retryCount -gt 0)
+				{
+					LogMsg "Retrying..."
+				}
+				if ($retryCount -eq 0)
+				{
+					Throw "Unable to Restart : $($vmData.RoleName)"
+				}
+			}
+		}
+		else
+		{
+            #TBD
+		}
+	}
+	$isSSHOpened = isAllSSHPortsEnabledRG -AllVMDataObject $AllVMData
+	return $isSSHOpened
+}
+
 
 Function StopAllDeployments($DeployedServices)
 {

@@ -106,50 +106,84 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 	LogMsg "Starting the Cycle - $($CycleName.ToUpper())"
 	$executionCount = 0
 
-    foreach ( $tempDistro in $xmlConfig.config.Azure.Deployment.Data.Distro )
-    {
-        if ( ($tempDistro.Name).ToUpper() -eq ($Distro).ToUpper() )
-        {
-            if ( $UseAzureResourceManager )
-            {
-		        if ( $tempDistro.ARMImage )
-		        { 
-			        Set-Variable -Name ARMImage -Value $tempDistro.ARMImage -Scope Global
-			    
-                    #if ( $ARMImage.Version -imatch "latest" )
-                    #{
-                    #    LogMsg "Getting latest image details..."
-                    #    $armTempImages = Get-AzureRmVMImage -Location ($xmlConfig.config.Azure.General.Location).Replace('"','') -PublisherName $ARMImage.Publisher -Offer $ARMImage.Offer -Skus $ARMImage.Sku
-                    #    $ARMImage.Version = [string](($armTempImages[$armTempImages.Count - 1]).Version)
-                    #}
-                    LogMsg "ARMImage name - $($ARMImage.Publisher) : $($ARMImage.Offer) : $($ARMImage.Sku) : $($ARMImage.Version)"
-		        }
-		        if ( $tempDistro.OsVHD )
-		        { 
-			        $BaseOsVHD = $tempDistro.OsVHD.ToUpper() 
-			        Set-Variable -Name BaseOsVHD -Value $BaseOsVHD -Scope Global
-			        LogMsg "Base VHD name - $BaseOsVHD"
-		        }
-            }
-            else
-            {
-		        if ( $tempDistro.OsImage ) 
-		        { 
-			        $BaseOsImage = $tempDistro.OsImage.ToUpper() 
-			        Set-Variable -Name BaseOsImage -Value $BaseOsImage -Scope Global
-			        LogMsg "Base image name - $BaseOsImage"
-		        }
-            }
-        }
-    }
+	foreach ( $tempDistro in $xmlConfig.config.Azure.Deployment.Data.Distro )
+	{
+		if ( ($tempDistro.Name).ToUpper() -eq ($Distro).ToUpper() )
+		{
+			if ( $UseAzureResourceManager )
+			{
+				if ( $tempDistro.ARMImage )
+				{ 
+					Set-Variable -Name ARMImage -Value $tempDistro.ARMImage -Scope Global
+				
+					#if ( $ARMImage.Version -imatch "latest" )
+					#{
+					#	LogMsg "Getting latest image details..."
+					#	$armTempImages = Get-AzureRmVMImage -Location ($xmlConfig.config.Azure.General.Location).Replace('"','') -PublisherName $ARMImage.Publisher -Offer $ARMImage.Offer -Skus $ARMImage.Sku
+					#	$ARMImage.Version = [string](($armTempImages[$armTempImages.Count - 1]).Version)
+					#}
+					LogMsg "ARMImage name - $($ARMImage.Publisher) : $($ARMImage.Offer) : $($ARMImage.Sku) : $($ARMImage.Version)"
+				}
+				if ( $tempDistro.OsVHD )
+				{ 
+					$BaseOsVHD = $tempDistro.OsVHD.Trim() 
+					Set-Variable -Name BaseOsVHD -Value $BaseOsVHD -Scope Global
+					LogMsg "Base VHD name - $BaseOsVHD"
+				}
+			}
+			else
+			{
+				if ( $tempDistro.OsImage ) 
+				{ 
+					$BaseOsImage = $tempDistro.OsImage.Trim() 
+					Set-Variable -Name BaseOsImage -Value $BaseOsImage -Scope Global
+					LogMsg "Base image name - $BaseOsImage"
+				}
+			}
+		}
+	}
 	if (!$BaseOsImage  -and !$UseAzureResourceManager)
 	{
 		Throw "Please give ImageName or OsVHD for ASM deployment."
 	}
-    if (!$($ARMImage.Publisher) -and !$BaseOSVHD -and $UseAzureResourceManager)
-    {
-        Throw "Please give ARM Image / VHD for ARM deployment."
-    }
+	if (!$($ARMImage.Publisher) -and !$BaseOSVHD -and $UseAzureResourceManager)
+	{
+		Throw "Please give ARM Image / VHD for ARM deployment."
+	}
+
+	#If Base OS VHD is present in another storage account, then copy to test storage account first.
+	if ($BaseOsVHD -imatch "/")
+	{
+		#Check if the test storage account is same as VHD's original storage account.
+		$givenVHDStorageAccount = $BaseOsVHD.Replace("https://","").Replace("http://","").Split(".")[0]
+		$ARMStorageAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
+		
+		if ($givenVHDStorageAccount -ne $ARMStorageAccount )
+		{
+			LogMsg "Your test VHD is not in target storage account ($ARMStorageAccount)."
+			LogMsg "Your VHD will be copied to $ARMStorageAccount now."
+			$sourceContainer =  $BaseOsVHD.Split("/")[$BaseOsVHD.Split("/").Count - 2]
+			$vhdName =  $BaseOsVHD.Split("/")[$BaseOsVHD.Split("/").Count - 1]
+			if ($ARMStorageAccount -inotmatch "NewStorage_")
+			{
+				$copyStatus = CopyVHDToAnotherStorageAccount -sourceStorageAccount $givenVHDStorageAccount -sourceStorageContainer $sourceContainer -destinationStorageAccount $ARMStorageAccount -destinationStorageContainer "vhds" -vhdName $vhdName
+				if (!$copyStatus)
+				{
+					Throw "Failed to copy the VHD to $ARMStorageAccount"
+				}
+				else 
+				{
+					Set-Variable -Name BaseOsVHD -Value $vhdName -Scope Global
+					LogMsg "New Base VHD name - $vhdName"	
+				}
+			}
+			else
+			{
+				Throw "Automation only supports copying VHDs to existing storage account."
+			}
+			#Copy the VHD to current storage account.
+		}
+	}
 
 	LogMsg "Loading the cycle Data..."
 
@@ -349,18 +383,26 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 					}
 					
 				} 
-				$currentJobs = Get-Job
-				foreach ( $job in $currentJobs )
-				{
-					$out = Remove-Job $job -Force -ErrorAction SilentlyContinue
-					if ( $? )
-					{
-						LogMsg "Removed background job ID $($job.Id)."
-					}
-				}
 				Write-Host $testSuiteResultDetails.totalPassTc,$testSuiteResultDetails.totalFailTc,$testSuiteResultDetails.totalAbortedTc
 				#Back to Test Suite Main Logging
 				$global:logFile = $testSuiteLogFile
+				$currentJobs = Get-Job
+				foreach ( $job in $currentJobs )
+				{
+					$jobStatus = Get-Job -Id $job.ID
+					if ( $jobStatus.State -ne "Running" )
+					{
+						Remove-Job -Id $job.ID -Force
+						if ( $? )
+						{
+							LogMsg "Removed $($job.State) background job ID $($job.Id)."
+						}
+					}
+					else
+					{
+						LogMsg "$($job.Name) is running."
+					}				
+				}
 			}
 			else
 			{
@@ -372,6 +414,40 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 			LogErr "No Test Data found for $($test.Name).."
 		}
 	}
+
+	LogMsg "Checking background cleanup jobs.."
+	$cleanupJobList = Get-Job | where { $_.Name -imatch "DeleteResourceGroup"}
+	$isAllCleaned = $false
+	while(!$isAllCleaned)
+	{
+		$runningJobsCount = 0
+		$isAllCleaned = $true
+		$cleanupJobList = Get-Job | where { $_.Name -imatch "DeleteResourceGroup"}
+		foreach ( $cleanupJob in $cleanupJobList )
+		{
+
+			$jobStatus = Get-Job -Id $cleanupJob.ID
+			if ( $jobStatus.State -ne "Running" )
+			{
+
+				$tempRG = $($cleanupJob.Name).Replace("DeleteResourceGroup-","")
+				LogMsg "$tempRG : Delete : $($jobStatus.State)"
+				Remove-Job -Id $cleanupJob.ID -Force
+			}
+			else
+			{
+				LogMsg "$($cleanupJob.Name) is running."
+				$isAllCleaned = $false
+				$runningJobsCount += 1
+			}
+		}
+		if ($runningJobsCount -gt 0)
+		{
+			Write-Host "$runningJobsCount background cleanup jobs still running. Waiting 30 seconds..."
+			sleep -Seconds 30
+		}
+	}
+	Write-Host "All background cleanup jobs finished."
 	
 	LogMsg "Cycle Finished.. $($CycleName.ToUpper())"
 	$EndTime =  [Datetime]::Now.ToUniversalTime()
