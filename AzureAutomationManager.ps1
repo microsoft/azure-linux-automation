@@ -142,8 +142,7 @@ try
     $testDir = $testResults + "\" + $fname + "-" + $testStartTime.ToString("yyyyMMdd-HHmmss") + "-$(Get-Random -Maximum 999 -Minimum 111)"
 
     mkdir $testDir -ErrorAction SilentlyContinue | out-null
-    Set-Content -Value "" -Path .\report\testSummary.html -Force | Out-Null
-    Set-Content -Value "" -Path .\report\AdditionalInfo.html -Force | Out-Null
+    Set-Content -Value "" -Path .\report\testSummary.html -Force -ErrorAction SilentlyContinue | Out-Null
 
     if ($logFilename)
     {
@@ -152,11 +151,11 @@ try
 
     $logFile = $testDir + "\" + $logfile
     Set-Variable -Name logfile -Value $logFile -Scope Global
-    Set-Content -Path .\report\lastLogDirectory.txt -Value $testDir
+    Set-Content -Path .\report\lastLogDirectory.txt -Value $testDir -ErrorAction SilentlyContinue
     Set-Variable -Name Distro -Value $Distro -Scope Global
     Set-Variable -Name onCloud -Value $onCloud -Scope Global
-    Set-Variable -Name xmlConfig -Value $xmlConfig -Scope Global
-	Set-Content -Path .\report\lastLogDirectory.txt -Value $testDir
+    Set-Variable -Name xmlConfig -Value $xmlConfig -Scope Global 
+	Set-Content -Path .\report\lastLogDirectory.txt -Value $testDir -ErrorAction SilentlyContinue
     Set-Variable -Name vnetIsAllConfigured -Value $false -Scope Global
     if($EconomyMode)
     {
