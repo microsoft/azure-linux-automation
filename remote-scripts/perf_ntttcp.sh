@@ -51,7 +51,7 @@ InstallNTTTCP() {
 				LogMsg "Configuring ${1} for ntttcp test..."
 				ssh ${1} "until dpkg --force-all --configure -a; sleep 10; do echo 'Trying again...'; done"
 				ssh ${1} "apt-get update"
-				ssh ${1} "apt-get -y install libaio1 sysstat git bc make gcc"
+				ssh ${1} "apt-get -y install libaio1 sysstat git bc make gcc dstat psmisc"
 				ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
 				ssh ${1} "cd ntttcp-for-linux/src/ && make && make install"
 				ssh ${1} "cp ntttcp-for-linux/src/ntttcp ."
@@ -63,7 +63,7 @@ InstallNTTTCP() {
 		then
 				LogMsg "Detected Redhat 6.x"
 				ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm"
-				ssh ${1} "yum -y --nogpgcheck install libaio1 sysstat git bc make gcc"
+				ssh ${1} "yum -y --nogpgcheck install libaio1 sysstat git bc make gcc dstat psmisc"
 				ssh ${1} "yum -y --nogpgcheck install gcc-c++"
 
 				ssh ${1} "wget http://ftp.heanet.ie/mirrors/gnu/libc/glibc-2.14.1.tar.gz"
@@ -82,7 +82,7 @@ InstallNTTTCP() {
 		then
 				LogMsg "Detected Redhat 7.x"
 				ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
-				ssh ${1} "yum -y --nogpgcheck install libaio1 sysstat git bc make gcc"
+				ssh ${1} "yum -y --nogpgcheck install libaio1 sysstat git bc make gcc dstat psmisc"
 				ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
 				ssh ${1} "cd ntttcp-for-linux/src/ && make && make install"
 				ssh ${1} "cp ntttcp-for-linux/src/ntttcp ."
@@ -95,7 +95,7 @@ InstallNTTTCP() {
 		then
 				LogMsg "Detected CentOS 6.x"
 				ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm"
-				ssh ${1} "yum -y --nogpgcheck install libaio1 sysstat git bc make gcc"
+				ssh ${1} "yum -y --nogpgcheck install libaio1 sysstat git bc make gcc dstat psmisc"
 				ssh ${1} "yum -y --nogpgcheck install gcc-c++"
 				ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
 				ssh ${1} "cd ntttcp-for-linux/src/ && make && make install"
@@ -109,7 +109,7 @@ InstallNTTTCP() {
 		then
 				LogMsg "Detected CentOS 7.x"
 				ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
-				ssh ${1} "yum -y --nogpgcheck install libaio1 sysstat git bc make gcc"
+				ssh ${1} "yum -y --nogpgcheck install libaio1 sysstat git bc make gcc dstat psmisc"
 				ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
 				ssh ${1} "cd ntttcp-for-linux/src/ && make && make install"
 				ssh ${1} "cp ntttcp-for-linux/src/ntttcp ."
@@ -122,7 +122,7 @@ InstallNTTTCP() {
 		then
 		LogMsg "Detected SLES12"
 				ssh ${1} "zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys remove gettext-runtime-mini*"
-				ssh ${1} "zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys install sysstat git bc make gcc grub2"
+				ssh ${1} "zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys install sysstat git bc make gcc grub2 dstat psmisc"
 				ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
 				ssh ${1} "cd ntttcp-for-linux/src/ && make && make install"
 				ssh ${1} "cp ntttcp-for-linux/src/ntttcp ."
@@ -181,6 +181,13 @@ if [ ! ${testDuration} ]; then
 	exit 1
 fi
 
+if [ ! ${nicName} ]; then
+	errMsg="Please add/provide value for nicName in constants.sh. nicName=eth0/bond0"
+	LogMsg "${errMsg}"
+	echo "${errMsg}" >> ./summary.log
+	UpdateTestState $ICA_TESTABORTED
+	exit 1
+fi
 #Make & build ntttcp on client and server Machine
 
 LogMsg "Configuring client ${client}..."
@@ -196,7 +203,7 @@ ssh root@${client} "wget https://raw.githubusercontent.com/iamshital/linux_perfo
 ssh root@${client} "chmod +x run-ntttcp-and-tcping.sh && chmod +x report-ntttcp-and-tcping.sh"
 LogMsg "Now running NTTTCP test"
 ssh root@${client} "rm -rf ntttcp-test-logs"
-ssh root@${client} "./run-ntttcp-and-tcping.sh ntttcp-test-logs ${server} root ${testDuration}"
+ssh root@${client} "./run-ntttcp-and-tcping.sh ntttcp-test-logs ${server} root ${testDuration} ${nicName}"
 ssh root@${client} "./report-ntttcp-and-tcping.sh ntttcp-test-logs"
 ssh root@${client} "cp ntttcp-test-logs/* ."
 

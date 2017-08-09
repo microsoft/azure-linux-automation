@@ -19,7 +19,8 @@ param (
 [switch] $upload, 
 [switch] $help, 
 [string] $Distro, 
-[string] $cycleName, 
+[string] $cycleName,
+[string] $RunSelectedTests,
 [string] $TestPriority, 
 [string] $osImage, 
 [switch] $EconomyMode, 
@@ -82,6 +83,10 @@ if ( $customLIS )
 if ( $customLISBranch )
 {
     Set-Variable -Name customLISBranch -Value $customLISBranch -Scope Global
+}
+if ( $RunSelectedTests )
+{
+    Set-Variable -Name RunSelectedTests -Value $RunSelectedTests -Scope Global
 }
 if ( $xmlConfig.config.Azure.General.StorageAccount -imatch "NewStorage_" )
 {

@@ -590,15 +590,16 @@ else
 {
     $saInfoCollected = $false
     $retryCount = 0
-    $maxRetryCount = 20
+    $maxRetryCount = 999
     while(!$saInfoCollected -and ($retryCount -lt $maxRetryCount))
     {
         try
         {
             $retryCount += 1
-            LogMsg "Getting Existing Storage Account : $StorageAccountName details ..."
-            $StorageAccountType = (Get-AzureRmStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).Sku.Tier.ToString()
-            $StorageAccountRG = (Get-AzureRmStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).ResourceGroupName.ToString()
+            LogMsg "[Attempt $retryCount/$maxRetryCount] : Getting Existing Storage Account : $StorageAccountName details ..."
+            $GetAzureRMStorageAccount = Get-AzureRmStorageAccount
+            $StorageAccountType = ($GetAzureRMStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).Sku.Tier.ToString()
+            $StorageAccountRG = ($GetAzureRMStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).ResourceGroupName.ToString()
             $saInfoCollected = $true
             if($StorageAccountType -match 'Premium')
             {
@@ -614,7 +615,7 @@ else
         catch
         {
             LogErr "Error in fetching Storage Account info. Retrying."
-            sleep -Seconds 30
+            sleep -Seconds 10
         }
     }
 }
@@ -2285,9 +2286,13 @@ Function CreateAllRGDeploymentsWithTempParameters($templateName, $location, $Tem
     return $retValue, $deployedGroups, $resourceGroupCount, $DeploymentElapsedTime
 }
 
-Function CopyVHDToAnotherStorageAccount ($sourceStorageAccount,$sourceStorageContainer,$destinationStorageAccount,$destinationStorageContainer,$vhdName)
+Function CopyVHDToAnotherStorageAccount ($sourceStorageAccount,$sourceStorageContainer,$destinationStorageAccount,$destinationStorageContainer,$vhdName,$destVHDName)
 {
     $retValue = $false
+    if (!$destVHDName)
+    {
+        $destVHDName = $vhdName
+    }
     $GetAzureRmStorageAccount = Get-AzureRmStorageAccount    
 
     LogMsg "Retrieving $sourceStorageAccount storage account key"
@@ -2300,7 +2305,7 @@ Function CopyVHDToAnotherStorageAccount ($sourceStorageAccount,$sourceStorageCon
     LogMsg "Retrieving $destinationStorageAccount storage account key"
     $DestAccountKey= (Get-AzureRmStorageAccountKey -ResourceGroupName $(($GetAzureRmStorageAccount  | Where {$_.StorageAccountName -eq "$destinationStorageAccount"}).ResourceGroupName) -Name $destinationStorageAccount)[0].Value
     [string]$DestAccountName =  $destinationStorageAccount
-    [string]$DestBlob = $vhdName
+    [string]$DestBlob = $destVHDName
     $DestContainer = $destinationStorageContainer
 
     $context = New-AzureStorageContext -StorageAccountName $srcStorageAccount -StorageAccountKey $srcStorageAccountKey 

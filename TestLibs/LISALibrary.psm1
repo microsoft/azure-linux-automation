@@ -221,7 +221,7 @@ function InstallCustomKernel ($customKernel, $allVMData, [switch]$RestartAfterUp
                             if ($currentKernelVersion -eq $upgradedKernelVersion)
                             {
                                 LogErr "Kernel version is same after restarting VMs."
-                                if ($customKernel -imatch "latest")
+                                if ($customKernel -eq "latest")
                                 {
                                     LogMsg "Continuing the tests as default kernel is latest."
                                     $isKernelUpgraded = $true
@@ -400,7 +400,7 @@ function EnableSRIOVInAllVMs($allVMData)
                         LogMsg "SRIOV workaround is not needed."
                     }
 		            LogMsg "Now executing $scriptName ..."
-		            $jobID = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/home/$user/$scriptName" -runAsSudo
+		            $sriovOutput = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/home/$user/$scriptName" -runAsSudo
                     $sriovDetectedCount += 1
                 }
                 else
@@ -412,8 +412,15 @@ function EnableSRIOVInAllVMs($allVMData)
 
             if ($sriovDetectedCount -gt 0)
             {
-                LogMsg "Now restarting VMs..."
-                $restartStatus = RestartAllDeployments -allVMData $allVMData
+                if ($sriovOutput -imatch "SYSTEM_RESTART_REQUIRED")
+                {
+                    LogMsg "Updated SRIOV configuration. Now restarting VMs..."
+                    $restartStatus = RestartAllDeployments -allVMData $allVMData
+                }
+                if ($sriovOutput -imatch "DATAPATH_SWITCHED_TO_VF")
+                {
+                    $restartStatus="True"
+                }
             }
             $vmCount = 0
             $bondSuccess = 0
@@ -423,17 +430,35 @@ function EnableSRIOVInAllVMs($allVMData)
 	            foreach ( $vmData in $allVMData )
 	            {
                     $vmCount += 1
-                    $AfterIfConfigStatus = $null
-                    $AfterIfConfigStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/sbin/ifconfig -a" -runAsSudo
-                    if ($AfterIfConfigStatus -imatch "bond")
+                    if ($sriovOutput -imatch "DATAPATH_SWITCHED_TO_VF")
                     {
-                        LogMsg "New bond detected in $($vmData.RoleName)"
-                        $bondSuccess += 1
+                        $AfterIfConfigStatus = $null
+                        $AfterIfConfigStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "dmesg" -runAsSudo
+                        if ($AfterIfConfigStatus -imatch "Data path switched to VF")
+                        {
+                            LogMsg "Data path already switched to VF in $($vmData.RoleName)"
+                            $bondSuccess += 1
+                        }
+                        else
+                        {
+                            LogErr "Data path not switched to VF in $($vmData.RoleName)"
+                            $bondError += 1 
+                        }
                     }
                     else
                     {
-                        LogErr "New bond not detected in $($vmData.RoleName)"
-                        $bondError += 1 
+                        $AfterIfConfigStatus = $null
+                        $AfterIfConfigStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/sbin/ifconfig -a" -runAsSudo
+                        if ($AfterIfConfigStatus -imatch "bond")
+                        {
+                            LogMsg "New bond detected in $($vmData.RoleName)"
+                            $bondSuccess += 1
+                        }
+                        else
+                        {
+                            LogErr "New bond not detected in $($vmData.RoleName)"
+                            $bondError += 1 
+                        }
                     }
                 }
             }

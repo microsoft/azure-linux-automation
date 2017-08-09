@@ -73,7 +73,14 @@ collect_VM_properties
                 {
                     $expectedCount = 4
                 }
+                elseif ($clientVMData.InstanceSize -eq "Standard_NC24r")
+                {
+                    $expectedCount = 4
+                }		
                 $errorCount = 0
+                #Adding sleep of 180 seconds, giving time to load nvidia drivers.
+                LogMsg "Waiting 3 minutes. (giving time to load nvidia drivers)"
+                Start-Sleep -Seconds 180
                 #region PCI Express pass-through
                 $PCIExpress = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "lsvmbus" -ignoreLinuxExitCode
                 Set-Content -Value $PCIExpress -Path $LogDir\PIC-Express-pass-through.txt -Force
