@@ -7267,7 +7267,6 @@
 			</TestParameters>
 			<Priority>P0</Priority>
 		</test>		
-		</test>
 		<!-- LIS BUILD TEST -->
 		<test>
 			<!-- Install Latest LIS -> reboot and Verify it Installed Successfully with out any errors and warnings. -->
