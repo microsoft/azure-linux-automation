@@ -1,0 +1,83 @@
+﻿<#-------------Create Deployment Start------------------#>
+Import-Module .\TestLibs\RDFELibs.psm1 -Force
+$result = ""
+$testResult = ""
+$resultArr = @()
+try {
+	if($testId.ToUpper() -eq "AZUREBVT_000" -and ($customKernel -or $customLIS))
+	{	
+
+	$isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
+	if ($isDeployed)
+	{
+		foreach ($VM in $allVMData)
+            {
+                $ResourceGroupUnderTest = $VM.ResourceGroupName
+				Set-Variable -Name ResourceGroupUnderTest -Value $ResourceGroupUnderTest -Scope Global
+                $VHDuri = (Get-AzureRMVM -ResourceGroupName $VM.ResourceGroupName).StorageProfile.OsDisk.Vhd.Uri
+                #Deprovision VM
+		        LogMsg "Executing: waagent -deprovision..."
+		        $DeprovisionInfo = RunLinuxCmd -username $user -password $password -ip $VM.PublicIP -port $VM.SSHPort -command "/usr/sbin/waagent -force -deprovision" -runAsSudo
+		        LogMsg $DeprovisionInfo
+		        LogMsg "Execution of waagent -deprovision done successfully"
+                LogMsg "Stopping Virtual Machine ...."
+                $out = Stop-AzureRmVM -ResourceGroupName $VM.ResourceGroupName -Name $VM.RoleName -Force
+                WaitFor -seconds 60
+            }
+            #get the VHD file name from the VHD uri
+            $VHDuri = Split-Path $VHDuri -Leaf
+            $Distros = @($xmlConfig.config.Azure.Deployment.Data.Distro)
+            #add OSVHD element to $xml so that deployment will pick the vhd for future tests
+            foreach ($distroname in $Distros)
+	        {
+           		if ($distroname.Name -eq $Distro)
+		        {
+                    $xmlConfig.config.Azure.Deployment.Data.Distro[$Distros.IndexOf($distroname)].OsVHD = $VHDuri.ToString() 
+		        }
+	        }
+
+            #Finally set customKernel and customLIS to null which are not required to be installed after deploying Virtual machine
+            $customKernel = $null
+            Set-Variable -Name customKernel -Value $customKernel -Scope Global
+            $customLIS = $null
+            Set-Variable -Name customLIS -Value $customLIS -Scope Global
+			$testResult = "PASS"
+			$testStatus = "TestCompleted"	
+			LogMsg "Resource Group deployed successfully. VHD is captured and it will be used for further tests"
+	}
+	else
+	{
+	$testResult = "Aborted"
+	}
+}
+elseif($testId.ToUpper() -eq "AZUREBVT_100") {
+	if($ResourceGroupUnderTest)
+	{
+		$out = DeleteResourceGroup -RGName $ResourceGroupUnderTest
+		LogMsg "Captured VHD is deleted along with the associated Resource Group."
+	}
+		$testResult = "PASS"
+		$testStatus = "TestCompleted"	
+}
+else {
+	$testResult = "PASS"
+	$testStatus = "TestCompleted"	
+	LogMsg "Capture VHD is not required since customLIS or customKernel is not specified. Continue with further tests"
+}
+}
+catch {
+	$ErrorMessage =  $_.Exception.Message
+	LogMsg "EXCEPTION : $ErrorMessage"   	
+}
+Finally
+{
+	if (!$testResult)
+	{
+		$testResult = "Aborted"
+	}
+	$resultArr += $testResult
+}
+
+$result = GetFinalResultHeader -resultarr $resultArr
+
+return $result

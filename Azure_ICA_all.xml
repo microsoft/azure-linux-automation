@@ -4919,6 +4919,32 @@
 	      <TestID>AzureBVT_029</TestID>
 	    </test>
 		<test>
+	      <testName>BVT-CAPTURE-VHD</testName>
+	      <testScript></testScript>
+	      <testScriptPs1>BVT-CAPTURE-VHD.ps1</testScriptPs1>
+	      <files></files>
+	      <setupType>BVTDeployment</setupType>
+	      <TestType>
+	      </TestType>
+	      <TestFeature>
+	      </TestFeature>
+	      <SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+	      <TestID>AzureBVT_000</TestID>
+	    </test>
+		<test>
+	    <testName>BVT-DELETE-VHD</testName>
+	    <testScript></testScript>
+	    <testScriptPs1>BVT-CAPTURE-VHD.ps1</testScriptPs1>
+	    <files></files>
+	    <setupType>BVTDeployment</setupType>
+	    <TestType>
+	    </TestType>
+	    <TestFeature>
+	    </TestFeature>
+	    <SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+	    <TestID>AzureBVT_100</TestID>
+		</test>
+		<test>
 			<testName>ICA-VERIFY-RDMA</testName>
 			<testScript>ICA-VERIFY-RDMA.py</testScript>
 			<testScriptPs1>ICA-VERIFY-RDMA.ps1</testScriptPs1>
@@ -7226,6 +7252,20 @@
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<Priority>P0</Priority>
+		</test>	
+		<test>
+			<testName>VERIFY-DISK-HOT-ADDREMOVE</testName>
+			<testScript></testScript>
+			<testScriptps1>DiskAddRemove.ps1</testScriptps1>
+			<setupType>A1</setupType>
+			<SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues></SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+				<param></param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>		
 		</test>
 		<!-- LIS BUILD TEST -->
 		<test>
@@ -7509,6 +7549,10 @@
 		<!-- BVT tests -->
 		<Cycle>
 			<cycleName>BVT</cycleName>
+			<!-- Do not delete BVT-CAPTURE-VHD test. This should always be the first test -->
+			<test>
+				<Name>BVT-CAPTURE-VHD</Name>
+			</test>
 			<test>
 				<Name>BVT-VERIFY-NO-ERROR-IN-LOGS</Name>
 			</test>
@@ -7583,6 +7627,10 @@
 			</test>
 			<test>
 				<Name>BVT-VERIFY-SHUTDOWN</Name>
+			</test>
+			<!-- Do not delete BVT-DELETE-VHD test. This should always be the last test -->
+			<test>
+				<Name>BVT-DELETE-VHD</Name>
 			</test>
 		</Cycle>
 
@@ -8490,6 +8538,11 @@
 			</test>
 		</Cycle>
 		<Cycle>
+			<cycleName>DISKHOTADDREMOVE</cycleName>
+			<test>
+				<Name>VERIFY-DISK-HOT-ADDREMOVE</Name>
+			</test>
+		</Cycle>
 			<cycleName>LTP-BASIC</cycleName>
 			<test>
 				<Name>ICA-LTP-BASIC-TEST</Name>
@@ -8534,6 +8587,5 @@
 				<Name>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM-LATEST</Name>
 			</test>
 		</Cycle>
-		
 	</testCycles>
 </config>
