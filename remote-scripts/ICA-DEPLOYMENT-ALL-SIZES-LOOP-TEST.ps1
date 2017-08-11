@@ -17,7 +17,25 @@ else
 	if ( $UseAzureResourceManager )
 	{
 		$StorAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
-		$AccountDetail =  Get-AzureRmStorageAccount | where {$_.StorageAccountName -eq $StorAccount}
+        $saInfoCollected = $false
+        $retryCount = 0
+        $maxRetryCount = 999
+        while(!$saInfoCollected -and ($retryCount -lt $maxRetryCount))
+        {
+            try
+            {
+                $retryCount += 1
+                LogMsg "[Attempt $retryCount/$maxRetryCount] : Getting Existing Storage Account : $StorAccount details ..."
+                $GetAzureRMStorageAccount = Get-AzureRmStorageAccount
+                $saInfoCollected = $true
+            }
+            catch
+            {
+                LogErr "Error in fetching Storage Account info. Retrying."
+                sleep -Seconds 10
+            }
+        }
+		$AccountDetail =  $GetAzureRMStorageAccount | where {$_.StorageAccountName -eq $StorAccount}
 		$Location = $AccountDetail.PrimaryLocation
 		$AccountType = $AccountDetail.Sku.Tier.ToString()
 		$SupportSizes = (Get-AzureRmVMSize -Location $location).Name
