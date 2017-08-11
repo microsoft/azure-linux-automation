@@ -160,12 +160,8 @@ $DeploymentCount = $NumberOfSizes*1
                         if($isRestarted)
                         {
                             $successCount += 1
-                            LogMsg "ATTEMPT : $count/$DeploymentCount : Deploying $($VMSizes[$VMSizeNumber]) VM.. SUCCESS"
-                            LogMsg "deployment Time = $($DeploymentStatistics.DeploymentTime)"
-                            $deployResult = "PASS"
-                        }
                             LogMsg "ATTEMPT : $count/$DeploymentCount : Reboot $($VMSizes[$VMSizeNumber]) VM.. SUCCESS"
-                            $successCount += 1
+                            LogMsg "deployment Time = $($DeploymentStatistics.DeploymentTime)"
                             $deployResult = "PASS"
                         }
                         else 

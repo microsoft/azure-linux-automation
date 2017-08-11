@@ -61,17 +61,17 @@
 			<Data>
 				<!-- You can add your own distro and Image names here -->
 				<Distro>
-					<Name>CK</Name>
+					<Name>ShortDistroName</Name>
 					<OsImage></OsImage>
 					<!-- <OsImage>b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu-16_04-LTS-amd64-server-20160907.1-en-us-30GB</OsImage> -->
 					<ARMImage>
-						<Publisher>Canonical</Publisher>
+						<Publisher></Publisher>
 						<!-- <Publisher>Canonical</Publisher> -->
-						<Offer>UbuntuServer</Offer>
+						<Offer></Offer>
 						<!-- <Offer>UbuntuServer</Offer> -->
-						<Sku>16.04.0-LTS</Sku>
+						<Sku></Sku>
 						<!-- <Sku>16.04.0-LTS</Sku> -->
-						<Version>latest</Version>
+						<Version></Version>
 						<!-- <Version>latest</Version> -->
 					</ARMImage>
 					<OsVHD></OsVHD>

@@ -143,6 +143,7 @@ try
 
     mkdir $testDir -ErrorAction SilentlyContinue | out-null
     Set-Content -Value "" -Path .\report\testSummary.html -Force -ErrorAction SilentlyContinue | Out-Null
+    Set-Content -Value "" -Path .\report\AdditionalInfo.html -Force -ErrorAction SilentlyContinue | Out-Null
 
     if ($logFilename)
     {
