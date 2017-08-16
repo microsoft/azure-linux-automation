@@ -145,6 +145,12 @@ collect_VM_properties
 			Add-Member -InputObject $objNode -MemberType NoteProperty -Name BufferSize -Value $null -Force
 			Add-Member -InputObject $objNode -MemberType NoteProperty -Name Connections -Value $null -Force
 			Add-Member -InputObject $objNode -MemberType NoteProperty -Name ClientTxGbps -Value $null -Force
+            Add-Member -InputObject $objNode -MemberType NoteProperty -Name ServerTxGbps -Value $null -Force
+            Add-Member -InputObject $objNode -MemberType NoteProperty -Name Retransmits -Value $null -Force
+            Add-Member -InputObject $objNode -MemberType NoteProperty -Name SenderCongestionWindowKB -Value $null -Force
+            Add-Member -InputObject $objNode -MemberType NoteProperty -Name ServerTxGbps -Value $null -Force
+
+
 			return $objNode
 		}
 
@@ -158,8 +164,8 @@ collect_VM_properties
 				$currentConnectionClientTxGbps = 0
 				$currentConnectionClientTxGbpsArr = @()
 
-				$currentConnectionserverTxGbps = 0
-				$currentConnectionserverTxGbpsArr = @()
+				$currentConnectionServerRxGbps = 0
+				$currentConnectionServerRxGbpsArr = @()
 
 				foreach ( $file in $files )
 				{
@@ -266,7 +272,7 @@ collect_VM_properties
 						if($currentInstanceServerThroughput)
 						{
 							LogMsg "	$fileName : Data collected successfully."
-							$currentConnectionServerTxGbpsArr += $currentInstanceServerThroughput
+							$currentConnectionServerRxGbpsArr += $currentInstanceServerThroughput
 						}
 					}
 				}
@@ -275,9 +281,16 @@ collect_VM_properties
 				$FinalClientThroughputArr += $currentConnectionClientTxGbps
 				$FinalClientTCPLossArr += $currentConnectionClientTCPLoss
 
+				$currentConnectionServerRxGbps = [math]::Round((($currentConnectionServerRxGbpsArr | Measure-Object -Average).Average),2)
+				Write-Host "Server: $Buffer . $connection . $currentConnectionServerRxGbps"
+				$FinalServerThroughputArr += $currentConnectionServerRxGbps
+				$FinalServerTCPLossArr += $currentConnectionServerTCPLoss
+
+
 				$currentResultObj.BufferSize = $Buffer
 				$currentResultObj.Connections = $connection
 				$currentResultObj.ClientTxGbps = $currentConnectionClientTxGbps
+				$currentResultObj.ServerRxGbps = $currentConnectionServerRxGbps                
 	   
 				$FinalServerClientTCPResultObjArr += $currentResultObj
 				Write-Host "-------------------------------"
@@ -346,11 +359,11 @@ collect_VM_properties
 			$ProtocolType = "TCP"
 
 			$connectionString = "Server=$dataSource;uid=$user; pwd=$password;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
-			$SQLQuery = "INSERT INTO $dataTableName (TestCaseName,TestDate,HostType,HostBy,HostOS,GuestOSType,GuestDistro,GuestSize,KernelVersion,IPVersion,ProtocolType,NumberOfConnections,Throughput_Gbps,Latency_ms) VALUES "
+			$SQLQuery = "INSERT INTO $dataTableName (TestCaseName,DataPath,TestDate,HostType,HostBy,HostOS,GuestOSType,GuestDistro,GuestSize,KernelVersion,IPVersion,ProtocolType,BufferSize_Bytes,RxThroughput_Gbps,TxThroughput_Gbps,RetransmittedSegments,CongestionWindowSize_KB) VALUES "
 
 			foreach ($tcpResult in $FinalServerClientTCPResultObjArr)
 			{
-				$SQLQuery += "('$TestCaseName','$(Get-Date -Format yyyy-MM-dd)','$HostType','$HostBy','$HostOS','$GuestOSType','$GuestDistro','$GuestSize','$KernelVersion','$IPVersion','$ProtocolType','$($tcpResult.Connections)','$($tcpResult.ClientTxGbps)','0'),"	
+				$SQLQuery += "('$TestCaseName','$dataPath','$(Get-Date -Format yyyy-MM-dd)','$HostType','$HostBy','$HostOS','$GuestOSType','$GuestDistro','$GuestSize','$KernelVersion','$IPVersion','$ProtocolType','$($tcpResult.BufferSize_Bytes)','$($tcpResult.ClientTxGbps)','0'),"	
 			}
 			$SQLQuery = $SQLQuery.TrimEnd(',')
 			LogMsg $SQLQuery
