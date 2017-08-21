@@ -55,7 +55,7 @@ if ($isDeployed)
 		foreach ( $param in $currentTestData.TestParameters.param)
 		{
 			Add-Content -Value "$param" -Path $constantsFile
-			if ($param -imatch "bufferLenghs=")
+			if ($param -imatch "bufferLengths=")
 			{
 				$testBuffers= $param.Replace("bufferLenghs=(","").Replace(")","").Split(" ")
 			}
