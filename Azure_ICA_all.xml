@@ -6165,7 +6165,7 @@
 			<TestFileSizeinGB>8</TestFileSizeinGB>
 			<!-- if ioengine is empty here, libaio will be used as default io engine-->
 			<ioengine></ioengine>
-			<runtimeSeconds>300</runtimeSeconds>
+			<runtimeSeconds>60</runtimeSeconds>
 			<SubtestValues>Here_some_text_is_required_due_to_automation_structure</SubtestValues>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
@@ -6841,7 +6841,7 @@
 					<param>ioDepths='1 2 4 8 16 32 64 128 256 512 1024'</param>
 					<!-- if you want to run test for multiple io sizes ioSizes='1 2 4' -->
 					<param>ioSizes=8</param>
-					<param>ioruntime=300</param>
+					<param>ioruntime=60</param>
 					<param>testmodes='read write'</param>
 					<param>testfilesize="16G"</param>
 				</TestParameters>
@@ -6977,7 +6977,7 @@
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<remoteFiles></remoteFiles>
-			<InitialWaitSeconds>300</InitialWaitSeconds>
+			<InitialWaitSeconds>60</InitialWaitSeconds>
 			<Priority>P0</Priority>
 		</test>			
 		<test>
@@ -7033,7 +7033,7 @@
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<remoteFiles></remoteFiles>
-			<InitialWaitSeconds>300</InitialWaitSeconds>
+			<InitialWaitSeconds>60</InitialWaitSeconds>
 			<Priority>P0</Priority>		
 		</test>
 		<test>
@@ -7074,7 +7074,7 @@
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<files>.\remote-scripts\azuremodules.sh</files>
 			<TestParameters>
-				<param>testDuration=300</param>
+				<param>testDuration=60</param>
 			</TestParameters>
 			<Priority>P0</Priority>
 		</test>
@@ -7106,7 +7106,7 @@
 				<param>maxThread=1024</param>
 				<param>startIO=4</param>
 				<param>numjobs=1</param>
-				<param>ioruntime=300</param>
+				<param>ioruntime=60</param>
 				<param>maxIO=4</param>
 				<param>fileSize=1023G</param>
 			</TestParameters>
@@ -7126,7 +7126,7 @@
 				<param>maxThread=1024</param>
 				<param>startIO=8</param>
 				<param>numjobs=1</param>
-				<param>ioruntime=300</param>
+				<param>ioruntime=60</param>
 				<param>maxIO=8</param>		
 				<param>fileSize=134G</param>
 			</TestParameters>
@@ -7146,7 +7146,7 @@
 				<param>maxThread=1024</param>
 				<param>startIO=1024</param>
 				<param>numjobs=1</param>
-				<param>ioruntime=300</param>
+				<param>ioruntime=60</param>
 				<param>maxIO=1024</param>		
 				<param>fileSize=134G</param>
 			</TestParameters>
@@ -7162,7 +7162,7 @@
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<files>.\remote-scripts\azuremodules.sh</files>			
 			<TestParameters>
-				<param>testDuration=300</param>
+				<param>testDuration=60</param>
 				<param>testType=udp</param>
 				<param>max_parallel_connections_per_instance=64</param>
 				<param>connections=(1 2 4 8 16 32 64 128 256 512 1024)</param>
@@ -7180,7 +7180,7 @@
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<files>.\remote-scripts\azuremodules.sh</files>			
 			<TestParameters>
-				<param>testDuration=300</param>
+				<param>testDuration=60</param>
 				<param>testType=tcp</param>
 				<param>max_parallel_connections_per_instance=64</param>
 				<param>connections=(1 2 4 8 16 32 64 128 256 512 1024)</param>
@@ -7198,7 +7198,7 @@
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<files>.\remote-scripts\azuremodules.sh</files>			
 			<TestParameters>
-				<param>testDuration=300</param>
+				<param>testDuration=60</param>
 				<param>testType=tcp</param>
 				<param>max_parallel_connections_per_instance=64</param>
 				<param>connections=(1 2 4 8 16 32 64 128 256 512 1024)</param>
@@ -7216,7 +7216,7 @@
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<files>.\remote-scripts\azuremodules.sh</files>			
 			<TestParameters>
-				<param>testDuration=300</param>
+				<param>testDuration=60</param>
 				<param>testType=tcp</param>
 				<param>max_parallel_connections_per_instance=64</param>
 				<param>connections=(1 2 4 8 16 32 64 128 256 512 1024)</param>
