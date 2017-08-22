@@ -597,7 +597,12 @@ else
         {
             $retryCount += 1
             LogMsg "[Attempt $retryCount/$maxRetryCount] : Getting Existing Storage Account : $StorageAccountName details ..."
+            $GetAzureRMStorageAccount = $null
             $GetAzureRMStorageAccount = Get-AzureRmStorageAccount
+            if ($GetAzureRMStorageAccount -eq $null)
+            {
+                throw
+            }            
             $StorageAccountType = ($GetAzureRMStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).Sku.Tier.ToString()
             $StorageAccountRG = ($GetAzureRMStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).ResourceGroupName.ToString()
             $saInfoCollected = $true
@@ -614,7 +619,7 @@ else
         }
         catch
         {
-            LogErr "Error in fetching Storage Account info. Retrying."
+            LogErr "Error in fetching Storage Account info. Retrying in 10 seconds."
             sleep -Seconds 10
         }
     }
