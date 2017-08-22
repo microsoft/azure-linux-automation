@@ -92,7 +92,7 @@ if ($isDeployed)
 			Add-Content -Value "$param" -Path $constantsFile
 			if ($param -imatch "bufferLengths=")
 			{
-				$testBuffers= $param.Replace("bufferLenghs=(","").Replace(")","").Split(" ")
+				$testBuffers= $param.Replace("bufferLengths=(","").Replace(")","").Split(" ")
 			}
 			if ($param -imatch "connections=" )
 			{
