@@ -31,6 +31,7 @@ else
             }
             catch
             {
+                $saInfoCollected = $false
                 LogErr "Error in fetching Storage Account info. Retrying."
                 sleep -Seconds 10
             }
