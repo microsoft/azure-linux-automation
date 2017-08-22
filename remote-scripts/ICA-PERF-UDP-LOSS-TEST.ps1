@@ -180,7 +180,7 @@ collect_VM_properties
 				foreach ( $file in $files )
 				{
 					#region Get Client data...
-					if ( $file.Name -imatch "iperf-client-udp-IPv4-buffer-$($Buffer)K-conn-$connection-instance-*" )
+					if ( $file.Name -imatch "iperf-client-udp-IPv4-buffer-$($Buffer)-conn-$connection-instance-*" )
 					{
 						$currentInstanceclientJsonText = $null
 						$currentInstanceclientJsonObj = $null
@@ -226,7 +226,7 @@ collect_VM_properties
 					#endregion
 
 					#region Get Server data...
-					if ( $file.Name -imatch "iperf-server-udp-IPv4-buffer-$($Buffer)K-conn-$connection-instance-*" )
+					if ( $file.Name -imatch "iperf-server-udp-IPv4-buffer-$($Buffer)-conn-$connection-instance-*" )
 					{
 						$currentInstanceserverJsonText = $null
 						$currentInstanceserverJsonObj = $null
@@ -284,7 +284,7 @@ collect_VM_properties
 				Write-Host "Server: $Buffer . $connection . $currentConnectionserverTxGbps .$currentConnectionserverUDPLoss"
 				$FinalServerThroughputArr += $currentConnectionserverTxGbps 
 				$FinalServerUDPLossArr += $currentConnectionserverUDPLoss
-				$currentResultObj.BufferSize = $Buffer
+				$currentResultObj.BufferSize = $Buffer/1024
 				$currentResultObj.Connections = $connection
 				$currentResultObj.ClientTxGbps = $currentConnectionClientTxGbps
 				$currentResultObj.ClientUDPLoss = $currentConnectionClientUDPLoss
@@ -376,7 +376,7 @@ collect_VM_properties
 			
 			foreach ( $udpResultObject in $FinalServerClientUDPResultObjArr )
 			{
-				$SQLQuery += "('$TestCaseName','$(Get-Date -Format yyyy-MM-dd)','$HostType','$HostBy','$HostOS','$GuestOSType','$GuestDistro','$GuestSize','$KernelVersion','$IPVersion','UDP','$DataPath','$(($udpResultObject.BufferSize)/1024)','$($udpResultObject.Connections)','$($udpResultObject.ClientTxGbps)','$($udpResultObject.ServerRxGbps)','$($udpResultObject.ClientUDPLoss)'),"
+				$SQLQuery += "('$TestCaseName','$(Get-Date -Format yyyy-MM-dd)','$HostType','$HostBy','$HostOS','$GuestOSType','$GuestDistro','$GuestSize','$KernelVersion','$IPVersion','UDP','$DataPath','$($udpResultObject.BufferSize)','$($udpResultObject.Connections)','$($udpResultObject.ClientTxGbps)','$($udpResultObject.ServerRxGbps)','$($udpResultObject.ClientUDPLoss)'),"
 			}
 
 			$SQLQuery = $SQLQuery.TrimEnd(',')
