@@ -46,7 +46,29 @@ if ($isDeployed)
 
             #Collect current VHD, Storage Account and Key
             LogMsg "---------------Copy #1: START----------------"
-            $GetAzureRmStorageAccount = Get-AzureRmStorageAccount
+            $saInfoCollected = $false
+            $retryCount = 0
+            $maxRetryCount = 999
+            while(!$saInfoCollected -and ($retryCount -lt $maxRetryCount))
+            {
+                try
+                {
+                    $retryCount += 1
+                    LogMsg "[Attempt $retryCount/$maxRetryCount] : Getting Storage Account details ..."
+                    $GetAzureRMStorageAccount = $null
+                    $GetAzureRMStorageAccount = Get-AzureRmStorageAccount
+                    if ($GetAzureRMStorageAccount -eq $null)
+                    {
+                        throw
+                    }            
+                    $saInfoCollected = $true
+                }
+                catch
+                {
+                    LogErr "Error in fetching Storage Account info. Retrying in 10 seconds."
+                    sleep -Seconds 10
+                }
+            }
             LogMsg "Collecting OS Disk VHD information."
             $OSDiskVHD = (Get-AzureRmVM -ResourceGroupName $clientVMData.ResourceGroupName -Name $clientVMData.RoleName).StorageProfile.OsDisk.Vhd.Uri
             $currentVHDName = $OSDiskVHD.Trim().Split("/")[($OSDiskVHD.Trim().Split("/").Count -1)]
