@@ -2298,7 +2298,30 @@ Function CopyVHDToAnotherStorageAccount ($sourceStorageAccount,$sourceStorageCon
     {
         $destVHDName = $vhdName
     }
-    $GetAzureRmStorageAccount = Get-AzureRmStorageAccount    
+    $saInfoCollected = $false
+    $retryCount = 0
+    $maxRetryCount = 999
+    while(!$saInfoCollected -and ($retryCount -lt $maxRetryCount))
+    {
+        try
+        {
+            $retryCount += 1
+            LogMsg "[Attempt $retryCount/$maxRetryCount] : Getting Existing Storage Account details ..."
+            $GetAzureRmStorageAccount = $null
+            $GetAzureRmStorageAccount = Get-AzureRmStorageAccount
+            if ($GetAzureRmStorageAccount -eq $null)
+            {
+                throw
+            }
+            $saInfoCollected = $true
+        }
+        catch
+        {
+            $saInfoCollected = $false
+            LogErr "Error in fetching Storage Account info. Retrying in 10 seconds."
+            sleep -Seconds 10
+        }
+    }
 
     LogMsg "Retrieving $sourceStorageAccount storage account key"
     $SrcStorageAccountKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $(($GetAzureRmStorageAccount  | Where {$_.StorageAccountName -eq "$sourceStorageAccount"}).ResourceGroupName) -Name $sourceStorageAccount)[0].Value
