@@ -1402,7 +1402,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
     {
         $vmName = $RGName+"-role-"+$role
     }
-    $NIC = "NIC" + "-$vmName"
+    $NIC = "PrimaryNIC" + "-$vmName"
 
         if ( $vmAdded )
         {
@@ -1772,7 +1772,7 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
     }
     $SubnetName = $newVM.ARMSubnetName
     $DnsServerIP = $RGXMLData.DnsServerIP
-    $NIC = "NIC" + "-$vmName"
+    $NIC = "PrimaryNIC" + "-$vmName"
     $SecurityGroupName = "SG-$RGName"
 
             #region networkInterfaces
