@@ -296,12 +296,14 @@ if [ "${rdmaRun}" == "yes" ];
 then
 	mpirunPath=`find / -name mpirun | grep intel64`
 	if [ $? -eq 0 ];
+	then
 		LogMsg "MPI binaries found."
 	else
 		LogMsg "Installing MPI Binaries..."	
 		zypper --no-gpg-checks --non-interactive install lsb
-		cd /opt/intelMPI/intel_mpi_packages
-		rpm -ivh *.rpm
+		cd /opt/intelMPI/intel_mpi_packages && rpm -ivh *.rpm
+		ssh root@${slaves} "zypper --no-gpg-checks --non-interactive install lsb"
+		ssh root@${slaves} "cd /opt/intelMPI/intel_mpi_packages && rpm -ivh *.rpm"
 		mpirunPath=`find / -name mpirun | grep intel64`
 		cd /root
 	fi
