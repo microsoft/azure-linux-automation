@@ -2101,6 +2101,8 @@ Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed
                         $retValue = $VerifiedGroups
                         #$vnetIsAllConfigured = $false
                         $xmlConfig.config.Azure.Deployment.$setupType.isDeployed = $retValue
+                        LogMsg "Waiting 5 minutes to finish LIS RDMA packages."
+                        Start-Sleep -Seconds 300
                         #Collecting Initial Kernel
                         $KernelLogOutput= GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Initial"
                     }

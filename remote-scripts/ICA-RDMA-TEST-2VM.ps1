@@ -44,9 +44,6 @@ if ($isDeployed)
 			Throw "No any client VM defined. Be sure that, client machine role names matches with pattern `"*client*`" Aborting Test."
 		}
 
-		LogMsg "Waiting 5 minutes to finish LIS RDMA packages."
-		Start-Sleep -Seconds 300
-
 		#region CONFIGURE VMs for TEST
 
 		LogMsg "SERVER VM details :"
