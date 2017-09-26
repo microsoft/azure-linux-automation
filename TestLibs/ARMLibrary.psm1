@@ -665,7 +665,7 @@ $dnsNameForPublicIP = "ica" + ([guid]::NewGuid().Guid).Replace("-","").ToLower()
 $dnsNameForPublicIPv6 = $dnsNameForPublicIP + "v6"
 #$virtualNetworkName = $($RGName.ToUpper() -replace '[^a-z]') + "VNET"
 $virtualNetworkName = "VirtualNetwork"
-$defaultSubnetName = "Subnet1"
+$defaultSubnetName = "SubnetForPrimaryNIC"
 #$availibilitySetName = $($RGName.ToUpper() -replace '[^a-z]') + "AvSet"
 
 #$LoadBalancerName =  $($RGName.ToUpper() -replace '[^a-z]') + "LoadBalancer"
@@ -759,6 +759,7 @@ for ($i =0; $i -lt 30; $i++)
 $numberOfVMs = 0
 $EnableIPv6 = $false
 $ForceLoadBalancerForSingleVM = $false
+$totalSubnetsRequired = 0
 foreach ( $newVM in $RGXMLData.VirtualMachine)
 {
     $numberOfVMs += 1
@@ -766,6 +767,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
     {
         foreach ( $endpoint in $newVM.EndPoints )
         {
+            #Check if IPv6 enabled? 
             if ( $endpoint.EnableIPv6 -eq "True" )
             {
                 $EnableIPv6 = $true
@@ -773,6 +775,12 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
             if ( $endpoint.LoadBalanced -eq "True" )
             {
                 $ForceLoadBalancerForSingleVM = $true
+            }
+
+            #Check total subnets required
+            if ( $newVM.ExtraNICs -ne 0)
+            {
+                $totalSubnetsRequired += $newVM.ExtraNICs
             }
         }
     }
@@ -1033,13 +1041,26 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
                             Add-Content -Value "$($indents[7])^addressPrefix^: ^[variables('defaultSubnetPrefix')]^" -Path $jsonFile
                         Add-Content -Value "$($indents[6])}" -Path $jsonFile
                     Add-Content -Value "$($indents[5])}" -Path $jsonFile
-                    #Add-Content -Value "$($indents[5]){" -Path $jsonFile
-                    #    Add-Content -Value "$($indents[6])^name^: ^[variables('subnet2Name')]^," -Path $jsonFile
-                    #    Add-Content -Value "$($indents[6])^properties^: " -Path $jsonFile
-                    #    Add-Content -Value "$($indents[6]){" -Path $jsonFile
-                    #        Add-Content -Value "$($indents[7])^addressPrefix^: ^[variables('subnet2Prefix')]^" -Path $jsonFile
-                    #    Add-Content -Value "$($indents[6])}" -Path $jsonFile
-                    #Add-Content -Value "$($indents[5])}" -Path $jsonFile
+                    LogMsg "  Added Default Subnet to $virtualNetworkName.."
+
+                    if ($totalSubnetsRequired -ne 0)
+                    {
+                        $subnetCounter = 1
+                        While($subnetCounter -le $totalSubnetsRequired)
+                        {
+                    Add-Content -Value "$($indents[5])," -Path $jsonFile
+                    Add-Content -Value "$($indents[5]){" -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^name^: ^ExtraSubnet-$subnetCounter^," -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^properties^: " -Path $jsonFile
+                        Add-Content -Value "$($indents[6]){" -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^addressPrefix^: ^10.0.$subnetCounter.0/24^" -Path $jsonFile
+                        Add-Content -Value "$($indents[6])}" -Path $jsonFile
+                    Add-Content -Value "$($indents[5])}" -Path $jsonFile
+                    LogMsg "  Added ExtraSubnet-$subnetCounter to $virtualNetworkName.."
+                    $subnetCounter += 1
+                        }
+                    }
+
                 Add-Content -Value "$($indents[4])]" -Path $jsonFile
             Add-Content -Value "$($indents[3])}" -Path $jsonFile
         Add-Content -Value "$($indents[2])}," -Path $jsonFile
@@ -1565,6 +1586,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
         $currentVMNics = 0
 		while ($currentVMNics -lt $newVM.ExtraNICs)
 		{
+            $totalRGNics += 1
 			$NicName = "ExtraNetworkCard-$totalRGNics"
 			$NicNameList.add($NicName)
 			Add-Content -Value "$($indents[2]){" -Path $jsonFile
@@ -1588,7 +1610,8 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
 							Add-Content -Value "$($indents[6]){" -Path $jsonFile
 								Add-Content -Value "$($indents[7])^subnet^:" -Path $jsonFile
 								Add-Content -Value "$($indents[7]){" -Path $jsonFile
-									Add-Content -Value "$($indents[8])^id^: ^[variables('defaultSubnetID')]^" -Path $jsonFile
+                                    Add-Content -Value "$($indents[8])^id^: ^[concat(variables('vnetID'),'/subnets/', 'ExtraSubnet-$totalRGNics')]^" -Path $jsonFile
+                                    LogMsg "  $NicName is part of subnet - ExtraSubnet-$totalRGNics"
 								Add-Content -Value "$($indents[7])}" -Path $jsonFile
 							Add-Content -Value "$($indents[6])}" -Path $jsonFile
 						Add-Content -Value "$($indents[5])}" -Path $jsonFile
@@ -1597,11 +1620,10 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
             {
                 Add-Content -Value "$($indents[4])," -Path $jsonFile
                 Add-Content -Value "$($indents[4])^enableAcceleratedNetworking^: true" -Path $jsonFile
-                LogMsg "Enabled Accelerated Networking for $NicName."
+                LogMsg "  Enabled Accelerated Networking for $NicName."
             }
 				Add-Content -Value "$($indents[3])}" -Path $jsonFile
 			Add-Content -Value "$($indents[2])}," -Path $jsonFile
-            $totalRGNics += 1
             $currentVMNics += 1
 		}
 
@@ -1732,7 +1754,6 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                 Add-Content -Value "$($indents[4])}" -Path $jsonFile
                 #endregion
             Add-Content -Value "$($indents[3])}" -Path $jsonFile
-            LogMsg "Attached Network Interface Card `"$NIC`" to Virtual Machine `"$vmName`"."
             #endregion
 
         Add-Content -Value "$($indents[2])}" -Path $jsonFile
