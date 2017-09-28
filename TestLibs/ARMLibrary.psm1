@@ -110,7 +110,7 @@
                 $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage $AllowedUsagePercentage 
                 $premiumVMs += 1
             }
-            if ( $testVMSize.StartsWith("DS") -and $testVMSize.EndsWith("v3"))
+            elseif ( $testVMSize.StartsWith("DS") -and $testVMSize.EndsWith("v3"))
             {
                 $identifierText = "Standard DSv3 Family Cores"
                 $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage -AllowedUsagePercentage $AllowedUsagePercentage 
@@ -145,7 +145,7 @@
             #endregion
 
             #region E-Series postmartem
-            if ( $testVMSize.StartsWith("ES") -and $testVMSize.EndsWith("v3"))
+            elseif ( $testVMSize.StartsWith("ES") -and $testVMSize.EndsWith("v3"))
             {
                 $identifierText = "Standard ESv3 Family Cores"
                 $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage -AllowedUsagePercentage $AllowedUsagePercentage 
@@ -234,7 +234,7 @@
                 $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage $AllowedUsagePercentage 
             }
             #region M-Series postmartem
-            if ( $testVMSize.StartsWith("M"))
+            elseif ( $testVMSize.StartsWith("M"))
             {
                 $identifierText = "Standard MS Family Cores"
                 $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage -AllowedUsagePercentage $AllowedUsagePercentage 
