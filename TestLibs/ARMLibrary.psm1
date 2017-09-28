@@ -356,8 +356,9 @@ Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro, [str
                 $readyToDeploy = ValidateSubscriptionUsage -subscriptionID $xmlConfig.config.Azure.General.SubscriptionID -RGXMLData $RG -SubscriptionUsageLimits ([xml](Get-Content .\XML\SubscriptionUsageLimits.xml))
                 if (!$readyToDeploy)
                 {
-                    LogMsg "Waiting 5 minutes..."
-                    sleep -Seconds 300
+                    $waitPeriod = Get-Random -Minimum 1 -Maximum 6 -SetSeed (Get-Random)    
+                    LogMsg "Waiting $waitPeriod minutes..."
+                    sleep -Seconds ($waitPeriod*60)
                 }
             }
         }
