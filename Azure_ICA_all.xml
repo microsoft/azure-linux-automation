@@ -3566,7 +3566,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12122</PublicPort>
+							<PublicPort>1111</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
@@ -3579,7 +3579,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12222</PublicPort>
+							<PublicPort>1112</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3597,7 +3597,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12122</PublicPort>
+							<PublicPort>1111</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
@@ -3610,7 +3610,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12222</PublicPort>
+							<PublicPort>1112</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3628,7 +3628,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12122</PublicPort>
+							<PublicPort>1111</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
@@ -3641,7 +3641,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12222</PublicPort>
+							<PublicPort>1112</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3659,7 +3659,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12122</PublicPort>
+							<PublicPort>1111</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
@@ -3672,7 +3672,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12222</PublicPort>
+							<PublicPort>1112</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3690,7 +3690,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12122</PublicPort>
+							<PublicPort>1111</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
@@ -3703,7 +3703,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12222</PublicPort>
+							<PublicPort>1112</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3722,7 +3722,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12122</PublicPort>
+							<PublicPort>1111</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
@@ -3735,7 +3735,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12222</PublicPort>
+							<PublicPort>1112</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3748,7 +3748,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12322</PublicPort>
+							<PublicPort>1113</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3761,7 +3761,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12422</PublicPort>
+							<PublicPort>1114</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3774,7 +3774,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12522</PublicPort>
+							<PublicPort>1115</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3787,7 +3787,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12622</PublicPort>
+							<PublicPort>1116</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3805,7 +3805,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12122</PublicPort>
+							<PublicPort>1111</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
@@ -3818,7 +3818,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12222</PublicPort>
+							<PublicPort>1112</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3831,7 +3831,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12322</PublicPort>
+							<PublicPort>1113</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3844,7 +3844,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12422</PublicPort>
+							<PublicPort>1114</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3857,7 +3857,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12522</PublicPort>
+							<PublicPort>1115</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3870,7 +3870,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12622</PublicPort>
+							<PublicPort>1116</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3883,7 +3883,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12722</PublicPort>
+							<PublicPort>1117</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3896,7 +3896,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12822</PublicPort>
+							<PublicPort>1118</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3909,7 +3909,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12922</PublicPort>
+							<PublicPort>1119</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3922,7 +3922,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>11022</PublicPort>
+							<PublicPort>11110</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3935,7 +3935,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>11122</PublicPort>
+							<PublicPort>11111</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3948,7 +3948,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>11222</PublicPort>
+							<PublicPort>11112</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3961,7 +3961,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>11322</PublicPort>
+							<PublicPort>11113</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3974,7 +3974,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>11422</PublicPort>
+							<PublicPort>11114</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3987,7 +3987,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>11522</PublicPort>
+							<PublicPort>11115</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -4000,7 +4000,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>11622</PublicPort>
+							<PublicPort>11116</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -4018,7 +4018,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12122</PublicPort>
+							<PublicPort>1111</PublicPort>
 						</EndPoints>
 						<DataDisk>
 							<LUN>0</LUN>
@@ -4035,7 +4035,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12222</PublicPort>
+							<PublicPort>1112</PublicPort>
 						</EndPoints>
 					</VirtualMachine>					
 				</HostedService>
@@ -4052,7 +4052,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12122</PublicPort>
+							<PublicPort>1111</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
@@ -4065,7 +4065,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12222</PublicPort>
+							<PublicPort>1112</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -4078,7 +4078,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12322</PublicPort>
+							<PublicPort>1113</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -7281,7 +7281,26 @@
 				<param>IPversion=4</param>
 			</TestParameters>
 			<Priority>P0</Priority>
-		</test>		
+		</test>
+		<test>
+			<testName>ICA-IPERF3-TCP-IPV4-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-IPERF3-TCPv4v6-xREGION-TEST.ps1</testScriptps1>
+			<setupType>S1C1LBIPv4</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>			
+			<TestParameters>
+				<param>testDuration=10</param>
+				<param>testType=tcp</param>
+				<param>max_parallel_connections_per_instance=64</param>
+				<param>connections=(1)</param>
+				<param>bufferLengths=(1024)</param>
+				<param>IPversion=4</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+				
 		<test>
 			<testName>ICA-IPERF3-TCP-IPV4-SAMEVNET-TEST</testName>
 			<testScript></testScript>
