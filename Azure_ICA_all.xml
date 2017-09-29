@@ -7484,7 +7484,20 @@
 			<TestParameters>
 			</TestParameters>
 			<Priority>P0</Priority>
-		</test>		
+		</test>
+		<test>
+			<testName>ICA-DOCKER-BASIC-TEST</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-DOCKER-BASIC-TEST.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>				
 		<test>
 			<testName>ICA-N-Series-GPU-TEST-NC6</testName>
 			<testScript>
@@ -8766,7 +8779,13 @@
 			<test>
 				<Name>ICA-LTP-BASIC-TEST</Name>
 			</test>
-		</Cycle>	
+		</Cycle>
+		<Cycle>
+			<cycleName>DOCKER-BASIC</cycleName>
+			<test>
+				<Name>ICA-DOCKER-BASIC-TEST</Name>
+			</test>
+		</Cycle>			
 		<Cycle>
 			<cycleName>GPU-BASIC</cycleName>
 			<test>
