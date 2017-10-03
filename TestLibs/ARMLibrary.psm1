@@ -110,26 +110,55 @@
                 $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage $AllowedUsagePercentage 
                 $premiumVMs += 1
             }
-            elseif ( $testVMSize.StartsWith("DS") -and !$testVMSize.EndsWith("v2"))
+            elseif ( $testVMSize.StartsWith("D") -and $testVMSize.EndsWith("s_v3"))
+            {
+                $identifierText = "Standard DSv3 Family Cores"
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage -AllowedUsagePercentage $AllowedUsagePercentage 
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage $AllowedUsagePercentage 
+                $premiumVMs += 1
+            }            
+            elseif ( $testVMSize.StartsWith("DS") -and !$testVMSize.EndsWith("v2") -and !$testVMSize.EndsWith("v3"))
             {
                 $identifierText = "Standard DS Family Cores" 
                 $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage -AllowedUsagePercentage $AllowedUsagePercentage 
                 $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage $AllowedUsagePercentage 
                 $premiumVMs += 1
             }
-            elseif ( $testVMSize.StartsWith("D") -and $testVMSize.EndsWith("v2"))
+            elseif ( $testVMSize.StartsWith("D") -and !$testVMSize.StartsWith("DS") -and $testVMSize.EndsWith("v2"))
             {
                 $identifierText = "Standard Dv2 Family Cores" 
                 $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage -AllowedUsagePercentage $AllowedUsagePercentage 
                 $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage $AllowedUsagePercentage 
             }
-            elseif ( $testVMSize.StartsWith("D") -and !$testVMSize.EndsWith("v2"))
+            elseif ( $testVMSize.StartsWith("D") -and !$testVMSize.EndsWith("s_v3") -and $testVMSize.EndsWith("v3"))
+            {
+                $identifierText = "Standard Dv3 Family Cores" 
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage -AllowedUsagePercentage $AllowedUsagePercentage 
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage $AllowedUsagePercentage 
+            }            
+            elseif ( $testVMSize.StartsWith("D") -and !$testVMSize.StartsWith("DS") -and !$testVMSize.EndsWith("v2") -and !$testVMSize.EndsWith("v3"))
             {
                 $identifierText = "Standard D Family Cores" 
                 $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage -AllowedUsagePercentage $AllowedUsagePercentage 
                 $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage $AllowedUsagePercentage 
             }
             #endregion
+
+            #region E-Series postmartem
+            elseif ( $testVMSize.StartsWith("E") -and $testVMSize.EndsWith("s_v3"))
+            {
+                $identifierText = "Standard ESv3 Family Cores"
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage -AllowedUsagePercentage $AllowedUsagePercentage 
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage $AllowedUsagePercentage 
+                $premiumVMs += 1
+            }
+            elseif ( $testVMSize.StartsWith("E") -and !$testVMSize.EndsWith("s_v3") -and $testVMSize.EndsWith("v3"))
+            {
+                $identifierText = "Standard Ev3 Family Cores"
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage -AllowedUsagePercentage $AllowedUsagePercentage 
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage $AllowedUsagePercentage 
+            }            
+            #endregion            
 
             #region Standard A series postmartem
 
@@ -204,6 +233,14 @@
                 $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage -AllowedUsagePercentage $AllowedUsagePercentage 
                 $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage $AllowedUsagePercentage 
             }
+            #region M-Series postmartem
+            elseif ( $testVMSize.StartsWith("M"))
+            {
+                $identifierText = "Standard MS Family Cores"
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage -AllowedUsagePercentage $AllowedUsagePercentage 
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage $AllowedUsagePercentage 
+            }
+            #endregion            
         
             else
             {
@@ -319,8 +356,9 @@ Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro, [str
                 $readyToDeploy = ValidateSubscriptionUsage -subscriptionID $xmlConfig.config.Azure.General.SubscriptionID -RGXMLData $RG -SubscriptionUsageLimits ([xml](Get-Content .\XML\SubscriptionUsageLimits.xml))
                 if (!$readyToDeploy)
                 {
-                    LogMsg "Waiting 5 minutes..."
-                    sleep -Seconds 300
+                    $waitPeriod = Get-Random -Minimum 1 -Maximum 6 -SetSeed (Get-Random)    
+                    LogMsg "Waiting $waitPeriod minutes..."
+                    sleep -Seconds ($waitPeriod*60)
                 }
             }
         }
