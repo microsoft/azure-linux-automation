@@ -87,8 +87,8 @@ InstallGPUDrivers() {
 				rm -f /tmp/${CUDA_REPO_PKG}
 				until dpkg --force-all --configure -a; sleep 10; do echo 'Trying again...'; done
 				apt-get -y update
-				apt-get -y install linux-tools-generic linux-cloud-tools-generic
-				apt-get -y install cuda-drivers
+				apt-get -y --allow-unauthenticated install linux-tools-generic linux-cloud-tools-generic
+				apt-get -y --allow-unauthenticated install cuda-drivers
 								
 		elif [[ $DISTRO =~ "Ubuntu 14.04" ]];
 		then
@@ -99,8 +99,8 @@ InstallGPUDrivers() {
 				dpkg -i /tmp/${CUDA_REPO_PKG}
 				rm -f /tmp/${CUDA_REPO_PKG}
 				apt-get -y update
-				apt-get -y install linux-tools-generic linux-cloud-tools-generic
-				apt-get -y install cuda-drivers
+				apt-get -y --allow-unauthenticated install linux-tools-generic linux-cloud-tools-generic
+				apt-get -y --allow-unauthenticated install cuda-drivers
 				
 		elif [[ $DISTRO =~ "CentOS Linux release 7.3" ]];
 		then
