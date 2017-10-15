@@ -1625,7 +1625,6 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
             }
 				Add-Content -Value "$($indents[3])}" -Path $jsonFile
 			Add-Content -Value "$($indents[2])}," -Path $jsonFile
-            $currentVMNics += 1
 		}
 
         
