@@ -780,7 +780,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
             #Check total subnets required
             if ( $newVM.ExtraNICs -ne 0)
             {
-                $totalSubnetsRequired += $newVM.ExtraNICs
+                $totalSubnetsRequired = $newVM.ExtraNICs
             }
         }
     }
@@ -1587,7 +1587,8 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
 		while ($currentVMNics -lt $newVM.ExtraNICs)
 		{
             $totalRGNics += 1
-			$NicName = "ExtraNetworkCard-$totalRGNics"
+            $currentVMNics = 0
+			$NicName = "$($newVM.RoleName)-ExtraNetworkCard-$currentVMNics"
 			$NicNameList.add($NicName)
 			Add-Content -Value "$($indents[2]){" -Path $jsonFile
 				Add-Content -Value "$($indents[3])^apiVersion^: ^2016-09-01^," -Path $jsonFile
@@ -1610,8 +1611,8 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
 							Add-Content -Value "$($indents[6]){" -Path $jsonFile
 								Add-Content -Value "$($indents[7])^subnet^:" -Path $jsonFile
 								Add-Content -Value "$($indents[7]){" -Path $jsonFile
-                                    Add-Content -Value "$($indents[8])^id^: ^[concat(variables('vnetID'),'/subnets/', 'ExtraSubnet-$totalRGNics')]^" -Path $jsonFile
-                                    LogMsg "  $NicName is part of subnet - ExtraSubnet-$totalRGNics"
+                                    Add-Content -Value "$($indents[8])^id^: ^[concat(variables('vnetID'),'/subnets/', 'ExtraSubnet-$currentVMNics')]^" -Path $jsonFile
+                                    LogMsg "  $NicName is part of subnet - ExtraSubnet-$currentVMNics"
 								Add-Content -Value "$($indents[7])}" -Path $jsonFile
 							Add-Content -Value "$($indents[6])}" -Path $jsonFile
 						Add-Content -Value "$($indents[5])}" -Path $jsonFile
