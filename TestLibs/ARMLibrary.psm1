@@ -1587,14 +1587,14 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
 		while ($currentVMNics -lt $newVM.ExtraNICs)
 		{
             $totalRGNics += 1
-            $currentVMNics = 0
+            $currentVMNics += 1
 			$NicName = "$($newVM.RoleName)-ExtraNetworkCard-$currentVMNics"
 			$NicNameList.add($NicName)
 			Add-Content -Value "$($indents[2]){" -Path $jsonFile
 				Add-Content -Value "$($indents[3])^apiVersion^: ^2016-09-01^," -Path $jsonFile
 				Add-Content -Value "$($indents[3])^type^: ^Microsoft.Network/networkInterfaces^," -Path $jsonFile
 				Add-Content -Value "$($indents[3])^name^: ^$NicName^," -Path $jsonFile
-				Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
+				Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^,"   -Path $jsonFile
 				Add-Content -Value "$($indents[3])^dependsOn^: " -Path $jsonFile
 				Add-Content -Value "$($indents[3])[" -Path $jsonFile
 					Add-Content -Value "$($indents[4])^[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]^," -Path $jsonFile
