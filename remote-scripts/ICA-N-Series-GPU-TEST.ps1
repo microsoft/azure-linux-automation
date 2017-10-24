@@ -120,7 +120,7 @@ collect_VM_properties
                 #region PCI lshw -c video
                 $lshw = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "lshw -c video" -ignoreLinuxExitCode
                 Set-Content -Value $lshw -Path $LogDir\lshw-c-video.txt -Force
-                if ( (Select-String -Path $LogDir\lshw-c-video.txt -Pattern "NVIDIA Corporation").Matches.Count -eq $expectedCount )
+                if ( (Select-String -Path $LogDir\lshw-c-video.txt -Pattern "product: NVIDIA Corporation").Matches.Count -eq $expectedCount )
                 {
                     LogMsg "Expected Display adapters: $expectedCount. Observed adapters: $expectedCount"
                     $resultSummary +=  CreateResultSummary -testResult "PASS" -metaData "lshw -c video" -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
@@ -138,9 +138,9 @@ collect_VM_properties
                 #region PCI nvidia-smi
                 $nvidiasmi = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "nvidia-smi" -ignoreLinuxExitCode
                 Set-Content -Value $nvidiasmi -Path $LogDir\nvidia-smi.txt -Force
-                if ( (Select-String -Path $LogDir\nvidia-smi.txt -Pattern "Tesla K80").Matches.Count -eq $expectedCount )
+                if ( (Select-String -Path $LogDir\nvidia-smi.txt -Pattern "Tesla ").Matches.Count -eq $expectedCount )
                 {
-                    LogMsg "Expected Tesla K80 count: $expectedCount. Observed count: $expectedCount"
+                    LogMsg "Expected Tesla count: $expectedCount. Observed count: $expectedCount"
                     $resultSummary +=  CreateResultSummary -testResult "PASS" -metaData "nvidia-smi" -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
                 }
                 else
