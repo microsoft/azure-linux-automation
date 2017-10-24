@@ -102,9 +102,9 @@ InstallGPUDrivers() {
 				apt-get -y --allow-unauthenticated install linux-tools-generic linux-cloud-tools-generic
 				apt-get -y --allow-unauthenticated install cuda-drivers
 				
-		elif [[ $DISTRO =~ "CentOS Linux release 7.3" ]];
+		elif [[ $DISTRO =~ "CentOS Linux release 7.3" ]] || [[ $DISTRO =~ "CentOS Linux release 7.4" ]] || [[ $DISTRO =~ "Red Hat Enterprise Linux Server release 7.4" ]];
 		then
-				LogMsg "Detected CENTOS73"
+				LogMsg "Detected CentOS 7.x / RHEL 7.x"
 				sed -i "/^exclude=kernel/c\#exclude=kernel*" /etc/yum.conf
 				yum -y update
 				yum -y --nogpgcheck install kernel-devel
