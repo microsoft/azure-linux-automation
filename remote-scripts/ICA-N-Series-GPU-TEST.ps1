@@ -76,7 +76,8 @@ collect_VM_properties
                 elseif (($clientVMData.InstanceSize -eq "Standard_NC24r") -or ($clientVMData.InstanceSize -eq "Standard_NC24rs_v2"))
                 {
                     $expectedCount = 4
-                }		
+                }	
+                LogMsg "Test VM Size: $($clientVMData.InstanceSize). Expected GPU Adapters : $expectedCount"	
                 $errorCount = 0
                 #Adding sleep of 180 seconds, giving time to load nvidia drivers.
                 LogMsg "Waiting 3 minutes. (giving time to load nvidia drivers)"
