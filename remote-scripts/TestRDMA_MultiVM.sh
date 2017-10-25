@@ -137,7 +137,7 @@ do
                 ssh root@${vm} "$mpirunPath -hosts $vm -ppn $mpi1_ppn -n $mpi1_ppn $mpi_settings $imb_mpi1Path pingpong > IMB-MPI1-IntraNode-pingpong-output-$vm.txt"
                 mpiIntranodeStatus=$?
                 scp root@${vm}:IMB-MPI1-IntraNode-pingpong-output-$vm.txt .
-                if [ $eth1Status -eq 0 ];
+                if [ $mpiIntranodeStatus -eq 0 ];
                 then
                                 LogMsg "IMB-MPI1 Intranode status in $vm - Succeeded."
                 else
@@ -164,7 +164,7 @@ do
         LogMsg "Checking IMB-MPI1 InterNode status in $vm"
         $mpirunPath -hosts $master,$vm -ppn $mpi1_ppn -n $(( $mpi1_ppn * 2 )) $mpi_settings $imb_mpi1Path pingpong > IMB-MPI1-InterNode-pingpong-output-${master}-${vm}.txt
         mpiInternodeStatus=$?
-        if [ $eth1Status -eq 0 ];
+        if [ $mpiInternodeStatus -eq 0 ];
         then
                         LogMsg "IMB-MPI1 Internode status in $vm - Succeeded."
         else
