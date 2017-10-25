@@ -3795,7 +3795,8 @@
 							<PublicPort>1125</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
-					</VirtualMachine>					
+					</VirtualMachine>
+				<HostedService>					
 			</S1C15>						
 			<RDMA2VMA8>
 				<isDeployed>NO</isDeployed>
