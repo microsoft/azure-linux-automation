@@ -3796,7 +3796,7 @@
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
-				<HostedService>					
+				</HostedService>					
 			</S1C15>						
 			<RDMA2VMA8>
 				<isDeployed>NO</isDeployed>
