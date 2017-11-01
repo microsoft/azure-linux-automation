@@ -48,6 +48,41 @@ if ($isDeployed)
 
 		#endregion
 
+		if($EnableAcceleratedNetworking)
+		{
+			$DataPath = "SRIOV"
+            LogMsg "Getting SRIOV NIC Name."
+            $clientNicName = (RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "route | grep '^default' | grep -o '[^ ]*$'").Trim()
+            LogMsg "CLIENT SRIOV NIC: $clientNicName"
+            $serverNicName = (RunLinuxCmd -ip $clientVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "route | grep '^default' | grep -o '[^ ]*$'").Trim()
+            LogMsg "SERVER SRIOV NIC: $serverNicName"
+            if ( $serverNicName -eq $clientNicName)
+            {
+                $nicName = $clientNicName
+            }
+            else
+            {
+                Throw "Server and client SRIOV NICs are not same."
+            }
+		}
+		else
+		{
+			$DataPath = "Synthetic"
+            LogMsg "Getting Active NIC Name."
+            $clientNicName = (RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "route | grep '^default' | grep -o '[^ ]*$'").Trim()
+            LogMsg "CLIENT NIC: $clientNicName"
+            $serverNicName = (RunLinuxCmd -ip $clientVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "route | grep '^default' | grep -o '[^ ]*$'").Trim()
+            LogMsg "SERVER NIC: $serverNicName"
+            if ( $serverNicName -eq $clientNicName)
+            {
+                $nicName = $clientNicName
+            }
+            else
+            {
+                Throw "Server and client NICs are not same."
+            }
+		}
+
 		LogMsg "Generating constansts.sh ..."
 		$constantsFile = "$LogDir\constants.sh"
 
@@ -110,7 +145,7 @@ collect_VM_properties
 		$out = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "chmod +x *.sh"
 		$testJob = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "/root/Startiperf3tcpTest.sh" -RunInBackground
 		#endregion
-
+		
 		#region MONITOR TEST
 		while ( (Get-Job -Id $testJob).State -eq "Running" )
 		{
@@ -118,6 +153,7 @@ collect_VM_properties
 			LogMsg "Current Test Staus : $currentStatus"
 			WaitFor -seconds 20
 		}
+		
 		$finalStatus = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "cat /root/state.txt"
 		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/iperf3tcpConsoleLogs.txt"
 		$iperf3LogDir = "$LogDir\iperf3Data"
@@ -125,186 +161,25 @@ collect_VM_properties
 		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $iperf3LogDir -files "iperf-client-tcp*"
 		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $iperf3LogDir -files "iperf-server-tcp*"
 		RemoteCopy -downloadFrom $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "VM_properties.csv"
-
 		$testSummary = $null
-		$iperf3LogDir = "$LogDir\iperf3Data"
-		#region START tcp ANALYSIS
-		$clientfolder = $iperf3LogDir
-		$serverfolder = $iperf3LogDir
-		
-		#clientData
-		$files = Get-ChildItem -Path $clientfolder
-		$FinalClientThroughputArr=@()
-		$FinalServerThroughputArr=@()
-
-		$FinalServerClientTCPResultObjArr = @()
-
-		function GetTCPDataObject()
+		foreach ( $BufferSize_Bytes in $testBuffers )
 		{
-			$objNode = New-Object -TypeName PSObject
-			Add-Member -InputObject $objNode -MemberType NoteProperty -Name BufferSize -Value $null -Force
-			Add-Member -InputObject $objNode -MemberType NoteProperty -Name Connections -Value $null -Force
-			Add-Member -InputObject $objNode -MemberType NoteProperty -Name ClientTxGbps -Value $null -Force
-            Add-Member -InputObject $objNode -MemberType NoteProperty -Name ServerTxGbps -Value $null -Force
-            Add-Member -InputObject $objNode -MemberType NoteProperty -Name Retransmits -Value $null -Force
-            Add-Member -InputObject $objNode -MemberType NoteProperty -Name SenderCongestionWindowKB -Value $null -Force
-            Add-Member -InputObject $objNode -MemberType NoteProperty -Name ServerTxGbps -Value $null -Force
-
-
-			return $objNode
-		}
-
-		foreach ( $Buffer in $testBuffers )
-		{
-			foreach ( $connection in $testConnections )
+			$serverJson = ConvertFrom-Json -InputObject ([string](Get-Content .\$iperf3LogDir\iperf-server-tcp-IPv4-buffer-$BufferSize_Bytes-conn-1-instance-1.txt))
+			$clientJson = ConvertFrom-Json -InputObject ([string](Get-Content .\$iperf3LogDir\iperf-client-tcp-IPv4-buffer-$BufferSize_Bytes-conn-1-instance-1.txt))
+			$RxThroughput_Gbps = [math]::Round($serverJson.end.sum_received.bits_per_second/1000000000,2)
+			$TxThroughput_Gbps = [math]::Round($clientJson.end.sum_received.bits_per_second/1000000000,2)
+			$RetransmittedSegments = $clientJson.end.streams.sender.retransmits
+			$CongestionWindowSize_KB_Total = 0
+			foreach ($interval in $clientJson.intervals)
 			{
-				
-				$currentResultObj = GetTCPDataObject
-
-				$currentConnectionClientTxGbps = 0
-				$currentConnectionClientTxGbpsArr = @()
-
-				$currentConnectionServerRxGbps = 0
-				$currentConnectionServerRxGbpsArr = @()
-
-				foreach ( $file in $files )
-				{
-					if ( $file.Name -imatch "iperf-client-tcp-$IPVersion-buffer-$($Buffer)-conn-$connection-instance-*" )
-					{
-						
-						$currentInstanceclientJsonText = $null
-						$currentInstanceclientJsonObj = $null
-						$currentInstanceClientPacketLoss = @()
-						$currentInstanceClientThroughput = $null
-						$fileName = $file.Name 
-						try
-						{
-							$currentInstanceclientJsonText = ([string]( Get-Content "$clientfolder\$fileName")).Replace("-nan","0")
-							$currentInstanceclientJsonObj = ConvertFrom-Json -InputObject $currentInstanceclientJsonText
-						}
-						catch 
-						{
-							LogErr "	$fileName : RETURNED NULL"
-						}
-						if ( $currentInstanceclientJsonObj.end.sum_sent )
-						{
-							$currentInstanceClientThroughput = $currentInstanceclientJsonObj.end.sum_sent.bits_per_second/1000000000
-						}
-						else
-						{
-							if ($currentInstanceclientJsonObj.error)
-							{
-								LogErr "	$fileName : Error Found : $($currentInstanceclientJsonObj.error)"
-							}
-							$totalStreams = 0
-							$totalBitsPerSecond = 0
-							foreach ( $interval in $currentInstanceclientJsonObj.intervals)
-							{
-								$totalBitsPerSecond += $interval.sum.bits_per_second
-								$totalStreams+=1
-							}
-							if ($totalStreams -ge 1)
-							{
-								LogMsg "	$fileName : Analysed $totalStreams intervals."
-								$currentInstanceClientThroughput = ($totalBitsPerSecond/$totalStreams)/1000000000
-							}
-							else
-							{
-								LogErr "	$fileName : Error : No connection intervals found."
-							}
-							#Write-Host "	$($currentJsonObj.error) $currentFileClientThroughput"
-						}
-						if($currentInstanceClientThroughput)
-						{
-							LogMsg "	$fileName : Data collected successfully."
-							$currentConnectionClientTxGbpsArr += $currentInstanceClientThroughput
-						}
-					}
-				}
-
-				foreach ( $file in $files )
-				{
-					if ( $file.Name -imatch "iperf-server-tcp-$IPVersion-buffer-$($Buffer)-conn-$connection-instance-*" )
-					{
-						
-						$currentInstanceServerJsonText = $null
-						$currentInstanceServerJsonObj = $null
-						$currentInstanceServerPacketLoss = @()
-						$currentInstanceServerThroughput = $null
-						$fileName = $file.Name 
-						try
-						{
-							$currentInstanceServerJsonText = ([string]( Get-Content "$serverfolder\$fileName")).Replace("-nan","0")
-							$currentInstanceServerJsonObj = ConvertFrom-Json -InputObject $currentInstanceServerJsonText
-						}
-						catch 
-						{
-							LogErr "	$fileName : RETURNED NULL"
-						}
-						if ( $currentInstanceServerJsonObj.end.sum_sent )
-						{
-							$currentInstanceServerThroughput = $currentInstanceServerJsonObj.end.sum_sent.bits_per_second/1000000000
-						}
-						else
-						{
-							if ($currentInstanceServerJsonObj.error)
-							{
-								LogErr "	$fileName : Error Found : $($currentInstanceServerJsonObj.error)"
-							}
-							$totalStreams = 0
-							$totalBitsPerSecond = 0
-							foreach ( $interval in $currentInstanceServerJsonObj.intervals)
-							{
-								$totalBitsPerSecond += $interval.sum.bits_per_second
-								$totalStreams+=1
-							}
-							if ($totalStreams -ge 1)
-							{
-								LogMsg "	$fileName : Analysed $totalStreams intervals."
-								$currentInstanceServerThroughput = ($totalBitsPerSecond/$totalStreams)/1000000000
-							}
-							else
-							{
-								LogErr "	$fileName : Error : No connection intervals found."
-							}
-							#Write-Host "	$($currentJsonObj.error) $currentFileClientThroughput"
-						}
-						if($currentInstanceServerThroughput)
-						{
-							LogMsg "	$fileName : Data collected successfully."
-							$currentConnectionServerRxGbpsArr += $currentInstanceServerThroughput
-						}
-					}
-				}
-				$currentConnectionClientTxGbps = [math]::Round((($currentConnectionClientTxGbpsArr | Measure-Object -Average).Average),2)
-				Write-Host "Client: $Buffer . $connection . $currentConnectionClientTxGbps"
-				$FinalClientThroughputArr += $currentConnectionClientTxGbps
-				$FinalClientTCPLossArr += $currentConnectionClientTCPLoss
-
-				$currentConnectionServerRxGbps = [math]::Round((($currentConnectionServerRxGbpsArr | Measure-Object -Average).Average),2)
-				Write-Host "Server: $Buffer . $connection . $currentConnectionServerRxGbps"
-				$FinalServerThroughputArr += $currentConnectionServerRxGbps
-				$FinalServerTCPLossArr += $currentConnectionServerTCPLoss
-
-
-				$currentResultObj.BufferSize = $Buffer
-				$currentResultObj.Connections = $connection
-				$currentResultObj.ClientTxGbps = $currentConnectionClientTxGbps
-				$currentResultObj.ServerRxGbps = $currentConnectionServerRxGbps                
-	   
-				$FinalServerClientTCPResultObjArr += $currentResultObj
-				Write-Host "-------------------------------"
+				$CongestionWindowSize_KB_Total += $interval.streams.snd_cwnd
 			}
-		}
-
-		#endregion
-
-		foreach ( $tcpResultObject in $FinalServerClientTCPResultObjArr )
-		{
-			$connResult="ClientTxGbps=$($tcpResultObject.ClientTxGbps)"
-			$metaData = "Buffer=$($tcpResultObject.BufferSize)K Connections=$($tcpResultObject.Connections)"
+			$CongestionWindowSize_KB = [math]::Round($CongestionWindowSize_KB_Total / $clientJson.intervals.Count / 1024 )
+			$connResult="ClientTxGbps=$TxThroughput_Gbps"
+			$metaData = "Buffer=$BufferSize_Bytes Bytes Connections=1"
 			$resultSummary +=  CreateResultSummary -testResult $connResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
 		}
+
 		if ( $finalStatus -imatch "TestFailed")
 		{
 			LogErr "Test failed. Last known status : $currentStatus."
@@ -337,11 +212,11 @@ collect_VM_properties
 		$database = $xmlConfig.config.Azure.database.dbname
 		$dataTableName = $xmlConfig.config.Azure.database.dbtable
 		$TestCaseName = $xmlConfig.config.Azure.database.testTag
+		$TestDate = "$(Get-Date -Format yyyy-MM-dd)"
+
 		if ($dataSource -And $user -And $password -And $database -And $dataTableName) 
-		{
+		{						
 			$GuestDistro	= cat "$LogDir\VM_properties.csv" | Select-String "OS type"| %{$_ -replace ",OS type,",""}
-			
-			#$TestCaseName	= "LINUX-NEXT-UPSTREAM-TEST"
 			if ( $UseAzureResourceManager )
 			{
 				$HostType	= "Azure-ARM"
@@ -356,14 +231,26 @@ collect_VM_properties
 			$GuestDistro	= cat "$LogDir\VM_properties.csv" | Select-String "OS type"| %{$_ -replace ",OS type,",""}
 			$GuestSize = $clientVMData.InstanceSize
 			$KernelVersion	= cat "$LogDir\VM_properties.csv" | Select-String "Kernel version"| %{$_ -replace ",Kernel version,",""}
+			$KernelVersion = $KernelVersion.Trim().Substring(0,28)
 			$ProtocolType = "TCP"
 
-			$connectionString = "Server=$dataSource;uid=$user; pwd=$password;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
-			$SQLQuery = "INSERT INTO $dataTableName (TestCaseName,DataPath,TestDate,HostType,HostBy,HostOS,GuestOSType,GuestDistro,GuestSize,KernelVersion,IPVersion,ProtocolType,BufferSize_Bytes,RxThroughput_Gbps,TxThroughput_Gbps,RetransmittedSegments,CongestionWindowSize_KB) VALUES "
 
-			foreach ($tcpResult in $FinalServerClientTCPResultObjArr)
+			$connectionString = "Server=$dataSource;uid=$user; pwd=$password;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+			$SQLQuery = "INSERT INTO $dataTableName (TestCaseName,DataPath,TestDate,HostBy,HostOS,HostType,GuestSize,GuestOSType,GuestDistro,KernelVersion,IPVersion,ProtocolType,BufferSize_Bytes,RxThroughput_Gbps,TxThroughput_Gbps,RetransmittedSegments,CongestionWindowSize_KB) VALUES"
+			foreach ( $BufferSize_Bytes in $testBuffers )
 			{
-				$SQLQuery += "('$TestCaseName','$dataPath','$(Get-Date -Format yyyy-MM-dd)','$HostType','$HostBy','$HostOS','$GuestOSType','$GuestDistro','$GuestSize','$KernelVersion','$IPVersion','$ProtocolType','$($tcpResult.BufferSize_Bytes)','$($tcpResult.ClientTxGbps)','0'),"	
+				$serverJson = ConvertFrom-Json -InputObject ([string](Get-Content .\$iperf3LogDir\iperf-server-tcp-IPv4-buffer-$BufferSize_Bytes-conn-1-instance-1.txt))
+				$clientJson = ConvertFrom-Json -InputObject ([string](Get-Content .\$iperf3LogDir\iperf-client-tcp-IPv4-buffer-$BufferSize_Bytes-conn-1-instance-1.txt))
+				$RxThroughput_Gbps = [math]::Round($serverJson.end.sum_received.bits_per_second/1000000000,2)
+				$TxThroughput_Gbps = [math]::Round($clientJson.end.sum_received.bits_per_second/1000000000,2)
+				$RetransmittedSegments = $clientJson.end.streams.sender.retransmits
+				$CongestionWindowSize_KB_Total = 0
+				foreach ($interval in $clientJson.intervals)
+				{
+					$CongestionWindowSize_KB_Total += $interval.streams.snd_cwnd
+				}
+				$CongestionWindowSize_KB = [math]::Round($CongestionWindowSize_KB_Total / $clientJson.intervals.Count / 1024 )
+				$SQLQuery += "('$TestCaseName','$DataPath','$TestDate','$HostBy','$HostOS','$HostType','$GuestSize','$GuestOSType','$GuestDistro','$KernelVersion','IPv4','TCP','$BufferSize_Bytes','$RxThroughput_Gbps','$TxThroughput_Gbps','$RetransmittedSegments','$CongestionWindowSize_KB'),"
 			}
 			$SQLQuery = $SQLQuery.TrimEnd(',')
 			LogMsg $SQLQuery

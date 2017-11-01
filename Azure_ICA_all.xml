@@ -7555,7 +7555,25 @@
 				<param>IPversion=4</param>
 			</TestParameters>
 			<Priority>P0</Priority>
-		</test>		
+		</test>
+		<test>
+			<testName>ICA-PERF-IPERF3-SINGLE-CONNNECTION-TCP-IPV4-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-IPERF3-SINGLE-CONNNECTION-TCP-IPV4-TEST.ps1</testScriptps1>
+			<setupType>M1S1</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>			
+			<TestParameters>
+				<param>testDuration=30</param>
+				<param>testType=tcp</param>
+				<param>max_parallel_connections_per_instance=64</param>
+				<param>connections=(1)</param>
+				<param>bufferLengths=(32 64 128 256 512 1024 2048 4096 8192 16384 32768 65536)</param>
+				<param>IPversion=4</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>			
 		<test>
 			<testName>ICA-PERF-REDIS-MIDDLEWARE-TEST</testName>
 			<testScript></testScript>
@@ -8938,6 +8956,14 @@
 				<Name>ICA-IPERF3-TCP-IPV4-TEST</Name>
 			</test>
 		</Cycle>
+		<Cycle>
+			<cycleName>PERF-IPERF3-SINGLE-CONNECTION</cycleName>
+			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
+			<test>
+				<Name>ICA-PERF-IPERF3-SINGLE-CONNNECTION-TCP-IPV4-TEST</Name>
+			</test>
+		</Cycle>		
+		
 		<Cycle>
 			<cycleName>IPERF3TCPv6</cycleName>
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
