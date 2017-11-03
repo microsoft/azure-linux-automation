@@ -135,6 +135,7 @@ if ($isDeployed)
 			
 			RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/eth1-status*"
 			RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/IMB-*"
+			RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/kernel-logs-*"
 			RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/TestRDMALogs.txt"
 			RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/state.txt"
 			$consoleOutput =  ( Get-Content -Path "$LogDir\TestRDMALogs.txt" | Out-String ) 		
@@ -150,6 +151,7 @@ if ($isDeployed)
 			$out = mkdir -Path "$LogDir\InfiniBand-Verification-$iteration-$tempName" -Force | Out-Null
 			$out = Move-Item -Path "$LogDir\eth1-status*" -Destination "$LogDir\InfiniBand-Verification-$iteration-$tempName" | Out-Null
 			$out = Move-Item -Path "$LogDir\IMB-*" -Destination "$LogDir\InfiniBand-Verification-$iteration-$tempName" | Out-Null
+			$out = Move-Item -Path "$LogDir\kernel-logs-*" -Destination "$LogDir\InfiniBand-Verification-$iteration-$tempName" | Out-Null
 			$out = Move-Item -Path "$LogDir\TestRDMALogs.txt" -Destination "$LogDir\InfiniBand-Verification-$iteration-$tempName" | Out-Null
 			$out = Move-Item -Path "$LogDir\state.txt" -Destination "$LogDir\InfiniBand-Verification-$iteration-$tempName" | Out-Null
 			

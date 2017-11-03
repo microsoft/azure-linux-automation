@@ -294,6 +294,25 @@ else
                 LogMsg "INFINIBAND_VERIFICATION_SUCCESS_NBC_ALLNODES"                
 fi
 
+
+#Get all the Kernel-Logs from all VMs.
+finaleth1Status=0
+totalVMs=0
+slavesArr=`echo ${slaves} | tr ',' ' '`
+for vm in $master $slavesArr
+do
+                LogMsg "Getting kernel logs from $vm"
+                ssh root@${vm} "dmesg > kernel-logs-${vm}.txt"
+                scp root@${vm}:kernel-logs-${vm}.txt .
+                if [ $? -eq 0 ];
+                then
+                                LogMsg "Kernel Logs collected successfully from ${vm}."
+                else
+                                LogMsg "Error: Failed to collect kernel logs from ${vm}."
+                fi
+
+done
+
 finalStatus=$(( $eth1Status +  $finalMpiIntranodeStatus + $finalMpiInternodeStatus + $imb_mpi1_finalStatus + $imb_rma_finalStatus + $imb_nbc_finalStatus ))
 if [ $finalStatus -ne 0 ];
 then
