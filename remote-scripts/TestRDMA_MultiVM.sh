@@ -73,7 +73,41 @@ PrepareForRDMA()
         # TODO
         echo Doing Nothing
 }
+#Get all the Kernel-Logs from all VMs.
+CollectKernelLogs()
+{
+    slavesArr=`echo ${slaves} | tr ',' ' '`
+    for vm in $master $slavesArr
+    do
+                    LogMsg "Getting kernel logs from $vm"
+                    ssh root@${vm} "dmesg > kernel-logs-${vm}.txt"
+                    scp root@${vm}:kernel-logs-${vm}.txt .
+                    if [ $? -eq 0 ];
+                    then
+                                    LogMsg "Kernel Logs collected successfully from ${vm}."
+                    else
+                                    LogMsg "Error: Failed to collect kernel logs from ${vm}."
+                    fi
 
+    done
+}
+
+CompressFiles()
+{
+    compressedFileName=$1
+    pattern=$2
+    LogMsg "Compressing ${pattern} files into ${compressedFileName}"
+    tar -cvzf ${compressedFileName} ${pattern}*
+    if [ $? -eq 0 ];
+    then
+            LogMsg "${pattern}* files compresssed successfully."
+            LogMsg "Deleting local copies of ${pattern}* files"
+            rm -rvf ${pattern}*
+    else
+            LogMsg "Error: Failed to compress files."
+            LogMsg "Don't worry. Your files are still here."
+    fi
+}
 
 if [ -e ${CONSTANTS_FILE} ]; then
     source ${CONSTANTS_FILE}
@@ -117,7 +151,8 @@ done
 if [ $finaleth1Status -ne 0 ]; then
                 LogMsg "ERROR: Some VMs did get IP address for eth1. Aborting Tests"
                 UpdateTestState $ICA_TESTFAILED
-                LogMsg "INFINIBAND_VERIFICATION_FAILED_ETH1"                
+                CollectKernelLogs
+                LogMsg "INFINIBAND_VERIFICATION_FAILED_ETH1"               
                 exit 0
 else
                 LogMsg "INFINIBAND_VERIFICATION_SUCCESS_ETH1"                
@@ -149,6 +184,7 @@ done
 if [ $finalMpiIntranodeStatus -ne 0 ]; then
                 LogMsg "ERROR: IMB-MPI1 Intranode test failed in somes VMs. Aborting further tests."
                 UpdateTestState $ICA_TESTFAILED
+                CollectKernelLogs
                 LogMsg "INFINIBAND_VERIFICATION_FAILED_MPI1_INTRANODE"
                 exit 0
 else
@@ -176,6 +212,7 @@ done
 if [ $finalMpiInternodeStatus -ne 0 ]; then
                 LogMsg "ERROR: IMB-MPI1 Internode test failed in somes VMs. Aborting further tests."
                 UpdateTestState $ICA_TESTFAILED
+                CollectKernelLogs
                 LogMsg "INFINIBAND_VERIFICATION_FAILED_MPI1_INTERNODE"
                 exit 0
 else
@@ -210,9 +247,15 @@ do
                 fi
 done
 
+if [ $imb_mpi1_tests_iterations -gt 5 ];
+then
+    CompressFiles "IMB-MPI1-AllNodes-output.tar.gz" "IMB-MPI1-AllNodes-output-Attempt"
+fi
+
 if [ $imb_mpi1_finalStatus -ne 0 ]; then
                 LogMsg "ERROR: IMB-MPI1 tests returned non-zero exit code."
                 UpdateTestState $ICA_TESTFAILED
+                CollectKernelLogs
                 LogMsg "INFINIBAND_VERIFICATION_FAILED_MPI1_ALLNODES"
                 exit 0
 else
@@ -248,9 +291,15 @@ do
                 fi
 done
 
+if [ $imb_rma_tests_iterations -gt 5 ];
+then
+    CompressFiles "IMB-RMA-AllNodes-output.tar.gz" "IMB-RMA-AllNodes-output-Attempt"
+fi
+
 if [ $imb_rma_finalStatus -ne 0 ]; then
                 LogMsg "ERROR: IMB-RMA tests returned non-zero exit code. Aborting further tests."
                 UpdateTestState $ICA_TESTFAILED
+                CollectKernelLogs
                 LogMsg "INFINIBAND_VERIFICATION_FAILED_RMA_ALLNODES"
                 exit 0
 else
@@ -285,33 +334,22 @@ do
                 fi
 done
 
+if [ $imb_rma_tests_iterations -gt 5 ];
+then
+    CompressFiles "IMB-NBC-AllNodes-output.tar.gz" "IMB-NBC-AllNodes-output-Attempt"
+fi
+
 if [ $imb_nbc_finalStatus -ne 0 ]; then
                 LogMsg "ERROR: IMB-RMA tests returned non-zero exit code. Aborting further tests."
                 UpdateTestState $ICA_TESTFAILED
+                CollectKernelLogs
                 LogMsg "INFINIBAND_VERIFICATION_FAILED_NBC_ALLNODES"
                 exit 0
 else
                 LogMsg "INFINIBAND_VERIFICATION_SUCCESS_NBC_ALLNODES"                
 fi
 
-
-#Get all the Kernel-Logs from all VMs.
-finaleth1Status=0
-totalVMs=0
-slavesArr=`echo ${slaves} | tr ',' ' '`
-for vm in $master $slavesArr
-do
-                LogMsg "Getting kernel logs from $vm"
-                ssh root@${vm} "dmesg > kernel-logs-${vm}.txt"
-                scp root@${vm}:kernel-logs-${vm}.txt .
-                if [ $? -eq 0 ];
-                then
-                                LogMsg "Kernel Logs collected successfully from ${vm}."
-                else
-                                LogMsg "Error: Failed to collect kernel logs from ${vm}."
-                fi
-
-done
+CollectKernelLogs
 
 finalStatus=$(( $eth1Status +  $finalMpiIntranodeStatus + $finalMpiInternodeStatus + $imb_mpi1_finalStatus + $imb_rma_finalStatus + $imb_nbc_finalStatus ))
 if [ $finalStatus -ne 0 ];
