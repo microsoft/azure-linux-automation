@@ -120,7 +120,7 @@ collect_VM_properties
                 #region PCI lshw -c video
                 $lshw = RunLinuxCmd -ip $clientVMData.PublicIP -port $clientVMData.SSHPort -username "root" -password $password -command "lshw -c video" -ignoreLinuxExitCode
                 Set-Content -Value $lshw -Path $LogDir\lshw-c-video.txt -Force
-                if ( (Select-String -Path $LogDir\lshw-c-video.txt -Pattern "product: NVIDIA Corporation").Matches.Count -eq $expectedCount )
+                if ( ((Select-String -Path $LogDir\lshw-c-video.txt -Pattern "product: NVIDIA Corporation").Matches.Count -eq $expectedCount) -or ((Select-String -Path $LogDir\lshw-c-video.txt -Pattern "vendor: NVIDIA Corporation").Matches.Count -eq $expectedCount) )
                 {
                     LogMsg "Expected Display adapters: $expectedCount. Observed adapters: $expectedCount"
                     $resultSummary +=  CreateResultSummary -testResult "PASS" -metaData "lshw -c video" -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
