@@ -55,7 +55,7 @@ InstallFIO() {
 			until dpkg --force-all --configure -a; sleep 10; do echo 'Trying again...'; done
 			apt-get update
 			apt-get install -y pciutils gawk mdadm
-			apt-get install -y wget sysstat blktrace bc fio
+			apt-get install -y wget sysstat blktrace bc fio xfsprogs
 			if [ $? -ne 0 ]; then
 				LogMsg "Error: Unable to install fio"
 				exit 1
@@ -67,7 +67,7 @@ InstallFIO() {
 			LogMsg "Detected RHEL 6.x"
 			LogMsg "INFO: installing required packages"
 			rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
-			yum -y --nogpgcheck install wget sysstat mdadm blktrace libaio fio
+			yum -y --nogpgcheck install wget sysstat mdadm blktrace libaio fio xfsprogs
 			mount -t debugfs none /sys/kernel/debug
 
 		elif [[ $DISTRO =~ "Red Hat Enterprise Linux Server release 7" ]];
@@ -75,7 +75,7 @@ InstallFIO() {
 			LogMsg "Detected RHEL 7.x"
 			LogMsg "INFO: installing required packages"
 			rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-			yum -y --nogpgcheck install wget sysstat mdadm blktrace libaio fio
+			yum -y --nogpgcheck install wget sysstat mdadm blktrace libaio fio xfsprogs
 			mount -t debugfs none /sys/kernel/debug
 				
 		elif [[ $DISTRO =~ "CentOS Linux release 6" ]] || [[ $DISTRO =~ "CentOS release 6" ]];
@@ -83,7 +83,7 @@ InstallFIO() {
 			LogMsg "Detected CentOS 6.x"
 			LogMsg "INFO: installing required packages"
 			rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
-			yum -y --nogpgcheck install wget sysstat mdadm blktrace libaio fio
+			yum -y --nogpgcheck install wget sysstat mdadm blktrace libaio fio xfsprogs
 			mount -t debugfs none /sys/kernel/debug
 				
 		elif [[ $DISTRO =~ "CentOS Linux release 7" ]];
@@ -91,7 +91,7 @@ InstallFIO() {
 			LogMsg "Detected CentOS 7.x"
 			LogMsg "INFO: installing required packages"
 			rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-			yum -y --nogpgcheck install wget sysstat mdadm blktrace libaio fio
+			yum -y --nogpgcheck install wget sysstat mdadm blktrace libaio fio xfsprogs
 			mount -t debugfs none /sys/kernel/debug
 
 		elif [[ $DISTRO =~ "SUSE Linux Enterprise Server 12" ]];
@@ -102,7 +102,7 @@ InstallFIO() {
 			zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys remove gettext-runtime-mini-0.19.2-1.103.x86_64
 			zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys install sysstat
 			zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys install grub2
-			zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys install wget mdadm blktrace libaio1 fio
+			zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys install wget mdadm blktrace libaio1 fio xfsprogs
 			
 
 		else
@@ -336,7 +336,7 @@ cd ${HOMEDIR}
 InstallFIO
 
 #Creating RAID before triggering test
-CreateRAID0 ext4
+CreateRAID0 xfs
 #CreateLVM ext4
 
 #Run test from here
