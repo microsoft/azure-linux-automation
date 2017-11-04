@@ -235,7 +235,7 @@ RunFIO()
 
 CreateRAID0()
 {	
-	disks=$(ls -l /dev | grep sd[c-z]$ | awk '{print $10}')
+	disks=$(ls -l /dev | grep sd | grep -v "\bsda\b" | grep -v "\bsda1\b" | grep -v "\bsda2\b" | grep -v "\bsda3\b" | grep -v "\bsda4\b" | grep -v "\bsda5\b" | grep -v "\bsdb\b" | grep -v "\bsdb1\b" | grep -v "\bsdb2\b" | grep -v "\bsdb3\b" | awk '{print $10}')
 	#disks=(`fdisk -l | grep 'Disk.*/dev/sd[a-z]' |awk  '{print $2}' | sed s/://| sort| grep -v "/dev/sd[ab]$" `)
 	
 	LogMsg "INFO: Check and remove RAID first"
@@ -259,7 +259,7 @@ CreateRAID0()
 	done
 	LogMsg "INFO: Creating RAID of ${count} devices."
 	sleep 1
-	mdadm --create ${mdVolume} --level 0 --raid-devices ${count} /dev/sd[c-z][1-5]
+	mdadm --create ${mdVolume} --level 0 --raid-devices ${count} /dev/sd[c-z][1-5] /dev/sda[a-z][1-5]
 	sleep 1
 	time mkfs -t $1 -F ${mdVolume}
 	mkdir ${mountDir}
