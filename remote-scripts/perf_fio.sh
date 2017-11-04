@@ -245,7 +245,7 @@ CreateRAID0()
 		umount /dev/${mdvol}
 		mdadm --stop /dev/${mdvol}
 		mdadm --remove /dev/${mdvol}
-		mdadm --zero-superblock /dev/sd[c-z][1-5]
+		mdadm --zero-superblock /dev/sd[c-z][1-5] /dev/sda[a-z][1-5]
 	fi
 	
 	LogMsg "INFO: Creating Partitions"
@@ -261,8 +261,16 @@ CreateRAID0()
 	sleep 1
 	mdadm --create ${mdVolume} --level 0 --raid-devices ${count} /dev/sd[c-z][1-5] /dev/sda[a-z][1-5]
 	sleep 1
-	time mkfs -t $1 -F ${mdVolume}
-	mkdir ${mountDir}
+	LogMsg "INFO: Formatting ${mdVolume} with $1 filesystem."
+	if [[ $1 == "ext4" ]];
+	then
+		time mkfs -t $1 -F ${mdVolume}
+	elif [[ $1 == "xfs" ]];
+	then
+		time mkfs -t $1 ${mdVolume}
+	fi
+	
+	mkdir -p ${mountDir}
 	sleep 1
 	mount -o nobarrier ${mdVolume} ${mountDir}
 	if [ $? -ne 0 ]; then
