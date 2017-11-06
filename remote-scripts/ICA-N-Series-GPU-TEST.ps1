@@ -61,15 +61,15 @@ collect_VM_properties
             $restartStatus = RestartAllDeployments -allVMData $clientVMData
             if ($restartStatus -eq "True")
             {
-                if (($clientVMData.InstanceSize -eq "Standard_NC6") -or ($clientVMData.InstanceSize -eq "Standard_NC6s_v2")) 
+                if (($clientVMData.InstanceSize -eq "Standard_NC6") -or ($clientVMData.InstanceSize -eq "Standard_NC6s_v2") -or ($clientVMData.InstanceSize -eq "Standard_NV6")) 
                 {
                     $expectedCount = 1
                 }
-                elseif (($clientVMData.InstanceSize -eq "Standard_NC12") -or ($clientVMData.InstanceSize -eq "Standard_NC12s_v2"))
+                elseif (($clientVMData.InstanceSize -eq "Standard_NC12") -or ($clientVMData.InstanceSize -eq "Standard_NC12s_v2") -or ($clientVMData.InstanceSize -eq "Standard_NV12"))
                 {
                     $expectedCount = 2
                 }
-                elseif (($clientVMData.InstanceSize -eq "Standard_NC24") -or ($clientVMData.InstanceSize -eq "Standard_NC24s_v2"))
+                elseif (($clientVMData.InstanceSize -eq "Standard_NC24") -or ($clientVMData.InstanceSize -eq "Standard_NC24s_v2") -or ($clientVMData.InstanceSize -eq "Standard_NV24"))
                 {
                     $expectedCount = 4
                 }
