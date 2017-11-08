@@ -8080,9 +8080,6 @@
 		<Cycle>
 			<cycleName>BVTMK</cycleName>
 			<test>
-				<Name>BVT-VERIFY-NO-ERROR-IN-LOGS</Name>
-			</test>
-			<test>
 				<Name>BVT-VERIFY-VHD-PREREQUISITES</Name>
 			</test>
 			<test>
