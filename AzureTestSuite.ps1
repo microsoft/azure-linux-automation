@@ -126,7 +126,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 				}
 				if ( $tempDistro.OsVHD )
 				{ 
-					$BaseOsVHD = $tempDistro.OsVHD.ToUpper() 
+					$BaseOsVHD = $tempDistro.OsVHD.Trim() 
 					Set-Variable -Name BaseOsVHD -Value $BaseOsVHD -Scope Global
 					LogMsg "Base VHD name - $BaseOsVHD"
 				}
@@ -135,7 +135,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 			{
 				if ( $tempDistro.OsImage ) 
 				{ 
-					$BaseOsImage = $tempDistro.OsImage.ToUpper() 
+					$BaseOsImage = $tempDistro.OsImage.Trim() 
 					Set-Variable -Name BaseOsImage -Value $BaseOsImage -Scope Global
 					LogMsg "Base image name - $BaseOsImage"
 				}
@@ -149,6 +149,40 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 	if (!$($ARMImage.Publisher) -and !$BaseOSVHD -and $UseAzureResourceManager)
 	{
 		Throw "Please give ARM Image / VHD for ARM deployment."
+	}
+
+	#If Base OS VHD is present in another storage account, then copy to test storage account first.
+	if ($BaseOsVHD -imatch "/")
+	{
+		#Check if the test storage account is same as VHD's original storage account.
+		$givenVHDStorageAccount = $BaseOsVHD.Replace("https://","").Replace("http://","").Split(".")[0]
+		$ARMStorageAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
+		
+		if ($givenVHDStorageAccount -ne $ARMStorageAccount )
+		{
+			LogMsg "Your test VHD is not in target storage account ($ARMStorageAccount)."
+			LogMsg "Your VHD will be copied to $ARMStorageAccount now."
+			$sourceContainer =  $BaseOsVHD.Split("/")[$BaseOsVHD.Split("/").Count - 2]
+			$vhdName =  $BaseOsVHD.Split("/")[$BaseOsVHD.Split("/").Count - 1]
+			if ($ARMStorageAccount -inotmatch "NewStorage_")
+			{
+				$copyStatus = CopyVHDToAnotherStorageAccount -sourceStorageAccount $givenVHDStorageAccount -sourceStorageContainer $sourceContainer -destinationStorageAccount $ARMStorageAccount -destinationStorageContainer "vhds" -vhdName $vhdName
+				if (!$copyStatus)
+				{
+					Throw "Failed to copy the VHD to $ARMStorageAccount"
+				}
+				else 
+				{
+					Set-Variable -Name BaseOsVHD -Value $vhdName -Scope Global
+					LogMsg "New Base VHD name - $vhdName"	
+				}
+			}
+			else
+			{
+				Throw "Automation only supports copying VHDs to existing storage account."
+			}
+			#Copy the VHD to current storage account.
+		}
 	}
 
 	LogMsg "Loading the cycle Data..."
@@ -186,14 +220,28 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 		$testCount = 1
 	}
 
-	for ($counter = 0; $counter -lt $testCount; $counter++)
+	foreach ($test in $currentCycleData.test)
 	{
-		$test = $currentCycleData.test[$counter]
 		if (-not $test)
 		{
 			$test = $currentCycleData.test
 		}
-		$currentTestData = GetCurrentTestData -xmlConfig $xmlConfig -testName $test.Name
+		if ($RunSelectedTests)
+		{
+			if ($RunSelectedTests.Trim().Replace(" ","").Split(",") -contains $test.Name)
+			{
+				$currentTestData = GetCurrentTestData -xmlConfig $xmlConfig -testName $test.Name	
+			}
+			else 
+			{
+				LogMsg "Skipping $($test.Name) because it is not in selected tests to run."
+				Continue;
+			}
+		}
+		else 
+		{
+			$currentTestData = GetCurrentTestData -xmlConfig $xmlConfig -testName $test.Name	
+		}
 		# Generate Unique Test
 		$server = $xmlConfig.config.global.ServerEnv.Server		
 		$cluster = $xmlConfig.config.global.ClusterEnv.Cluster

@@ -40,15 +40,15 @@ function check_exit_status ()
 function detect_linux_ditribution_version()
 {
     local  distro_version="Unknown"
-    if [ -f /etc/os-release ] ; then
-        distro_version=`cat /etc/os-release|sed 's/"//g'|grep "VERSION_ID="| sed 's/VERSION_ID=//'| sed 's/\r//'`
-    elif [ -f /etc/centos-release ] ; then
+    if [ -f /etc/centos-release ] ; then
         distro_version=`cat /etc/centos-release | sed s/.*release\ // | sed s/\ .*//`
     elif [ -f /etc/oracle-release ] ; then
         distro_version=`cat /etc/oracle-release | sed s/.*release\ // | sed s/\ .*//`
     elif [ -f /etc/redhat-release ] ; then
         distro_version=`cat /etc/redhat-release | sed s/.*release\ // | sed s/\ .*//`
-    fi
+    elif [ -f /etc/os-release ] ; then
+        distro_version=`cat /etc/os-release|sed 's/"//g'|grep "VERSION_ID="| sed 's/VERSION_ID=//'| sed 's/\r//'`
+	fi
     echo $distro_version
 }
 
