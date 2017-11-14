@@ -1,4 +1,4 @@
-﻿<#-------------Create Deployment Start------------------#>
+<#-------------Create Deployment Start------------------#>
 Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""

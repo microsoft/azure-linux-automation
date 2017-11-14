@@ -154,8 +154,7 @@ function GetTestSummary($testCycle, [DateTime] $StartTime, [string] $xmlFilename
     $strHtml += "<table border='0' class='TFtable'>"
     $strHtml += $testCycle.htmlSummary
     $strHtml += "</table>"
-    $currentNWPath = (hostname) + "\" + (pwd).Path.Replace(":", "$")
-    $strHtml += "<br /><br/> <a href='\\${currentNWPath}\TestResults\" + $xmlFilename + "-" + $StartTime.ToString("yyyyMMdd-HHmmss") + "'>Logs can be found here </a><br /><br />"
+    
     $strHtml += "</body></Html>"
 
     if (-not (Test-Path(".\temp\CI"))) {
