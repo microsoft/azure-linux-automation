@@ -2421,3 +2421,35 @@ Function CopyVHDToAnotherStorageAccount ($sourceStorageAccount,$sourceStorageCon
     }
     return $retValue
 }
+
+Function SetResourceGroupLock ([string]$ResourceGroup,  [string]$LockNote, [string]$LockName="ReproVM",  $LockType = "CanNotDelete")
+{
+    $parameterErrors = 0
+    if ($LockNote -eq $null)
+    {
+        LogErr "You did not provide -LockNote <string>. Please give a valid note."
+        $parameterErrors += 1
+    }
+    if ($ResourceGroup -eq $null)
+    {
+        LogErr "You did not provide -ResourceGroup <string>.."
+        $parameterErrors += 1
+    }
+    if ($parameterErrors -eq 0)
+    {
+        LogMsg "Adding '$LockName' lock to '$ResourceGroup'"
+        $lock = Set-AzureRmResourceLock -LockName $LockName -LockLevel $LockType -LockNotes $LockNote -Force -ResourceGroupName $ResourceGroup
+        if ( $lock.Properties.level -eq $LockType)
+        {
+            LogMsg ">>>$ResourceGroup LOCKED<<<."
+        }
+        else 
+        {
+            LogErr "Something went wrong. Please try again."    
+        }
+    }
+    else
+    {
+        LogMsg "Fix the paremeters and try again."    
+    }
+}
