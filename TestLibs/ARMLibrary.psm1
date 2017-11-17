@@ -593,18 +593,27 @@ Function CreateResourceGroupDeployment([string]$RGName, $location, $setupType, $
             }
             else 
             {
-                LogErr "Failed to Resource Group."
                 $retValue = $false
-                $VMsCreated = Get-AzureRmVM -ResourceGroupName $RGName
-                if ( $VMsCreated )
+                LogErr "Failed to create Resource Group - $RGName."
+                if ($ForceDeleteResources)
                 {
-                    LogMsg "Keeping Failed resource group, as we found $($VMsCreated.Count) VM(s) deployed."
-                }
-                else
-                {
-                    LogMsg "Removing Failed resource group, as we found 0 VM(s) deployed."
+                    LogMsg "-ForceDeleteResources is Set. Deleting $RGName."
                     DeleteResourceGroup -RGName $RGName
+                
                 }
+                else 
+                {
+                    $VMsCreated = Get-AzureRmVM -ResourceGroupName $RGName
+                    if ( $VMsCreated )
+                    {
+                        LogMsg "Keeping Failed resource group, as we found $($VMsCreated.Count) VM(s) deployed."
+                    }
+                    else
+                    {
+                        LogMsg "Removing Failed resource group, as we found 0 VM(s) deployed."
+                        DeleteResourceGroup -RGName $RGName
+                    }                        
+                }                
             }
         }
         catch

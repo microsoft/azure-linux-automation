@@ -2705,76 +2705,83 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 				$isVMLogsCollected = $false
 				foreach ($group in $ResourceGroups)
 				{
-					if($result -eq "PASS")
+					if ($ForceDeleteResources)
 					{
-						if($EconomyMode -and (-not $IsLastCaseInCycle))
+						LogMsg "-ForceDeleteResources is Set. Deleting $group."
+					}
+					else 
+					{
+						if($result -eq "PASS")
 						{
-							LogMsg "Skipping cleanup of Resource Group : $group."
-							if(!$keepUserDirectory)
+							if($EconomyMode -and (-not $IsLastCaseInCycle))
 							{
-								RemoveAllFilesFromHomeDirectory -allDeployedVMs $allVMData
+								LogMsg "Skipping cleanup of Resource Group : $group."
+								if(!$keepUserDirectory)
+								{
+									RemoveAllFilesFromHomeDirectory -allDeployedVMs $allVMData
+								}
+							}
+							else
+							{
+								$RGdetails = Get-AzureRmResourceGroup -Name $group
+								if ( $RGdetails.Tags )
+								{
+									if ( (  $RGdetails.Tags[0].Name -eq $preserveKeyword ) -and (  $RGdetails.Tags[0].Value -eq "yes" ))
+									{
+										LogMsg "Skipping Cleanup of preserved resource group."
+										LogMsg "Collecting VM logs.."
+										if ( !$isVMLogsCollected)
+										{
+											GetVMLogs -allVMData $allVMData
+										}
+										$isVMLogsCollected = $true
+									}
+								}
+								else
+								{
+									if ( $keepReproInact )
+									{
+										LogMsg "Skipping cleanup due to 'keepReproInact' flag is set."
+									}
+									else
+									{
+										LogMsg "Cleaning up deployed test virtual machines."
+										$isClened = DeleteResourceGroup -RGName $group
+										if (!$isClened)
+										{
+											LogMsg "CleanUP unsuccessful for $group.. Please delete the services manually."
+										}
+										else
+										{
+											LogMsg "CleanUP Successful for $group.."
+										}
+									}
+								}
 							}
 						}
 						else
 						{
-							$RGdetails = Get-AzureRmResourceGroup -Name $group
-                            if ( $RGdetails.Tags )
-                            {
-							    if ( (  $RGdetails.Tags[0].Name -eq $preserveKeyword ) -and (  $RGdetails.Tags[0].Value -eq "yes" ))
-							    {
-								    LogMsg "Skipping Cleanup of preserved resource group."
-								    LogMsg "Collecting VM logs.."
-								    if ( !$isVMLogsCollected)
-								    {
-									    GetVMLogs -allVMData $allVMData
-								    }
-								    $isVMLogsCollected = $true
-							    }
-                            }
-							else
+							LogMsg "Preserving the Resource Group(s) $group"
+							LogMsg "Setting tags : preserve = yes; testName = $testName"
+							$hash = @{}
+							$hash.Add($preserveKeyword,"yes")
+							$hash.Add("testName","$testName")
+							$out = Set-AzureRmResourceGroup -Name $group -Tag $hash
+							LogMsg "Collecting VM logs.."
+							if ( !$isVMLogsCollected)
 							{
-                                if ( $keepReproInact )
-                                {
-									LogMsg "Skipping cleanup due to 'keepReproInact' flag is set."
-                                }
-                                else
-                                {
-									LogMsg "Cleaning up deployed test virtual machines."
-									$isClened = DeleteResourceGroup -RGName $group
-									if (!$isClened)
-									{
-										LogMsg "CleanUP unsuccessful for $group.. Please delete the services manually."
-									}
-								    else
-									{
-										LogMsg "CleanUP Successful for $group.."
-									}
-                                }
+								GetVMLogs -allVMData $allVMData
 							}
-						}
-					}
-					else
-					{
-						LogMsg "Preserving the Resource Group(s) $group"
-						LogMsg "Setting tags : preserve = yes; testName = $testName"
-						$hash = @{}
-						$hash.Add($preserveKeyword,"yes")
-						$hash.Add("testName","$testName")
-						$out = Set-AzureRmResourceGroup -Name $group -Tag $hash
-						LogMsg "Collecting VM logs.."
-						if ( !$isVMLogsCollected)
-						{
-							GetVMLogs -allVMData $allVMData
-						}
-						$isVMLogsCollected = $true
-						if(!$keepUserDirectory -and !$keepReproInact -and $EconomyMode)
+							$isVMLogsCollected = $true
+							if(!$keepUserDirectory -and !$keepReproInact -and $EconomyMode)
+								{
+									RemoveAllFilesFromHomeDirectory -allDeployedVMs $allVMData
+								}
+							if($keepReproInact)
 							{
-								RemoveAllFilesFromHomeDirectory -allDeployedVMs $allVMData
+								$xmlConfig.config.Azure.Deployment.$setupType.isDeployed = "NO"
 							}
-						if($keepReproInact)
-						{
-							$xmlConfig.config.Azure.Deployment.$setupType.isDeployed = "NO"
-						}
+						}						
 					}
 				}
 			}

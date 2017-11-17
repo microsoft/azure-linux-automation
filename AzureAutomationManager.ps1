@@ -32,7 +32,8 @@ param (
 [string] $customKernel, 
 [string] $customLIS, 
 [string] $customLISBranch,
-[string] $resizeVMsAfterDeployment
+[string] $resizeVMsAfterDeployment,
+[switch] $ForceDeleteResources
 )
 
 Import-Module .\TestLibs\AzureWinUtils.psm1 -Force -Scope Global
@@ -62,6 +63,10 @@ if($EnableAcceleratedNetworking)
 {
     Set-Variable -Name EnableAcceleratedNetworking -Value $true -Scope Global
 }
+if($ForceDeleteResources)
+{
+    Set-Variable -Name ForceDeleteResources -Value $true -Scope Global
+}
 if($resizeVMsAfterDeployment)
 {
     Set-Variable -Name resizeVMsAfterDeployment -Value $resizeVMsAfterDeployment -Scope Global
@@ -87,6 +92,7 @@ if ( $RunSelectedTests )
 {
     Set-Variable -Name RunSelectedTests -Value $RunSelectedTests -Scope Global
 }
+
 if ( $xmlConfig.config.Azure.General.StorageAccount -imatch "NewStorage_" )
 {
     $NewASMStorageAccountType = ($xmlConfig.config.Azure.General.StorageAccount).Replace("NewStorage_","")
