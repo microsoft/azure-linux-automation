@@ -454,7 +454,7 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
 {
     try
     {
-        LogMsg "Checking of $RGName exists..."
+        LogMsg "Checking if $RGName exists..."
         $ResourceGroup = Get-AzureRmResourceGroup -Name $RGName -ErrorAction Ignore
     }
     catch
