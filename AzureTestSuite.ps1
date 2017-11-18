@@ -357,7 +357,12 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 						$startTime = [Datetime]::Now.ToUniversalTime()
 						$testResult = Invoke-Expression $command
 						$testResult = RefineTestResult2 -testResult $testResult
-						$tempHtmlText = ($testResult[1]).Substring(0,((($testResult[1]).Length)-6))
+						try {
+							$tempHtmlText = ($testResult[1]).Substring(0,((($testResult[1]).Length)-6))	
+						}
+						catch {
+							$tempHtmlText = "Unable to parse the results. Will be fixed shortly."
+						}
 						$executionCount += 1
 						$testRunDuration = GetStopWatchElapasedTime $stopWatch "mm"
 						$testRunDuration = $testRunDuration.ToString()
