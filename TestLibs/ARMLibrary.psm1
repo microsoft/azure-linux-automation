@@ -454,6 +454,7 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
 {
     try
     {
+        LogMsg "Checking of $RGName exists..."
         $ResourceGroup = Get-AzureRmResourceGroup -Name $RGName -ErrorAction Ignore
     }
     catch
@@ -487,13 +488,14 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
             }
             $ARMStorageAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
             $AuthenticatePSFullPath = $(Get-Item .\tools\AddAzureRmAccount.ps1 | Select FullName).FullName
+            LogMsg "Starting $RGName cleanup in background."
             $cleanupJob = Start-Job -ScriptBlock $cleanupRGScriptBlock -ArgumentList $RGName,$AuthenticatePSFullPath,$ARMStorageAccount -Name "DeleteResourceGroup-$RGName"
-            
             LogMsg "$RGName cleanup started in background."
             $retValue = $true
         }
         else
         {
+            LogMsg "Removing $RGName"
             Remove-AzureRmResourceGroup -Name $RGName -Force -Verbose
             $retValue = $?
             $ARMStorageAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
