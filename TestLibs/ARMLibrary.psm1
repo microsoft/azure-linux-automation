@@ -600,7 +600,7 @@ Function CreateResourceGroupDeployment([string]$RGName, $location, $setupType, $
                 if ($ForceDeleteResources)
                 {
                     LogMsg "-ForceDeleteResources is Set. Deleting $RGName."
-                    DeleteResourceGroup -RGName $RGName
+                    $isClened = DeleteResourceGroup -RGName $RGName
                 
                 }
                 else 
@@ -613,7 +613,7 @@ Function CreateResourceGroupDeployment([string]$RGName, $location, $setupType, $
                     else
                     {
                         LogMsg "Removing Failed resource group, as we found 0 VM(s) deployed."
-                        DeleteResourceGroup -RGName $RGName
+                        $isClened = DeleteResourceGroup -RGName $RGName
                     }                        
                 }                
             }

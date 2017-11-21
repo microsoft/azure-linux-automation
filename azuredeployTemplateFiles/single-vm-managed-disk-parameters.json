@@ -1,0 +1,30 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "publisher": {
+            "value": "RedHat"
+        },
+        "offer": {
+            "value": "RHEL"
+        },
+        "sku": {
+            "value": "7-RAW"
+        },
+        "version": {
+            "value": "latest"
+        },        
+        "virtualMachineName": {
+            "value": "SS-RHEL74TEST"
+        },
+        "virtualMachineSize": {
+            "value": "Standard_DS1_v2"
+        },
+        "adminUsername": {
+            "value": "adminlisa"
+        },
+        "adminPassword": {
+            "value": null
+        }        
+    }
+}

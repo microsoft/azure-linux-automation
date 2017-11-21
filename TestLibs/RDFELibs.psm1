@@ -2708,7 +2708,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 					if ($ForceDeleteResources)
 					{
 						LogMsg "-ForceDeleteResources is Set. Deleting $group."
-						DeleteResourceGroup -RGName $group
+						$isClened = DeleteResourceGroup -RGName $group
 					}
 					else 
 					{
