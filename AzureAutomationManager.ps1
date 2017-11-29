@@ -104,7 +104,6 @@ if ( $xmlConfig.config.Azure.General.ARMStorageAccount -imatch "NewStorage_" )
     Set-Variable -Name NewARMStorageAccountType -Value $NewASMStorageAccountType -Scope Global
 }
 
-
 try
 {
     # Main Body of the script
@@ -134,10 +133,6 @@ try
         exit 3
     }
 
-    #Parse XML file
-    #Get Parameters through XML file
-
-    $xmlConfig=[XML](Get-Content $xmlConfigFile)
     $Platform=$xmlConfig.config.global.platform
     $global=$xmlConfig.config.global
 	
@@ -189,7 +184,25 @@ try
     LogMsg  ("Info : Created test results directory:", $testDir)
     LogMsg  ("Info : Logfile = ", $logfile)
     LogMsg  ("Info : Using config file $xmlConfigFile")
+    if ( ( $xmlConfig.config.Azure.General.ARMStorageAccount -imatch "ExistingStorage" ) -or ($xmlConfig.config.Azure.General.StorageAccount -imatch "ExistingStorage" ) )
+    {
+        $regionName = $xmlConfig.config.Azure.General.Location.Replace(" ","").Replace('"',"").ToLower()
+        $regionStorageMapping = [xml](Get-Content .\XML\RegionAndStorageAccounts.xml)
 
+        if ( $xmlConfig.config.Azure.General.ARMStorageAccount -imatch "standard")
+        {
+           $xmlConfig.config.Azure.General.ARMStorageAccount = $regionStorageMapping.AllRegions.$regionName.StandardStorage
+           $xmlConfig.config.Azure.General.StorageAccount = $regionStorageMapping.AllRegions.$regionName.StandardStorage
+           LogMsg "Info : Selecting existing standard storage account in $regionName - $($regionStorageMapping.AllRegions.$regionName.StandardStorage)"
+        }
+        if ( $xmlConfig.config.Azure.General.ARMStorageAccount -imatch "premium")
+        {
+           $xmlConfig.config.Azure.General.ARMStorageAccount = $regionStorageMapping.AllRegions.$regionName.StandardStorage
+           $xmlConfig.config.Azure.General.StorageAccount = $regionStorageMapping.AllRegions.$regionName.StandardStorage
+           LogMsg "Info : Selecting existing premium storage account in $regionName - $($regionStorageMapping.AllRegions.$regionName.StandardStorage)"
+
+        }
+    }
     if ($UseAzureResourceManager)
     {
         Set-Variable -Name UseAzureResourceManager -Value $true -Scope Global
