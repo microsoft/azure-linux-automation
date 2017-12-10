@@ -1361,6 +1361,7 @@ Function DeployManagementServices ($xmlConfig, $setupType, $Distro, $getLogsIfFa
 			else
 			{
 				Write-Host "Exception detected. Source : DeployVMs()"
+				Write-Host "$($_.Exception.GetType().FullName, " : ",$_.Exception.Message)"
 			}
 			$retValue = $NULL
 		}
