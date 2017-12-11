@@ -2654,11 +2654,11 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 										$isClened = DeleteService -serviceName $hsDetails.ServiceName
 										if ($isClened -contains "False")
 										{
-											LogMsg "CleanUP unsuccessful for $($hsDetails.ServiceName).. Please delete the services manually."
+											#LogMsg "CleanUP unsuccessful for $($hsDetails.ServiceName).. Please delete the services manually."
 										}
 										else
 										{
-											LogMsg "CleanUP Successful for $($hsDetails.ServiceName).."
+											#LogMsg "CleanUP Successful for $($hsDetails.ServiceName).."
 										}
 									}
 								}
