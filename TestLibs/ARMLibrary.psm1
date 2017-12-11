@@ -96,7 +96,7 @@
             else
             {
                 $testVMUsage = (Get-AzureRmVMSize -Location $Location | Where { $_.Name -eq $testVMSize}).NumberOfCores
-                Write-Host $testVMUsage
+                #Write-Host $testVMUsage
             }
             
 
