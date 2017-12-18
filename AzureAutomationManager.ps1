@@ -197,9 +197,9 @@ try
         }
         if ( $xmlConfig.config.Azure.General.ARMStorageAccount -imatch "premium")
         {
-           $xmlConfig.config.Azure.General.ARMStorageAccount = $regionStorageMapping.AllRegions.$regionName.StandardStorage
-           $xmlConfig.config.Azure.General.StorageAccount = $regionStorageMapping.AllRegions.$regionName.StandardStorage
-           LogMsg "Info : Selecting existing premium storage account in $regionName - $($regionStorageMapping.AllRegions.$regionName.StandardStorage)"
+           $xmlConfig.config.Azure.General.ARMStorageAccount = $regionStorageMapping.AllRegions.$regionName.PremiumStorage
+           $xmlConfig.config.Azure.General.StorageAccount = $regionStorageMapping.AllRegions.$regionName.PremiumStorage
+           LogMsg "Info : Selecting existing premium storage account in $regionName - $($regionStorageMapping.AllRegions.$regionName.PremiumStorage)"
 
         }
     }
