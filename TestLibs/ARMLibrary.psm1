@@ -2159,9 +2159,9 @@ Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed
                         #$vnetIsAllConfigured = $false
                         $xmlConfig.config.Azure.Deployment.$setupType.isDeployed = $retValue
                         #Collecting Initial Kernel
-                        if ( Test-Path -Path  .\tools\UploadDeploymentDataToDB.ps1 )
+                        if ( Test-Path -Path  .\Extras\UploadDeploymentDataToDB.ps1 )
                         {
-                            $out = .\tools\UploadDeploymentDataToDB.ps1 -allVMData $allVMData -DeploymentTime $DeploymentElapsedTime.TotalSeconds
+                            $out = .\Extras\UploadDeploymentDataToDB.ps1 -allVMData $allVMData -DeploymentTime $DeploymentElapsedTime.TotalSeconds
                         }
                         $KernelLogOutput= GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Initial"
                     }
