@@ -257,7 +257,6 @@ try
     $connectionString = "Server=$dataSource;uid=$dbuser; pwd=$dbpassword;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
     LogMsg $SQLQuery
     
-    <#
     $connection = New-Object System.Data.SqlClient.SqlConnection
     $connection.ConnectionString = $connectionString
     $connection.Open()
@@ -266,7 +265,7 @@ try
     $command.CommandText = $SQLQuery
     $result = $command.executenonquery()
     $connection.Close()
-    #>
+    
     LogMsg "Uploading boot data to database :  done!!"
 }
 catch
