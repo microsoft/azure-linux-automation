@@ -170,22 +170,22 @@ mkdir -Path .\tools -ErrorAction SilentlyContinue | Out-Null
 if (!( Test-Path -Path .\tools\7za.exe ))
 {
     Write-Host "Downloading 7za.exe"
-    $out = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/iamshital/azure-linux-automation-support-files/raw/master/tools/7za.exe" -ErrorAction SilentlyContinue | Out-Null
+    $out = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/iamshital/azure-linux-automation-support-files/raw/master/tools/7za.exe" -OutFile 7za.exe -ErrorAction SilentlyContinue | Out-Null
 }
 if (!( Test-Path -Path .\tools\dos2unix.exe ))
 {
     Write-Host "Downloading dos2unix.exe"
-    $out = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/iamshital/azure-linux-automation-support-files/raw/master/tools/dos2unix.exe" -ErrorAction SilentlyContinue | Out-Null
+    $out = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/iamshital/azure-linux-automation-support-files/raw/master/tools/dos2unix.exe" -OutFile dos2unix.exe -ErrorAction SilentlyContinue | Out-Null
 }
 if (!( Test-Path -Path .\tools\plink.exe ))
 {
     Write-Host "Downloading plink.exe"
-    $out = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/iamshital/azure-linux-automation-support-files/raw/master/tools/plink.exe" -ErrorAction SilentlyContinue | Out-Null
+    $out = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/iamshital/azure-linux-automation-support-files/raw/master/tools/plink.exe" -OutFile plink.exe -ErrorAction SilentlyContinue | Out-Null
 }
 if (!( Test-Path -Path .\tools\pscp.exe ))
 {
     Write-Host "Downloading pscp.exe"
-    $out = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/iamshital/azure-linux-automation-support-files/raw/master/tools/pscp.exe" -ErrorAction SilentlyContinue | Out-Null
+    $out = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/iamshital/azure-linux-automation-support-files/raw/master/tools/pscp.exe" -OutFile pscp.exe -ErrorAction SilentlyContinue | Out-Null
 }
 Copy-Item -Path "*.exe" -Destination .\tools -ErrorAction SilentlyContinue -Force
 
