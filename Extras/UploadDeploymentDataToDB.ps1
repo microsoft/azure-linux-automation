@@ -137,15 +137,16 @@ try
         $containerName = "logs"
         $blobContext = New-AzureStorageContext -StorageAccountName $storageAccountName -StorageAccountKey $storageAccountKey
 
+        $ticks = (Get-Date).Ticks
         $fileName = "$LogDir\$($vmData.RoleName)-waagent.log.txt"
-        $blobName = "$destfolder/$($fileName | Split-Path -Leaf)"
+        $blobName = "$destfolder/$($fileName.Replace("waagent","waagent-$ticks") | Split-Path -Leaf)"
         $out = Set-AzureStorageBlobContent -File $filename -Container $containerName -Blob $blobName -Context $blobContext -Force
-        $WALAlogFile = "https://$storageAccountName.blob.core.windows.net/$containerName/$destfolder/$($fileName | Split-Path -Leaf)"
+        $WALAlogFile = "https://$storageAccountName.blob.core.windows.net/$containerName/$destfolder/$($fileName.Replace("waagent","waagent-$ticks") | Split-Path -Leaf)"
         Write-Host "Upload file to Azure: Success: $WALAlogFile"
         $fileName = "$LogDir\$($vmData.RoleName)-dmesg.txt"
-        $blobName = "$destfolder/$($fileName | Split-Path -Leaf)"
+        $blobName = "$destfolder/$($fileName.Replace("dmesg","dmesg-$ticks") | Split-Path -Leaf)"
         $out = Set-AzureStorageBlobContent -File $filename -Container $containerName -Blob $blobName -Context $blobContext -Force
-        $kernelLogFile = "https://$storageAccountName.blob.core.windows.net/$containerName/$destfolder/$($fileName | Split-Path -Leaf)"
+        $kernelLogFile = "https://$storageAccountName.blob.core.windows.net/$containerName/$destfolder/$($fileName.Replace("dmesg","dmesg-$ticks") | Split-Path -Leaf)"
         Write-Host "Upload file to Azure: Success: $kernelLogFile"
         $walaStartIdentifier = "Azure Linux Agent Version"
         $walaEndIdentifier = "Start env monitor service"
