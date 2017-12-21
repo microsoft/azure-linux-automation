@@ -93,9 +93,9 @@ elseif ( $StorageAccount -imatch "NewStorage_Premium" )
 {
     $StorageAccountName = "NewStorage_Premium_LRS"
 }
-else
+elseif ($StorageAccount -eq $null)
 {
-    $StorageAccountName = $StorageAccount
+    $StorageAccountName = $regionStorageMapping.AllRegions.$regionName.StandardStorage
 }
 
 #if ($defaultDestinationStorageAccount -ne $StorageAccountName)
