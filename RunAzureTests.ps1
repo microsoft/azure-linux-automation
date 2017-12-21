@@ -228,6 +228,10 @@ if ( $EnableAcceleratedNetworking )
 {
     $cmd += " -EnableAcceleratedNetworking"
 }
+if ( $ForceDeleteResources )
+{
+    $cmd += " -ForceDeleteResources"
+}
 
 if ( $keepReproInact )
 {
