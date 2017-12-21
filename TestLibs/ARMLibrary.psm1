@@ -462,14 +462,22 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
     }
     if ($ResourceGroup)
     {
-        if ( Test-Path .\tools\AddAzureRmAccount.ps1)
+        if ( $xmlSecrets )
         {
             $cleanupRGScriptBlock = {
                                 
                 $RGName = $args[0]
-                $AuthenticatePSFullPath = $args[1]
+                $xmlSecrets = $args[1]
                 $storageAccount = $args[2]
-                Invoke-Expression -Command $AuthenticatePSFullPath 
+                
+                $ClientID = $xmlSecrets.secrets.SubscriptionServicePrincipalClientID
+                $TenantID = $xmlSecrets.secrets.SubscriptionServicePrincipalTenantID
+                $Key = $xmlSecrets.secrets.SubscriptionServicePrincipalKey
+
+                $pass = ConvertTo-SecureString $key -AsPlainText -Force
+                $mycred = New-Object System.Management.Automation.PSCredential ($ClientID, $pass)
+                $out = Add-AzureRmAccount -ServicePrincipal -Tenant $TenantID -Credential $mycred
+
                 Remove-AzureRmResourceGroup -Name $RGName -Verbose -Force
                 
                 $azureStorage = $storageAccount
@@ -487,9 +495,8 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
                 sleep -Seconds 1
             }
             $ARMStorageAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
-            $AuthenticatePSFullPath = $(Get-Item .\tools\AddAzureRmAccount.ps1 | Select FullName).FullName
             LogMsg "Starting $RGName cleanup in background."
-            $cleanupJob = Start-Job -ScriptBlock $cleanupRGScriptBlock -ArgumentList $RGName,$AuthenticatePSFullPath,$ARMStorageAccount -Name "DeleteResourceGroup-$RGName"
+            $cleanupJob = Start-Job -ScriptBlock $cleanupRGScriptBlock -ArgumentList $RGName,$xmlSecrets,$ARMStorageAccount -Name "DeleteResourceGroup-$RGName"
             LogMsg "$RGName cleanup started in background."
             $retValue = $true
         }

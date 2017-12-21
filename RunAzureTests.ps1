@@ -47,6 +47,7 @@ if ( Test-Path $secretsFile) {
     Write-Host "AzureSecrets.xml found."
     .\AddAzureRmAccountFromSecretsFile.ps1 -customSecretsFilePath $secretsFile
     $xmlSecrets = [xml](Get-Content $secretsFile)
+    Set-Variable -Name xmlSecrets -Value $xmlSecrets -Scope Global
 }
 else { 
     Write-Host "AzureSecrets.xml file is not added in Jenkins Global Environments OR it is not bound to 'Azure_Secrets_File' variable." -ForegroundColor Red -BackgroundColor Black
