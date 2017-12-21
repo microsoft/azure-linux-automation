@@ -22,7 +22,9 @@
 [string] $customSecretsFilePath = $null,
 [string] $ArchiveLogDirectory = $null,
 [string] $ResultDBTable = $null,
-[string] $ResultDBTestTag = $null 
+[string] $ResultDBTestTag = $null,
+[string] $RunSelectedTests=$null,
+[string] $StorageAccount=$null
 )
 
 #---------------------------------------------------------[Initializations]--------------------------------------------------------
@@ -75,7 +77,27 @@ else
 #region Select Storage Account Type
 $regionName = $testLocation.Replace(" ","").Replace('"',"").ToLower()
 $regionStorageMapping = [xml](Get-Content .\XML\RegionAndStorageAccounts.xml)
-$StorageAccountName = $regionStorageMapping.AllRegions.$regionName.StandardStorage
+if ( $StorageAccount -imatch "ExistingStorage_Standard" )
+{
+    $StorageAccountName = $regionStorageMapping.AllRegions.$regionName.StandardStorage
+}
+elseif ( $StorageAccount -imatch "ExistingStorage_Premium" )
+{
+    $StorageAccountName = $regionStorageMapping.AllRegions.$regionName.PremiumStorage
+}
+elseif ( $StorageAccount -imatch "NewStorage_Standard" )
+{
+    $StorageAccountName = "NewStorage_Standard_LRS"
+}
+elseif ( $StorageAccount -imatch "NewStorage_Premium" )
+{
+    $StorageAccountName = "NewStorage_Premium_LRS"
+}
+else
+{
+    $StorageAccountName = $StorageAccount
+}
+
 #if ($defaultDestinationStorageAccount -ne $StorageAccountName)
 #{
 #   $OsVHD = "https://$defaultDestinationStorageAccount.blob.core.windows.net/vhds/$OsVHD"
@@ -211,7 +233,6 @@ if ( $keepReproInact )
 {
     $cmd += " -keepReproInact"
 }
-    $cmd += " -ImageType Standard"
 if ( $customKernel)
 {
     $cmd += " -customKernel $customKernel"
@@ -220,7 +241,12 @@ if ( $customLIS)
 {
     $cmd += " -customLIS $customLIS"
 }
+if ( $RunSelectedTests )
+{
+    $cmd += " -RunSelectedTests '$RunSelectedTests'"
+}
 
+$cmd += " -ImageType Standard"
 $cmd += " -UseAzureResourceManager"
 
 Write-Host "Invoking Final Command..."
