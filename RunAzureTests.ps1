@@ -224,9 +224,9 @@ if ( $EconomyMode -eq "True")
 {
     $cmd += " -EconomyMode -keepReproInact"
 }
-if ( $EnableSRIOV )
+if ( $EnableAcceleratedNetworking )
 {
-    $cmd += " -EnableSRIOV"
+    $cmd += " -EnableAcceleratedNetworking"
 }
 
 if ( $keepReproInact )
