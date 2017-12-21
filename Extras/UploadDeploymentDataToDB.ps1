@@ -247,6 +247,7 @@ try
         $finalLine = (Get-Content -Path $dmesgFile)[$actualLineNumber]
         #Write-Host $finalLine
         $finalLine = $finalLine.Replace('; Vmbus version:4.0','')
+        $finalLine = $finalLine.Replace('; Vmbus version:3.0','')
         $HostVersion = ($finalLine.Split(":")[$finalLine.Split(":").Count -1 ]).Trim()
         Write-Host "$($vmData.RoleName) - Host Version = $HostVersion"
         #endregion
