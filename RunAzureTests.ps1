@@ -67,6 +67,7 @@ if ($env:BUILD_NUMBER -gt 0)
 {
     Write-Host "Detected Jenkins environment."
     $xmlConfigFileFinal = "$PWD\Azure_ICA_all_run-$env:JOB_NAME-$env:BUILD_NUMBER.xml"
+    $xmlConfigFileFinal = $xmlConfigFileFinal.Replace('/','-')
 }
 else
 {
