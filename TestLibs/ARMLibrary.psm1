@@ -280,7 +280,7 @@
     $currentStorageStatus = Get-AzureRmStorageUsage
     if ( ($premiumVMs -gt 0 ) -and ($xmlConfig.config.Azure.General.StorageAccount -imatch "NewStorage_"))
     {
-        $requiredStorageAccounts = 2
+        $requiredStorageAccounts = 1
     }
     elseif( ($premiumVMs -gt 0 ) -and !($xmlConfig.config.Azure.General.StorageAccount -imatch "NewStorage_"))
     {
@@ -633,12 +633,41 @@ Function CreateResourceGroupDeployment([string]$RGName, $location, $setupType, $
     return $retValue
 }
 
-
 Function GenerateAzureDeployJSONFile ($RGName, $osImage, $osVHD, $RGXMLData, $Location, $azuredeployJSONFilePath, [string]$storageAccount = "")
 {
 LogMsg "Generating Template : $azuredeployJSONFilePath"
 $jsonFile = $azuredeployJSONFilePath
 $StorageAccountName = $xml.config.Azure.General.ARMStorageAccount
+$saInfoCollected = $false
+$retryCount = 0
+$maxRetryCount = 999
+while(!$saInfoCollected -and ($retryCount -lt $maxRetryCount))
+{
+    try
+    {
+        $retryCount += 1
+        LogMsg "[Attempt $retryCount/$maxRetryCount] : Getting Existing Storage account information..."
+        $GetAzureRMStorageAccount = $null
+        $GetAzureRMStorageAccount = Get-AzureRmStorageAccount
+        if ($GetAzureRMStorageAccount -eq $null)
+        {
+            $saInfoCollected = $false
+        }
+        else
+        {
+            $saInfoCollected = $true
+        }
+        
+    }
+    catch
+    {
+        LogErr "Error in fetching Storage Account info. Retrying in 10 seconds."
+        sleep -Seconds 10
+        $saInfoCollected = $false
+    }
+}
+
+
 if($storageAccount)
 { 
  $StorageAccountName = $storageAccount
@@ -651,42 +680,18 @@ if ( $NewARMStorageAccountType )
 }
 else
 {
-    $saInfoCollected = $false
-    $retryCount = 0
-    $maxRetryCount = 999
-    while(!$saInfoCollected -and ($retryCount -lt $maxRetryCount))
+    $StorageAccountType = ($GetAzureRMStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).Sku.Tier.ToString()
+    $StorageAccountRG = ($GetAzureRMStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).ResourceGroupName.ToString()
+    if($StorageAccountType -match 'Premium')
     {
-        try
-        {
-            $retryCount += 1
-            LogMsg "[Attempt $retryCount/$maxRetryCount] : Getting Existing Storage Account : $StorageAccountName details ..."
-            $GetAzureRMStorageAccount = $null
-            $GetAzureRMStorageAccount = Get-AzureRmStorageAccount
-            if ($GetAzureRMStorageAccount -eq $null)
-            {
-                throw
-            }            
-            $StorageAccountType = ($GetAzureRMStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).Sku.Tier.ToString()
-            $StorageAccountRG = ($GetAzureRMStorageAccount | where {$_.StorageAccountName -eq $StorageAccountName}).ResourceGroupName.ToString()
-            $saInfoCollected = $true
-            if($StorageAccountType -match 'Premium')
-            {
-                $StorageAccountType = "Premium_LRS"
-            }
-            else
-            {
-	            $StorageAccountType = "Standard_LRS"
-            }
-            LogMsg "Storage Account Type : $StorageAccountType"
-            Set-Variable -Name StorageAccountTypeGlobal -Value $StorageAccountType -Scope Global
-
-        }
-        catch
-        {
-            LogErr "Error in fetching Storage Account info. Retrying in 10 seconds."
-            sleep -Seconds 10
-        }
+        $StorageAccountType = "Premium_LRS"
     }
+    else
+    {
+	    $StorageAccountType = "Standard_LRS"
+    }
+    LogMsg "Storage Account Type : $StorageAccountType"
+    Set-Variable -Name StorageAccountTypeGlobal -Value $StorageAccountType -Scope Global
 }
 $HS = $RGXMLData
 $setupType = $Setup
@@ -745,9 +750,9 @@ if ( $CurrentTestData.ProvisionTimeExtensions )
 	$extensionXML = [xml]$extensionString
 }
 
+$LocationLower = $Location.Replace(" ","").ToLower().Replace('"','')
 if ( $NewARMStorageAccountType )
 {
-    $LocationLower = $Location.Replace(" ","").ToLower().Replace('"','')
     #$StorageAccountName = $($NewARMStorageAccountType.ToLower().Replace("_","").Replace("standard","std").Replace("premium","prm")) + "$RGRandomNumber" + "$LocationLower"
     $StorageAccountName = $($NewARMStorageAccountType.ToLower().Replace("_","")) + "$RGRandomNumber"
     #$StorageAccountName = "$LocationLower" + "$RGRandomNumber"
@@ -1007,6 +1012,10 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
     
     if ($StorageAccountType -imatch "Premium_LRS")
     {
+
+        $bootDiagnosticsSA = ([xml](Get-Content .\XML\RegionAndStorageAccounts.xml)).AllRegions.$LocationLower.StandardStorage
+        $diagnosticRG = $StorageAccountRG = ($GetAzureRMStorageAccount | where {$_.StorageAccountName -eq $bootDiagnosticsSA}).ResourceGroupName.ToString()
+        <#
         Add-Content -Value "$($indents[2]){" -Path $jsonFile
             Add-Content -Value "$($indents[3])^apiVersion^: ^2015-06-15^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^type^: ^Microsoft.Storage/storageAccounts^," -Path $jsonFile
@@ -1019,6 +1028,7 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
         Add-Content -Value "$($indents[2])}," -Path $jsonFile
         $diagnosticRG = $RGName
         LogMsg "Added boot diagnostic Storage Account $bootDiagnosticsSA.."
+        #>
     }
     else
     {
