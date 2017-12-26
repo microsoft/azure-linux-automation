@@ -14,6 +14,7 @@
 
 [Parameter(Mandatory=$true)]  
 [string] $OverrideVMSize,
+
 [switch] $EnableAcceleratedNetworking,
 [string] $customKernel, 
 [string] $customLIS, 
@@ -252,7 +253,7 @@ if ( $keepReproInact )
 }
 if ( $customKernel)
 {
-    $cmd += " -customKernel $customKernel"
+    $cmd += " -customKernel '$customKernel'"
 }
 if ( $customLIS)
 {
@@ -316,3 +317,4 @@ finally
     Remove-Item -Path $xmlConfigFileFinal
     exit $retValue
 }
+$retValue = 0

@@ -140,13 +140,16 @@ elif [[ $customKernel == *.deb ]]; then
 		apt-get install wget
 		LogMsg "Debian package web link detected. Downloading $customKernel"	
 		wget $customKernel
-		prefix="#*/"		
+		LogMsg "Installing ${customKernel##*/}"
+		dpkg -i "${customKernel##*/}"
+		kernelInstallStatus=$?			
 	else
 		prefix="localfile:"
+		LogMsg "Installing ${customKernel#$prefix}"
+		dpkg -i "${customKernel#$prefix}"
+		kernelInstallStatus=$?			
 	fi
-	LogMsg "Installing ${customKernel#$prefix}"
-	dpkg -i "${customKernel#$prefix}"
-	kernelInstallStatus=$?	
+
 	UpdateTestState $ICA_TESTCOMPLETED
 	if [ $kernelInstallStatus -ne 0 ]; then
 		LogMsg "CUSTOM_KERNEL_FAIL"
@@ -163,13 +166,17 @@ elif [[ $customKernel == *.rpm ]]; then
 		yum -y install wget
 		LogMsg "RPM package web link detected. Downloading $customKernel"
 		wget $customKernel
-		prefix="#*/"		
+		LogMsg "Installing ${customKernel##*/}"
+		rpm -ivh "${customKernel##*/}"
+		kernelInstallStatus=$?			
 	else
 		prefix="localfile:"
+		LogMsg "Installing ${customKernel#$prefix}"
+		rpm -ivh "${customKernel#$prefix}"
+		kernelInstallStatus=$?			
+
 	fi
-	LogMsg "Installing ${customKernel#$prefix}"
-	rpm -ivh "${customKernel#$prefix}"
-	kernelInstallStatus=$?
+
 	UpdateTestState $ICA_TESTCOMPLETED
 	if [ $kernelInstallStatus -ne 0 ]; then
 		LogMsg "CUSTOM_KERNEL_FAIL"
