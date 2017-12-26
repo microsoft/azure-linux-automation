@@ -29,7 +29,7 @@
 
 #---------------------------------------------------------[Initializations]--------------------------------------------------------
 Write-Host "-----------$PWD---------"
-if ( $pwd.Path.Length -gt 128)
+if ( $pwd.Path.Length -gt 64)
 {
     $currentTicks = (Get-Date).Ticks
     Write-Host "Current working directory lenght is greather than 128. Need to change the working directory."
