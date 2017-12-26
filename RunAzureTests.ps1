@@ -32,6 +32,7 @@ Write-Host "-----------$PWD---------"
 if ( $pwd.Path.Length -gt 64)
 {
     $currentTicks = (Get-Date).Ticks
+    $originalWorkingDirectory = $pwd
     Write-Host "Current working directory lenght is greather than 128. Need to change the working directory."
     $currentDrive = $pwd | Split-Path -Qualifier
     New-Item -ItemType Directory -Path "$currentDrive\AzureTests" -Force -ErrorAction SilentlyContinue | Out-Null
@@ -305,7 +306,10 @@ catch
 }
 finally
 {
+    
     Write-Host "Exiting with code : $retValue"
+    Write-Host "Copying all files to original working directory."
+    Copy-Item -Path "$finalWorkingDirectory\*" -Destination $originalWorkingDirectory -Recurse -Force 
     Remove-Item -Path $xmlConfigFileFinal
     exit $retValue
 }
