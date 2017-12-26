@@ -157,6 +157,13 @@ function InstallCustomKernel ($customKernel, $allVMData, [switch]$RestartAfterUp
 	        foreach ( $vmData in $allVMData )
 	        {
                 RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\remote-scripts\$scriptName,.\SetupScripts\DetectLinuxDistro.sh" -username $user -password $password -upload
+                if ( $customKernel.StartsWith("localfile:"))
+                {
+                    $customKernelFilePath = $customKernel.Replace('localfile:','')
+                    RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\$customKernelFilePath" -username $user -password $password -upload                    
+                }
+                RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\remote-scripts\$scriptName,.\SetupScripts\DetectLinuxDistro.sh" -username $user -password $password -upload
+
                 $out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "chmod +x *.sh" -runAsSudo
                 $currentKernelVersion = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "uname -r"
 		        LogMsg "Executing $scriptName ..."

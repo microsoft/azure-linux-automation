@@ -33,7 +33,7 @@ if ( $pwd.Path.Length -gt 64)
 {
     $currentTicks = (Get-Date).Ticks
     $originalWorkingDirectory = $pwd
-    Write-Host "Current working directory lenght is greather than 128. Need to change the working directory."
+    Write-Host "Current working directory lenght is greather than 64. Need to change the working directory."
     $currentDrive = $pwd | Split-Path -Qualifier
     New-Item -ItemType Directory -Path "$currentDrive\AzureTests" -Force -ErrorAction SilentlyContinue | Out-Null
     New-Item -ItemType Directory -Path "$currentDrive\AzureTests\$currentTicks" -Force -ErrorAction SilentlyContinue | Out-Null 
@@ -45,7 +45,7 @@ if ( $pwd.Path.Length -gt 64)
 
 if ( $customSecretsFilePath ) {
     $secretsFile = $customSecretsFilePath
-    Write-Host "Using provided secrets file: $($secretsFile | Split-Path -Leaf)"
+    Write-Host "Using user provided secrets file: $($secretsFile | Split-Path -Leaf)"
 }
 if ($env:Azure_Secrets_File) {
     $secretsFile = $env:Azure_Secrets_File
@@ -223,7 +223,7 @@ if (!( Test-Path -Path .\tools\pscp.exe ))
     Write-Host "Downloading pscp.exe"
     $out = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/iamshital/azure-linux-automation-support-files/raw/master/tools/pscp.exe" -OutFile pscp.exe -ErrorAction SilentlyContinue | Out-Null
 }
-Copy-Item -Path "*.exe" -Destination .\tools -ErrorAction SilentlyContinue -Force
+Move-Item -Path "*.exe" -Destination .\tools -ErrorAction SilentlyContinue -Force
 
 
 $cmd = ".\AzureAutomationManager.ps1 -runtests -Distro " + ($DistroIdentifier).Trim() + " -cycleName "+ ($TestCycle).Trim()
@@ -269,13 +269,14 @@ $cmd += " -UseAzureResourceManager"
 Write-Host "Invoking Final Command..."
 Write-Host $cmd
 Invoke-Expression -Command $cmd
+Remove-Item *.json -Force
 
 $LogDir = Get-Content .\report\lastLogDirectory.txt -ErrorAction SilentlyContinue
 $currentDir = $PWD
+
 function ZipFiles( $zipfilename, $sourcedir )
 {
    cd $sourcedir
-   Remove-Item *.json -Force
    Add-Type -Assembly System.IO.Compression.FileSystem
    $compressionLevel = [System.IO.Compression.CompressionLevel]::Optimal
    [System.IO.Compression.ZipFile]::CreateFromDirectory($sourcedir,

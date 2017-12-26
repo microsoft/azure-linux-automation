@@ -136,12 +136,17 @@ elif [ "${customKernel}" == "netnext" ]; then
 elif [[ $customKernel == *.deb ]]; then
 	LogMsg "Custom Kernel:$customKernel"
 	apt-get update
-	apt-get install wget
-	LogMsg "Debian package web link detected. Downloading $customKernel"
-	wget $customKernel
-	LogMsg "Installing ${customKernel##*/}"
-	dpkg -i "${customKernel##*/}"
-	kernelInstallStatus=$?
+	if [[ $customKernel =~ "http" ]];then
+		apt-get install wget
+		LogMsg "Debian package web link detected. Downloading $customKernel"	
+		wget $customKernel
+		prefix="#*/"		
+	else
+		prefix="localfile:"
+	fi
+	LogMsg "Installing ${customKernel#$prefix}"
+	dpkg -i "${customKernel#$prefix}"
+	kernelInstallStatus=$?	
 	UpdateTestState $ICA_TESTCOMPLETED
 	if [ $kernelInstallStatus -ne 0 ]; then
 		LogMsg "CUSTOM_KERNEL_FAIL"
@@ -153,11 +158,17 @@ elif [[ $customKernel == *.deb ]]; then
 	exit 0
 elif [[ $customKernel == *.rpm ]]; then
 	LogMsg "Custom Kernel:$customKernel"
-	yum -y install wget
-	LogMsg "RPM package web link detected. Downloading $customKernel"
-	wget $customKernel
-	LogMsg "Installing ${customKernel##*/}"
-	rpm -ivh "${customKernel##*/}"
+	
+	if [[ $customKernel =~ "http" ]];then
+		yum -y install wget
+		LogMsg "RPM package web link detected. Downloading $customKernel"
+		wget $customKernel
+		prefix="#*/"		
+	else
+		prefix="localfile:"
+	fi
+	LogMsg "Installing ${customKernel#$prefix}"
+	rpm -ivh "${customKernel#$prefix}"
 	kernelInstallStatus=$?
 	UpdateTestState $ICA_TESTCOMPLETED
 	if [ $kernelInstallStatus -ne 0 ]; then
