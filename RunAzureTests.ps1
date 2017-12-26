@@ -20,12 +20,12 @@
 [string] $customLIS, 
 [string] $customLISBranch,
 [switch] $ForceDeleteResources,
-[string] $customSecretsFilePath = $null,
-[string] $ArchiveLogDirectory = $null,
-[string] $ResultDBTable = $null,
-[string] $ResultDBTestTag = $null,
-[string] $RunSelectedTests=$null,
-[string] $StorageAccount=$null
+[string] $customSecretsFilePath = "",
+[string] $ArchiveLogDirectory = "",
+[string] $ResultDBTable = "",
+[string] $ResultDBTestTag = "",
+[string] $RunSelectedTests="",
+[string] $StorageAccount=""
 )
 
 #---------------------------------------------------------[Initializations]--------------------------------------------------------
@@ -107,11 +107,12 @@ elseif ( $StorageAccount -imatch "NewStorage_Premium" )
 {
     $StorageAccountName = "NewStorage_Premium_LRS"
 }
-elseif ($StorageAccount -eq $null)
+elseif ($StorageAccount -eq "")
 {
     $StorageAccountName = $regionStorageMapping.AllRegions.$regionName.StandardStorage
+    Write-Host "Auto selecting storage account : $StorageAccountName as per your test region."
+     
 }
-
 #if ($defaultDestinationStorageAccount -ne $StorageAccountName)
 #{
 #   $OsVHD = "https://$defaultDestinationStorageAccount.blob.core.windows.net/vhds/$OsVHD"
