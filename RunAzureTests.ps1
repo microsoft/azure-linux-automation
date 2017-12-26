@@ -309,7 +309,7 @@ finally
     
     Write-Host "Exiting with code : $retValue"
     Write-Host "Copying all files to original working directory."
-    Copy-Item -Path "$finalWorkingDirectory\*" -Destination $originalWorkingDirectory -Recurse -Force 
+    Copy-Item -Path "$finalWorkingDirectory\*" -Destination ('\\?\' + $originalWorkingDirectory) -Recurse -Force 
     Remove-Item -Path $xmlConfigFileFinal
     exit $retValue
 }
