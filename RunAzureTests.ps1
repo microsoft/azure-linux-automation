@@ -29,7 +29,18 @@
 
 #---------------------------------------------------------[Initializations]--------------------------------------------------------
 Write-Host "-----------$PWD---------"
-
+if ( $pwd.Path.Length -gt 128)
+{
+    $currentTicks = (Get-Date).Ticks
+    Write-Host "Current working directory lenght is greather than 128. Need to change the working directory."
+    $currentDrive = $pwd | Split-Path -Qualifier
+    New-Item -ItemType Directory -Path "$currentDrive\AzureTests" -Force -ErrorAction SilentlyContinue | Out-Null
+    New-Item -ItemType Directory -Path "$currentDrive\AzureTests\$currentTicks" -Force -ErrorAction SilentlyContinue | Out-Null 
+    $finalWorkingDirectory = "$currentDrive\AzureTests\$currentTicks"
+    Copy-Item -Path "*" -Destination $finalWorkingDirectory -Recurse | Out-Null
+    Set-Location -Path $finalWorkingDirectory | Out-Null
+    Write-Host "Wroking directory changed to $finalWorkingDirectory"
+}
 
 if ( $customSecretsFilePath ) {
     $secretsFile = $customSecretsFilePath
