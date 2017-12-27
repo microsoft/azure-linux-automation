@@ -32,13 +32,13 @@
 Write-Host "-----------$PWD---------"
 if ( $pwd.Path.Length -gt 64)
 {
-    $currentTicks = (Get-Date).Ticks
+    $randomNumber = Get-Random -Maximum 999999999999 -Minimum 111111111111
     $originalWorkingDirectory = $pwd
     Write-Host "Current working directory lenght is greather than 64. Need to change the working directory."
     $currentDrive = $pwd | Split-Path -Qualifier
     New-Item -ItemType Directory -Path "$currentDrive\AzureTests" -Force -ErrorAction SilentlyContinue | Out-Null
-    New-Item -ItemType Directory -Path "$currentDrive\AzureTests\$currentTicks" -Force -ErrorAction SilentlyContinue | Out-Null 
-    $finalWorkingDirectory = "$currentDrive\AzureTests\$currentTicks"
+    New-Item -ItemType Directory -Path "$currentDrive\AzureTests\$randomNumber" -Force -ErrorAction SilentlyContinue | Out-Null 
+    $finalWorkingDirectory = "$currentDrive\AzureTests\$randomNumber"
     Copy-Item -Path "*" -Destination $finalWorkingDirectory -Recurse | Out-Null
     Set-Location -Path $finalWorkingDirectory | Out-Null
     Write-Host "Wroking directory changed to $finalWorkingDirectory"
