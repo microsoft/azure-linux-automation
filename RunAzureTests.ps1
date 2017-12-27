@@ -39,7 +39,7 @@ if ( $pwd.Path.Length -gt 64)
     New-Item -ItemType Directory -Path "$currentDrive\AzureTests" -Force -ErrorAction SilentlyContinue | Out-Null
     New-Item -ItemType Directory -Path "$currentDrive\AzureTests\$randomNumber" -Force -ErrorAction SilentlyContinue | Out-Null 
     $finalWorkingDirectory = "$currentDrive\AzureTests\$randomNumber"
-    Copy-Item -Path "*" -Destination $finalWorkingDirectory -Recurse | Out-Null
+    Copy-Item -Path ('\\?\' + "*") -Destination $finalWorkingDirectory -Recurse | Out-Null
     Set-Location -Path $finalWorkingDirectory | Out-Null
     Write-Host "Wroking directory changed to $finalWorkingDirectory"
 }
