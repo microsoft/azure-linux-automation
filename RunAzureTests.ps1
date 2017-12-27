@@ -271,10 +271,36 @@ $cmd += " -UseAzureResourceManager"
 Write-Host "Invoking Final Command..."
 Write-Host $cmd
 Invoke-Expression -Command $cmd
+
 Remove-Item *.json -Force
+Remove-Item *.xml -Force
 
 $LogDir = Get-Content .\report\lastLogDirectory.txt -ErrorAction SilentlyContinue
 $currentDir = $PWD
+
+if ($ArchiveLogDirectory)
+{
+    Write-Host "Archive test results to : $ArchiveLogDirectory"
+    $now = Get-Date
+    $hhmmssC = Get-Date -format "HHMMssfff"
+    $hhmmssP = Get-Date -format "yyyyMMdd"
+    $destDir = "$testCycle-$hhmmssC"
+    Mkdir -Force "$ArchiveLogDirectory\$hhmmssP" -ErrorAction SilentlyContinue | Out-Null
+    $FinalDestDir = "$ArchiveLogDirectory\$hhmmssP\$destDir"
+    Mkdir -Force $FinalDestDir -ErrorAction SilentlyContinue | Out-Null
+    if (Test-Path -Path $FinalDestDir )
+    {
+        Write-Host "$FinalDestDir - Available."
+        Write-Host "Entering $LogDir"
+        cd $LogDir
+        Remove-Item *.json -Force
+        Remove-Item *.xml -Force        
+        Write-Host "Copying all items recursively to $FinalDestDir"
+        Copy-Item -Path .\* -Recurse -Destination $FinalDestDir -Force
+        Write-Host "Done."    
+        cd $currentDir
+    }
+}
 
 function ZipFiles( $zipfilename, $sourcedir )
 {
@@ -312,7 +338,8 @@ finally
     if ( $finalWorkingDirectory )
     {
         Write-Host "Copying all files to original working directory."
-        Copy-Item -Path "$finalWorkingDirectory\*" -Destination ('\\?\' + $originalWorkingDirectory) -Recurse -Force
+        Move-Item -Path "$finalWorkingDirectory\*" -Destination ('\\?\' + $originalWorkingDirectory) -Recurse -Force
+        Remove-Item -Path $finalWorkingDirectory -Force -Verbose
     }    
     Write-Host "Exiting with code : $retValue"
     Remove-Item -Path $xmlConfigFileFinal
