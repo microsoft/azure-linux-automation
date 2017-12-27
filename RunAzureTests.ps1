@@ -47,6 +47,8 @@ if ( $pwd.Path.Length -gt $maxDirLength)
     Write-Host "Wroking directory changed to $finalWorkingDirectory"
 }
 
+.\Extras\CheckForNewKernelPackages.ps1
+
 if ( $customSecretsFilePath ) {
     $secretsFile = $customSecretsFilePath
     Write-Host "Using user provided secrets file: $($secretsFile | Split-Path -Leaf)"
@@ -293,6 +295,9 @@ if ($ArchiveLogDirectory)
         Write-Host "$FinalDestDir - Available."
         Write-Host "Entering $FinalDestDir"
         cd $LogDir
+        Write-Host "$LogDir-----------------------"
+        Remove-Item *.json -Force
+        Remove-Item *.xml -Force        
         Write-Host "Copying all items recursively to $FinalDestDir"
         Copy-Item -Path .\* -Recurse -Destination $FinalDestDir -Force
         Write-Host "Done."    
@@ -344,7 +349,6 @@ finally
         Write-Host "Setting workspace to original location: $originalWorkingDirectory"
         cd $originalWorkingDirectory
     }    
-    Remove-Item -Path $xmlConfigFileFinal -ErrorAction SilentlyContinue | Out-Null
     Write-Host "Exiting with code : $retValue"
     exit $retValue
 }
