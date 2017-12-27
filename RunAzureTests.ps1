@@ -39,7 +39,8 @@ if ( $pwd.Path.Length -gt 64)
     New-Item -ItemType Directory -Path "$currentDrive\AzureTests" -Force -ErrorAction SilentlyContinue | Out-Null
     New-Item -ItemType Directory -Path "$currentDrive\AzureTests\$randomNumber" -Force -ErrorAction SilentlyContinue | Out-Null 
     $finalWorkingDirectory = "$currentDrive\AzureTests\$randomNumber"
-    Copy-Item -Path ('\\?\' + "*") -Destination $finalWorkingDirectory -Recurse | Out-Null
+    $tmpSource = '\\?\' + "$originalWorkingDirectory\*"
+    Copy-Item -Path $tmpSource -Destination $finalWorkingDirectory -Recurse | Out-Null
     Set-Location -Path $finalWorkingDirectory | Out-Null
     Write-Host "Wroking directory changed to $finalWorkingDirectory"
 }
@@ -338,11 +339,12 @@ finally
     if ( $finalWorkingDirectory )
     {
         Write-Host "Copying all files to original working directory."
-        Move-Item -Path "$finalWorkingDirectory\*" -Destination ('\\?\' + $originalWorkingDirectory) -Recurse -Force
+        $tmpDest = '\\?\' + $originalWorkingDirectory
+        Move-Item -Path "$finalWorkingDirectory\*" -Destination $tmpDest -Force
         Remove-Item -Path $finalWorkingDirectory -Force -Verbose
     }    
     Write-Host "Exiting with code : $retValue"
-    Remove-Item -Path $xmlConfigFileFinal
+    Remove-Item -Path $xmlConfigFileFinal -ErrorAction SilentlyContinue
     exit $retValue
 }
 $retValue = 0
