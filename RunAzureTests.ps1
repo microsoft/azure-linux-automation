@@ -30,17 +30,19 @@
 
 #---------------------------------------------------------[Initializations]--------------------------------------------------------
 Write-Host "-----------$PWD---------"
-if ( $pwd.Path.Length -gt 64)
+$maxDirLength = 10
+if ( $pwd.Path.Length -gt $maxDirLength)
 {
-    $randomNumber = Get-Random -Maximum 999999999999 -Minimum 111111111111
+    $randomNumber = Get-Date -Format "yyyyMMddhhmmssffff"
     $originalWorkingDirectory = $pwd
-    Write-Host "Current working directory lenght is greather than 64. Need to change the working directory."
-    $currentDrive = $pwd | Split-Path -Qualifier
-    New-Item -ItemType Directory -Path "$currentDrive\AzureTests" -Force -ErrorAction SilentlyContinue | Out-Null
-    New-Item -ItemType Directory -Path "$currentDrive\AzureTests\$randomNumber" -Force -ErrorAction SilentlyContinue | Out-Null 
-    $finalWorkingDirectory = "$currentDrive\AzureTests\$randomNumber"
+    Write-Host "Current working directory length is greather than $maxDirLength. Need to change the working directory."
+    $tempWorkspace = $env:TEMP
+    New-Item -ItemType Directory -Path "$tempWorkspace\az" -Force -ErrorAction SilentlyContinue | Out-Null
+    New-Item -ItemType Directory -Path "$tempWorkspace\az\$randomNumber" -Force -ErrorAction SilentlyContinue | Out-Null 
+    $finalWorkingDirectory = "$tempWorkspace\az\$randomNumber"
     $tmpSource = '\\?\' + "$originalWorkingDirectory\*"
-    Copy-Item -Path $tmpSource -Destination $finalWorkingDirectory -Recurse | Out-Null
+    Write-Host "Copying current workspace to $finalWorkingDirectory"
+    Copy-Item -Path $tmpSource -Destination $finalWorkingDirectory -Recurse -Force -ErrorAction SilentlyContinue| Out-Null
     Set-Location -Path $finalWorkingDirectory | Out-Null
     Write-Host "Wroking directory changed to $finalWorkingDirectory"
 }
@@ -273,9 +275,6 @@ Write-Host "Invoking Final Command..."
 Write-Host $cmd
 Invoke-Expression -Command $cmd
 
-Remove-Item *.json -Force
-Remove-Item *.xml -Force
-
 $LogDir = Get-Content .\report\lastLogDirectory.txt -ErrorAction SilentlyContinue
 $currentDir = $PWD
 
@@ -292,10 +291,8 @@ if ($ArchiveLogDirectory)
     if (Test-Path -Path $FinalDestDir )
     {
         Write-Host "$FinalDestDir - Available."
-        Write-Host "Entering $LogDir"
+        Write-Host "Entering $FinalDestDir"
         cd $LogDir
-        Remove-Item *.json -Force
-        Remove-Item *.xml -Force        
         Write-Host "Copying all items recursively to $FinalDestDir"
         Copy-Item -Path .\* -Recurse -Destination $FinalDestDir -Force
         Write-Host "Done."    
@@ -340,11 +337,15 @@ finally
     {
         Write-Host "Copying all files to original working directory."
         $tmpDest = '\\?\' + $originalWorkingDirectory
-        Move-Item -Path "$finalWorkingDirectory\*" -Destination $tmpDest -Force
-        Remove-Item -Path $finalWorkingDirectory -Force -Verbose
+        Move-Item -Path "$finalWorkingDirectory\*" -Destination $tmpDest -Force -ErrorAction SilentlyContinue | Out-Null
+        cd ..
+        Write-Host "Cleaning $finalWorkingDirectory"
+        Remove-Item -Path $finalWorkingDirectory -Force -Recurse -ErrorAction SilentlyContinue
+        Write-Host "Setting workspace to original location: $originalWorkingDirectory"
+        cd $originalWorkingDirectory
     }    
+    Remove-Item -Path $xmlConfigFileFinal -ErrorAction SilentlyContinue | Out-Null
     Write-Host "Exiting with code : $retValue"
-    Remove-Item -Path $xmlConfigFileFinal -ErrorAction SilentlyContinue
     exit $retValue
 }
 $retValue = 0
