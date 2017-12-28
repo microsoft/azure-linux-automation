@@ -8100,6 +8100,9 @@
 			<test>
 				<Name>BVT-HOT-ADD-DISK-SERIAL</Name>
 			</test>
+			<test>
+				<Name>BVT-DELETE-VHD</Name>
+			</test>			
 		</Cycle>
 		<!-- Network Outbound Access tests -->
 		<Cycle>
