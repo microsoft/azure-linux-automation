@@ -8081,24 +8081,15 @@
 			<cycleName>BVTMK</cycleName>
 			<test>
 				<Name>BVT-CAPTURE-VHD</Name>
-			</test>			
+			</test>		
+			<test>
+				<Name>BVT-VERIFY-NO-ERROR-IN-LOGS</Name>
+			</test>				
 			<test>
 				<Name>BVT-VERIFY-VHD-PREREQUISITES</Name>
 			</test>
 			<test>
 				<Name>BVT-VERIFY-RESTART</Name>
-			</test>
-			<test>
-				<Name>BVT-VERIFY-SHUTDOWN</Name>
-			</test>
-			<test>
-				<Name>BVT-HOT-VM-RESIZE</Name>
-			</test>
-			<test>
-				<Name>BVT-HOT-ADD-DISK-PARALLEL</Name>
-			</test>
-			<test>
-				<Name>BVT-HOT-ADD-DISK-SERIAL</Name>
 			</test>
 			<test>
 				<Name>BVT-DELETE-VHD</Name>
