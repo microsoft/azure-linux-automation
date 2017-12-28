@@ -8080,16 +8080,10 @@
 		<Cycle>
 			<cycleName>BVTMK</cycleName>
 			<test>
+				<Name>BVT-CAPTURE-VHD</Name>
+			</test>			
+			<test>
 				<Name>BVT-VERIFY-VHD-PREREQUISITES</Name>
-			</test>
-			<test>
-				<Name>BVT-WA-PROC-CHECK</Name>
-			</test>
-			<test>
-				<Name>BVT-WA-VER-CHECK</Name>
-			</test>
-			<test>
-				<Name>BVT-SWAP-CHECK</Name>
 			</test>
 			<test>
 				<Name>BVT-VERIFY-RESTART</Name>
