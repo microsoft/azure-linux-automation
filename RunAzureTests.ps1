@@ -12,7 +12,6 @@
 [string] $ARMImageName,
 [string] $OsVHD,
 
-[Parameter(Mandatory=$true)]  
 [string] $OverrideVMSize,
 
 [switch] $EnableAcceleratedNetworking,
@@ -30,7 +29,7 @@
 
 #---------------------------------------------------------[Initializations]--------------------------------------------------------
 Write-Host "-----------$PWD---------"
-$maxDirLength = 10
+$maxDirLength = 32
 if ( $pwd.Path.Length -gt $maxDirLength)
 {
     $randomNumber = Get-Date -Format "yyyyMMddhhmmssffff"
