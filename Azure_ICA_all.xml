@@ -7844,6 +7844,19 @@
 			<Priority>P0</Priority>
 		</test>
 		<test>
+			<testName>CAPTURE-VHD-BEFORE-TEST</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>CAPTURE-VHD-BEFORE-TEST.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<OverrideVMSize>Standard_A2</OverrideVMSize>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<regions>westus,westus2,northeurope</regions>		
+			<Priority>P0</Priority>
+		</test>		
+		<test>
 			<testName>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM-LIS</testName>
 			<testScript>
 			</testScript>
@@ -8078,19 +8091,13 @@
 			</test>
 		</Cycle>
 		<Cycle>
-			<cycleName>BVTMK</cycleName>
-			<test>
-				<Name>BVT-CAPTURE-VHD</Name>
-			</test>			
+			<cycleName>BVTMK</cycleName>		
 			<test>
 				<Name>BVT-VERIFY-VHD-PREREQUISITES</Name>
 			</test>
 			<test>
 				<Name>BVT-VERIFY-RESTART</Name>
-			</test>
-			<test>
-				<Name>BVT-DELETE-VHD</Name>
-			</test>			
+			</test>		
 		</Cycle>
 		<!-- Network Outbound Access tests -->
 		<Cycle>
@@ -9057,7 +9064,13 @@
 			<test>
 				<Name>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM-BLUESTONE</Name>
 			</test>
-		</Cycle>  
+		</Cycle>
+		<Cycle>
+			<cycleName>PUBLISH-VHD</cycleName>
+			<test>
+				<Name>CAPTURE-VHD-BEFORE-TEST</Name>
+			</test>
+		</Cycle>		
 		<Cycle>
 			<cycleName>CAPTURE-VHD-LIS</cycleName>
 			<test>
