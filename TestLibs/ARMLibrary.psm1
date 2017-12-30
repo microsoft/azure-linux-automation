@@ -2220,6 +2220,11 @@ Function DeployResourceGroups ($xmlConfig, $setupType, $Distro, $getLogsIfFailed
         catch
         {
             LogMsg "Exception detected. Source : DeployVMs()"
+            $line = $_.InvocationInfo.ScriptLineNumber
+            $script_name = ($_.InvocationInfo.ScriptName).Replace($PWD,".")
+            $ErrorMessage =  $_.Exception.Message
+            LogErr "EXCEPTION : $ErrorMessage"
+            LogErr "Source : Line $line in script $script_name."              
             $retValue = $NULL
         }
     }
