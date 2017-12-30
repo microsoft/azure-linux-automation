@@ -54,7 +54,21 @@ else
 		$Location = (Get-AzureStorageAccount -StorageAccountName $StorAccount).GeoPrimaryLocation
 		$AccountType = (Get-AzureStorageAccount -StorageAccountName $StorAccount).AccountType
 		$SupportSizes = (Get-AzureLocation | where {$_.Name -eq $location}).VirtualMachineRoleSizes
-	}
+    }
+    if ($currentTestData.StandardVMSizes   -and $AccountType -match 'Standard' )
+    {
+        $targetVMSizes = ($currentTestData.StandardVMSizes).Split(",")
+    }
+    elseif ($currentTestData.PremiumVMSizes  -and $AccountType -match 'Premium')
+    {
+        $targetVMSizes = ($currentTestData.PremiumVMSizes).Split(",")
+    }
+    else 
+    {
+        $targetVMSizes = $SupportSizes
+    }
+    Write-Host "targetVMSizes = $targetVMSizes"
+    
 	foreach($size in $SupportSizes)
 	{
 		if ($size -imatch 'Promo')
@@ -63,13 +77,19 @@ else
 		}
 		else
 		{
-		    if(($size -match 'DS') -or ($size -match 'GS') -or ($size.Trim().EndsWith("s")))
+		    if(($size -match 'DS') -or ($size -match 'GS') -or ($size.Trim().EndsWith("s")) -or ($size.Contains("s_v")))
 		    {
-			$XioSizes += $size.Trim()
+                if ( $targetVMsizes.Contains("$size") )
+                {
+                    $XioSizes += $size.Trim()
+                }
 		    }
 		    else
 		    {
-			$StandardSizes += $size.Trim()
+                if ( $targetVMsizes.Contains("$size") )
+                {
+                    $StandardSizes += $size.Trim()
+                }
 		    }
 		}
 	}
