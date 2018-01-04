@@ -24,7 +24,9 @@
 [string] $ResultDBTable = "",
 [string] $ResultDBTestTag = "",
 [string] $RunSelectedTests="",
-[string] $StorageAccount=""
+[string] $StorageAccount="",
+
+[switch] $ExitWithZero
 )
 
 #---------------------------------------------------------[Initializations]--------------------------------------------------------
@@ -277,6 +279,8 @@ Write-Host $cmd
 Invoke-Expression -Command $cmd
 
 $LogDir = Get-Content .\report\lastLogDirectory.txt -ErrorAction SilentlyContinue
+
+
 $currentDir = $PWD
 
 if ($ArchiveLogDirectory)
@@ -322,12 +326,19 @@ try
         $resultXML = [xml](Get-Content ".\report\report_$(($TestCycle).Trim()).xml" -ErrorAction SilentlyContinue)
         if ( ( $resultXML.testsuites.testsuite.failures -eq 0 ) -and ( $resultXML.testsuites.testsuite.errors -eq 0 ) -and ( $resultXML.testsuites.testsuite.tests -gt 0 ))
         {
+            Rename-Item -Path ".\report\report_$(($TestCycle).Trim()).xml" -NewName "report_$(($TestCycle).Trim())-$randomNumber.xml"
+            Write-Host "Renamed : .\report\report_$(($TestCycle).Trim()).xml --> report_$(($TestCycle).Trim())-$randomNumber.xml"
             $retValue = 0
         }
         else
         {
             $retValue = 1
         }
+    }
+    else 
+    {
+        Write-Host "Summary file: .\report\report_$(($TestCycle).Trim()).xml does not exist. Exiting with 1."
+        $retValue = 1    
     }
 }
 catch
@@ -347,8 +358,11 @@ finally
         Remove-Item -Path $finalWorkingDirectory -Force -Recurse -ErrorAction SilentlyContinue
         Write-Host "Setting workspace to original location: $originalWorkingDirectory"
         cd $originalWorkingDirectory
-    }    
+    }
+    if ( $ExitWithZero -and ($retValue -ne 0) )
+    {
+        Write-Host "Changed exit code from 1 --> 0. (-ExitWithZero mentioned.)"
+    }
     Write-Host "Exiting with code : $retValue"
     exit $retValue
 }
-$retValue = 0
