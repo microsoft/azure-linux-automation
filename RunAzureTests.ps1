@@ -30,6 +30,7 @@
 )
 
 #---------------------------------------------------------[Initializations]--------------------------------------------------------
+
 Write-Host "-----------$PWD---------"
 $maxDirLength = 32
 if ( $pwd.Path.Length -gt $maxDirLength)
@@ -47,6 +48,8 @@ if ( $pwd.Path.Length -gt $maxDirLength)
     Set-Location -Path $finalWorkingDirectory | Out-Null
     Write-Host "Wroking directory changed to $finalWorkingDirectory"
 }
+
+Remove-Item -Path ".\report\report_$(($TestCycle).Trim()).xml" -Force -ErrorAction SilentlyContinue
 
 .\Extras\CheckForNewKernelPackages.ps1
 
@@ -326,8 +329,8 @@ try
         $resultXML = [xml](Get-Content ".\report\report_$(($TestCycle).Trim()).xml" -ErrorAction SilentlyContinue)
         if ( ( $resultXML.testsuites.testsuite.failures -eq 0 ) -and ( $resultXML.testsuites.testsuite.errors -eq 0 ) -and ( $resultXML.testsuites.testsuite.tests -gt 0 ))
         {
-            Rename-Item -Path ".\report\report_$(($TestCycle).Trim()).xml" -NewName "report_$(($TestCycle).Trim())-$randomNumber.xml"
-            Write-Host "Renamed : .\report\report_$(($TestCycle).Trim()).xml --> report_$(($TestCycle).Trim())-$randomNumber.xml"
+            Copy-Item -Path ".\report\report_$(($TestCycle).Trim()).xml" -Destination ".\report_$(($TestCycle).Trim())-$randomNumber.xml" -Force -ErrorAction SilentlyContinue
+            Write-Host "Copied : .\report\report_$(($TestCycle).Trim()).xml --> report_$(($TestCycle).Trim())-$randomNumber.xml"
             $retValue = 0
         }
         else
@@ -362,6 +365,7 @@ finally
     if ( $ExitWithZero -and ($retValue -ne 0) )
     {
         Write-Host "Changed exit code from 1 --> 0. (-ExitWithZero mentioned.)"
+        $retValue = 0
     }
     Write-Host "Exiting with code : $retValue"
     exit $retValue
