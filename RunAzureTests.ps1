@@ -4,7 +4,7 @@
 [string] $testLocation,
 
 [Parameter(Mandatory=$true)]
-[string] $DistroIdentifier, 
+[string] $DistroIdentifier,
 
 [Parameter(Mandatory=$true)]
 [string] $testCycle,
@@ -15,8 +15,8 @@
 [string] $OverrideVMSize,
 
 [switch] $EnableAcceleratedNetworking,
-[string] $customKernel, 
-[string] $customLIS, 
+[string] $customKernel,
+[string] $customLIS,
 [string] $customLISBranch,
 [switch] $ForceDeleteResources,
 [string] $customSecretsFilePath = "",
@@ -35,13 +35,14 @@ Write-Host "-----------$PWD---------"
 $maxDirLength = 32
 if ( $pwd.Path.Length -gt $maxDirLength)
 {
-    $randomNumber = Get-Date -Format "yyyyMMddhhmmssffff"
+    $shortRandomNumber = Get-Random -Maximum 999999 -Minimum 111111
+    $shortRandomWord = -join ((65..90) | Get-Random -Count 6 | % {[char]$_})
     $originalWorkingDirectory = $pwd
     Write-Host "Current working directory length is greather than $maxDirLength. Need to change the working directory."
     $tempWorkspace = $env:TEMP
     New-Item -ItemType Directory -Path "$tempWorkspace\az" -Force -ErrorAction SilentlyContinue | Out-Null
-    New-Item -ItemType Directory -Path "$tempWorkspace\az\$randomNumber" -Force -ErrorAction SilentlyContinue | Out-Null 
-    $finalWorkingDirectory = "$tempWorkspace\az\$randomNumber"
+    New-Item -ItemType Directory -Path "$tempWorkspace\az\$shortRandomNumber" -Force -ErrorAction SilentlyContinue | Out-Null
+    $finalWorkingDirectory = "$tempWorkspace\az\$shortRandomNumber"
     $tmpSource = '\\?\' + "$originalWorkingDirectory\*"
     Write-Host "Copying current workspace to $finalWorkingDirectory"
     Copy-Item -Path $tmpSource -Destination $finalWorkingDirectory -Recurse -Force -ErrorAction SilentlyContinue| Out-Null
@@ -59,7 +60,7 @@ if ( $customSecretsFilePath ) {
 }
 if ($env:Azure_Secrets_File) {
     $secretsFile = $env:Azure_Secrets_File
-    Write-Host "Using predefined secrets file: $($secretsFile | Split-Path -Leaf) in Jenkins Global Environments."	
+    Write-Host "Using predefined secrets file: $($secretsFile | Split-Path -Leaf) in Jenkins Global Environments."
 }
 if ( $secretsFile -eq $null ) {
     Write-Host "ERROR: Azure Secrets file not found in Jenkins / user not provided -customSecretsFilePath" -ForegroundColor Red -BackgroundColor Black
@@ -73,7 +74,7 @@ if ( Test-Path $secretsFile) {
     $xmlSecrets = [xml](Get-Content $secretsFile)
     Set-Variable -Name xmlSecrets -Value $xmlSecrets -Scope Global
 }
-else { 
+else {
     Write-Host "AzureSecrets.xml file is not added in Jenkins Global Environments OR it is not bound to 'Azure_Secrets_File' variable." -ForegroundColor Red -BackgroundColor Black
     Write-Host "Aborting." -ForegroundColor Red -BackgroundColor Black
     exit 1
@@ -120,7 +121,7 @@ elseif ($StorageAccount -eq "")
 {
     $StorageAccountName = $regionStorageMapping.AllRegions.$regionName.StandardStorage
     Write-Host "Auto selecting storage account : $StorageAccountName as per your test region."
-     
+
 }
 #if ($defaultDestinationStorageAccount -ne $StorageAccountName)
 #{
@@ -136,8 +137,8 @@ Set-Content -Value "<pre>" -Path .\FinalReport.txt -Force
 Add-Content -Value "Build process aborted manually. Please check attached logs for more details..." -Path .\FinalReport.txt -Force
 Add-Content -Value "</pre>" -Path .\FinalReport.txt -Force
 mkdir .\report -Force -ErrorAction SilentlyContinue | Out-Null
-Set-Content -Value "" -Path .\report\testSummary.html -Force 
-Set-Content -Value "" -Path .\report\lastLogDirectory.txt -Force 
+Set-Content -Value "" -Path .\report\testSummary.html -Force
+Set-Content -Value "" -Path .\report\lastLogDirectory.txt -Force
 
 #Copy-Item J:\Jenkins\userContent\azure-linux-automation\* -Destination . -Recurse -Force -ErrorAction SilentlyContinue
 #Copy-Item J:\Jenkins\userContent\CI\* -Destination . -Recurse -Force -ErrorAction SilentlyContinue
@@ -155,17 +156,17 @@ $xmlFileData.config.Azure.Deployment.Data.Password = '"' + ($xmlSecrets.secrets.
 $xmlFileData.config.Azure.Deployment.Data.UserName = $xmlSecrets.secrets.linuxTestUsername.Trim()
 $xmlFileData.config.Azure.Deployment.Data.Distro[0].Name = ($DistroIdentifier).Trim()
 $xmlFileData.config.Azure.General.AffinityGroup=""
-$newNode = $xmlFileData.CreateElement("Location") 
+$newNode = $xmlFileData.CreateElement("Location")
 $xmlFileData.config.Azure.General.AppendChild($newNode) | Out-Null
 $xmlFileData.config.Azure.General.Location='"' + "$testLocation" + '"'
 if ( $OsVHD )
 {
-    Write-Host "Injecting Os VHD Information in $xmlConfigFileFinal ..."    
+    Write-Host "Injecting Os VHD Information in $xmlConfigFileFinal ..."
     $xmlFileData.config.Azure.Deployment.Data.Distro[0].OsVHD = ($OsVHD).Trim()
 }
 else
 {
-    Write-Host "Injecting ARM Image Information in $xmlConfigFileFinal ..."    
+    Write-Host "Injecting ARM Image Information in $xmlConfigFileFinal ..."
     $armPub = ($ARMImageName).Split(" ")[0]
     $armOffer = ($ARMImageName).Split(" ")[1]
     $armSKU = ($ARMImageName).Split(" ")[2]
@@ -303,10 +304,10 @@ if ($ArchiveLogDirectory)
         cd $LogDir
         Write-Host "$LogDir-----------------------"
         Remove-Item *.json -Force
-        Remove-Item *.xml -Force        
+        Remove-Item *.xml -Force
         Write-Host "Copying all items recursively to $FinalDestDir"
         Copy-Item -Path .\* -Recurse -Destination $FinalDestDir -Force
-        Write-Host "Done."    
+        Write-Host "Done."
         cd $currentDir
     }
 }
@@ -329,8 +330,8 @@ try
         $resultXML = [xml](Get-Content ".\report\report_$(($TestCycle).Trim()).xml" -ErrorAction SilentlyContinue)
         if ( ( $resultXML.testsuites.testsuite.failures -eq 0 ) -and ( $resultXML.testsuites.testsuite.errors -eq 0 ) -and ( $resultXML.testsuites.testsuite.tests -gt 0 ))
         {
-            Copy-Item -Path ".\report\report_$(($TestCycle).Trim()).xml" -Destination ".\report_$(($TestCycle).Trim())-$randomNumber.xml" -Force -ErrorAction SilentlyContinue
-            Write-Host "Copied : .\report\report_$(($TestCycle).Trim()).xml --> report_$(($TestCycle).Trim())-$randomNumber.xml"
+            Copy-Item -Path ".\report\report_$(($TestCycle).Trim()).xml" -Destination ".\report\report_$(($TestCycle).Trim())-$shortRandomNumber-junit.xml" -Force -ErrorAction SilentlyContinue
+            Write-Host "Copied : .\report\report_$(($TestCycle).Trim()).xml --> .\report\report_$(($TestCycle).Trim())-$shortRandomNumber-junit.xml"
             $retValue = 0
         }
         else
@@ -338,10 +339,10 @@ try
             $retValue = 1
         }
     }
-    else 
+    else
     {
         Write-Host "Summary file: .\report\report_$(($TestCycle).Trim()).xml does not exist. Exiting with 1."
-        $retValue = 1    
+        $retValue = 1
     }
 }
 catch

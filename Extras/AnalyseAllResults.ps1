@@ -1,4 +1,4 @@
-$allReports = Get-ChildItem .\report | Where-Object {($_.FullName).EndsWith(".xml") -and ($_.FullName -imatch "\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d")}
+$allReports = Get-ChildItem .\report | Where-Object {($_.FullName).EndsWith("-junit.xml") -and ($_.FullName -imatch "\d\d\d\d\d\d")}
 $retValue = 0
 foreach ( $report in $allReports )
 {
