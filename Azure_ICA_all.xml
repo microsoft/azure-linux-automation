@@ -6774,14 +6774,63 @@
 		</test>
 
 		<test>
-			<testName>ICA-VM-REBOOT-TEST</testName>
+			<testName>ICA-VM-250-REBOOT-TEST</testName>
 			<testScript></testScript>
 			<testScriptPs1>ICA-VM-REBOOT-TEST.ps1</testScriptPs1>
-			<setupType>G5</setupType>
+			<setupType>SingleVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
-			<rebootCount>100</rebootCount>
+			<SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>CUSTOM,VM,SIZES</SubtestValues>
+			<rebootCount>250</rebootCount>
+			<TestID>Reboot_02</TestID>
+		</test>		
+		<test>
+			<testName>ICA-VM-500-REBOOT-TEST</testName>
+			<testScript></testScript>
+			<testScriptPs1>ICA-VM-REBOOT-TEST.ps1</testScriptPs1>
+			<setupType>SingleVM</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>CUSTOM,VM,SIZES</SubtestValues>
+			<rebootCount>500</rebootCount>
+			<TestID>Reboot_02</TestID>
+		</test>		
+		<test>
+			<testName>ICA-VM-1000-REBOOT-TEST</testName>
+			<testScript></testScript>
+			<testScriptPs1>ICA-VM-REBOOT-TEST.ps1</testScriptPs1>
+			<setupType>SingleVM</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>CUSTOM,VM,SIZES</SubtestValues>
+			<rebootCount>1000</rebootCount>
+			<TestID>Reboot_02</TestID>
+		</test>		
+		<test>
+			<testName>ICA-VM-2000-REBOOT-TEST</testName>
+			<testScript></testScript>
+			<testScriptPs1>ICA-VM-REBOOT-TEST.ps1</testScriptPs1>
+			<setupType>SingleVM</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>CUSTOM,VM,SIZES</SubtestValues>
+			<rebootCount>2000</rebootCount>
+			<TestID>Reboot_02</TestID>
+		</test>		
+		<test>
+			<testName>ICA-VM-5000-REBOOT-TEST</testName>
+			<testScript></testScript>
+			<testScriptPs1>ICA-VM-REBOOT-TEST.ps1</testScriptPs1>
+			<setupType>SingleVM</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>CUSTOM,VM,SIZES</SubtestValues>
+			<rebootCount>5000</rebootCount>
 			<TestID>Reboot_02</TestID>
 		</test>		
 		
@@ -8020,7 +8069,19 @@
 		<Cycle>
 			<cycleName>REBOOT</cycleName>
 			<test>
-				<Name>ICA-VM-REBOOT-TEST</Name>
+				<Name>ICA-VM-250-REBOOT-TEST</Name>
+			</test>
+			<test>
+				<Name>ICA-VM-500-REBOOT-TEST</Name>
+			</test>
+			<test>
+				<Name>ICA-VM-1000-REBOOT-TEST</Name>
+			</test>
+			<test>
+				<Name>ICA-VM-2000-REBOOT-TEST</Name>
+			</test>
+			<test>
+				<Name>ICA-VM-5000-REBOOT-TEST</Name>
 			</test>
 		</Cycle>
 

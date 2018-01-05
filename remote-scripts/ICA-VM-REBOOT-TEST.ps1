@@ -8,38 +8,35 @@ if ($isDeployed)
 {
 	try
 	{
-		$hs1VIP = $AllVMData.PublicIP
-		$hs1vm1sshport = $AllVMData.SSHPort
-		$hs1ServiceUrl = $AllVMData.URL
-		$hs1vm1Dip = $AllVMData.InternalIP
-		$hs1vm1Hostname = $AllVMData.RoleName
-
 		$rebootCount = $($currentTestData.rebootCount)
 		$count = 1
-		$restartMethod = "Restart"
+		$nextRestartMethod = "Restart"
 		while ( $count -le $rebootCount )
 		{
-			$currentLogDir = "$LogDir\Attempt-$count-$restartMethod"
+			$testResult = "FAIL"
+			$currentLogDir = "$LogDir\Attempt-$count-$nextRestartMethod"
 			$out = mkdir $currentLogDir -Force | Out-Null
-			if ( $restartMethod -eq "Restart" )
+			if ( $nextRestartMethod -eq "Restart" )
 			{
-				$restartMethod = "StopAndStart"
-				LogMsg "[$count/$rebootCount] Restarting $hs1vm1Hostname ..."	
-				$restartStatus = Restart-AzureVM -ServiceName $isDeployed -Name $hs1vm1Hostname -Verbose
-				$restartStatus = $restartStatus.OperationStatus
+				$currentRestartMethod = "Restart"
+				$nextRestartMethod = "StopAndStart"
+				LogMsg "[$count/$rebootCount] Restarting $($allVMData.RoleName) ..."
+				$restartStatus = Restart-AzureRmVM -Name $allVMData.RoleName -ResourceGroupName $allVMData.ResourceGroupName
+				$restartStatus = $restartStatus.Status
 			}
 			else
 			{
-				$restartMethod = "Restart"
-				LogMsg "[$count/$rebootCount] Step1. Stoping $hs1vm1Hostname ..."	
-				$stopVMStauts = Stop-AzureVM -ServiceName $isDeployed -Name $hs1vm1Hostname -Verbose -StayProvisioned -Force
-				if ( $stopVMStauts.OperationStatus -eq "Succeeded" )
+				$currentRestartMethod = "StopAndStart"
+				$nextRestartMethod = "Restart"
+				LogMsg "[$count/$rebootCount] Step1. Stopping $($allVMData.RoleName) ..."
+				$stopVMStauts = Stop-AzureRmVM -Name $allVMData.RoleName -ResourceGroupName $allVMData.ResourceGroupName -Force -StayProvisioned
+				if ( $stopVMStauts.Status -eq "Succeeded" )
 				{
-					LogMsg "[$count/$rebootCount] Step2. Starting $hs1vm1Hostname ..."	
-					$startVMStautus = Start-AzureVM -ServiceName $isDeployed -Name $hs1vm1Hostname -Verbose
-					if ( $startVMStautus.OperationStatus -eq "Succeeded" )
+					LogMsg "[$count/$rebootCount] Step2. Starting $($allVMData.RoleName) ..."
+					$startVMStautus = Start-AzureRmVM -Name $allVMData.RoleName -ResourceGroupName $allVMData.ResourceGroupName
+					if ( $startVMStautus.Status -eq "Succeeded" )
 					{
-						$restartStatus = $startVMStautus.OperationStatus
+						$restartStatus = $startVMStautus.Status
 					}
 					else
 					{
@@ -53,18 +50,16 @@ if ($isDeployed)
 			}
 			if ( $restartStatus -eq "Succeeded" )
 			{
-					LogMsg "VM restarted successfully"
-					$sshStatus = isAllSSHPortsEnabledRG -AllVMDataObject $AllVMData
-
-
+				LogMsg "VM restarted successfully"
+				LogMsg "Sleeping 10 seconds ..."
+				WaitFor -seconds 10
+				$sshStatus = isAllSSHPortsEnabledRG -AllVMDataObject $AllVMData
 				if ( $sshStatus -eq "True" )
 				{
 					LogMsg "SSH connection verified"
-					LogMsg "Sleeping 120 seconds ..."
-					WaitFor -seconds 120
-					$out = RunLinuxCmd -ip $hs1VIP -port $hs1vm1sshport -username $user -password $password -command "dmesg > /home/$user/InitialBootLogs.txt" -runAsSudo
-					$out = RemoteCopy -download -downloadFrom $hs1VIP -port $hs1vm1sshport -files "/home/$user/InitialBootLogs.txt" -downloadTo $currentLogDir -username $user -password $password
-					LogMsg "$hs1vm1Hostname : Kernel logs collected .."
+					$out = RunLinuxCmd -ip $($allVMData.PublicIP) -port $($allVMData.SSHPort) -username $user -password $password -command "dmesg > /home/$user/InitialBootLogs.txt" -runAsSudo
+					$out = RemoteCopy -download -downloadFrom $($allVMData.PublicIP) -port $($allVMData.SSHPort) -files "/home/$user/InitialBootLogs.txt" -downloadTo $currentLogDir -username $user -password $password
+					LogMsg "$($allVMData.RoleName) : Kernel logs collected .."
 					LogMsg "Checking for call traces in kernel logs.."
 					$KernelLogs = Get-Content "$currentLogDir\InitialBootLogs.txt"
 					$callTraceFound  = $false
@@ -87,20 +82,23 @@ if ($isDeployed)
 					{
 						LogMsg "No any call traces found."
 						$testResult = "PASS"
+						$resultSummary +=  CreateResultSummary -testResult $testResult -metaData "$count : $currentRestartMethod" -checkValues "PASS,FAIL,ABORTED" -testName "$($currentTestData.testName)"
 					}
 					else
 					{
 						LogErr "call traces found."
 						$testResult = "FAIL"
+						$resultSummary +=  CreateResultSummary -testResult $testResult -metaData "$count : $currentRestartMethod" -checkValues "PASS,FAIL,ABORTED" -testName "$($currentTestData.testName)"
 						break
 					}
-					
+
 					$count += 1
 				}
 				else
 				{
 					LogErr "SSH connection failed."
 					$testResult = "FAIL"
+					$resultSummary +=  CreateResultSummary -testResult $testResult -metaData "$count : $currentRestartMethod" -checkValues "PASS,FAIL,ABORTED" -testName "$($currentTestData.testName)"
 					break
 				}
 			}
@@ -108,6 +106,7 @@ if ($isDeployed)
 			{
 				LogErr "Failed to restart VM"
 				$testResult = "FAIL"
+				$resultSummary +=  CreateResultSummary -testResult $testResult -metaData "$count : $currentRestartMethod" -checkValues "PASS,FAIL,ABORTED" -testName "$($currentTestData.testName)"
 				break
 			}
 		}
@@ -117,7 +116,7 @@ if ($isDeployed)
 	catch
 	{
 		$ErrorMessage =  $_.Exception.Message
-		LogMsg "EXCEPTION : $ErrorMessage"   
+		LogMsg "EXCEPTION : $ErrorMessage"
 	}
 	Finally
 	{
@@ -127,8 +126,7 @@ if ($isDeployed)
 			$testResult = "Aborted"
 		}
 		$resultArr += $testResult
-#$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
-	}   
+	}
 }
 
 else
@@ -143,4 +141,4 @@ $result = GetFinalResultHeader -resultarr $resultArr
 DoTestCleanUp -result $result -testName $currentTestData.testName -deployedServices $isDeployed -ResourceGroups $isDeployed
 
 #Return the result and summery to the test suite script..
-return $result
+return $result, $resultSummary
