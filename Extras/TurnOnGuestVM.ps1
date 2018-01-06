@@ -33,14 +33,25 @@ else {
 $vmStatus = Get-AzureRMVm -ResourceGroupName $resourceGroup -Name $roleName -Status
 if (($vmStatus.Statuses | Where-Object { $_.Code -imatch "PowerState" }).Code -inotmatch "running")
 {
-    Write-Host "'$roleName' is '$(($vmStatus.Statuses | Where-Object { $_.Code -imatch "PowerState" }).Code)'. Turning it ON..."
-    $startStatus = Start-AzureRmVM -Name $roleName -ResourceGroupName $resourceGroup
-    if ($startStatus.Status -eq "Succeeded")
+    $retryCount  = 1
+    $turnONfailed = $true
+    while ($turnONfailed -and $retryCount -lt 11)
     {
-        Write-Host "Done."
-        exit 0
+        Write-Host "'$roleName' is '$(($vmStatus.Statuses | Where-Object { $_.Code -imatch "PowerState" }).Code)'. Turning it ON..."
+        $startStatus = Start-AzureRmVM -Name $roleName -ResourceGroupName $resourceGroup
+        if ($startStatus.Status -eq "Succeeded")
+        {
+            $turnONfailed = $false
+            Write-Host "Done."
+            exit 0
+        }
+        else
+        {
+            $turnONfailed = $true
+        }
+        $retryCount += 1
     }
-    else
+    if ( $retryCount -gt 10)
     {
         Write-Host "There was some issue in turning ON the VM. Please try from web portal."
         exit 1
