@@ -51,6 +51,9 @@ if ( $pwd.Path.Length -gt $maxDirLength)
 }
 
 Remove-Item -Path ".\report\report_$(($TestCycle).Trim()).xml" -Force -ErrorAction SilentlyContinue
+Remove-Item -Path ".\report\testSummary.html" -Force -ErrorAction SilentlyContinue
+mkdir -Path .\report -Force -ErrorAction SilentlyContinue | Out-Null
+Set-Content -Value "No tests ran yet." -Path ".\report\testSummary.html" -Force -ErrorAction SilentlyContinue
 
 .\Extras\CheckForNewKernelPackages.ps1
 
@@ -121,7 +124,6 @@ elseif ($StorageAccount -eq "")
 {
     $StorageAccountName = $regionStorageMapping.AllRegions.$regionName.StandardStorage
     Write-Host "Auto selecting storage account : $StorageAccountName as per your test region."
-
 }
 #if ($defaultDestinationStorageAccount -ne $StorageAccountName)
 #{
