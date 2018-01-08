@@ -18,8 +18,8 @@
     Author:         Shital Savekar <v-shisav@microsoft.com>
     Creation Date:  14th December 2017
     Purpose/Change: Initial script development
-  
-.EXAMPLE 
+
+.EXAMPLE
     .\AddAzureRmAccountFromSecretsFile.ps1 -customSecretsFilePath .\AzureSecrets.xml
 #>
 
@@ -32,7 +32,7 @@ param
 
 if ( $customSecretsFilePath ) {
     $secretsFile = $customSecretsFilePath
-    Write-Host "Using provided secrets file: $($secretsFile | Split-Path -Leaf)" 
+    Write-Host "Using provided secrets file: $($secretsFile | Split-Path -Leaf)"
 }
 if ($env:Azure_Secrets_File) {
     $secretsFile = $env:Azure_Secrets_File
@@ -55,16 +55,16 @@ if ( Test-Path $secretsFile ) {
     $Key = $xmlSecrets.secrets.SubscriptionServicePrincipalKey
     $pass = ConvertTo-SecureString $key -AsPlainText -Force
     $mycred = New-Object System.Management.Automation.PSCredential ($ClientID, $pass)
-    $out = Add-AzureRmAccount -ServicePrincipal -Tenant $TenantID -Credential $mycred	
+    $out = Add-AzureRmAccount -ServicePrincipal -Tenant $TenantID -Credential $mycred
+    $subIDSplitted = ($xmlSecrets.secrets.SubscriptionID).Split("-")
     $selectedSubscription = Select-AzureRmSubscription -SubscriptionId $xmlSecrets.secrets.SubscriptionID
     if ( $selectedSubscription.Subscription.Id -eq $xmlSecrets.secrets.SubscriptionID ) {
-        Write-Host "Current Subscription : $($xmlSecrets.secrets.SubscriptionID)."
+        Write-Host "Current Subscription : $($subIDSplitted[0])-xxxx-xxxx-xxxx-$($subIDSplitted[4])."
         Write-Host "---------------------------------"
     }
     else {
-        Write-Host "There was error selecting $($xmlSecrets.secrets.SubscriptionID)."		
+        Write-Host "There was error selecting $($subIDSplitted[0])-xxxx-xxxx-xxxx-$($subIDSplitted[4])."
         Write-Host "---------------------------------"
-        Write-Host $selectedSubscription
     }
 }
 else {
