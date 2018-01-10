@@ -7357,6 +7357,30 @@
 			</params>			
 		</test>
 		<test>
+			<testName>ICA-RDMA-TEST-MultiVM-REBOOT-STRESS</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-RDMA-TEST-MultiVM.ps1</testScriptps1>
+			<setupType>S1C15</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<remoteFiles></remoteFiles>
+			<InitialWaitSeconds>60</InitialWaitSeconds>
+			<Priority>P0</Priority>
+			<NumberOfReboots>1000</NumberOfReboots>
+			<params>
+				<param>mpi_settings="-env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 -env SECS_PER_SAMPLE=600"</param>
+				<param>imb_mpi1_tests="pingpong allreduce"</param>
+				<param>mpi1_ppn=3</param>
+				<param>imb_mpi1_tests_iterations=5</param>
+				<param>imb_rma_tests="all"</param>
+				<param>rma_ppn=2</param>
+				<param>imb_rma_tests_iterations=0</param>
+				<param>imb_nbc_tests="all"</param>
+				<param>nbc_ppn=2</param>
+				<param>imb_nbc_tests_iterations=0</param>
+			</params>
+		</test>
+		<test>
 			<testName>ICA-RDMA-TEST-2VM-A8</testName>
 			<testScript></testScript>
 			<testScriptps1>ICA-RDMA-TEST-2VM.ps1</testScriptps1>
@@ -8932,7 +8956,10 @@
 			<cycleName>RDMAMultiVM</cycleName>
 			<test>
 				<Name>ICA-RDMA-TEST-MultiVM</Name>
-			</test>			
+			</test>
+			<test>
+				<Name>ICA-RDMA-TEST-MultiVM-REBOOT-STRESS</Name>
+			</test>						
 		</Cycle>        
 		<Cycle>
 			<cycleName>RHUI-Stress</cycleName>
