@@ -1933,7 +1933,7 @@ Function GetTestVMHardwareDetails ($xmlConfigFile, $setupType, [switch]$VCPU, [s
 Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $username, $password, [switch]$upload, [switch]$download, [switch]$usePrivateKey, [switch]$doNotCompress) #Removed XML config
 {
 	$retry=1
-	$maxRetry=3
+	$maxRetry=20
 	if($upload)
 	{
 #LogMsg "Uploading the files"
@@ -1979,7 +1979,7 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 				if ( $CompressCount -eq $fileCounter )
 				{
 					$retry=1
-					$maxRetry=3
+					$maxRetry=10
 					while($retry -le $maxRetry)
 					{
 						if($usePrivateKey)
@@ -2252,7 +2252,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 		WrapperCommandsToFile $username $password $ip $command $port
 	}
 	$randomFileName = [System.IO.Path]::GetRandomFileName()
-	$maxRetryCount = 3
+	$maxRetryCount = 20
 	$currentDir = $PWD.Path
 	$RunStartTime = Get-Date
 	
@@ -5030,28 +5030,19 @@ Function VerifyDNSServerInResolvConf($DeployedServices, $dnsServerIP)
 
 Function RestartAllDeployments($allVMData)
 {
+	$currentGUID = ([guid]::newguid()).Guid
+	$out = Save-AzureRmContext -Path "$env:TEMP\$($currentGUID).azurecontext" -Force
+	$restartJobs = @()	
 	foreach ( $vmData in $AllVMData )
 	{
 		if ( $UseAzureResourceManager)
 		{
-			$restartVM = Restart-AzureRmVM -ResourceGroupName $vmData.ResourceGroupName -Name $vmData.RoleName -Verbose
-			if ( $restartVM.Status -eq "Succeeded" )
-			{
-				LogMsg "Restarted : $($vmData.RoleName)"
-			}
-			else
-			{
-				LogErr "FAILED TO RESTART : $($vmData.RoleName)"
-				$retryCount = $retryCount + 1
-				if ($retryCount -gt 0)
-				{
-					LogMsg "Retrying..."
-				}
-				if ($retryCount -eq 0)
-				{
-					Throw "Unable to Restart : $($vmData.RoleName)"
-				}
-			}
+			LogMsg "Triggering Restart-$($vmData.RoleName)..."
+			$restartJobs += Start-Job -ScriptBlock { $vmData = $args[0]
+				$currentGUID = $args[1]
+				Import-AzureRmContext -AzureContext "$env:TEMP\$($currentGUID).azurecontext"
+				$restartVM = Restart-AzureRmVM -ResourceGroupName $vmData.ResourceGroupName -Name $vmData.RoleName -Verbose
+			} -ArgumentList $vmData,$currentGUID -Name "Restart-$($vmData.RoleName)"
 		}
 		else
 		{
@@ -5076,6 +5067,34 @@ Function RestartAllDeployments($allVMData)
 			}
 		}
 	}
+	$recheckAgain = $true
+	LogMsg "Waiting until VMs restart..."
+	$jobCount = $restartJobs.Count
+	$completedJobsCount = 0
+	While ($recheckAgain)
+	{
+		$recheckAgain = $false
+		$tempJobs = @()
+		foreach ($restartJob in $restartJobs)
+		{
+			if ($restartJob.State -eq "Completed")
+			{
+				$completedJobsCount += 1
+				LogMsg "[$completedJobsCount/$jobCount] $($restartJob.Name) is done."
+				$out = Remove-Job -Id $restartJob.ID -Force -ErrorAction SilentlyContinue
+			}
+			else
+			{
+				$tempJobs += $restartJob
+				$recheckAgain = $true
+			}
+		}
+		$restartJobs = $tempJobs
+		Start-Sleep -Seconds 1
+	}
+	
+	Remove-Item -Path "$env:TEMP\$($currentGUID).azurecontext" -Force -ErrorAction SilentlyContinue | Out-Null
+
 	$isSSHOpened = isAllSSHPortsEnabledRG -AllVMDataObject $AllVMData
 	return $isSSHOpened
 }

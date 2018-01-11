@@ -64,12 +64,13 @@ if ($isDeployed)
 			LogMsg "  RoleName : $($clientVMData.RoleName)"
 			LogMsg "  Public IP : $($clientVMData.PublicIP)"
 			LogMsg "  SSH Port : $($clientVMData.SSHPort)"
-			$i += 1		
+			$i += 1
 		}
+		$firstRun = $true
 		#
-		# PROVISION VMS FOR LISA WILL ENABLE ROOT USER AND WILL MAKE ENABLE PASSWORDLESS AUTHENTICATION ACROSS ALL VMS IN SAME HOSTED SERVICE.	
+		# PROVISION VMS FOR LISA WILL ENABLE ROOT USER AND WILL MAKE ENABLE PASSWORDLESS AUTHENTICATION ACROSS ALL VMS IN SAME HOSTED SERVICE.
 		#
-		
+
 		ProvisionVMsForLisa -allVMData $allVMData -installPackagesOnRoleNames "none"
 
 		#endregion
@@ -104,7 +105,7 @@ if ($isDeployed)
 		LogMsg "slaves=$slaveHostnames added to constansts.sh"
 
 		LogMsg "constanst.sh created successfully..."
-		#endregion		
+		#endregion
 
 		#region Upload files to master VM...
 		RemoteCopy -uploadTo $serverVMData.PublicIP -port $serverVMData.SSHPort -files "$constantsFile,.\remote-scripts\TestRDMA_MultiVM.sh" -username "root" -password $password -upload
@@ -118,107 +119,79 @@ if ($isDeployed)
 		$iteration = 0
 		do
 		{
-			
-			#region EXECUTE TEST
-			$iteration += 1
-			LogMsg "********************************Iteration - $iteration/$ExpectedSuccessCount***********************************************"
-			$testJob = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "/root/TestRDMA_MultiVM.sh" -RunInBackground
-			#endregion
-
-			#region MONITOR TEST
-			while ( (Get-Job -Id $testJob).State -eq "Running" )
+			if ($firstRun)
 			{
-				$currentStatus = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "tail -n 1 /root/TestRDMALogs.txt"
-				LogMsg "Current Test Staus : $currentStatus"
-				WaitFor -seconds 10
-			}
-			
-			RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/eth1-status*"
-			RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/IMB-*"
-			RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/kernel-logs-*"
-			RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/TestRDMALogs.txt"
-			RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/state.txt"
-			$consoleOutput =  ( Get-Content -Path "$LogDir\TestRDMALogs.txt" | Out-String ) 		
-			$finalStatus = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "cat /root/state.txt"
-			if($iteration -eq 1)
-			{
-				$tempName = "FirstBoot"
-			}
-			else 
-			{
-				$tempName = "Reboot"	
-			}
-			$out = mkdir -Path "$LogDir\InfiniBand-Verification-$iteration-$tempName" -Force | Out-Null
-			$out = Move-Item -Path "$LogDir\eth1-status*" -Destination "$LogDir\InfiniBand-Verification-$iteration-$tempName" | Out-Null
-			$out = Move-Item -Path "$LogDir\IMB-*" -Destination "$LogDir\InfiniBand-Verification-$iteration-$tempName" | Out-Null
-			$out = Move-Item -Path "$LogDir\kernel-logs-*" -Destination "$LogDir\InfiniBand-Verification-$iteration-$tempName" | Out-Null
-			$out = Move-Item -Path "$LogDir\TestRDMALogs.txt" -Destination "$LogDir\InfiniBand-Verification-$iteration-$tempName" | Out-Null
-			$out = Move-Item -Path "$LogDir\state.txt" -Destination "$LogDir\InfiniBand-Verification-$iteration-$tempName" | Out-Null
-			
-			#region Check if eth1 got IP address
-			$logFileName = "$LogDir\InfiniBand-Verification-$iteration-$tempName\TestRDMALogs.txt"
-			$pattern = "INFINIBAND_VERIFICATION_SUCCESS_ETH1"
-			LogMsg "Analysing $logFileName"
-			$metaData = "InfiniBand-Verification-$iteration-$tempName : eth1 IP"				
-			$sucessLogs = Select-String -Path $logFileName -Pattern $pattern
-			if ($sucessLogs.Count -eq 1)
-			{
-				$currentResult = "PASS"
+				$firstRun = $false
+				$continueMPITest = $true
+				foreach ( $clientVMData in $clientMachines )
+				{
+					LogMsg "Getting initial MAC address info from $($clientVMData.RoleName)"
+					RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password "ifconfig eth1 | grep ether | awk '{print `$2}' > InitialInfiniBandMAC.txt"
+				}
 			}
 			else
 			{
-				$currentResult = "FAIL"
+				$continueMPITest = $true
+				foreach ( $clientVMData in $clientMachines )
+				{
+					LogMsg "Step 1/2: Getting current MAC address info from $($clientVMData.RoleName)"
+					$currentMAC = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password "ifconfig eth1 | grep ether | awk '{print `$2}'"
+					$InitialMAC = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password "cat InitialInfiniBandMAC.txt"
+					if ($currentMAC -eq $InitialMAC)
+					{
+						LogMsg "Step 2/2: MAC address verified in $($clientVMData.RoleName)."
+					}
+					else
+					{
+						LogErr "Step 2/2: MAC address swapped / changed in $($clientVMData.RoleName)."
+						$continueMPITest = $false
+					}
+				}
 			}
-			LogMsg "$pattern : $currentResult"
-			$resultArr += $currentResult
-			$resultSummary +=  CreateResultSummary -testResult $currentResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName			
-			#endregion
 
-			#region Check MPI pingpong intranode tests
-			$logFileName = "$LogDir\InfiniBand-Verification-$iteration-$tempName\TestRDMALogs.txt"
-			$pattern = "INFINIBAND_VERIFICATION_SUCCESS_MPI1_INTRANODE"
-			LogMsg "Analysing $logFileName"
-			$metaData = "InfiniBand-Verification-$iteration-$tempName : PingPong Intranode"				
-			$sucessLogs = Select-String -Path $logFileName -Pattern $pattern
-			if ($sucessLogs.Count -eq 1)
+			if($continueMPITest)
 			{
-				$currentResult = "PASS"
-			}
-			else
-			{
-				$currentResult = "FAIL"
-			}
-			LogMsg "$pattern : $currentResult"
-			$resultArr += $currentResult
-			$resultSummary +=  CreateResultSummary -testResult $currentResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName			
-			#endregion
+				#region EXECUTE TEST
+				$iteration += 1
+				LogMsg "********************************Iteration - $iteration/$ExpectedSuccessCount***********************************************"
+				$testJob = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "/root/TestRDMA_MultiVM.sh" -RunInBackground
+				#endregion
 
-			#region Check MPI pingpong internode tests
-			$logFileName = "$LogDir\InfiniBand-Verification-$iteration-$tempName\TestRDMALogs.txt"
-			$pattern = "INFINIBAND_VERIFICATION_SUCCESS_MPI1_INTERNODE"
-			LogMsg "Analysing $logFileName"
-			$metaData = "InfiniBand-Verification-$iteration-$tempName : PingPong Internode"				
-			$sucessLogs = Select-String -Path $logFileName -Pattern $pattern
-			if ($sucessLogs.Count -eq 1)
-			{
-				$currentResult = "PASS"
-			}
-			else
-			{
-				$currentResult = "FAIL"
-			}
-			LogMsg "$pattern : $currentResult"
-			$resultArr += $currentResult
-			$resultSummary +=  CreateResultSummary -testResult $currentResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName			
-			#endregion
+				#region MONITOR TEST
+				while ( (Get-Job -Id $testJob).State -eq "Running" )
+				{
+					$currentStatus = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "tail -n 1 /root/TestRDMALogs.txt"
+					LogMsg "Current Test Staus : $currentStatus"
+					WaitFor -seconds 10
+				}
 
-			#region Check MPI1 all nodes tests
-			if ( $imb_mpi1_test_iterations -ge 1)
-			{
+				RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/eth1-status*"
+				RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/IMB-*"
+				RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/kernel-logs-*"
+				RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/TestRDMALogs.txt"
+				RemoteCopy -downloadFrom $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -download -downloadTo $LogDir -files "/root/state.txt"
+				$consoleOutput =  ( Get-Content -Path "$LogDir\TestRDMALogs.txt" | Out-String )
+				$finalStatus = RunLinuxCmd -ip $serverVMData.PublicIP -port $serverVMData.SSHPort -username "root" -password $password -command "cat /root/state.txt"
+				if($iteration -eq 1)
+				{
+					$tempName = "FirstBoot"
+				}
+				else
+				{
+					$tempName = "Reboot"
+				}
+				$out = mkdir -Path "$LogDir\InfiniBand-Verification-$iteration-$tempName" -Force | Out-Null
+				$out = Move-Item -Path "$LogDir\eth1-status*" -Destination "$LogDir\InfiniBand-Verification-$iteration-$tempName" | Out-Null
+				$out = Move-Item -Path "$LogDir\IMB-*" -Destination "$LogDir\InfiniBand-Verification-$iteration-$tempName" | Out-Null
+				$out = Move-Item -Path "$LogDir\kernel-logs-*" -Destination "$LogDir\InfiniBand-Verification-$iteration-$tempName" | Out-Null
+				$out = Move-Item -Path "$LogDir\TestRDMALogs.txt" -Destination "$LogDir\InfiniBand-Verification-$iteration-$tempName" | Out-Null
+				$out = Move-Item -Path "$LogDir\state.txt" -Destination "$LogDir\InfiniBand-Verification-$iteration-$tempName" | Out-Null
+
+				#region Check if eth1 got IP address
 				$logFileName = "$LogDir\InfiniBand-Verification-$iteration-$tempName\TestRDMALogs.txt"
-				$pattern = "INFINIBAND_VERIFICATION_SUCCESS_MPI1_ALLNODES"
+				$pattern = "INFINIBAND_VERIFICATION_SUCCESS_ETH1"
 				LogMsg "Analysing $logFileName"
-				$metaData = "InfiniBand-Verification-$iteration-$tempName : IMB-MPI1"				
+				$metaData = "InfiniBand-Verification-$iteration-$tempName : eth1 IP"
 				$sucessLogs = Select-String -Path $logFileName -Pattern $pattern
 				if ($sucessLogs.Count -eq 1)
 				{
@@ -231,16 +204,13 @@ if ($isDeployed)
 				LogMsg "$pattern : $currentResult"
 				$resultArr += $currentResult
 				$resultSummary +=  CreateResultSummary -testResult $currentResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
-			}
-			#endregion
+				#endregion
 
-			#region Check RMA all nodes tests
-			if ( $imb_rma_tests_iterations -ge 1)
-			{
+				#region Check MPI pingpong intranode tests
 				$logFileName = "$LogDir\InfiniBand-Verification-$iteration-$tempName\TestRDMALogs.txt"
-				$pattern = "INFINIBAND_VERIFICATION_SUCCESS_RMA_ALLNODES"
+				$pattern = "INFINIBAND_VERIFICATION_SUCCESS_MPI1_INTRANODE"
 				LogMsg "Analysing $logFileName"
-				$metaData = "InfiniBand-Verification-$iteration-$tempName : IMB-RMA"				
+				$metaData = "InfiniBand-Verification-$iteration-$tempName : PingPong Intranode"
 				$sucessLogs = Select-String -Path $logFileName -Pattern $pattern
 				if ($sucessLogs.Count -eq 1)
 				{
@@ -253,16 +223,13 @@ if ($isDeployed)
 				LogMsg "$pattern : $currentResult"
 				$resultArr += $currentResult
 				$resultSummary +=  CreateResultSummary -testResult $currentResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
-			}
-			#endregion
+				#endregion
 
-			#region Check NBC all nodes tests
-			if ( $imb_nbc_tests_iterations -ge 1)
-			{
+				#region Check MPI pingpong internode tests
 				$logFileName = "$LogDir\InfiniBand-Verification-$iteration-$tempName\TestRDMALogs.txt"
-				$pattern = "INFINIBAND_VERIFICATION_SUCCESS_RMA_ALLNODES"
+				$pattern = "INFINIBAND_VERIFICATION_SUCCESS_MPI1_INTERNODE"
 				LogMsg "Analysing $logFileName"
-				$metaData = "InfiniBand-Verification-$iteration-$tempName : IMB-NBC"				
+				$metaData = "InfiniBand-Verification-$iteration-$tempName : PingPong Internode"
 				$sucessLogs = Select-String -Path $logFileName -Pattern $pattern
 				if ($sucessLogs.Count -eq 1)
 				{
@@ -275,20 +242,92 @@ if ($isDeployed)
 				LogMsg "$pattern : $currentResult"
 				$resultArr += $currentResult
 				$resultSummary +=  CreateResultSummary -testResult $currentResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
-			}
-			#endregion
+				#endregion
 
-			if ($finalStatus -imatch "TestCompleted")
-			{
-				LogMsg "Test finished successfully."
-				LogMsg $consoleOutput
+				#region Check MPI1 all nodes tests
+				if ( $imb_mpi1_test_iterations -ge 1)
+				{
+					$logFileName = "$LogDir\InfiniBand-Verification-$iteration-$tempName\TestRDMALogs.txt"
+					$pattern = "INFINIBAND_VERIFICATION_SUCCESS_MPI1_ALLNODES"
+					LogMsg "Analysing $logFileName"
+					$metaData = "InfiniBand-Verification-$iteration-$tempName : IMB-MPI1"
+					$sucessLogs = Select-String -Path $logFileName -Pattern $pattern
+					if ($sucessLogs.Count -eq 1)
+					{
+						$currentResult = "PASS"
+					}
+					else
+					{
+						$currentResult = "FAIL"
+					}
+					LogMsg "$pattern : $currentResult"
+					$resultArr += $currentResult
+					$resultSummary +=  CreateResultSummary -testResult $currentResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+				}
+				#endregion
+
+				#region Check RMA all nodes tests
+				if ( $imb_rma_tests_iterations -ge 1)
+				{
+					$logFileName = "$LogDir\InfiniBand-Verification-$iteration-$tempName\TestRDMALogs.txt"
+					$pattern = "INFINIBAND_VERIFICATION_SUCCESS_RMA_ALLNODES"
+					LogMsg "Analysing $logFileName"
+					$metaData = "InfiniBand-Verification-$iteration-$tempName : IMB-RMA"
+					$sucessLogs = Select-String -Path $logFileName -Pattern $pattern
+					if ($sucessLogs.Count -eq 1)
+					{
+						$currentResult = "PASS"
+					}
+					else
+					{
+						$currentResult = "FAIL"
+					}
+					LogMsg "$pattern : $currentResult"
+					$resultArr += $currentResult
+					$resultSummary +=  CreateResultSummary -testResult $currentResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+				}
+				#endregion
+
+				#region Check NBC all nodes tests
+				if ( $imb_nbc_tests_iterations -ge 1)
+				{
+					$logFileName = "$LogDir\InfiniBand-Verification-$iteration-$tempName\TestRDMALogs.txt"
+					$pattern = "INFINIBAND_VERIFICATION_SUCCESS_RMA_ALLNODES"
+					LogMsg "Analysing $logFileName"
+					$metaData = "InfiniBand-Verification-$iteration-$tempName : IMB-NBC"
+					$sucessLogs = Select-String -Path $logFileName -Pattern $pattern
+					if ($sucessLogs.Count -eq 1)
+					{
+						$currentResult = "PASS"
+					}
+					else
+					{
+						$currentResult = "FAIL"
+					}
+					LogMsg "$pattern : $currentResult"
+					$resultArr += $currentResult
+					$resultSummary +=  CreateResultSummary -testResult $currentResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName
+				}
+				#endregion
+
+				if ($finalStatus -imatch "TestCompleted")
+				{
+					LogMsg "Test finished successfully."
+					LogMsg $consoleOutput
+				}
+				else
+				{
+					LogErr "Test failed."
+					LogErr $consoleOutput
+				}
+				#endregion
+
+
 			}
 			else
 			{
-				LogErr "Test failed."
-				LogErr $consoleOutput
+				$finalStatus = "TestFailed"
 			}
-			#endregion
 
 			if ( $finalStatus -imatch "TestFailed")
 			{
@@ -315,18 +354,25 @@ if ($isDeployed)
 			LogMsg "*********************************************************************************************"
 			if ($remainingRebootIterations -gt 0)
 			{
-				$RestartStatus = RestartAllDeployments -allVMData $allVMData
-				$remainingRebootIterations -= 1
-			}
-			
-		}
-		while(($ExpectedSuccessCount -ne $iteration) -and ($RestartStatus -eq "True"))
+				if ($testResult -eq "PASS")
+				{
+					$RestartStatus = RestartAllDeployments -allVMData $allVMData
+					$remainingRebootIterations -= 1
+				}
+				else
+				{
+					Write-Host "Stopping the test."
+				}
 
+			}
+
+		}
+		while(($ExpectedSuccessCount -ne $iteration) -and ($RestartStatus -eq "True") -and ($testResult -eq "PASS"))
 		if ( $ExpectedSuccessCount -eq $totalSuccessCount )
 		{
 			$testResult = "PASS"
 		}
-		else 
+		else
 		{
 			$testResult = "FAIL"
 		}
@@ -337,7 +383,7 @@ if ($isDeployed)
 	catch
 	{
 		$ErrorMessage =  $_.Exception.Message
-		LogMsg "EXCEPTION : $ErrorMessage"   
+		LogMsg "EXCEPTION : $ErrorMessage"
 	}
 	Finally
 	{
@@ -346,7 +392,7 @@ if ($isDeployed)
 			$testResult = "Aborted"
 		}
 		$resultArr += $testResult
-	}   
+	}
 }
 
 else
