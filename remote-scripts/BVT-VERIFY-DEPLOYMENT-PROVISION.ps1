@@ -11,14 +11,23 @@ if ($isDeployed)
 
 	try
 	{
-		LogMsg "Test Result : PASS."
-		$testResult = "PASS"
+		$RestartStatus = RestartAllDeployments -allVMData $allVMData
+		if($RestartStatus -eq "True")
+		{
+			LogMsg "Test Result : PASS."
+			$testResult = "PASS"
+		}
+		else
+		{
+			LogMsg "Test Result : FAIL."
+			$testResult = "FAIL"
+		}
 	}
 
 	catch
 	{
 		$ErrorMessage =  $_.Exception.Message
-		LogMsg "EXCEPTION : $ErrorMessage"   
+		LogMsg "EXCEPTION : $ErrorMessage"
 	}
 	Finally
 	{
@@ -29,7 +38,7 @@ if ($isDeployed)
 		}
 		$resultArr += $testResult
 #$resultSummary +=  CreateResultSummary -testResult $testResult -metaData $metaData -checkValues "PASS,FAIL,ABORTED" -testName $currentTestData.testName# if you want to publish all result then give here all test status possibilites. if you want just failed results, then give here just "FAIL". You can use any combination of PASS FAIL ABORTED and corresponding test results will be published!
-	}   
+	}
 }
 
 else
