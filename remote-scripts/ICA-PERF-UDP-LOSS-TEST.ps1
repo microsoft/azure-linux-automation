@@ -196,7 +196,7 @@ collect_VM_properties
 						{
 							LogErr "   $fileName : RETURNED NULL"
 						}
-						if ( $currentInstanceclientJsonObj.end.sum.lost_percent )
+						if ( $currentInstanceclientJsonObj.end.sum.lost_percent -or $currentInstanceserverJsonObj.end.sum.packets)
 						{
 							$currentConnectionClientUDPLossArr += $currentInstanceclientJsonObj.end.sum.lost_percent
 
@@ -242,7 +242,7 @@ collect_VM_properties
 						{
 							LogErr "   $fileName : RETURNED NULL"
 						}
-						if ( $currentInstanceserverJsonObj.end.sum.lost_percent )
+						if ( $currentInstanceserverJsonObj.end.sum.lost_percent -or $currentInstanceserverJsonObj.end.sum.packets )
 						{
 							$currentConnectionserverUDPLossArr += $currentInstanceserverJsonObj.end.sum.lost_percent
 
