@@ -231,7 +231,10 @@ collect_VM_properties
 			$GuestDistro	= cat "$LogDir\VM_properties.csv" | Select-String "OS type"| %{$_ -replace ",OS type,",""}
 			$GuestSize = $clientVMData.InstanceSize
 			$KernelVersion	= cat "$LogDir\VM_properties.csv" | Select-String "Kernel version"| %{$_ -replace ",Kernel version,",""}
-			$KernelVersion = $KernelVersion.Trim().Substring(0,28)
+			if ( $KernelVersion.Length -ge 28 )
+			{
+				$KernelVersion = $KernelVersion.Trim().Substring(0,28)
+			}
 			$ProtocolType = "TCP"
 
 
