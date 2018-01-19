@@ -2369,7 +2369,7 @@ Function RunLinuxCmd([string] $username,[string] $password,[string] $ip,[string]
 					$timeOut = $true
 				}
 			}
-			WaitFor -seconds 5
+			WaitFor -seconds 2
 			$SSHOut = Receive-Job $runLinuxCmdJob 2> $LogDir\$randomFileName
 			if($SSHOut )
 			{
