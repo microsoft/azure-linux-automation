@@ -1103,148 +1103,155 @@ Function RemoveICAUnusedDataDisks()
 #function to collect and compare kernel logs
 Function GetAndCheckKernelLogs($allDeployedVMs, $status, $vmUser, $vmPassword)
 {
-	if ( !$vmUser )
+	try
 	{
-		$vmUser = $user
-	}
-	if ( !$vmPassword )
-	{
-		$vmPassword = $password
-	}
-	$retValue = $false
-	foreach ($VM in $allDeployedVMs)
-	{
-		$BootLogDir="$Logdir\$($VM.RoleName)"
-		mkdir $BootLogDir -Force | Out-Null			
-		LogMsg "Collecting $($VM.RoleName) VM Kernel $status Logs.."
-		$InitailBootLog="$BootLogDir\InitialBootLogs.txt"
-		$FinalBootLog="$BootLogDir\FinalBootLogs.txt"
-		$KernelLogStatus="$BootLogDir\KernelLogStatus.txt"
-		if($status -imatch "Initial")
+		if ( !$vmUser )
 		{
-			$randomFileName = [System.IO.Path]::GetRandomFileName()
-			Set-Content -Value "A Random file." -Path "$Logdir\$randomFileName"
-			$out = RemoteCopy -uploadTo $VM.PublicIP -port $VM.SSHPort  -files "$Logdir\$randomFileName" -username $vmUser -password $vmPassword -upload
-			Remove-Item -Path "$Logdir\$randomFileName" -Force
-			$out = RunLinuxCmd -ip $VM.PublicIP -port $VM.SSHPort -username $vmUser -password $vmPassword -command "dmesg > /home/$vmUser/InitialBootLogs.txt" -runAsSudo
-			$out = RemoteCopy -download -downloadFrom $VM.PublicIP -port $VM.SSHPort -files "/home/$vmUser/InitialBootLogs.txt" -downloadTo $BootLogDir -username $vmUser -password $vmPassword
-			LogMsg "$($VM.RoleName): $status Kernel logs collected ..SUCCESSFULLY"
-			LogMsg "Checking for call traces in kernel logs.."
-			$KernelLogs = Get-Content $InitailBootLog 
-			$callTraceFound  = $false
-			foreach ( $line in $KernelLogs )
-			{
-				if ( $line -imatch "Call Trace" )
-				{
-					LogErr $line
-					$callTraceFound = $true
-				}
-				if ( $callTraceFound )
-				{
-					if ( $line -imatch "\[<")
-					{
-						LogErr $line
-					}
-				}
-			}
-			if ( !$callTraceFound )
-			{
-				LogMsg "No any call traces found."
-			}
-			$detectedDistro = DetectLinuxDistro -VIP $VM.PublicIP -SSHport $VM.SSHPort -testVMUser $vmUser -testVMPassword $vmPassword
-			SetDistroSpecificVariables -detectedDistro $detectedDistro
-			$retValue = $true
+			$vmUser = $user
 		}
-		elseif($status -imatch "Final")
+		if ( !$vmPassword )
 		{
-			$out = RunLinuxCmd -ip $VM.PublicIP -port $VM.SSHPort -username $vmUser -password $vmPassword -command "dmesg > /home/$vmUser/FinalBootLogs.txt" -runAsSudo
-			$out = RemoteCopy -download -downloadFrom $VM.PublicIP -port $VM.SSHPort -files "/home/$vmUser/FinalBootLogs.txt" -downloadTo $BootLogDir -username $vmUser -password $vmPassword
-			LogMsg "Checking for call traces in kernel logs.."
-			$KernelLogs = Get-Content $FinalBootLog
-			$callTraceFound  = $false
-			foreach ( $line in $KernelLogs )
+			$vmPassword = $password
+		}
+		$retValue = $false
+		foreach ($VM in $allDeployedVMs)
+		{
+			$BootLogDir="$Logdir\$($VM.RoleName)"
+			mkdir $BootLogDir -Force | Out-Null			
+			LogMsg "Collecting $($VM.RoleName) VM Kernel $status Logs.."
+			$InitailBootLog="$BootLogDir\InitialBootLogs.txt"
+			$FinalBootLog="$BootLogDir\FinalBootLogs.txt"
+			$KernelLogStatus="$BootLogDir\KernelLogStatus.txt"
+			if($status -imatch "Initial")
 			{
-				if ( $line -imatch "Call Trace" )
+				$randomFileName = [System.IO.Path]::GetRandomFileName()
+				Set-Content -Value "A Random file." -Path "$Logdir\$randomFileName"
+				$out = RemoteCopy -uploadTo $VM.PublicIP -port $VM.SSHPort  -files "$Logdir\$randomFileName" -username $vmUser -password $vmPassword -upload
+				Remove-Item -Path "$Logdir\$randomFileName" -Force
+				$out = RunLinuxCmd -ip $VM.PublicIP -port $VM.SSHPort -username $vmUser -password $vmPassword -command "dmesg > /home/$vmUser/InitialBootLogs.txt" -runAsSudo
+				$out = RemoteCopy -download -downloadFrom $VM.PublicIP -port $VM.SSHPort -files "/home/$vmUser/InitialBootLogs.txt" -downloadTo $BootLogDir -username $vmUser -password $vmPassword
+				LogMsg "$($VM.RoleName): $status Kernel logs collected ..SUCCESSFULLY"
+				LogMsg "Checking for call traces in kernel logs.."
+				$KernelLogs = Get-Content $InitailBootLog 
+				$callTraceFound  = $false
+				foreach ( $line in $KernelLogs )
 				{
-					LogErr $line
-					$callTraceFound = $true
-				}
-				if ( $callTraceFound )
-				{
-					if ( $line -imatch "\[<")
+					if ( $line -imatch "Call Trace" )
 					{
 						LogErr $line
+						$callTraceFound = $true
+					}
+					if ( $callTraceFound )
+					{
+						if ( $line -imatch "\[<")
+						{
+							LogErr $line
+						}
 					}
 				}
-			}
-			if ( !$callTraceFound )
-			{
-				LogMsg "No any call traces found."
-			}
-			$KernelDiff = Compare-Object -ReferenceObject (Get-Content $FinalBootLog) -DifferenceObject (Get-Content $InitailBootLog)
-			#Removing final dmesg file from logs to reduce the size of logs. We can alwayas see complete Final Logs as : Initial Kernel Logs + Difference in Kernel Logs
-			Remove-Item -Path $FinalBootLog -Force | Out-Null
-			if($KernelDiff -eq $null)
-			{
-				LogMsg "** Initial and Final Kernel Logs has same content **"  
-				Set-Content -Value "*** Initial and Final Kernel Logs has same content ***" -Path $KernelLogStatus
+				if ( !$callTraceFound )
+				{
+					LogMsg "No any call traces found."
+				}
+				$detectedDistro = DetectLinuxDistro -VIP $VM.PublicIP -SSHport $VM.SSHPort -testVMUser $vmUser -testVMPassword $vmPassword
+				SetDistroSpecificVariables -detectedDistro $detectedDistro
 				$retValue = $true
 			}
-			else
+			elseif($status -imatch "Final")
 			{
-				$errorCount = 0
-				Set-Content -Value "Following lines were added in the kernel log during execution of test." -Path $KernelLogStatus
-				LogMsg "Following lines were added in the kernel log during execution of test." 
-				Add-Content -Value "-------------------------------START----------------------------------" -Path $KernelLogStatus
-				foreach ($line in $KernelDiff)
+				$out = RunLinuxCmd -ip $VM.PublicIP -port $VM.SSHPort -username $vmUser -password $vmPassword -command "dmesg > /home/$vmUser/FinalBootLogs.txt" -runAsSudo
+				$out = RemoteCopy -download -downloadFrom $VM.PublicIP -port $VM.SSHPort -files "/home/$vmUser/FinalBootLogs.txt" -downloadTo $BootLogDir -username $vmUser -password $vmPassword
+				LogMsg "Checking for call traces in kernel logs.."
+				$KernelLogs = Get-Content $FinalBootLog
+				$callTraceFound  = $false
+				foreach ( $line in $KernelLogs )
 				{
-					Add-Content -Value $line.InputObject -Path $KernelLogStatus
-					if ( ($line.InputObject -imatch "fail") -or ($line.InputObject -imatch "error") -or ($line.InputObject -imatch "warning"))
+					if ( $line -imatch "Call Trace" )
 					{
-						$errorCount += 1
-						LogErr $line.InputObject
+						LogErr $line
+						$callTraceFound = $true
 					}
-					else
+					if ( $callTraceFound )
 					{
-						LogMsg $line.InputObject
+						if ( $line -imatch "\[<")
+						{
+							LogErr $line
+						}
 					}
 				}
-				Add-Content -Value "--------------------------------EOF-----------------------------------" -Path $KernelLogStatus
-			}
-			LogMsg "$($VM.RoleName): $status Kernel logs collected and Compared ..SUCCESSFULLY"
-			if ($errorCount -gt 0)
-			{
-				LogErr "Found $errorCount fail/error/warning messages in kernel logs during execution."
-				$retValue = $false
-			}
-			if ( $callTraceFound )
-			{
-				if ( $UseAzureResourceManager )
+				if ( !$callTraceFound )
 				{
-					LogMsg "Preserving the Resource Group(s) $($VM.ResourceGroupName)"
-					LogMsg "Setting tags : $preserveKeyword = yes; testName = $testName"
-					$hash = @{}
-					$hash.Add($preserveKeyword,"yes")
-					$hash.Add("testName","$testName")
-					$out = Set-AzureRmResourceGroup -Name $($VM.ResourceGroupName) -Tag $hash
-					LogMsg "Setting tags : calltrace = yes; testName = $testName"
-					$hash = @{}
-					$hash.Add("calltrace","yes")
-					$hash.Add("testName","$testName")
-					$out = Set-AzureRmResourceGroup -Name $($VM.ResourceGroupName) -Tag $hash
+					LogMsg "No any call traces found."
+				}
+				$KernelDiff = Compare-Object -ReferenceObject (Get-Content $FinalBootLog) -DifferenceObject (Get-Content $InitailBootLog)
+				#Removing final dmesg file from logs to reduce the size of logs. We can alwayas see complete Final Logs as : Initial Kernel Logs + Difference in Kernel Logs
+				Remove-Item -Path $FinalBootLog -Force | Out-Null
+				if($KernelDiff -eq $null)
+				{
+					LogMsg "** Initial and Final Kernel Logs has same content **"  
+					Set-Content -Value "*** Initial and Final Kernel Logs has same content ***" -Path $KernelLogStatus
+					$retValue = $true
 				}
 				else
 				{
-					LogMsg "Adding preserve tag to $($VM.ServiceName) .."
-					$out = Set-AzureService -ServiceName $($VM.ServiceName) -Description $preserveKeyword
+					$errorCount = 0
+					Set-Content -Value "Following lines were added in the kernel log during execution of test." -Path $KernelLogStatus
+					LogMsg "Following lines were added in the kernel log during execution of test." 
+					Add-Content -Value "-------------------------------START----------------------------------" -Path $KernelLogStatus
+					foreach ($line in $KernelDiff)
+					{
+						Add-Content -Value $line.InputObject -Path $KernelLogStatus
+						if ( ($line.InputObject -imatch "fail") -or ($line.InputObject -imatch "error") -or ($line.InputObject -imatch "warning"))
+						{
+							$errorCount += 1
+							LogErr $line.InputObject
+						}
+						else
+						{
+							LogMsg $line.InputObject
+						}
+					}
+					Add-Content -Value "--------------------------------EOF-----------------------------------" -Path $KernelLogStatus
+				}
+				LogMsg "$($VM.RoleName): $status Kernel logs collected and Compared ..SUCCESSFULLY"
+				if ($errorCount -gt 0)
+				{
+					LogErr "Found $errorCount fail/error/warning messages in kernel logs during execution."
+					$retValue = $false
+				}
+				if ( $callTraceFound )
+				{
+					if ( $UseAzureResourceManager )
+					{
+						LogMsg "Preserving the Resource Group(s) $($VM.ResourceGroupName)"
+						LogMsg "Setting tags : $preserveKeyword = yes; testName = $testName"
+						$hash = @{}
+						$hash.Add($preserveKeyword,"yes")
+						$hash.Add("testName","$testName")
+						$out = Set-AzureRmResourceGroup -Name $($VM.ResourceGroupName) -Tag $hash
+						LogMsg "Setting tags : calltrace = yes; testName = $testName"
+						$hash = @{}
+						$hash.Add("calltrace","yes")
+						$hash.Add("testName","$testName")
+						$out = Set-AzureRmResourceGroup -Name $($VM.ResourceGroupName) -Tag $hash
+					}
+					else
+					{
+						LogMsg "Adding preserve tag to $($VM.ServiceName) .."
+						$out = Set-AzureService -ServiceName $($VM.ServiceName) -Description $preserveKeyword
+					}
 				}
 			}
+			else
+			{
+				LogMsg "pass value for status variable either final or initial"
+				$retValue = $false
+			}
 		}
-		else
-		{
-			LogMsg "pass value for status variable either final or initial"
-			$retValue = $false
-		}
+	}
+	catch
+	{
+		$retValue = $false
 	}
 	return $retValue
 }

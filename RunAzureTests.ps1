@@ -328,12 +328,15 @@ try
 {
     if (Test-Path -Path ".\report\report_$(($TestCycle).Trim()).xml" )
     {
-        Write-Host "Analysing results.."
         $resultXML = [xml](Get-Content ".\report\report_$(($TestCycle).Trim()).xml" -ErrorAction SilentlyContinue)
+        Copy-Item -Path ".\report\report_$(($TestCycle).Trim()).xml" -Destination ".\report\report_$(($TestCycle).Trim())-$shortRandomNumber-junit.xml" -Force -ErrorAction SilentlyContinue
+        Write-Host "Copied : .\report\report_$(($TestCycle).Trim()).xml --> .\report\report_$(($TestCycle).Trim())-$shortRandomNumber-junit.xml"
+        Write-Host "Analysing results.."
+        Write-Host "PASS  : $($resultXML.testsuites.testsuite.tests - $resultXML.testsuites.testsuite.errors - $resultXML.testsuites.testsuite.failures)"
+        Write-Host "FAIL  : $($resultXML.testsuites.testsuite.failures)"
+        Write-Host "ABORT : $($resultXML.testsuites.testsuite.errors)"
         if ( ( $resultXML.testsuites.testsuite.failures -eq 0 ) -and ( $resultXML.testsuites.testsuite.errors -eq 0 ) -and ( $resultXML.testsuites.testsuite.tests -gt 0 ))
         {
-            Copy-Item -Path ".\report\report_$(($TestCycle).Trim()).xml" -Destination ".\report\report_$(($TestCycle).Trim())-$shortRandomNumber-junit.xml" -Force -ErrorAction SilentlyContinue
-            Write-Host "Copied : .\report\report_$(($TestCycle).Trim()).xml --> .\report\report_$(($TestCycle).Trim())-$shortRandomNumber-junit.xml"
             $retValue = 0
         }
         else
