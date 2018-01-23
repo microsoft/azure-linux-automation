@@ -28,8 +28,8 @@
     Author:         Shital Savekar <v-shisav@microsoft.com>
     Creation Date:  14th December 2017
     Purpose/Change: Initial script development
-  
-.EXAMPLE 
+
+.EXAMPLE
     .\UploadDeploymentDataToDB.ps1 -customSecretsFilePath .\AzureSecrets.xml
 #>
 
@@ -44,12 +44,12 @@ param
 if ( $customSecretsFilePath )
 {
 	$secretsFile = $customSecretsFilePath
-	Write-Host "Using provided secrets file: $($secretsFile | Split-Path -Leaf)" 
+	Write-Host "Using provided secrets file: $($secretsFile | Split-Path -Leaf)"
 }
 if  ($env:Azure_Secrets_File)
 {
 	$secretsFile = $env:Azure_Secrets_File
-	Write-Host "Using predefined secrets file: $($secretsFile | Split-Path -Leaf) in Jenkins Global Environments."	
+	Write-Host "Using predefined secrets file: $($secretsFile | Split-Path -Leaf) in Jenkins Global Environments."
 }
 if ( $secretsFile -eq $null )
 {
@@ -117,13 +117,13 @@ try
 
         $ResourceGroupName = $vmData.ResourceGroupName
         $RoleName = $vmData.RoleName
-        $DeploymentTime = $DeploymentTime    
+        $DeploymentTime = $DeploymentTime
         $Region = $vmData.Location
         $RoleSize = $vmData.InstanceSize
         $TestCaseName = $CurrentTestData.testName
         $StorageType = $StorageAccountTypeGlobal
 
-        
+
         #Copy and run test file
         $out = RemoteCopy -upload -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files .\remote-scripts\CollectLogFile.sh -username $user -password $password
         $out = RunLinuxCmd -username $user -password $password -ip $vmData.PublicIP -port $vmData.SSHPort -command "sh CollectLogFile.sh" -ignoreLinuxExitCode
@@ -131,7 +131,7 @@ try
 
         #download the log files
         $out = RemoteCopy -downloadFrom $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -files "$($vmData.RoleName)-*.txt" -downloadTo "$LogDir" -download
-        
+
         # Upload files in data subfolder to Azure.
         $destfolder = "bootPerf"
         $containerName = "logs"
@@ -187,7 +187,7 @@ try
         #endregion
 
 
-        
+
         #region Waagent Provision Time Checking.
         $waagentFile = "$LogDir\$($vmData.RoleName)-waagent.log.txt"
         $waagentStartLineNumber = (Select-String -Path $waagentFile -Pattern "$walaStartIdentifier")[0].LineNumber
@@ -204,8 +204,12 @@ try
 
         #region Boot Time checking.
         $bootStart = [datetime](Get-Content "$LogDir\$($vmData.RoleName)-uptime.txt")
-        
+
         $kernelBootTime = ($waagentStartTime - $bootStart).TotalSeconds
+        if ($kernelBootTime -le 0 -and $kernelBootTime -gt 1800)
+        {
+            Throw "Invalid boottime range. Boot time = $kernelBootTime"
+        }
         $dmesgFile = "$LogDir\$($vmData.RoleName)-dmesg.txt"
         #$foundLineNumber = (Select-String -Path $dmesgFile -Pattern "$bootIdentifier").LineNumber
         #$actualLineNumber = $foundLineNumber - 2
@@ -218,7 +222,7 @@ try
 
 
         #region Call Trace Checking
-		$KernelLogs = Get-Content $dmesgFile 
+		$KernelLogs = Get-Content $dmesgFile
 		$callTraceFound  = $false
 		foreach ( $line in $KernelLogs )
 		{
@@ -258,7 +262,7 @@ try
     $SQLQuery = $SQLQuery.TrimEnd(',')
     $connectionString = "Server=$dataSource;uid=$dbuser; pwd=$dbpassword;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
     LogMsg $SQLQuery
-    
+
     $connection = New-Object System.Data.SqlClient.SqlConnection
     $connection.ConnectionString = $connectionString
     $connection.Open()
@@ -267,7 +271,7 @@ try
     $command.CommandText = $SQLQuery
     $result = $command.executenonquery()
     $connection.Close()
-    
+
     LogMsg "Uploading boot data to database :  done!!"
 }
 catch
@@ -276,6 +280,6 @@ catch
     $script_name = ($_.InvocationInfo.ScriptName).Replace($PWD,".")
     $ErrorMessage =  $_.Exception.Message
     LogErr "EXCEPTION : $ErrorMessage"
-    LogErr "Source : Line $line in script $script_name."  
+    LogErr "Source : Line $line in script $script_name."
     LogErr "ERROR : Uploading boot data to database"
 }
