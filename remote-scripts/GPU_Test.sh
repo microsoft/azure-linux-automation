@@ -39,7 +39,7 @@ while echo $1 | grep ^- > /dev/null; do
 	shift
 done
 
-CUDADriverVersion="9.0.176-1"
+CUDADriverVersion="9.1.85-1"
 ICA_TESTRUNNING="TestRunning"	  # The test is running
 ICA_TESTCOMPLETED="TestCompleted"  # The test completed successfully
 ICA_TESTABORTED="TestAborted"	  # Error during setup of test
