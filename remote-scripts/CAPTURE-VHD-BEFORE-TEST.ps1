@@ -33,7 +33,14 @@ if ($isDeployed)
         {
             LogMsg "Shutdown successful."
             #Copy the OS VHD with different name.
-            $newVHDName = "SS-AUTOBUILT-$($ARMImage.Publisher)-$($ARMImage.Offer)-$($ARMImage.Sku)-$($ARMImage.Version)-$Distro"
+            if ($ARMImage)
+            {
+                $newVHDName = "SS-AUTOBUILT-$($ARMImage.Publisher)-$($ARMImage.Offer)-$($ARMImage.Sku)-$($ARMImage.Version)-$Distro"
+            }
+            if ($OsVHD)
+            {
+                $newVHDName = "$($OsVHD.Replace('.vhd',''))-$Distro"
+            }
             #$newVHDName = $newVHDName.ToUpper()
             $newVHDName = "$newVHDName.vhd"
 
@@ -59,7 +66,7 @@ if ($isDeployed)
                     if ($GetAzureRMStorageAccount -eq $null)
                     {
                         throw
-                    }            
+                    }
                     $saInfoCollected = $true
                 }
                 catch
