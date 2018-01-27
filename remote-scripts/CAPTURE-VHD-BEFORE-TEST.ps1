@@ -39,11 +39,11 @@ if ($isDeployed)
             }
             if ($OsVHD)
             {
-                $newVHDName = "$($OsVHD.Replace('.vhd',''))-$Distro"
+                $newVHDName = "SS-AUTOBUILT-$($OsVHD.Replace('.vhd',''))-$Distro"
             }
             #$newVHDName = $newVHDName.ToUpper()
             $newVHDName = "$newVHDName.vhd"
-
+            Set-Content -Path .\ARM_OSVHD_NAME.azure.env -Value $newVHDName -NoNewline -Force
             $newVHDNameWithTimeStamp = "$newVHDName-$(Get-Date -Format "MM-dd-yyyy")"
             $newVHDNameWithTimeStamp = $newVHDNameWithTimeStamp.ToUpper()
             $newVHDNameWithTimeStamp = "$newVHDNameWithTimeStamp.vhd"
