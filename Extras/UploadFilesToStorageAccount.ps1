@@ -62,17 +62,33 @@ $DateTimeUTC = "$($utctime.Year)-$($utctime.Month)-$($utctime.Day) $($utctime.Ho
 
 try
 {
+    if ($destinationStorageKey)
+    {
+        Write-Host "Using user provided storage account key." 
+    }
+    else 
+    {
+        Write-Host "Getting $destinationStorageAccount storage account key..."
+        $allResources = Get-AzureRmResource
+        $destSARG = ($allResources | Where { $_.ResourceType -imatch "storageAccounts" -and $_.ResourceName -eq "$destinationStorageAccount" }).ResourceGroupName
+        $keyObj = Get-AzureRmStorageAccountKey -ResourceGroupName $destSARG -Name $destinationStorageAccount
+        $destinationStorageKey = $keyObj[0].Value
+    }
     $containerName = "$destinationContainer"
     $storageAccountName = $destinationStorageAccount
     $blobContext = New-AzureStorageContext -StorageAccountName $storageAccountName -StorageAccountKey $destinationStorageKey
+    $uploadedFiles = @()
     foreach($fileName in $filePaths.Split(","))
     {
         $ticks = (Get-Date).Ticks
         #$fileName = "$LogDir\$($vmData.RoleName)-waagent.log.txt"
         $blobName = "$destinationFolder/$($fileName | Split-Path -Leaf)"
+        Write-Host 
         $out = Set-AzureStorageBlobContent -File $filename -Container $containerName -Blob $blobName -Context $blobContext -Force -ErrorAction Stop
-        Write-Host "Upload file to Azure: Success: $filename"
+        Write-Host "$($blobContext.BlobEndPoint)$containerName/$blobName : Success"
+        $uploadedFiles += "$($blobContext.BlobEndPoint)$containerName/$blobName"
     }
+    return $uploadedFiles
 }
 catch
 {
@@ -81,5 +97,5 @@ catch
     $ErrorMessage =  $_.Exception.Message
     Write-Host "EXCEPTION : $ErrorMessage"
     Write-Host "Source : Line $line in script $script_name."
-    Write-Host "ERROR : Uploading to $destinationStorageAccount failed."
+    Write-Host "ERROR : $($blobContext.BlobEndPoint)/$containerName/$blobName : Failed"
 }

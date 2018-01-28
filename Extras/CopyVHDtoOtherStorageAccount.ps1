@@ -3,6 +3,7 @@
 param(
     $sourceLocation,
     $destinationLocations,
+    $destinationAccountType,
     $sourceVHDName,
     $destinationVHDName,
     $customSecretsFilePath
@@ -40,6 +41,10 @@ if ($destinationVHDName)
 else
 {
     $newVHDName = $sourceVHDName
+}
+if (!$destinationAccountType)
+{
+    $destinationAccountType="Standard,Premium"
 }
 $regionName = $sourceLocation.Replace(" ","").Replace('"',"").ToLower()
 $regionStorageMapping = [xml](Get-Content .\XML\RegionAndStorageAccounts.xml)
@@ -86,7 +91,7 @@ else
 {
     $targetRegions = (Get-AzureRmLocation).Location
 }
-$targetStorageAccounts = ($GetAzureRmStorageAccount | where { ( $_.StorageAccountName -imatch "konkaci" ) -and $targetRegions.Contains($_.PrimaryLocation)}).StorageAccountName
+$targetStorageAccounts = ($GetAzureRmStorageAccount | where { ( $_.StorageAccountName -imatch "konkaci" ) -and $targetRegions.Contains($_.PrimaryLocation) -and $destinationAccountType -imatch $_.Sku.Tier}).StorageAccountName
 $destContextArr = @()
 foreach ($targetSA in $targetStorageAccounts)
 {
