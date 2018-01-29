@@ -227,6 +227,12 @@
                 $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage -AllowedUsagePercentage $AllowedUsagePercentage 
                 $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage $AllowedUsagePercentage 
             }
+            elseif ( $testVMSize.StartsWith("ND"))
+            {
+                $identifierText = "standardNDFamily"
+                $currentStatus = SetUsage -currentStatus $currentStatus -text $identifierText  -usage $testVMUsage -AllowedUsagePercentage $AllowedUsagePercentage 
+                $overFlowErrors += TestUsage -currentStatus $currentStatus -text $identifierText -AllowedUsagePercentage $AllowedUsagePercentage 
+            }
             elseif ( $testVMSize.StartsWith("H"))
             {
                 $identifierText = "standardHFamily"

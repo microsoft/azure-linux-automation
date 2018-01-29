@@ -37,6 +37,7 @@ if (($vmStatus.Statuses | Where-Object { $_.Code -imatch "PowerState" }).Code -i
     $turnONfailed = $true
     while ($turnONfailed -and $retryCount -lt 11)
     {
+        $vmStatus = Get-AzureRMVm -ResourceGroupName $resourceGroup -Name $roleName -Status
         Write-Host "'$roleName' is '$(($vmStatus.Statuses | Where-Object { $_.Code -imatch "PowerState" }).Code)'. Turning it ON..."
         $startStatus = Start-AzureRmVM -Name $roleName -ResourceGroupName $resourceGroup
         if ($startStatus.Status -eq "Succeeded")

@@ -1117,7 +1117,7 @@ Function GetAndCheckKernelLogs($allDeployedVMs, $status, $vmUser, $vmPassword)
 		foreach ($VM in $allDeployedVMs)
 		{
 			$BootLogDir="$Logdir\$($VM.RoleName)"
-			mkdir $BootLogDir -Force | Out-Null			
+			mkdir $BootLogDir -Force | Out-Null
 			LogMsg "Collecting $($VM.RoleName) VM Kernel $status Logs.."
 			$InitailBootLog="$BootLogDir\InitialBootLogs.txt"
 			$FinalBootLog="$BootLogDir\FinalBootLogs.txt"

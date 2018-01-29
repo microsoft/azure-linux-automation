@@ -91,7 +91,7 @@ else
 {
     $targetRegions = (Get-AzureRmLocation).Location
 }
-$targetStorageAccounts = ($GetAzureRmStorageAccount | where { ( $_.StorageAccountName -imatch "konkaci" ) -and $targetRegions.Contains($_.PrimaryLocation) -and $destinationAccountType -imatch $_.Sku.Tier}).StorageAccountName
+$targetStorageAccounts = ($GetAzureRmStorageAccount | where { ( $_.StorageAccountName -imatch "konkaci" ) -and $targetRegions.Contains($_.PrimaryLocation) -and ($destinationAccountType -imatch $_.Sku.Tier)}).StorageAccountName
 $destContextArr = @()
 foreach ($targetSA in $targetStorageAccounts)
 {
@@ -105,26 +105,31 @@ foreach ($targetSA in $targetStorageAccounts)
     [string]$DestBlob = $newVHDName
     $DestAccountKey= (Get-AzureRmStorageAccountKey -ResourceGroupName $(($GetAzureRmStorageAccount  | Where {$_.StorageAccountName -eq "$targetSA"}).ResourceGroupName) -Name $targetSA)[0].Value
     $DestContainer = "vhds"
-
     $context = New-AzureStorageContext -StorageAccountName $srcStorageAccount -StorageAccountKey $srcStorageAccountKey
     $expireTime = Get-Date
     $expireTime = $expireTime.AddYears(1)
     $SasUrl = New-AzureStorageBlobSASToken -container $srcStorageContainer -Blob $srcStorageBlob -Permission R -ExpiryTime $expireTime -FullUri -Context $Context
-
 
     #
     # Start Replication to DogFood
     #
 
     $destContext = New-AzureStorageContext -StorageAccountName $destAccountName -StorageAccountKey $destAccountKey
-    $destContextArr += $destContext
     $testContainer = Get-AzureStorageContainer -Name $destContainer -Context $destContext -ErrorAction Ignore
     if ($testContainer -eq $null) {
         New-AzureStorageContainer -Name $destContainer -context $destContext
     }
     # Start the Copy
-    Write-Host "Copying $SrcStorageBlob as $DestBlob from and to storage account $DestAccountName/$DestContainer"
-    $out = Start-AzureStorageBlobCopy -AbsoluteUri $SasUrl  -DestContainer $destContainer -DestContext $destContext -DestBlob $destBlob -Force
+    if (($SrcStorageAccount -eq $DestAccountName) -and ($SrcStorageBlob -eq $DestBlob))
+    {
+        Write-Host "Skipping copy for : $DestAccountName as source storage account and VHD name is same."
+    }
+    else
+    {
+        Write-Host "Copying $SrcStorageBlob as $DestBlob from and to storage account $DestAccountName/$DestContainer"
+        $out = Start-AzureStorageBlobCopy -AbsoluteUri $SasUrl  -DestContainer $destContainer -DestContext $destContext -DestBlob $destBlob -Force
+        $destContextArr += $destContext
+    }
 }
 #
 # Monitor replication status
@@ -137,7 +142,15 @@ while($CopyingInProgress)
     foreach ($destContext in $destContextArr)
     {
         $status = Get-AzureStorageBlobCopyState -Container $destContainer -Blob $destBlob -Context $destContext
-        if ($status.Status -ne "Success")
+        if ($status.Status -eq "Success")
+        {
+            Write-Host "$DestBlob : $($destContext.StorageAccountName) : Done : 100 %"
+        }
+        elseif ($status.Status -eq "Failed")
+        {
+            Write-Host "$DestBlob : $($destContext.StorageAccountName) : Failed."
+        }
+        elseif ($status.Status -eq "Pending")
         {
             sleep -Milliseconds 100
             $CopyingInProgress = $true
@@ -145,14 +158,10 @@ while($CopyingInProgress)
             $copyPercent = [math]::Round((($status.BytesCopied/$status.TotalBytes) * 100),2)
             Write-Host "$DestBlob : $($destContext.StorageAccountName) : Running : $copyPercent %"
         }
-        else
-        {
-            Write-Host "$DestBlob : $($destContext.StorageAccountName) : Done : 100 %"
-        }
     }
     if ($CopyingInProgress)
     {
-        Write-Host "$($newDestContextArr.Count) copy operations still in progress."
+        Write-Host "--------$($newDestContextArr.Count) copy operations still in progress.-------"
         $destContextArr = $newDestContextArr
         Sleep -Seconds 10
     }

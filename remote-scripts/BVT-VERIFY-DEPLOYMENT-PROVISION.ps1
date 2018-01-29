@@ -8,14 +8,35 @@ $resultArr = @()
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
-
 	try
 	{
-		$RestartStatus = RestartAllDeployments -allVMData $allVMData
-		if($RestartStatus -eq "True")
+		Start-Sleep 30
+		LogMsg "Check 1: Checking call tracess again after 30 seconds sleep"
+		$noCallTraces = GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Initial"
+		if ($noCallTraces)
 		{
-			LogMsg "Test Result : PASS."
-			$testResult = "PASS"
+			$RestartStatus = RestartAllDeployments -allVMData $allVMData
+			if($RestartStatus -eq "True")
+			{
+				Start-Sleep 30
+				LogMsg "Check 2: Checking call tracess again after Reboot > 30 seconds sleep"
+				$noCallTraces = GetAndCheckKernelLogs -allDeployedVMs $allVMData -status "Initial"
+				if ($noCallTraces)
+				{
+					LogMsg "Test Result : PASS."
+					$testResult = "PASS"
+				}
+				else
+				{
+					LogMsg "Test Result : FAIL."
+					$testResult = "FAIL"
+				}
+			}
+			else
+			{
+				LogMsg "Test Result : FAIL."
+				$testResult = "FAIL"
+			}
 		}
 		else
 		{
@@ -23,7 +44,6 @@ if ($isDeployed)
 			$testResult = "FAIL"
 		}
 	}
-
 	catch
 	{
 		$ErrorMessage =  $_.Exception.Message
