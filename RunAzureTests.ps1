@@ -93,13 +93,13 @@ if ( $ARMImageName -eq $null -and $OsVHD -eq $null)
 if ($env:BUILD_NUMBER -gt 0)
 {
     Write-Host "Detected Jenkins environment."
-    $xmlConfigFileFinal = "$PWD\Azure_ICA_all_run-$env:JOB_NAME-$env:BUILD_NUMBER.xml"
+    $xmlConfigFileFinal = "$PWD\Azure_Config-$shortRandomNumber.xml"
     $xmlConfigFileFinal = $xmlConfigFileFinal.Replace('/','-')
 }
 else
 {
     Write-Host "Detected local environment."
-    $xmlConfigFileFinal = "$PWD\Azure_ICA_all_run-$testCycle-$DistroIdentifier.xml"
+    $xmlConfigFileFinal = "$PWD\Azure_Config-$testCycle-$DistroIdentifier.xml"
 }
 
 #region Select Storage Account Type

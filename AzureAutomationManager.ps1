@@ -139,8 +139,7 @@ try
     $testStartTime = [DateTime]::Now.ToUniversalTime()
     Set-Variable -Name testStartTime -Value $testStartTime -Scope Global
 
-    $fname = [System.IO.Path]::GetFilenameWithoutExtension($xmlConfigFile)
-    $testDir = $testResults + "\" + $fname + "-" + $testStartTime.ToString("yyyyMMdd-HHmmss") + "-$(Get-Random -Maximum 999 -Minimum 111)"
+    $testDir = $testResults + "\" + $cycleName + "-" + $testStartTime.ToString("yyyyMMddHHmmssff")
 
     mkdir $testDir -ErrorAction SilentlyContinue | out-null
     Set-Content -Value "" -Path .\report\testSummary.html -Force -ErrorAction SilentlyContinue | Out-Null
