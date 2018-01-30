@@ -7475,6 +7475,21 @@
 			<files>.\remote-scripts\azuremodules.sh</files>
 			<TestParameters>
 				<param>testDuration=300</param>
+				<param>testConnections="1 2 4 8 16 32 64 128 256 512 1024 2048 4096 6144 8192 10240"</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-PERF-NTTTCP-TEST-LIMITED</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-NTTTCP-TEST.ps1</testScriptps1>
+			<setupType>M1S1</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+				<param>testDuration=300</param>
+				<param>testConnections="1 1024 10240"</param>
 			</TestParameters>
 			<Priority>P0</Priority>
 		</test>
@@ -7504,6 +7519,26 @@
 				<param>modes='randread randwrite read write'</param>
 				<param>startThread=1</param>
 				<param>maxThread=1024</param>
+				<param>startIO=4</param>
+				<param>numjobs=1</param>
+				<param>ioruntime=300</param>
+				<param>maxIO=4</param>
+				<param>fileSize=1023G</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>		
+		<test>
+			<testName>ICA-PERF-FIO-TEST-4K-LIMITED</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-FIO-TEST.ps1</testScriptps1>
+			<setupType>DS14DISK12</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>			
+			<TestParameters>
+				<param>modes='randread randwrite read write'</param>
+				<param>startThread=1</param>
+				<param>maxThread=256</param>
 				<param>startIO=4</param>
 				<param>numjobs=1</param>
 				<param>ioruntime=300</param>
@@ -7544,6 +7579,26 @@
 				<param>modes='randread randwrite read write'</param>
 				<param>startThread=1</param>
 				<param>maxThread=1024</param>
+				<param>startIO=1024</param>
+				<param>numjobs=1</param>
+				<param>ioruntime=300</param>
+				<param>maxIO=1024</param>		
+				<param>fileSize=134G</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>		
+		<test>
+			<testName>ICA-PERF-FIO-TEST-1024K-LIMITED</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-FIO-TEST.ps1</testScriptps1>
+			<setupType>DS14DISK12</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>			
+			<TestParameters>
+				<param>modes='randread randwrite read write'</param>
+				<param>startThread=1</param>
+				<param>maxThread=256</param>
 				<param>startIO=1024</param>
 				<param>numjobs=1</param>
 				<param>ioruntime=300</param>
@@ -9009,6 +9064,12 @@
 			</test>
 		</Cycle>
 		<Cycle>
+			<cycleName>PERF-NTTTCP-LIMITED</cycleName>
+			<test>
+				<Name>ICA-PERF-NTTTCP-TEST-LIMITED</Name>
+			</test>
+		</Cycle>
+		<Cycle>
 			<cycleName>PERF-LAGSCOPE</cycleName>
 			<test>
 				<Name>ICA-PERF-LAGSCOPE-TEST</Name>
@@ -9027,6 +9088,15 @@
 			</test>
 			<test>
 				<Name>ICA-PERF-FIO-TEST-1024K</Name>
+			</test>			
+		</Cycle>
+		<Cycle>
+			<cycleName>PERF-FIO-LIMITED</cycleName>
+			<test>
+				<Name>ICA-PERF-FIO-TEST-4K-LIMITED</Name>
+			</test>
+			<test>
+				<Name>ICA-PERF-FIO-TEST-1024K-LIMITED</Name>
 			</test>			
 		</Cycle>
 		<Cycle>

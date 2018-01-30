@@ -60,7 +60,7 @@ Set-Content -Value "No tests ran yet." -Path ".\report\testSummary.html" -Force 
 if ( $customSecretsFilePath ) {
     $secretsFile = $customSecretsFilePath
     Write-Host "Using user provided secrets file: $($secretsFile | Split-Path -Leaf)"
-    Set-Variable -Name $secretsFile -Value $customSecretsFilePath -Scope Global
+    Set-Variable -Name "secretsFile" -Value $customSecretsFilePath -Scope Global
 }
 if ($env:Azure_Secrets_File) {
     $secretsFile = $env:Azure_Secrets_File
