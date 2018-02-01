@@ -15,7 +15,7 @@ if ($isDeployed)
         $noServer = $true
 		$noClient = $true
 		$clientMachines = @()
-		$slaveHostnames = ""
+		$slaveInternalIPs = ""
 		foreach ( $vmData in $allVMData )
 		{
 			if ( $vmData.RoleName -imatch "Server" )
@@ -28,13 +28,13 @@ if ($isDeployed)
 			{
 				$clientMachines += $vmData
 				$noClient = $fase
-				if ( $slaveHostnames )
+				if ( $slaveInternalIPs )
 				{
-					$slaveHostnames += "," + $vmData.RoleName
+					$slaveInternalIPs += "," + $vmData.InternalIP
 				}
 				else
 				{
-					$slaveHostnames = $vmData.RoleName
+					$slaveInternalIPs = $vmData.InternalIP
 				}
 			}
 		}
@@ -97,12 +97,12 @@ if ($isDeployed)
 			}
 		}
 
-		Add-Content -Value "master=`"$($serverVMData.RoleName)`"" -Path $constantsFile
-		LogMsg "master=$($serverVMData.RoleName) added to constansts.sh"
+		Add-Content -Value "master=`"$($serverVMData.InternalIP)`"" -Path $constantsFile
+		LogMsg "master=$($serverVMData.InternalIP) added to constansts.sh"
 
 
-		Add-Content -Value "slaves=`"$slaveHostnames`"" -Path $constantsFile
-		LogMsg "slaves=$slaveHostnames added to constansts.sh"
+		Add-Content -Value "slaves=`"$slaveInternalIPs`"" -Path $constantsFile
+		LogMsg "slaves=$slaveInternalIPs added to constansts.sh"
 
 		LogMsg "constanst.sh created successfully..."
 		#endregion
