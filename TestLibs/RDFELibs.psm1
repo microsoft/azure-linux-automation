@@ -1263,6 +1263,7 @@ Function CheckKernelLogs($allVMData, $vmUser, $vmPassword)
 		$errorLines = @()
 		$errorLines += "Call Trace"
 		$errorLines += "rcu_sched self-detected stall on CPU"
+		$errorLines += "rcu_sched detected stalls on"
 		$errorLines += "BUG: soft lockup"
 		$totalErrors = 0
 		if ( !$vmUser )

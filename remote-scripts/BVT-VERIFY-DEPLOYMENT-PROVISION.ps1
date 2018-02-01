@@ -10,16 +10,16 @@ if ($isDeployed)
 {
 	try
 	{
-		Start-Sleep 30
 		LogMsg "Check 1: Checking call tracess again after 30 seconds sleep"
+		Start-Sleep 30
 		$noIssues = CheckKernelLogs -allVMData $allVMData
 		if ($noIssues)
 		{
 			$RestartStatus = RestartAllDeployments -allVMData $allVMData
 			if($RestartStatus -eq "True")
 			{
-				Start-Sleep 30
 				LogMsg "Check 2: Checking call tracess again after Reboot > 30 seconds sleep"
+				Start-Sleep 30
 				$noIssues = CheckKernelLogs -allVMData $allVMData
 				if ($noIssues)
 				{
