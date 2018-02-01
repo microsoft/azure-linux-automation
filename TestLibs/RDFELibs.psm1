@@ -1256,6 +1256,79 @@ Function GetAndCheckKernelLogs($allDeployedVMs, $status, $vmUser, $vmPassword)
 	return $retValue
 }
 
+Function CheckKernelLogs($allVMData, $vmUser, $vmPassword)
+{
+	try
+	{
+		$errorLines = @()
+		$errorLines += "Call Trace"
+		$errorLines += "rcu_sched self-detected stall on CPU"
+		$errorLines += "BUG: soft lockup"
+		$totalErrors = 0
+		if ( !$vmUser )
+		{
+			$vmUser = $user
+		}
+		if ( !$vmPassword )
+		{
+			$vmPassword = $password
+		}
+		$retValue = $false
+		foreach ($VM in $allVMData)
+		{
+			$vmErrors = 0
+			$BootLogDir="$Logdir\$($VM.RoleName)"
+			mkdir $BootLogDir -Force | Out-Null
+			LogMsg "Collecting $($VM.RoleName) VM Kernel $status Logs.."
+			$currentKernelLogFile="$BootLogDir\CurrentKernelLogs.txt"
+			$out = RunLinuxCmd -ip $VM.PublicIP -port $VM.SSHPort -username $vmUser -password $vmPassword -command "dmesg > /home/$vmUser/CurrentKernelLogs.txt" -runAsSudo
+			$out = RemoteCopy -download -downloadFrom $VM.PublicIP -port $VM.SSHPort -files "/home/$vmUser/CurrentKernelLogs.txt" -downloadTo $BootLogDir -username $vmUser -password $vmPassword
+			LogMsg "$($VM.RoleName): $status Kernel logs collected ..SUCCESSFULLY"
+			foreach ($errorLine in $errorLines)
+			{
+				LogMsg "Checking for $errorLine in kernel logs.."
+				$KernelLogs = Get-Content $currentKernelLogFile 
+				$callTraceFound  = $false
+				foreach ( $line in $KernelLogs )
+				{
+					if ( $line -imatch "$errorLine" )
+					{
+						LogErr $line
+						$totalErrors += 1
+						$vmErrors += 1
+					}
+					if ( $line -imatch "\[<")
+					{
+						LogErr $line
+					}
+				}
+			}
+			if ( $vmErrors -eq 0 )
+			{
+				LogMsg "$($VM.RoleName) : No issues in kernel logs."
+				$retValue = $true
+			}
+			else
+			{
+				LogErr "$($VM.RoleName) : $vmErrors errors found."
+				$retValue = $false
+			}
+		}
+		if ( $totalErrors -eq 0 )
+		{
+			$retValue = $true
+		}
+		else
+		{
+			$retValue = $false
+		}
+	}
+	catch
+	{
+		$retValue = $false
+	}
+	return $retValue
+}
 Function SetDistroSpecificVariables($detectedDistro)
 {
 	$python_cmd = "python"	
