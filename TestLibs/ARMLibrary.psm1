@@ -468,59 +468,19 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
     }
     if ($ResourceGroup)
     {
-        if ( $xmlSecrets )
-        {
-            $cleanupRGScriptBlock = {
-                                
-                $RGName = $args[0]
-                $xmlSecrets = $args[1]
-                $storageAccount = $args[2]
-                
-                $ClientID = $xmlSecrets.secrets.SubscriptionServicePrincipalClientID
-                $TenantID = $xmlSecrets.secrets.SubscriptionServicePrincipalTenantID
-                $Key = $xmlSecrets.secrets.SubscriptionServicePrincipalKey
-
-                $pass = ConvertTo-SecureString $key -AsPlainText -Force
-                $mycred = New-Object System.Management.Automation.PSCredential ($ClientID, $pass)
-                $out = Add-AzureRmAccount -ServicePrincipal -Tenant $TenantID -Credential $mycred
-
-                Remove-AzureRmResourceGroup -Name $RGName -Verbose -Force
-                
-                $azureStorage = $storageAccount
-                $storageContext = (Get-AzureRmStorageAccount | Where-Object{$_.StorageAccountName -match $azureStorage}).Context
-                $storageBlob = Get-AzureStorageBlob -Context $storageContext -Container "vhds"
-                $vhdList = $storageBlob | Where-Object{$_.Name -match "$RGName"}
-                if ($vhdList) 
-                {
-                    # Remove VHD files
-                    foreach($diskName in $vhdList.Name) 
-                    {
-                        Remove-AzureStorageBlob -Blob $diskname -Container vhds -Context $storageContext -ErrorAction SilentlyContinue
-                    }
-                }
-                sleep -Seconds 1
-            }
-            $ARMStorageAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
-            LogMsg "Starting $RGName cleanup in background."
-            $cleanupJob = Start-Job -ScriptBlock $cleanupRGScriptBlock -ArgumentList $RGName,$xmlSecrets,$ARMStorageAccount -Name "DeleteResourceGroup-$RGName"
-            LogMsg "$RGName cleanup started in background."
-            $retValue = $true
+        $currentGUID = ([guid]::newguid()).Guid
+        $out = Save-AzureRmContext -Path "$env:TEMP\$($currentGUID).azurecontext" -Force
+        $cleanupRGScriptBlock = {
+            $RGName = $args[0]
+            $currentGUID = $args[1]
+            Import-AzureRmContext -AzureContext "$env:TEMP\$($currentGUID).azurecontext"
+            Remove-AzureRmResourceGroup -Name $RGName -Verbose -Force
         }
-        else
-        {
-            LogMsg "Removing $RGName"
-            Remove-AzureRmResourceGroup -Name $RGName -Force -Verbose
-            $retValue = $?
-            $ARMStorageAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
-            if ( $NewARMStorageAccountType )
-            {
-                LogMsg "No need to remove residual VHDs, as storage account in $RGName is deleted."
-            }
-            else
-            {
-                RemoveResidualResourceGroupVHDs -ResourceGroup $RGName -storageAccount $ARMStorageAccount
-            }
-        }
+        $currentGUID = ([guid]::newguid()).Guid
+        $out = Save-AzureRmContext -Path "$env:TEMP\$($currentGUID).azurecontext" -Force
+        LogMsg "Triggering : DeleteResourceGroup-$RGName..."
+        $deleteJob = Start-Job -ScriptBlock $cleanupRGScriptBlock -ArgumentList $RGName,$currentGUID -Name "DeleteResourceGroup-$RGName"
+        $retValue = $true
     }
     else
     {

@@ -489,7 +489,9 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro )
 		}
 	}
 	Write-Host "All background cleanup jobs finished."
-
+	$azureContextFiles = Get-Item "$env:TEMP\*.azurecontext"
+	$out = $azureContextFiles | Remove-Item -Force | Out-Null
+	LogMsg "Removed $($azureContextFiles.Count) context files."
 	LogMsg "Cycle Finished.. $($CycleName.ToUpper())"
 	$EndTime =  [Datetime]::Now.ToUniversalTime()
 
