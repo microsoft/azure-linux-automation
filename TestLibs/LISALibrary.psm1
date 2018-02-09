@@ -369,6 +369,28 @@ function InstallcustomLIS ($customLIS, $customLISBranch, $allVMData, [switch]$Re
     }
 }
 
+function VerifyMellanoxAdapter($vmData)
+{
+    $maxRetryAttemps = 50
+    $retryAttempts = 1
+    $mellanoxAdapterDetected = $false
+    while ( !$mellanoxAdapterDetected -and ($retryAttempts -lt $maxRetryAttemps))
+    {
+        $pciDevices = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "lspci" -runAsSudo
+        if ( $pciDevices -imatch "Mellanox")
+        {
+            LogMsg "[Attempt $retryAttempts/$maxRetryAttemps] Mellanox Adapter detected in $($vmData.RoleName)."
+            $mellanoxAdapterDetected = $true
+        }
+        else
+        {
+            LogErr "[Attempt $retryAttempts/$maxRetryAttemps] Mellanox Adapter NOT detected in $($vmData.RoleName)."
+            $retryAttempts += 1
+        }
+    }
+    return $mellanoxAdapterDetected
+}
+
 function EnableSRIOVInAllVMs($allVMData)
 {
     try
@@ -385,28 +407,12 @@ function EnableSRIOVInAllVMs($allVMData)
 	        foreach ( $vmData in $allVMData )
 	        {
                 $vmCount += 1 
-                RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\remote-scripts\$scriptName" -username $user -password $password -upload
-                $out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "chmod +x *.sh" -runAsSudo
-                $currentIfConfigStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/sbin/ifconfig -a" -runAsSudo
-                $pciDevices = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "lspci" -runAsSudo
-                if ( $pciDevices -imatch "Mellanox")
+                $currentMellanoxStatus = VerifyMellanoxAdapter -vmData $vmData
+                if ( $currentMellanoxStatus )
                 {
                     LogMsg "Mellanox Adapter detected in $($vmData.RoleName)."
-                    #SRIOV-Workaround for Ubuntu.
-                    RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\remote-scripts\ConfigureSRIOV-workaround.sh" -username $user -password $password -upload
-                    $out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "chmod +x ConfigureSRIOV-workaround.sh" -runAsSudo
-                    $isRestartNeeded=""
-                    $isRestartNeeded= RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "./ConfigureSRIOV-workaround.sh" -runAsSudo
-                    if ($isRestartNeeded -imatch "SYSTEM_RESTART_REQUIRED")
-                    {
-                        LogMsg "SRIOV workaround applied for $($vmData.RoleName). Restart required."
-                        $restartStatus = RestartAllDeployments -allVMData $vmData
-                    }
-                    else
-                    {
-                        LogMsg "SRIOV workaround is not needed."
-                    }
-		            LogMsg "Now executing $scriptName ..."
+                    RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\remote-scripts\$scriptName" -username $user -password $password -upload
+                    $out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "chmod +x *.sh" -runAsSudo                    
 		            $sriovOutput = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/home/$user/$scriptName" -runAsSudo
                     $sriovDetectedCount += 1
                 }
