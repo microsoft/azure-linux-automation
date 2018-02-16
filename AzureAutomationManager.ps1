@@ -33,7 +33,9 @@ param (
 [string] $customLIS,
 [string] $customLISBranch,
 [string] $resizeVMsAfterDeployment,
-[switch] $ForceDeleteResources
+[switch] $ForceDeleteResources,
+[string] $tipSessionId="",
+[string] $tipCluster=""
 )
 
 Import-Module .\TestLibs\AzureWinUtils.psm1 -Force -Scope Global
@@ -55,6 +57,8 @@ Set-Variable -Name PublicConfiguration -Value @() -Scope Global
 Set-Variable -Name PrivateConfiguration -Value @() -Scope Global
 Set-Variable -Name CurrentTestData -Value $CurrentTestData -Scope Global
 Set-Variable -Name preserveKeyword -Value "preserving" -Scope Global
+Set-Variable -Name tipSessionId -Value $tipSessionId -Scope Global
+Set-Variable -Name tipCluster -Value $tipCluster -Scope Global
 
 Set-Variable -Name global4digitRandom -Value $(Get-Random -SetSeed $(Get-Random) -Maximum 9999 -Minimum 1111) -Scope Global
 
