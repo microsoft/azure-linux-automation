@@ -152,8 +152,6 @@ InstallKernel()
 						CheckInstallLockUbuntu
                         apt-get install wget
                         LogMsg "Debian package web link detected. Downloading $customKernel"
-                        LogMsg "Uninstalling current curent kernel..."
-                        apt-get -y remove linux-azure linux-image-azure linux-image-$(uname -r)
                         wget $customKernel
                         LogMsg "Installing ${customKernel##*/}"
                         dpkg -i "${customKernel##*/}"  >> $logFolder/build-customKernel.txt 2>&1
