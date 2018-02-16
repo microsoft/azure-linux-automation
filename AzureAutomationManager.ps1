@@ -38,6 +38,8 @@ param (
 [switch] $UseManagedDisks,
 [int] $coureCountExceededTimeout = 3600,
 [int] $testIterations = 1,
+[string] $tipSessionId="",
+[string] $tipCluster="",
 [switch] $ForceDeleteResources
 )
 
@@ -60,6 +62,8 @@ Set-Variable -Name PublicConfiguration -Value @() -Scope Global
 Set-Variable -Name PrivateConfiguration -Value @() -Scope Global
 Set-Variable -Name CurrentTestData -Value $CurrentTestData -Scope Global
 Set-Variable -Name preserveKeyword -Value "preserving" -Scope Global
+Set-Variable -Name tipSessionId -Value $tipSessionId -Scope Global
+Set-Variable -Name tipCluster -Value $tipCluster -Scope Global
 
 Set-Variable -Name global4digitRandom -Value $(Get-Random -SetSeed $(Get-Random) -Maximum 9999 -Minimum 1111) -Scope Global
 Set-Variable -Name coureCountExceededTimeout -Value $coureCountExceededTimeout -Scope Global

@@ -33,6 +33,10 @@
 [string] $LinuxUsername="",
 [string] $LinuxPassword="",
 
+[string] $tipSessionId="",
+[string] $tipCluster="",
+[switch] $UseManagedDisks,
+
 [switch] $ExitWithZero
 )
 
@@ -328,7 +332,18 @@ if ( $testIterations -gt 1 )
 {
     $cmd += " -testIterations $testIterations"
 }
-
+if ( $tipSessionId)
+{
+    $cmd += " -tipSessionId $tipSessionId"
+}
+if ( $tipCluster)
+{
+    $cmd += " -tipCluster $tipCluster"
+}
+if ($UseManagedDisks)
+{
+    $cmd += " -UseManagedDisks"
+}
 $cmd += " -ImageType Standard"
 $cmd += " -UseAzureResourceManager"
 
