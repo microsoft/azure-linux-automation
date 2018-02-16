@@ -15,6 +15,7 @@ if ($isDeployed)
 		$noIssues = CheckKernelLogs -allVMData $allVMData
 		if ($noIssues)
 		{
+			<#
 			$RestartStatus = RestartAllDeployments -allVMData $allVMData
 			if($RestartStatus -eq "True")
 			{
@@ -23,8 +24,10 @@ if ($isDeployed)
 				$noIssues = CheckKernelLogs -allVMData $allVMData
 				if ($noIssues)
 				{
+			#>
 					LogMsg "Test Result : PASS."
 					$testResult = "PASS"
+			<#
 				}
 				else
 				{
@@ -37,6 +40,7 @@ if ($isDeployed)
 				LogMsg "Test Result : FAIL."
 				$testResult = "FAIL"
 			}
+			#>
 		}
 		else
 		{
