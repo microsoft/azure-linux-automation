@@ -69,9 +69,9 @@ if ($isDeployed)
 		foreach ( $param in $currentTestData.TestParameters.param)
 		{
 			Add-Content -Value "$param" -Path $constantsFile
-			if ($param -imatch "bufferLenghs=")
+			if ($param -imatch "bufferLengths=")
 			{
-				$testBuffers= $param.Replace("bufferLenghs=(","").Replace(")","").Split(" ")
+				$testBuffers= $param.Replace("bufferLengths=(","").Replace(")","").Split(" ")
 			}
 			if ($param -imatch "connections=" )
 			{
@@ -163,7 +163,7 @@ collect_VM_properties
 
 				foreach ( $file in $files )
 				{
-					if ( $file.Name -imatch "iperf-client-tcp-$IPVersion-buffer-$($Buffer)K-conn-$connection-instance-*" )
+					if ( $file.Name -imatch "iperf-client-tcp-$IPVersion-buffer-$($Buffer)-conn-$connection-instance-*" )
 					{
 						
 						$currentInstanceclientJsonText = $null

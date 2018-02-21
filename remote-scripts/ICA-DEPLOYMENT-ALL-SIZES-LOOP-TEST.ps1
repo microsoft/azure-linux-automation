@@ -1,4 +1,4 @@
-﻿<#-------------Create Deployment Start------------------#>
+<#-------------Create Deployment Start------------------#>
 Import-Module .\TestLibs\RDFELibs.psm1 -Force
 $result = ""
 $testResult = ""
@@ -17,7 +17,33 @@ else
 	if ( $UseAzureResourceManager )
 	{
 		$StorAccount = $xmlConfig.config.Azure.General.ARMStorageAccount
-		$AccountDetail =  Get-AzureRmStorageAccount | where {$_.StorageAccountName -eq $StorAccount}
+
+		$saInfoCollected = $false
+		$retryCount = 0
+		$maxRetryCount = 999
+		while(!$saInfoCollected -and ($retryCount -lt $maxRetryCount))
+		{
+			try
+			{
+				$retryCount += 1
+				LogMsg "[Attempt $retryCount/$maxRetryCount] : Getting $StorAccount Storage Account details ..."
+				$GetAzureRmStorageAccount = $null
+				$GetAzureRmStorageAccount = Get-AzureRmStorageAccount
+				if ($GetAzureRmStorageAccount -eq $null)
+				{
+					throw
+				}
+				$saInfoCollected = $true
+			}
+			catch
+			{
+				$saInfoCollected = $false
+				LogErr "Error in fetching Storage Account info. Retrying in 10 seconds."
+				sleep -Seconds 10
+			}
+		}
+		
+		$AccountDetail =  $GetAzureRMStorageAccount | where {$_.StorageAccountName -eq $StorAccount}
 		$Location = $AccountDetail.PrimaryLocation
 		$AccountType = $AccountDetail.Sku.Tier.ToString()
 		$SupportSizes = (Get-AzureRmVMSize -Location $location).Name
@@ -28,16 +54,43 @@ else
 		$Location = (Get-AzureStorageAccount -StorageAccountName $StorAccount).GeoPrimaryLocation
 		$AccountType = (Get-AzureStorageAccount -StorageAccountName $StorAccount).AccountType
 		$SupportSizes = (Get-AzureLocation | where {$_.Name -eq $location}).VirtualMachineRoleSizes
-	}
+    }
+    if ($currentTestData.StandardVMSizes   -and $AccountType -match 'Standard' )
+    {
+        $targetVMSizes = ($currentTestData.StandardVMSizes).Split(",")
+    }
+    elseif ($currentTestData.PremiumVMSizes  -and $AccountType -match 'Premium')
+    {
+        $targetVMSizes = ($currentTestData.PremiumVMSizes).Split(",")
+    }
+    else 
+    {
+        $targetVMSizes = $SupportSizes
+    }
+    Write-Host "targetVMSizes = $targetVMSizes"
+    
 	foreach($size in $SupportSizes)
 	{
-		if($size -match 'DS' -or $size -match 'GS' -or ($size.Trim().EndsWith("s")) )
+		if ($size -imatch 'Promo')
 		{
-			$XioSizes += $size.Trim()
+		    LogMsg "Skipping $size"
 		}
 		else
 		{
-            $StandardSizes += $size.Trim()
+		    if(($size -match 'DS') -or ($size -match 'GS') -or ($size.Trim().EndsWith("s")) -or ($size.Contains("s_v")))
+		    {
+                if ( $targetVMsizes.Contains("$size") )
+                {
+                    $XioSizes += $size.Trim()
+                }
+		    }
+		    else
+		    {
+                if ( $targetVMsizes.Contains("$size") )
+                {
+                    $StandardSizes += $size.Trim()
+                }
+		    }
 		}
 	}
 	if($AccountType -match 'Premium')
@@ -51,7 +104,7 @@ else
 }
 LogMsg "test VM sizes: $VMSizes"
 $NumberOfSizes = $VMSizes.Count
-$DeploymentCount = $NumberOfSizes*5
+$DeploymentCount = $NumberOfSizes*1
 
 #Test Starts Here..
     try
@@ -77,6 +130,37 @@ $DeploymentCount = $NumberOfSizes*5
             }
             return $DeploymentStatistics
         }
+
+        #Do this only when CustomKernel or CustomLIS is set 
+        if (($cycleName.ToUpper() -eq "DEPLOYMENT") -and ($customKernel -or $customLIS))
+        {
+            #create a resource group and use the VHD for Deployment Test
+            $isDeployed = DeployVMS -setupType "SingleVM" -Distro $Distro -xmlConfig $xmlConfig -GetDeploymentStatistics $True
+                
+            foreach ($VM in $allVMData)
+            {
+                $ResourceGroupUnderTest = $VM.ResourceGroupName
+                $VHDuri = (Get-AzureRMVM -ResourceGroupName $VM.ResourceGroupName).StorageProfile.OsDisk.Vhd.Uri
+                #Deprovision VM
+		        LogMsg "Executing: waagent -deprovision..."
+		        $DeprovisionInfo = RunLinuxCmd -username $user -password $password -ip $VM.PublicIP -port $VM.SSHPort -command "/usr/sbin/waagent -force -deprovision" -runAsSudo
+		        LogMsg $DeprovisionInfo
+		        LogMsg "Execution of waagent -deprovision done successfully"
+                LogMsg "Stopping Virtual Machine ...."
+                $out = Stop-AzureRmVM -ResourceGroupName $VM.ResourceGroupName -Name $VM.RoleName -Force
+                WaitFor -seconds 60
+            }
+            #get the VHD file name from the VHD uri
+            $VHDuri = Split-Path $VHDuri -Leaf
+            #set BaseOsVHD so that deployment will pick the VHD
+            Set-Variable -Name BaseOsVHD -Value $VHDuri -Scope Global
+
+            #Finally set customKernl and customLIS to null which are not required to be installed after deploying Virtual machine
+            $customKernel = $null
+            Set-Variable -Name customKernel -Value $customKernel -Scope Global
+            $customLIS = $null
+            Set-Variable -Name customLIS -Value $customLIS -Scope Global
+        }
         While ($count -lt $DeploymentCount)
         {
             $count += 1
@@ -84,9 +168,12 @@ $DeploymentCount = $NumberOfSizes*5
             $deployedResourceGroupName = $null
             $DeploymentStatistics = CreateDeploymentResultObject
             #Create A VM here and Wait for the VM to come up.
+            LogMsg "Current Progress : Success : $successCount, Fail : $failCount, Remaining : $($DeploymentCount - $successCount - $failCount)"
             LogMsg "ATTEMPT : $count/$DeploymentCount : Deploying $($VMSizes[$VMSizeNumber]) VM.."
-            Set-Variable -Name OverrideVMSize -Value $($VMSizes[$VMSizeNumber]) -Scope Global -Force 
+            Set-Variable -Name OverrideVMSize -Value $($VMSizes[$VMSizeNumber]) -Scope Global -Force
+            $xmlConfig.config.Azure.Deployment.SingleVM.HostedService.Tag = $($VMSizes[$VMSizeNumber]).Replace("_","-")
             $isDeployed = DeployVMS -setupType "SingleVM" -Distro $Distro -xmlConfig $xmlConfig -GetDeploymentStatistics $True
+                        
             $DeploymentStatistics.VMSize = $($VMSizes[$VMSizeNumber])
             $DeploymentStatistics.attempt = $count
             if ( !$UseAzureResourceManager )
@@ -105,10 +192,24 @@ $DeploymentCount = $NumberOfSizes*5
             {
                 if ( $UseAzureResourceManager )
                 {
-                        $successCount += 1
                         LogMsg "ATTEMPT : $count/$DeploymentCount : Deploying $($VMSizes[$VMSizeNumber]) VM.. SUCCESS"
                         LogMsg "deployment Time = $($DeploymentStatistics.DeploymentTime)"
-                        $deployResult = "PASS"
+                        #Added restart check for the deployment
+                        $isRestarted = RestartAllDeployments -allVMData $allVMData
+                        if($isRestarted)
+                        {
+                            $successCount += 1
+                            LogMsg "ATTEMPT : $count/$DeploymentCount : Reboot $($VMSizes[$VMSizeNumber]) VM.. SUCCESS"
+                            LogMsg "deployment Time = $($DeploymentStatistics.DeploymentTime)"
+                            $deployResult = "PASS"
+                        }
+                        else 
+                        {
+                            $hash = @{}
+                            $hash.Add($preserveKeyword,"yes")
+                            $hash.Add("testName","$($currentTestData.testName)")
+                            $out = Set-AzureRmResourceGroup -Name $deployedServiceName -Tag $hash
+                        }
                 }
                 else
                 {
@@ -234,6 +335,11 @@ $DeploymentCount = $NumberOfSizes*5
         if (!$testResult)
         {
             $testResult = "Aborted"
+        }
+        #delete the resource group with captured VHD
+        elseif ($testResult -eq "PASS")
+        {
+            $out = DeleteResourceGroup -RGName $ResourceGroupUnderTest
         }
         $resultArr += $testResult
     }   

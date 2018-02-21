@@ -61,7 +61,7 @@
 			<Data>
 				<!-- You can add your own distro and Image names here -->
 				<Distro>
-					<Name>SSU1604P</Name>
+					<Name>ShortDistroName</Name>
 					<OsImage></OsImage>
 					<!-- <OsImage>b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu-16_04-LTS-amd64-server-20160907.1-en-us-30GB</OsImage> -->
 					<ARMImage>
@@ -76,6 +76,7 @@
 					</ARMImage>
 					<OsVHD></OsVHD>
 					<!-- <OsVHD>VHD_NAME.vhd</OsVHD> -->
+					<!-- <OsVHD>http://storageaccouunt.blob.core.windows.net/vhds/VHD_NAME.vhd</OsVHD> -->
 				</Distro>				
 				<Distro>
 					<Name>SSU1510P</Name>
@@ -505,25 +506,12 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
 							<PublicPort>22</PublicPort>
-						</EndPoints>
-						<EndPoints>
-							<Name>https-1</Name>
-							<Protocol>tcp</Protocol>
-							<LocalPort>8443</LocalPort>
-							<PublicPort>8443</PublicPort>
-							<LoadBalanced>False</LoadBalanced>
-						</EndPoints>
-						<EndPoints>
-							<Name>https-2</Name>
-							<Protocol>udp</Protocol>
-							<LocalPort>443</LocalPort>
-							<PublicPort>443</PublicPort>
-							<LoadBalanced>False</LoadBalanced>
 						</EndPoints>
 						<EndPoints>
 							<Name>http-1</Name>
@@ -547,9 +535,11 @@
 			<SingleVM>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
+					<Tag>SingleVM</Tag>
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>ExtraSmall</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
@@ -664,6 +654,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Medium</InstanceSize>
+						<ARMInstanceSize>Standard_A2</ARMInstanceSize>
 						<RoleName>Backend</RoleName>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -676,6 +667,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<RoleName>Frontend1</RoleName>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -684,22 +676,6 @@
 							<PublicPort>222</PublicPort>
 						</EndPoints>
 						<EndPoints>
-							<Name>https-1</Name>
-							<Protocol>tcp</Protocol>
-							<LocalPort>8443</LocalPort>
-							<PublicPort>8443</PublicPort>
-							<ProbePort>8443</ProbePort>
-							<LoadBalanced>True</LoadBalanced>
-						</EndPoints>
-						<EndPoints>
-							<Name>https-2</Name>
-							<Protocol>udp</Protocol>
-							<LocalPort>443</LocalPort>
-							<PublicPort>443</PublicPort>
-							<ProbePort>443</ProbePort>
-							<LoadBalanced>True</LoadBalanced>
-						</EndPoints>
-						<EndPoints>
 							<Name>http-1</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>80</LocalPort>
@@ -720,6 +696,7 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<RoleName>Frontend2</RoleName>
 						<EndPoints>
 							<Name>SSH</Name>
@@ -728,22 +705,6 @@
 							<PublicPort>322</PublicPort>
 						</EndPoints>
 						<EndPoints>
-							<Name>https-1</Name>
-							<Protocol>tcp</Protocol>
-							<LocalPort>8443</LocalPort>
-							<PublicPort>8443</PublicPort>
-							<ProbePort>8443</ProbePort>
-							<LoadBalanced>True</LoadBalanced>
-						</EndPoints>
-						<EndPoints>
-							<Name>https-2</Name>
-							<Protocol>udp</Protocol>
-							<LocalPort>443</LocalPort>
-							<PublicPort>443</PublicPort>
-							<ProbePort>443</ProbePort>
-							<LoadBalanced>True</LoadBalanced>
-						</EndPoints>
-						<EndPoints>
 							<Name>http-1</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>80</LocalPort>
@@ -764,28 +725,13 @@
 					<VirtualMachine>
 						<state></state>
 						<InstanceSize>Small</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<RoleName>Frontend3</RoleName>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
 							<PublicPort>422</PublicPort>
-						</EndPoints>
-						<EndPoints>
-							<Name>https-1</Name>
-							<Protocol>tcp</Protocol>
-							<LocalPort>8443</LocalPort>
-							<PublicPort>8443</PublicPort>
-							<ProbePort>8443</ProbePort>
-							<LoadBalanced>True</LoadBalanced>
-						</EndPoints>
-						<EndPoints>
-							<Name>https-2</Name>
-							<Protocol>udp</Protocol>
-							<LocalPort>443</LocalPort>
-							<PublicPort>443</PublicPort>
-							<ProbePort>443</ProbePort>
-							<LoadBalanced>True</LoadBalanced>
 						</EndPoints>
 						<EndPoints>
 							<Name>http-1</Name>
@@ -3001,6 +2947,69 @@
 					</VirtualMachine>
 				</HostedService>
 			</A11>
+			<Trim-OP0>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Large</InstanceSize>
+						<ARMInstanceSize>Standard_A3</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk>
+							<LUN>0</LUN>
+							<DiskSizeInGB>80</DiskSizeInGB>
+							<HostCaching>None</HostCaching>
+						</DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</Trim-OP0>
+			<Trim-OP1>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Large</InstanceSize>
+						<ARMInstanceSize>Standard_A3</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk>
+							<LUN>0</LUN>
+							<DiskSizeInGB>80</DiskSizeInGB>
+							<HostCaching>ReadOnly</HostCaching>
+						</DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</Trim-OP1>
+			<Trim-OP2>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Large</InstanceSize>
+						<ARMInstanceSize>Standard_A3</ARMInstanceSize>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>22</PublicPort>
+						</EndPoints>
+						<DataDisk>
+							<LUN>0</LUN>
+							<DiskSizeInGB>80</DiskSizeInGB>
+							<HostCaching>ReadWrite</HostCaching>
+						</DataDisk>
+					</VirtualMachine>
+				</HostedService>
+			</Trim-OP2>			
 			<DS2DISK2>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -3557,7 +3566,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12122</PublicPort>
+							<PublicPort>1111</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
@@ -3570,12 +3579,349 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12222</PublicPort>
+							<PublicPort>1112</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
 				</HostedService>
-			</M1S1>			
+			</M1S1>
+			<S1C15>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D1_v2</InstanceSize>
+						<ARMInstanceSize>Standard_D1_v2</ARMInstanceSize>
+						<RoleName>server-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1110</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D1_v2</InstanceSize>
+						<ARMInstanceSize>Standard_D1_v2</ARMInstanceSize>
+						<RoleName>client-vm-1</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1111</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D1_v2</InstanceSize>
+						<ARMInstanceSize>Standard_D1_v2</ARMInstanceSize>
+						<RoleName>client-vm-2</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1112</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D1_v2</InstanceSize>
+						<ARMInstanceSize>Standard_D1_v2</ARMInstanceSize>
+						<RoleName>client-vm-3</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1113</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D1_v2</InstanceSize>
+						<ARMInstanceSize>Standard_D1_v2</ARMInstanceSize>
+						<RoleName>client-vm-4</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1114</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D1_v2</InstanceSize>
+						<ARMInstanceSize>Standard_D1_v2</ARMInstanceSize>
+						<RoleName>client-vm-5</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1115</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D1_v2</InstanceSize>
+						<ARMInstanceSize>Standard_D1_v2</ARMInstanceSize>
+						<RoleName>client-vm-6</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1116</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D1_v2</InstanceSize>
+						<ARMInstanceSize>Standard_D1_v2</ARMInstanceSize>
+						<RoleName>client-vm-7</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1117</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D1_v2</InstanceSize>
+						<ARMInstanceSize>Standard_D1_v2</ARMInstanceSize>
+						<RoleName>client-vm-8</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1118</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D1_v2</InstanceSize>
+						<ARMInstanceSize>Standard_D1_v2</ARMInstanceSize>
+						<RoleName>client-vm-9</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1119</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D1_v2</InstanceSize>
+						<ARMInstanceSize>Standard_D1_v2</ARMInstanceSize>
+						<RoleName>client-vm-10</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1120</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D1_v2</InstanceSize>
+						<ARMInstanceSize>Standard_D1_v2</ARMInstanceSize>
+						<RoleName>client-vm-11</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1121</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D1_v2</InstanceSize>
+						<ARMInstanceSize>Standard_D1_v2</ARMInstanceSize>
+						<RoleName>client-vm-12</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1122</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D1_v2</InstanceSize>
+						<ARMInstanceSize>Standard_D1_v2</ARMInstanceSize>
+						<RoleName>client-vm-13</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1123</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D1_v2</InstanceSize>
+						<ARMInstanceSize>Standard_D1_v2</ARMInstanceSize>
+						<RoleName>client-vm-14</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1124</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_D1_v2</InstanceSize>
+						<ARMInstanceSize>Standard_D1_v2</ARMInstanceSize>
+						<RoleName>client-vm-15</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1125</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+				</HostedService>					
+			</S1C15>						
+			<RDMA2VMA8>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_A8</InstanceSize>
+						<ARMInstanceSize>Standard_A8</ARMInstanceSize>
+						<RoleName>server-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1111</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_A8</InstanceSize>
+						<ARMInstanceSize>Standard_A8</ARMInstanceSize>
+						<RoleName>client-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1112</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+				</HostedService>
+			</RDMA2VMA8>						
+			<RDMA2VMA9>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_A9</InstanceSize>
+						<ARMInstanceSize>Standard_A9</ARMInstanceSize>
+						<RoleName>server-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1111</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_A9</InstanceSize>
+						<ARMInstanceSize>Standard_A9</ARMInstanceSize>
+						<RoleName>client-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1112</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+				</HostedService>
+			</RDMA2VMA9>						
+			<RDMA2VMH16r>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_H16r</InstanceSize>
+						<ARMInstanceSize>Standard_H16r</ARMInstanceSize>
+						<RoleName>server-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1111</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_H16r</InstanceSize>
+						<ARMInstanceSize>Standard_H16r</ARMInstanceSize>
+						<RoleName>client-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1112</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+				</HostedService>
+			</RDMA2VMH16r>						
+			<RDMA2VMH16mr>
+				<isDeployed>NO</isDeployed>
+				<HostedService>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_H16mr</InstanceSize>
+						<ARMInstanceSize>Standard_H16mr</ARMInstanceSize>
+						<RoleName>server-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1111</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>
+					<VirtualMachine>
+						<state></state>
+						<InstanceSize>Standard_H16mr</InstanceSize>
+						<ARMInstanceSize>Standard_H16mr</ARMInstanceSize>
+						<RoleName>client-vm</RoleName>
+						<EndPoints>
+							<Name>SSH</Name>
+							<Protocol>tcp</Protocol>
+							<LocalPort>22</LocalPort>
+							<PublicPort>1112</PublicPort>
+						</EndPoints>
+						<DataDisk></DataDisk>
+					</VirtualMachine>					
+				</HostedService>
+			</RDMA2VMH16mr>									
 			<M1S5>
 				<!-- This setup type defines One Master and Three slave machines. Hence name is M(aster)1S(lave)3. -->
 				<isDeployed>NO</isDeployed>
@@ -3589,7 +3935,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12122</PublicPort>
+							<PublicPort>1111</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
@@ -3602,7 +3948,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12222</PublicPort>
+							<PublicPort>1112</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3615,7 +3961,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12322</PublicPort>
+							<PublicPort>1113</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3628,7 +3974,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12422</PublicPort>
+							<PublicPort>1114</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3641,7 +3987,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12522</PublicPort>
+							<PublicPort>1115</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3654,7 +4000,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12622</PublicPort>
+							<PublicPort>1116</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3672,7 +4018,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12122</PublicPort>
+							<PublicPort>1111</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
@@ -3685,7 +4031,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12222</PublicPort>
+							<PublicPort>1112</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3698,7 +4044,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12322</PublicPort>
+							<PublicPort>1113</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3711,7 +4057,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12422</PublicPort>
+							<PublicPort>1114</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3724,7 +4070,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12522</PublicPort>
+							<PublicPort>1115</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3737,7 +4083,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12622</PublicPort>
+							<PublicPort>1116</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3750,7 +4096,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12722</PublicPort>
+							<PublicPort>1117</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3763,7 +4109,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12822</PublicPort>
+							<PublicPort>1118</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3776,7 +4122,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12922</PublicPort>
+							<PublicPort>1119</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3789,7 +4135,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>11022</PublicPort>
+							<PublicPort>11110</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3802,7 +4148,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>11122</PublicPort>
+							<PublicPort>11111</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3815,7 +4161,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>11222</PublicPort>
+							<PublicPort>11112</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3828,7 +4174,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>11322</PublicPort>
+							<PublicPort>11113</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3841,7 +4187,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>11422</PublicPort>
+							<PublicPort>11114</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3854,7 +4200,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>11522</PublicPort>
+							<PublicPort>11115</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3867,7 +4213,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>11622</PublicPort>
+							<PublicPort>11116</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3885,7 +4231,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12122</PublicPort>
+							<PublicPort>1111</PublicPort>
 						</EndPoints>
 						<DataDisk>
 							<LUN>0</LUN>
@@ -3902,7 +4248,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12222</PublicPort>
+							<PublicPort>1112</PublicPort>
 						</EndPoints>
 					</VirtualMachine>					
 				</HostedService>
@@ -3919,7 +4265,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12122</PublicPort>
+							<PublicPort>1111</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
@@ -3932,7 +4278,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12222</PublicPort>
+							<PublicPort>1112</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -3945,7 +4291,7 @@
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>12322</PublicPort>
+							<PublicPort>1113</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>					
@@ -4564,7 +4910,7 @@
 			<testScript></testScript>
 			<testScriptPs1>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</testScriptPs1>
 			<files></files>
-			<setupType>BVTDeployment</setupType>
+			<setupType>SingleVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
@@ -4849,6 +5195,44 @@
 	      <SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 	      <TestID>AzureBVT_029</TestID>
 	    </test>
+		<test>
+	      <testName>BVT-CAPTURE-VHD</testName>
+	      <testScript></testScript>
+	      <testScriptPs1>BVT-CAPTURE-VHD.ps1</testScriptPs1>
+	      <files></files>
+	      <setupType>BVTDeployment</setupType>
+	      <TestType>
+	      </TestType>
+	      <TestFeature>
+	      </TestFeature>
+	      <SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+	      <TestID>AzureBVT_000</TestID>
+	    </test>
+		<test>
+	    <testName>BVT-DELETE-VHD</testName>
+	    <testScript></testScript>
+	    <testScriptPs1>BVT-CAPTURE-VHD.ps1</testScriptPs1>
+	    <files></files>
+	    <setupType>BVTDeployment</setupType>
+	    <TestType>
+	    </TestType>
+	    <TestFeature>
+	    </TestFeature>
+	    <SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+	    <TestID>AzureBVT_100</TestID>
+		</test>
+		<test>
+		  <testName>BVT-VERIFY-KVP-DAEMON-STATUS</testName>
+		  <testScript></testScript>
+		  <testScriptPs1>BVT-VERIFY-KVP-DAEMON-STATUS.ps1</testScriptPs1>
+		  <files></files>
+		  <setupType>BVTDeployment</setupType>
+		  <TestType></TestType>
+		  <TestFeature></TestFeature>
+		  <SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+		  <TestID>AzureBVT_030</TestID>
+		</test>
+		
 		<test>
 			<testName>ICA-VERIFY-RDMA</testName>
 			<testScript>ICA-VERIFY-RDMA.py</testScript>
@@ -5842,12 +6226,12 @@
 			<testName>E2E-WORDPRESS-SINGLE-VM-SETUP</testName>
 			<testScript>E2E-WORDPRESS-SETUP.py</testScript>
 			<testScriptps1>E2E-WORDPRESS-SETUP.ps1</testScriptps1>
-			<files>.\remote-scripts\Packages\wordpress.zip,.\remote-scripts\Packages\Wordpress.DDL,.\remote-scripts\E2E-WORDPRESS-SETUP.py,.\remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\E2E-WORDPRESS-SETUP.py,.\remote-scripts\azuremodules.py,.\tools\packages\python-pexpect-3.1-1.1.noarch.rpm</files>
 			<setupType>E2ESingleVM</setupType>
 			<TestType></TestType>
 			<E2ESetupCmdLineArgument>singleVM_setup</E2ESetupCmdLineArgument>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID></TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -5873,12 +6257,12 @@
 			<testName>E2E-WORDPRESS-FOUR-VM-SETUP</testName>
 			<testScript>E2E-WORDPRESS-SETUP.py</testScript>
 			<testScriptps1>E2E-WORDPRESS-SETUP.ps1</testScriptps1>
-			<files>.\remote-scripts\Packages\wordpress.zip,.\remote-scripts\Packages\Wordpress.DDL,.\remote-scripts\E2E-WORDPRESS-SETUP.py,.\remote-scripts\azuremodules.py</files>
+			<files>.\remote-scripts\E2E-WORDPRESS-SETUP.py,.\remote-scripts\azuremodules.py,.\tools\packages\python-pexpect-3.1-1.1.noarch.rpm</files>
 			<setupType>E2EFourVM</setupType>
 			<TestType></TestType>
 			<E2ESetupCmdLineArgument>loadbalancer_setup</E2ESetupCmdLineArgument>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<TestID></TestID>
 			<Priority>P0</Priority>
 		</test>
@@ -6375,14 +6759,78 @@
 			<TestID>Reboot_01</TestID>
 		</test>
 		<test>
-			<testName>ICA-VM-REBOOT-TEST</testName>
+			<testName>ICA-DEPLOYMENT-ALL-SIZES-LOOP-TEST-LIMITED</testName>
 			<testScript></testScript>
-			<testScriptPs1>ICA-VM-REBOOT-TEST.ps1</testScriptPs1>
-			<setupType>G5</setupType>
+			<testScriptPs1>ICA-DEPLOYMENT-ALL-SIZES-LOOP-TEST.ps1</testScriptPs1>
+			<files>.\remote-scripts\temp.txt</files>
+			<setupType>BVTDeployment</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
-			<SupportedExecutionModes>AzureServiceManagement</SupportedExecutionModes>
-			<rebootCount>100</rebootCount>
+			<SubtestValues>CUSTOM,VM,SIZES</SubtestValues>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<StandardVMSizes>Standard_A0,Standard_E64_v3,Standard_A7,Standard_D64_v3,Basic_A0,Standard_E32_v3,Basic_A4,Standard_D32_v3,Standard_D1_v2,Standard_D15_v2,Standard_F1,Standard_A1_v2,Standard_F16,Standard_A8_v2,Standard_D1,Standard_D14,Standard_D2_v3,Standard_G5,Standard_E2_v3,Standard_G1,Standard_A8</StandardVMSizes>
+			<PremiumVMSizes>Standard_DS1_v2,Standard_E64s_v3,Standard_DS15_v2,Standard_F1s,Standard_D64s_v3,Standard_F16s,Standard_E32s_v3,Standard_DS1,Standard_DS14,Standard_B1ms,Standard_L32s,Standard_B8ms,Standard_D2s_v3,Standard_D32s_v3,Standard_E2s_v3,Standard_GS5,Standard_GS1,Standard_L4s</PremiumVMSizes>
+			<TestID>Reboot_01</TestID>
+		</test>
+
+		<test>
+			<testName>ICA-VM-250-REBOOT-TEST</testName>
+			<testScript></testScript>
+			<testScriptPs1>ICA-VM-REBOOT-TEST.ps1</testScriptPs1>
+			<setupType>SingleVM</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>CUSTOM,VM,SIZES</SubtestValues>
+			<rebootCount>250</rebootCount>
+			<TestID>Reboot_02</TestID>
+		</test>		
+		<test>
+			<testName>ICA-VM-500-REBOOT-TEST</testName>
+			<testScript></testScript>
+			<testScriptPs1>ICA-VM-REBOOT-TEST.ps1</testScriptPs1>
+			<setupType>SingleVM</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>CUSTOM,VM,SIZES</SubtestValues>
+			<rebootCount>500</rebootCount>
+			<TestID>Reboot_02</TestID>
+		</test>		
+		<test>
+			<testName>ICA-VM-1000-REBOOT-TEST</testName>
+			<testScript></testScript>
+			<testScriptPs1>ICA-VM-REBOOT-TEST.ps1</testScriptPs1>
+			<setupType>SingleVM</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>CUSTOM,VM,SIZES</SubtestValues>
+			<rebootCount>1000</rebootCount>
+			<TestID>Reboot_02</TestID>
+		</test>		
+		<test>
+			<testName>ICA-VM-2000-REBOOT-TEST</testName>
+			<testScript></testScript>
+			<testScriptPs1>ICA-VM-REBOOT-TEST.ps1</testScriptPs1>
+			<setupType>SingleVM</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>CUSTOM,VM,SIZES</SubtestValues>
+			<rebootCount>2000</rebootCount>
+			<TestID>Reboot_02</TestID>
+		</test>		
+		<test>
+			<testName>ICA-VM-5000-REBOOT-TEST</testName>
+			<testScript></testScript>
+			<testScriptPs1>ICA-VM-REBOOT-TEST.ps1</testScriptPs1>
+			<setupType>SingleVM</setupType>
+			<TestType></TestType>
+			<TestFeature></TestFeature>
+			<SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>CUSTOM,VM,SIZES</SubtestValues>
+			<rebootCount>5000</rebootCount>
 			<TestID>Reboot_02</TestID>
 		</test>		
 		
@@ -6885,6 +7333,99 @@
 			<Priority>P0</Priority>
 		</test>			
 		<test>
+			<testName>ICA-RDMA-TEST-MultiVM</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-RDMA-TEST-MultiVM.ps1</testScriptps1>
+			<setupType>S1C15</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<remoteFiles></remoteFiles>
+			<InitialWaitSeconds>60</InitialWaitSeconds>
+			<Priority>P0</Priority>
+			<NumberOfReboots>5</NumberOfReboots>
+			<params>
+				<param>mpi_settings="-env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 -env SECS_PER_SAMPLE=600"</param>
+				<param>imb_mpi1_tests="pingpong allreduce"</param>
+				<param>mpi1_ppn=2</param>
+				<param>imb_mpi1_tests_iterations=10</param>
+				<param>imb_rma_tests="all"</param>
+				<param>rma_ppn=2</param>
+				<param>imb_rma_tests_iterations=1</param>
+				<param>imb_nbc_tests="all"</param>
+				<param>nbc_ppn=2</param>
+				<param>imb_nbc_tests_iterations=1</param>
+			</params>			
+		</test>
+		<test>
+			<testName>ICA-RDMA-TEST-MultiVM-REBOOT-STRESS</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-RDMA-TEST-MultiVM.ps1</testScriptps1>
+			<setupType>S1C15</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<remoteFiles></remoteFiles>
+			<InitialWaitSeconds>60</InitialWaitSeconds>
+			<Priority>P0</Priority>
+			<NumberOfReboots>1000</NumberOfReboots>
+			<params>
+				<param>mpi_settings="-env I_MPI_FABRICS dapl -env I_MPI_DAPL_PROVIDER=ofa-v2-ib0 -env SECS_PER_SAMPLE=600"</param>
+				<param>imb_mpi1_tests="pingpong allreduce"</param>
+				<param>mpi1_ppn=3</param>
+				<param>imb_mpi1_tests_iterations=5</param>
+				<param>imb_rma_tests="all"</param>
+				<param>rma_ppn=2</param>
+				<param>imb_rma_tests_iterations=0</param>
+				<param>imb_nbc_tests="all"</param>
+				<param>nbc_ppn=2</param>
+				<param>imb_nbc_tests_iterations=0</param>
+			</params>
+		</test>
+		<test>
+			<testName>ICA-RDMA-TEST-2VM-A8</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-RDMA-TEST-2VM.ps1</testScriptps1>
+			<setupType>RDMA2VMA8</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<remoteFiles></remoteFiles>
+			<InitialWaitSeconds>60</InitialWaitSeconds>
+			<Priority>P0</Priority>
+		</test>			
+		<test>
+			<testName>ICA-RDMA-TEST-2VM-A9</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-RDMA-TEST-2VM.ps1</testScriptps1>
+			<setupType>RDMA2VMA9</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<remoteFiles></remoteFiles>
+			<InitialWaitSeconds>60</InitialWaitSeconds>
+			<Priority>P0</Priority>
+		</test>			
+		<test>
+			<testName>ICA-RDMA-TEST-2VM-H16r</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-RDMA-TEST-2VM.ps1</testScriptps1>
+			<setupType>RDMA2VMH16r</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<remoteFiles></remoteFiles>
+			<InitialWaitSeconds>60</InitialWaitSeconds>
+			<Priority>P0</Priority>
+		</test>			
+		<test>
+			<testName>ICA-RDMA-TEST-2VM-H16mr</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-RDMA-TEST-2VM.ps1</testScriptps1>
+			<setupType>RDMA2VMH16mr</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<remoteFiles></remoteFiles>
+			<InitialWaitSeconds>60</InitialWaitSeconds>
+			<Priority>P0</Priority>
+		</test>			
+		
+		<test>
 			<testName>ICA-RDMA-TEST-16VM</testName>
 			<testScript></testScript>
 			<testScriptps1>ICA-RDMA-TEST-16VM.ps1</testScriptps1>
@@ -6934,6 +7475,75 @@
 			<files>.\remote-scripts\azuremodules.sh</files>
 			<TestParameters>
 				<param>testDuration=300</param>
+				<param>testConnections="1 2 4 8 16 32 64 128 256 512 1024 2048 4096 6144 8192 10240"</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-PERF-NTTTCP-TEST-LIMITED</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-NTTTCP-TEST.ps1</testScriptps1>
+			<setupType>M1S1</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+				<param>testDuration=300</param>
+				<param>testConnections="1 1024 10240"</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-PERF-LAGSCOPE-TEST</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-PERF-LAGSCOPE-TEST.ps1</testScriptps1>
+			<setupType>M1S1</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+				<param>pingIteration=1000000</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>		
+		<test>
+			<testName>ICA-PERF-FIO-TEST-4K</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-FIO-TEST.ps1</testScriptps1>
+			<setupType>DS14DISK12</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>			
+			<TestParameters>
+				<param>modes='randread randwrite read write'</param>
+				<param>startThread=1</param>
+				<param>maxThread=1024</param>
+				<param>startIO=4</param>
+				<param>numjobs=1</param>
+				<param>ioruntime=300</param>
+				<param>maxIO=4</param>
+				<param>fileSize=1023G</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>		
+		<test>
+			<testName>ICA-PERF-FIO-TEST-4K-LIMITED</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-FIO-TEST.ps1</testScriptps1>
+			<setupType>DS14DISK12</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>			
+			<TestParameters>
+				<param>modes='randread randwrite read write'</param>
+				<param>startThread=1</param>
+				<param>maxThread=256</param>
+				<param>startIO=4</param>
+				<param>numjobs=1</param>
+				<param>ioruntime=300</param>
+				<param>maxIO=4</param>
+				<param>fileSize=1023G</param>
 			</TestParameters>
 			<Priority>P0</Priority>
 		</test>		
@@ -6952,7 +7562,7 @@
 				<param>startIO=8</param>
 				<param>numjobs=1</param>
 				<param>ioruntime=300</param>
-				<param>maxIO=8</param>
+				<param>maxIO=8</param>		
 				<param>fileSize=134G</param>
 			</TestParameters>
 			<Priority>P0</Priority>
@@ -6977,6 +7587,26 @@
 			</TestParameters>
 			<Priority>P0</Priority>
 		</test>		
+		<test>
+			<testName>ICA-PERF-FIO-TEST-1024K-LIMITED</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-FIO-TEST.ps1</testScriptps1>
+			<setupType>DS14DISK12</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>			
+			<TestParameters>
+				<param>modes='randread randwrite read write'</param>
+				<param>startThread=1</param>
+				<param>maxThread=256</param>
+				<param>startIO=1024</param>
+				<param>numjobs=1</param>
+				<param>ioruntime=300</param>
+				<param>maxIO=1024</param>		
+				<param>fileSize=134G</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>		
 		
 		<test>
 			<testName>ICA-PERF-UDP-LOSS-TEST</testName>
@@ -6991,7 +7621,7 @@
 				<param>testType=udp</param>
 				<param>max_parallel_connections_per_instance=64</param>
 				<param>connections=(1 2 4 8 16 32 64 128 256 512 1024)</param>
-				<param>bufferLenghs=(1 8)</param>
+				<param>bufferLengths=(1024 8192)</param>
 				<param>IPversion=4</param>
 			</TestParameters>
 			<Priority>P0</Priority>
@@ -7009,7 +7639,7 @@
 				<param>testType=tcp</param>
 				<param>max_parallel_connections_per_instance=64</param>
 				<param>connections=(1 2 4 8 16 32 64 128 256 512 1024)</param>
-				<param>bufferLenghs=(1024)</param>
+				<param>bufferLengths=(1024)</param>
 				<param>IPversion=6</param>
 			</TestParameters>
 			<Priority>P0</Priority>
@@ -7027,11 +7657,30 @@
 				<param>testType=tcp</param>
 				<param>max_parallel_connections_per_instance=64</param>
 				<param>connections=(1 2 4 8 16 32 64 128 256 512 1024)</param>
-				<param>bufferLenghs=(1024)</param>
+				<param>bufferLengths=(1024)</param>
 				<param>IPversion=4</param>
 			</TestParameters>
 			<Priority>P0</Priority>
-		</test>		
+		</test>
+		<test>
+			<testName>ICA-IPERF3-TCP-IPV4-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-IPERF3-TCPv4v6-xREGION-TEST.ps1</testScriptps1>
+			<setupType>S1C1LBIPv4</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>			
+			<TestParameters>
+				<param>testDuration=10</param>
+				<param>testType=tcp</param>
+				<param>max_parallel_connections_per_instance=64</param>
+				<param>connections=(1)</param>
+				<param>bufferLengths=(1024)</param>
+				<param>IPversion=4</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+				
 		<test>
 			<testName>ICA-IPERF3-TCP-IPV4-SAMEVNET-TEST</testName>
 			<testScript></testScript>
@@ -7045,11 +7694,29 @@
 				<param>testType=tcp</param>
 				<param>max_parallel_connections_per_instance=64</param>
 				<param>connections=(1 2 4 8 16 32 64 128 256 512 1024)</param>
-				<param>bufferLenghs=(1024)</param>
+				<param>bufferLengths=(1024)</param>
 				<param>IPversion=4</param>
 			</TestParameters>
 			<Priority>P0</Priority>
-		</test>		
+		</test>
+		<test>
+			<testName>ICA-PERF-IPERF3-SINGLE-CONNNECTION-TCP-IPV4-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-IPERF3-SINGLE-CONNNECTION-TCP-IPV4-TEST.ps1</testScriptps1>
+			<setupType>M1S1</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>			
+			<TestParameters>
+				<param>testDuration=30</param>
+				<param>testType=tcp</param>
+				<param>max_parallel_connections_per_instance=64</param>
+				<param>connections=(1)</param>
+				<param>bufferLengths=(32 64 128 256 512 1024 2048 4096 8192 16384 32768 65536)</param>
+				<param>IPversion=4</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>			
 		<test>
 			<testName>ICA-PERF-REDIS-MIDDLEWARE-TEST</testName>
 			<testScript></testScript>
@@ -7078,7 +7745,372 @@
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
 			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
 			<Priority>P0</Priority>
-		</test>			
+		</test>	
+		<test>
+			<testName>VERIFY-DISK-HOT-ADDREMOVE</testName>
+			<testScript></testScript>
+			<testScriptps1>DiskAddRemove.ps1</testScriptps1>
+			<setupType>A1</setupType>
+			<SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues></SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+				<param></param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>		
+		<!-- LIS BUILD TEST -->
+		<test>
+			<!-- Install Latest LIS -> reboot and Verify it Installed Successfully with out any errors and warnings. -->
+			<testName>ICA-LIS-BUILD-TEST-SCENARIO-1</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
+			<CurrentLISVersion>LATEST</CurrentLISVersion>
+			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<setupType>A2</setupType>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<SubtestValues>TestID2</SubtestValues>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<!-- Install Previous LIS, reboot and Upgrade to latest LIS, reboot. Verify that LIS install/upgrade Successful with out any errors and warnings. -->
+			<testName>ICA-LIS-BUILD-TEST-SCENARIO-2</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
+			<PreviousLISVersion>PREVIOUS</PreviousLISVersion>
+			<PreviousLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/previous-lis-rpms.tar.gz^tar -xzf previous-lis-rpms.tar.gz^cp -ar LISISO/* . </PreviousLISExtractCommand>
+			<CurrentLISVersion>LATEST</CurrentLISVersion>
+			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<setupType>A2</setupType>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<SubtestValues>TestID1,TestID3</SubtestValues>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<!-- Install Previous LIS -> Upgrade to latest LIS -> Uninstall LIS -> ReInstall Prevous LIS. Verify that LIS install/upgrade/uninstall Successful with out any errors and warnings. -->
+			<testName>ICA-LIS-BUILD-TEST-SCENARIO-3</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
+			<PreviousLISVersion>PREVIOUS</PreviousLISVersion>
+			<PreviousLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/previous-lis-rpms.tar.gz^tar -xzf previous-lis-rpms.tar.gz^cp -ar LISISO/* . </PreviousLISExtractCommand>
+			<CurrentLISVersion>LATEST</CurrentLISVersion>
+			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<setupType>A2</setupType>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<SubtestValues>TestID1,TestID3,TestID4,TestID5</SubtestValues>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<!-- Upgrade Kernel (don't reboot) -> Install Current LIS and  Verify that LIS aborting install (LIS negative scenario test) -->
+			<testName>ICA-LIS-BUILD-TEST-SCENARIO-4</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
+			<CurrentLISVersion>LATEST</CurrentLISVersion>
+			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<setupType>A2</setupType>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<SubtestValues>TestID7,TestID8</SubtestValues>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<!-- Install Current LIS and Upgrade Kernel with reboot. Verify that install/upgrade Successful with out any errors and warnings and boot with Inbuilt LIS drives. -->
+			<testName>ICA-LIS-BUILD-TEST-SCENARIO-5</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
+			<CurrentLISVersion>LATEST</CurrentLISVersion>
+			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<setupType>A2</setupType>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<SubtestValues>TestID2,TestID6</SubtestValues>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<!-- Install Previous LIS -> upgrade to Current LIS -> Upgrade Kernel with reboot. Verify that install/upgrade Successful with out any errors and warnings and boot with Inbuilt LIS drives. -->
+			<testName>ICA-LIS-BUILD-TEST-SCENARIO-6</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
+			<PreviousLISVersion>PREVIOUS</PreviousLISVersion>
+			<PreviousLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/previous-lis-rpms.tar.gz^tar -xzf previous-lis-rpms.tar.gz^cp -ar LISISO/* . </PreviousLISExtractCommand>
+			<CurrentLISVersion>LATEST</CurrentLISVersion>
+			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<setupType>A2</setupType>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<SubtestValues>TestID1,TestID3,TestID6</SubtestValues>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<!-- Upgrade Kernel -> reboot -> Install Current LIS and  Verify that LIS installed successful -->
+			<testName>ICA-LIS-BUILD-TEST-SCENARIO-7</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
+			<CurrentLISVersion>LATEST</CurrentLISVersion>
+			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<setupType>A2</setupType>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<SubtestValues>TestID6,TestID2</SubtestValues>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<!-- Install Current LIS -> Uninstall LIS. Verify that install/uninstall Successful with out any errors and warnings,microsoft-hyper-v lib modules should be Empty and boot with Inbuilt LIS drives. -->
+			<testName>ICA-LIS-BUILD-TEST-SCENARIO-8</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
+			<CurrentLISVersion>LATEST</CurrentLISVersion>
+			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<setupType>A2</setupType>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<SubtestValues>TestID2,TestID4</SubtestValues>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-LTP-BASIC-TEST</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-LTP-BASIC-TEST.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-DOCKER-BASIC-TEST</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-DOCKER-BASIC-TEST.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>				
+		<test>
+			<testName>ICA-N-Series-GPU-TEST-NC6</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-N-Series-GPU-TEST.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<OverrideVMSize>Standard_NC6</OverrideVMSize>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+			  <param>enableProposedRepo=yes</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-N-Series-GPU-TEST-NC12</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-N-Series-GPU-TEST.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<OverrideVMSize>Standard_NC12</OverrideVMSize>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+			  <param></param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-N-Series-GPU-TEST-NC24</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-N-Series-GPU-TEST.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<OverrideVMSize>Standard_NC24</OverrideVMSize>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+			  <param></param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-N-Series-GPU-TEST-NC24r</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-N-Series-GPU-TEST.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<OverrideVMSize>Standard_NC24r</OverrideVMSize>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+			  <param></param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM-NEXT</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<OverrideVMSize>Standard_A2</OverrideVMSize>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+			<param>NEXT</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>		
+		<test>
+			<testName>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM-BLUESTONE</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<OverrideVMSize>Standard_A2</OverrideVMSize>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+			<param>BLUESTONE</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>CAPTURE-VHD-BEFORE-TEST</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>CAPTURE-VHD-BEFORE-TEST.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<OverrideVMSize>Standard_A2</OverrideVMSize>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<regions>westus,westus2,northeurope</regions>		
+			<Priority>P0</Priority>
+		</test>		
+		<test>
+			<testName>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM-LIS</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<OverrideVMSize>Standard_A2</OverrideVMSize>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+			<param>LIS</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM-LATEST</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<OverrideVMSize>Standard_A2</OverrideVMSize>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+			<param>LATEST</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>BVT-HOT-VM-RESIZE</testName>
+			<testScript></testScript>
+			<testScriptps1>HotReSize-VM.ps1</testScriptps1>
+			<setupType>A4</setupType>
+			<SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues></SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+				<param></param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>BVT-HOT-ADD-DISK-PARALLEL</testName>
+			<testScript></testScript>
+			<testScriptps1>DiskHotAddRemove-Parallel.ps1</testScriptps1>
+			<setupType>A4</setupType>
+			<SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues></SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+				<param></param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>BVT-HOT-ADD-DISK-SERIAL</testName>
+			<testScript></testScript>
+			<testScriptps1>DiskHotAddRemove-Serial.ps1</testScriptps1>
+			<setupType>A4</setupType>
+			<SupportedExecutionModes>AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues></SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+				<param></param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+		<!-- TRIM Test Definations -->
+		<test>
+			<testName>ICA-TRIM-OPTION-0-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-TRIM-TEST.ps1</testScriptps1>
+			<setupType>Trim-OP0</setupType>
+			<diskType>None</diskType>
+			<files>.\remote-scripts\auto_rdos_XStoreTrim_setup.sh,.\remote-scripts\auto_rdos_XStoreTrim.sh,.\remote-scripts\auto_rdos_XStoreTrimFinal.sh</files>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>TestID1,TestID2,TestID3,TestID4,TestID5</SubtestValues>
+			<TestParameters>
+				<param>trimParam="BTRFS","XFS","EXT4"</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>	
+		<test>
+			<testName>ICA-TRIM-OPTION-1-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-TRIM-TEST.ps1</testScriptps1>
+			<setupType>Trim-OP1</setupType>
+			<diskType>ReadOnly</diskType>
+			<files>.\remote-scripts\auto_rdos_XStoreTrim_setup.sh,.\remote-scripts\auto_rdos_XStoreTrim.sh,.\remote-scripts\auto_rdos_XStoreTrimFinal.sh</files>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>TestID1,TestID2,TestID3,TestID4,TestID5</SubtestValues>
+			<TestParameters>
+				<param>trimParam="BTRFS","XFS","EXT4"</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>	
+		<test>
+			<testName>ICA-TRIM-OPTION-2-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-TRIM-TEST.ps1</testScriptps1>
+			<setupType>Trim-OP2</setupType>
+			<diskType>ReadWrite</diskType>
+			<files>.\remote-scripts\auto_rdos_XStoreTrim_setup.sh,.\remote-scripts\auto_rdos_XStoreTrim.sh,.\remote-scripts\auto_rdos_XStoreTrimFinal.sh</files>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>TestID1,TestID2,TestID3,TestID4,TestID5</SubtestValues>
+			<TestParameters>
+				<param>trimParam="BTRFS","XFS","EXT4"</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>					
 	</testsDefinition>
 
 	<testCycles>
@@ -7096,6 +8128,18 @@
 			</test>
 		</Cycle>
 		<Cycle>
+			<cycleName>DEPLOYMENT-LIMITED</cycleName>
+			<test>
+				<Name>ICA-DEPLOYMENT-ALL-SIZES-LOOP-TEST-LIMITED</Name>
+			</test>
+		</Cycle>		
+		<Cycle>
+			<cycleName>LEGACY-DEPLOYMENT</cycleName>
+			<test>
+				<Name>ICA-DEPLOYMENT-ALL-SIZES-LOOP-TEST</Name>
+			</test>
+		</Cycle>
+		<Cycle>
 			<cycleName>UITEST</cycleName>
 			<test>
 				<Name>UI-AzurePortalTest-CreateARMVM</Name>
@@ -7104,13 +8148,29 @@
 		<Cycle>
 			<cycleName>REBOOT</cycleName>
 			<test>
-				<Name>ICA-VM-REBOOT-TEST</Name>
+				<Name>ICA-VM-250-REBOOT-TEST</Name>
+			</test>
+			<test>
+				<Name>ICA-VM-500-REBOOT-TEST</Name>
+			</test>
+			<test>
+				<Name>ICA-VM-1000-REBOOT-TEST</Name>
+			</test>
+			<test>
+				<Name>ICA-VM-2000-REBOOT-TEST</Name>
+			</test>
+			<test>
+				<Name>ICA-VM-5000-REBOOT-TEST</Name>
 			</test>
 		</Cycle>
 
 		<!-- BVT tests -->
 		<Cycle>
 			<cycleName>BVT</cycleName>
+			<!-- Do not delete BVT-CAPTURE-VHD test. This should always be the first test -->
+			<test>
+				<Name>BVT-CAPTURE-VHD</Name>
+			</test>
 			<test>
 				<Name>BVT-VERIFY-NO-ERROR-IN-LOGS</Name>
 			</test>
@@ -7186,8 +8246,20 @@
 			<test>
 				<Name>BVT-VERIFY-SHUTDOWN</Name>
 			</test>
+			<!-- Do not delete BVT-DELETE-VHD test. This should always be the last test -->
+			<test>
+				<Name>BVT-DELETE-VHD</Name>
+			</test>
 		</Cycle>
-
+		<Cycle>
+			<cycleName>BVTMK</cycleName>		
+			<test>
+				<Name>BVT-VERIFY-VHD-PREREQUISITES</Name>
+			</test>
+			<test>
+				<Name>BVT-VERIFY-RESTART</Name>
+			</test>		
+		</Cycle>
 		<!-- Network Outbound Access tests -->
 		<Cycle>
 			<cycleName>OutboundAccess</cycleName>
@@ -7921,10 +8993,28 @@
 			</test>
 		</Cycle>
 		<Cycle>
-			<cycleName>RDMA16VM</cycleName>
+			<cycleName>RDMA2VM-ALL-SIZES</cycleName>
 			<test>
-				<Name>ICA-RDMA-TEST-16VM</Name>
-			</test>			
+				<Name>ICA-RDMA-TEST-2VM-A8</Name>
+			</test>
+			<test>
+				<Name>ICA-RDMA-TEST-2VM-A9</Name>
+			</test>
+			<test>
+				<Name>ICA-RDMA-TEST-2VM-H16r</Name>
+			</test>
+			<test>
+				<Name>ICA-RDMA-TEST-2VM-H16mr</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>RDMAMultiVM</cycleName>
+			<test>
+				<Name>ICA-RDMA-TEST-MultiVM</Name>
+			</test>
+			<test>
+				<Name>ICA-RDMA-TEST-MultiVM-REBOOT-STRESS</Name>
+			</test>						
 		</Cycle>        
 		<Cycle>
 			<cycleName>RHUI-Stress</cycleName>
@@ -7974,6 +9064,18 @@
 			</test>
 		</Cycle>
 		<Cycle>
+			<cycleName>PERF-NTTTCP-LIMITED</cycleName>
+			<test>
+				<Name>ICA-PERF-NTTTCP-TEST-LIMITED</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>PERF-LAGSCOPE</cycleName>
+			<test>
+				<Name>ICA-PERF-LAGSCOPE-TEST</Name>
+			</test>
+		</Cycle>
+		<Cycle>
 			<cycleName>PERF-TCPv6</cycleName>
 			<test>
 				<Name>ICA-PERF-TCP-IPV6-TEST</Name>
@@ -7982,12 +9084,21 @@
 		<Cycle>
 			<cycleName>PERF-FIO</cycleName>
 			<test>
-				<Name>ICA-PERF-FIO-TEST-8K</Name>
+				<Name>ICA-PERF-FIO-TEST-4K</Name>
 			</test>
 			<test>
 				<Name>ICA-PERF-FIO-TEST-1024K</Name>
 			</test>			
-		</Cycle>		
+		</Cycle>
+		<Cycle>
+			<cycleName>PERF-FIO-LIMITED</cycleName>
+			<test>
+				<Name>ICA-PERF-FIO-TEST-4K-LIMITED</Name>
+			</test>
+			<test>
+				<Name>ICA-PERF-FIO-TEST-1024K-LIMITED</Name>
+			</test>			
+		</Cycle>
 		<Cycle>
 			<cycleName>PERF-REDIS-M</cycleName>
 			<test>
@@ -8014,6 +9125,14 @@
 			</test>
 		</Cycle>
 		<Cycle>
+			<cycleName>PERF-IPERF3-SINGLE-CONNECTION</cycleName>
+			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
+			<test>
+				<Name>ICA-PERF-IPERF3-SINGLE-CONNNECTION-TCP-IPV4-TEST</Name>
+			</test>
+		</Cycle>		
+		
+		<Cycle>
 			<cycleName>IPERF3TCPv6</cycleName>
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
 			<test>
@@ -8026,7 +9145,47 @@
 			<test>
 				<Name>ICA-IPERF3-TCP-IPV4-SAMEVNET-TEST</Name>
 			</test>
-		</Cycle>		
+		</Cycle>
+		<Cycle>
+			<cycleName>LIS-BUILD</cycleName>
+			<test>
+				<Name>ICA-LIS-BUILD-TEST-SCENARIO-1</Name>
+			</test>
+			<test>
+				<Name>ICA-LIS-BUILD-TEST-SCENARIO-2</Name>
+			</test>
+			<test>
+				<Name>ICA-LIS-BUILD-TEST-SCENARIO-3</Name>
+			</test>
+			<test>
+				<Name>ICA-LIS-BUILD-TEST-SCENARIO-4</Name>
+			</test>
+			<test>
+				<Name>ICA-LIS-BUILD-TEST-SCENARIO-5</Name>
+			</test>
+			<test>
+				<Name>ICA-LIS-BUILD-TEST-SCENARIO-6</Name>
+			</test>
+			<test>
+				<Name>ICA-LIS-BUILD-TEST-SCENARIO-7</Name>
+			</test>			
+			<test>
+				<Name>ICA-LIS-BUILD-TEST-SCENARIO-8</Name>
+			</test>
+		</Cycle>
+		<!-- TRIM tests -->
+		<Cycle>
+			<cycleName>TRIM</cycleName>
+			<test>
+				<Name>ICA-TRIM-OPTION-0-TEST</Name>
+			</test>
+			<test>
+				<Name>ICA-TRIM-OPTION-1-TEST</Name>
+			</test>
+			<test>
+				<Name>ICA-TRIM-OPTION-2-TEST</Name>
+			</test>
+		</Cycle>			
 		<Cycle>
 			<cycleName>DEBUG</cycleName>
 			<!--You can add individual tests here and run them for debugging purpose. You can also add new cycles. -->
@@ -8038,6 +9197,69 @@
 			<cycleName>PROVISION</cycleName>
 			<test>
 				<Name>BVT-VERIFY-DEPLOYMENT-PROVISION</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>DISKHOTADDREMOVE</cycleName>
+			<test>
+				<Name>VERIFY-DISK-HOT-ADDREMOVE</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>LTP-BASIC</cycleName>
+			<test>
+				<Name>ICA-LTP-BASIC-TEST</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>DOCKER-BASIC</cycleName>
+			<test>
+				<Name>ICA-DOCKER-BASIC-TEST</Name>
+			</test>
+		</Cycle>			
+		<Cycle>
+			<cycleName>GPU-BASIC</cycleName>
+			<test>
+				<Name>ICA-N-Series-GPU-TEST-NC6</Name>
+			</test>
+			<test>
+				<Name>ICA-N-Series-GPU-TEST-NC12</Name>
+			</test>
+			<test>
+				<Name>ICA-N-Series-GPU-TEST-NC24</Name>
+			</test>
+			<test>
+				<Name>ICA-N-Series-GPU-TEST-NC24r</Name>
+			</test>
+		</Cycle>	
+		<Cycle>
+			<cycleName>CAPTURE-VHD-NEXT</cycleName>
+			<test>
+				<Name>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM-NEXT</Name>
+			</test>
+		</Cycle>  
+		<Cycle>
+			<cycleName>CAPTURE-VHD-BLUESTONE</cycleName>
+			<test>
+				<Name>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM-BLUESTONE</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>PUBLISH-VHD</cycleName>
+			<test>
+				<Name>CAPTURE-VHD-BEFORE-TEST</Name>
+			</test>
+		</Cycle>		
+		<Cycle>
+			<cycleName>CAPTURE-VHD-LIS</cycleName>
+			<test>
+				<Name>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM-LIS</Name>
+			</test>
+		</Cycle>  
+		<Cycle>
+			<cycleName>CAPTURE-VHD-LATEST</cycleName>
+			<test>
+				<Name>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM-LATEST</Name>
 			</test>
 		</Cycle>
 	</testCycles>

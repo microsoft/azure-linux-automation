@@ -16,37 +16,13 @@ $SAName = $currentTestData.remoteSA
 $SAPrimaryKey = (Get-AzureStorageKey -StorageAccountName $SAName).Primary
 $SAContainer = $currentTestData.remoteSAContainer
 $remoteDebPath = $currentTestData.remoteDEBPath
-$imageType = $currentTestData.imageType
-$BaseOsImageName = GetOSImageFromDistro -Distro $Distro -xmlConfig $xmlConfig
 LogMsg "Remote Storage Account to copy deb package : $SAName"
-Logmsg "Image type : $imageType"
-if($imageType -imatch "Standard")
-{
-	LogMsg "BaseOsImageName : $BaseOsImageName"
-	LogMsg "Collecting latest $imageType ubuntu image from Azure gallery.." 
-	$latestLinuxImage = (Get-AzureVMImage | where {$_.ImageName -imatch "Ubuntu-16_04-LTS-amd64-server" } | sort PublishedDate -Descending)[0].ImageName
-	LogMsg "Latest $imageType Image from Azure gallery : $latestLinuxImage"
-	$latestOsImage = SetOSImageToDistro -Distro $Distro -xmlConfig $xmlConfig -ImageName $latestLinuxImage
-	LogMsg "Is $imageType latestOsImage SET : $latestOsImage"
-}
-elseif($imageType -imatch "Daily")
-{
-	LogMsg "BaseOsImageName : $BaseOsImageName"
-	LogMsg "Collecting latest ubuntu $imageType image from Azure gallery"
-	$latestLinuxImage = (Get-AzureVMImage | where {$_.ImageName -imatch "Ubuntu_DAILY_BUILD-xenial-16_04-" } | sort PublishedDate -Descending)[0].ImageName
-	LogMsg "Latest $imageType Image from Azure gallery : $latestLinuxImage"
-	$latestOsImage = SetOSImageToDistro -Distro $Distro -xmlConfig $xmlConfig -ImageName $latestLinuxImage
-	LogMsg "Is $imageType latestOsImage SET : $latestOsImage"
-	
-}
 
 $isDeployed = DeployVMS -setupType $currentTestData.setupType -Distro $Distro -xmlConfig $xmlConfig
 if ($isDeployed)
 {
        try
        {
-              $allVMData  = GetAllDeployementData -DeployedServices $isDeployed
-              Set-Variable -Name AllVMData -Value $allVMData
               [string] $ServiceName = $allVMData.ServiceName
               $hs1VIP = $allVMData.PublicIP
               $hs1ServiceUrl = $allVMData.URL

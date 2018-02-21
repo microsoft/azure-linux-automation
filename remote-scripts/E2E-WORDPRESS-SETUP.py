@@ -7,8 +7,9 @@ import os.path
 from azuremodules import *
 
 #OS independent variables
-wdp_downlink = "http://wordpress.org/latest.tar.gz"
-##wdp_db_root_password = "wordpress_root_password"
+# wdp_downlink = "http://wordpress.org/latest.tar.gz"
+# wdp_configlink = "https://konkasoftpackages.blob.core.windows.net/testpackages/wordpress/wp-config-sample.php"
+wdp_downlink = "https://github.com/WordPress/WordPress.git"
 wdp_db_root_password = "wordpress_password"
 wdp_db_name		= "wordpressdb"
 wdp_db_hostname = "localhost"
@@ -55,50 +56,51 @@ def set_variables_OS_dependent():
 		service_httpd_name	= "httpd"
 		service_mysqld_name = "mysqld"
 		mysql_pkg_name		= "mysql-server"
-		frontend_packages_list = ["mysql.x86_64","php", "php-mysql","httpd","wget","sendmail"]
+		frontend_packages_list = ["mysql.x86_64","php", "php-mysql","httpd","wget","sendmail", "git"]
 		if(distro_version >= 7):		
 			service_mysqld_name	= "mariadb"
 			mysql_pkg_name		= "mariadb-server"
-			frontend_packages_list = ["mariadb","php", "php-mysql","httpd","wget","sendmail"]
+			frontend_packages_list = ["mariadb","php", "php-mysql","httpd","wget","sendmail", "git"]
 	elif (current_distro == "ubuntu"):
 		pexpect_pkg_name	= "python-pexpect"
 		service_httpd_name	= "apache2"
 		service_mysqld_name	= "mysql"
 		mysql_pkg_name		= "mysql-server"
-		frontend_packages_list = ["mysql-client","php5", "php5-mysql","libapache2-mod-php5","apache2","wget","sendmail"]
+		frontend_packages_list = ["mysql-client","php", "php-mysql","libapache2-mod-php","apache2","wget","sendmail", "git"]
+		UpdateRepos()
 	elif (current_distro == "opensuse"):
 		pexpect_pkg_name	= "python-pexpect"
 		service_httpd_name	= "apache2"
 		service_mysqld_name	= "mysql"
 		mysql_pkg_name		= "mysql-community-server"
-		frontend_packages_list = ["mysql-community-server-client","php5", "php5-mysql","apache2-mod_php5","apache2","wget", "sendmail"]
+		frontend_packages_list = ["mysql-community-server-client","php5", "php5-mysql","apache2-mod_php5","apache2","wget", "sendmail", "git"]
 	elif (current_distro == "SUSE Linux"):
 		pexpect_pkg_name	= "python-pexpect"					 
 		service_httpd_name	= "apache2"
 		service_mysqld_name	= "mysql"
 		mysql_pkg_name		= "mysql"
 		#service_command = "/etc/init.d/"
-		frontend_packages_list = ["mysql-client","php53", "php53-mysql","apache2-mod_php53","apache2","wget","sendmail"]
+		frontend_packages_list = ["mysql-client","php53", "php53-mysql","apache2-mod_php53","apache2","wget","sendmail", "git"]
 	elif (current_distro == "sles"):
 		pexpect_pkg_name	= "python-pexpect"					 
 		service_httpd_name	= "apache2"
 		service_mysqld_name	= "mysql"
-		mysql_pkg_name		= "mariadb"		 
-		frontend_packages_list = ["mariadb-client","apache2-mod_php5","apache2","php5", "php5-mysql","wget","sendmail"]
+		mysql_pkg_name		= "mysql"		 
+		frontend_packages_list = ["mysql-client","php53", "php53-mysql","apache2-mod_php53","apache2","wget","sendmail", "git"]
 		if(distro_version >= 12):
 			service_mysqld_name	= "mysql"
 			mysql_pkg_name		= "mariadb"
-			frontend_packages_list = ["mariadb-client","apache2-mod_php5","apache2","php5", "php5-mysql","wget","sendmail"]
+			frontend_packages_list = ["mariadb-client","apache2-mod_php5","apache2","php5", "php5-mysql","wget","sendmail", "git"]
 	elif ((current_distro == "Red Hat") or (current_distro == "rhel")):
 		pexpect_pkg_name	= "pexpect"					 
 		service_httpd_name	= "httpd"
 		service_mysqld_name	= "mysqld"
 		mysql_pkg_name		= "mysql-server"
-		frontend_packages_list = ["mysql.x86_64","php", "php-mysql", "httpd" , "wget","sendmail"]
+		frontend_packages_list = ["mysql.x86_64","php", "php-mysql", "httpd" , "wget","sendmail", "git"]
 		if(distro_version >= 7):		
 			service_mysqld_name	= "mariadb"
 			mysql_pkg_name		= "mariadb-server"
-			frontend_packages_list = ["mariadb","mysql.x86_64","php", "php-mysql", "httpd" , "wget","sendmail"]
+			frontend_packages_list = ["mariadb","mysql.x86_64","php", "php-mysql", "httpd" , "wget","sendmail", "git"]
 
 	singlevm_packages_list = frontend_packages_list + [mysql_pkg_name]
 	RunLog.info( "set_variables_OS_dependent .. [done]")
@@ -119,6 +121,18 @@ def DetectDistro():
 		elif (re.match(r'^VERSION_ID=(.*)',line,re.M|re.I) ):
 			matchObj = re.match( r'^VERSION_ID=(.*)', line, re.M|re.I)
 			version = float(matchObj.group(1))
+	
+	if(version == "unknown"):
+		RunLog.info("Detecting Distro Version")
+		oslist = Run("echo '"+vm_password+"' | sudo -S ls /etc/*-release")	
+		if("/etc/centos-release" in oslist):
+			version = float(Run("echo '"+vm_password+"' | sudo -S cat /etc/centos-release | sed s/.*release\ // | sed s/\ .*// "))
+		elif("/etc/oracle-release" in oslist):
+			version = float(Run("echo '"+vm_password+"' | sudo -S cat /etc/oracle-release | sed s/.*release\ // | sed s/\ .*// ")	)
+		elif("/etc/redhat-release" in oslist):
+			version = float(Run("echo '"+vm_password+"' | sudo -S cat /etc/redhat-release | sed s/.*release\ // | sed s/\ .*// "))
+	else:
+		RunLog.info("Detected Distro Version : " +str(version))
 	
 	if(distribution == 'unknown'):
 		for line in outputlist:
@@ -320,9 +334,28 @@ def download_url(url, destination_folder):
 	else:
 		print rtrn
 		return False
+		
+def download_git_url(url, destination_folder):
+	RunLog.info("Downloading the WordPress from git URL...")
+	rtrn = Run("echo '"+vm_password+"' | sudo -S git clone "+url+" "+destination_folder+"wordpress  2>&1")
+	# Faild to find git package
+	if(rtrn.rfind("git command not found") != -1):
+		install_package("git")
+		rtrn = Run("echo '"+vm_password+"' | sudo -S git clone "+url+" "+destination_folder+"wordpress  2>&1")		
+		RunLog.info("Downloading the WordPress from git URL... status...." + rtrn)
+	
+	rtrn = Run("echo '"+vm_password+"' | sudo -S ls "+destination_folder+"wordpress  2>&1")
+	if( rtrn.rfind("No such file or directory") == -1) :
+		RunLog.info("Downloading the WordPress from git URL... status...." + rtrn)
+		print rtrn
+		return True
+	else:
+		print rtrn
+		return False
 
 def install_packages_singleVM():
 	global wdp_install_folder
+	global wdp_configlink
 	RunLog.info("Installing Packages in SingleVM")
 
 	for package in singlevm_packages_list:
@@ -338,9 +371,30 @@ def install_packages_singleVM():
 		RunLog.error("Aborting the installation.")
 		end_the_script()
 
-	if(download_url(wdp_downlink, wdp_install_folder)):
-		RunLog.info("Wordpress package downloaded successfully")
-		Run("echo '"+vm_password+"' | sudo -S tar -xvf "+wdp_install_folder+"/latest.tar.gz -C "+wdp_install_folder)
+	if(".git" in wdp_downlink):
+		RunLog.info("Wordpress package is downloading from git" +wdp_downlink)
+		if(download_git_url(wdp_downlink, wdp_install_folder)):
+			RunLog.info("Wordpress package downloaded successfully")
+		else:
+			RunLog.info("Wordpress package downloaded failed.")
+			return False
+	elif(".tar" in wdp_downlink):
+		if(download_url(wdp_downlink, wdp_install_folder)):
+			RunLog.info("Wordpress package extraction is Started..")
+			Run("echo '"+vm_password+"' | sudo -S tar -xvzf "+wdp_install_folder+"/latest.tar.gz -C "+wdp_install_folder+" 2>&1")
+			RunLog.info("Wordpress package extract verification is Started..")
+			wdp_configfileStatus = Run("echo '"+vm_password+"' | sudo -S ls "+wdp_install_folder+"wordpress/wp-config-sample.php")
+			if("wp-config-sample.php" in wdp_configfileStatus):
+				RunLog.info(""+wdp_install_folder+"wordpress/wp-config-sample.php is there.. Wordpress extacred Successfully.. & update user, Db details for wordpress setup in config")
+			else:
+				RunLog.error(""+wdp_install_folder+"wordpress/wp-config-sample.php is NOT there.. So copy Sample-Config file")
+				if(download_url(wdp_configlink, wdp_install_folder)):
+					RunLog.info("wp-config-sample.php downloaded successfully")
+					Run("echo '"+vm_password+"' | sudo -S cp "+wdp_install_folder+"wp-config-sample.php -C "+wdp_install_folder+"/wordpress/ 2>&1")
+					return True
+		else:
+			RunLog.info("wp-config-sample.php downloaded failed.")
+			return False
 	else:
 		RunLog.info("Wordpress package downloaded failed.")
 		return False
@@ -388,14 +442,34 @@ def install_packages_frontend():
 		end_the_script()
 
 	#Downloading "WordPress" from Web URL
-	#wdp_install_folder = get_apache_document_root()
-	if(download_url(wdp_downlink, wdp_install_folder)):
-		RunLog.info("Wordpress package downloaded successfully")
-		Run("echo '"+vm_password+"' | sudo -S tar -xvf "+wdp_install_folder+"/latest.tar.gz -C "+wdp_install_folder)
+	if(".git" in wdp_downlink):
+		RunLog.info("Wordpress package is downloading from git" +wdp_downlink)
+		if(download_git_url(wdp_downlink, wdp_install_folder)):
+			RunLog.info("Wordpress package downloaded successfully")
+		else:
+			RunLog.info("Wordpress package downloaded failed.")
+			return False
+	elif(".tar" in wdp_downlink):
+		if(download_url(wdp_downlink, wdp_install_folder)):
+			RunLog.info("Wordpress package extraction is Started..")
+			Run("echo '"+vm_password+"' | sudo -S tar -xvzf "+wdp_install_folder+"/latest.tar.gz -C "+wdp_install_folder+" 2>&1")
+			RunLog.info("Wordpress package extract verification is Started..")
+			wdp_configfileStatus = Run("echo '"+vm_password+"' | sudo -S ls "+wdp_install_folder+"wordpress/wp-config-sample.php")
+			if("wp-config-sample.php" in wdp_configfileStatus):
+				RunLog.info(""+wdp_install_folder+"wordpress/wp-config-sample.php is there.. Wordpress extacred Successfully.. & update user, Db details for wordpress setup in config")
+			else:
+				RunLog.error(""+wdp_install_folder+"wordpress/wp-config-sample.php is NOT there.. So copy Sample-Config file")
+				if(download_url(wdp_configlink, wdp_install_folder)):
+					RunLog.info("wp-config-sample.php downloaded successfully")
+					Run("echo '"+vm_password+"' | sudo -S cp "+wdp_install_folder+"wp-config-sample.php -C "+wdp_install_folder+"/wordpress/ 2>&1")
+					return True
+		else:
+			RunLog.info("wp-config-sample.php downloaded failed.")
+			return False
 	else:
 		RunLog.info("Wordpress package downloaded failed.")
 		return False
-
+		
 	return True
 
 def mysql_secure_install(wdp_db_root_password):
@@ -591,17 +665,28 @@ def disable_selinux():
 
 def disable_iptables():
 	RunLog.info("Disabling IPPTABLES...")
+	iptablesInfo = Run ("echo '"+vm_password+"' | sudo -S iptables -nL")
+	RunLog.info("iptables status " +iptablesInfo)
 	#Identify the Distro and disable the Firewall
 	if (current_distro == 'ubuntu'):
 		ufw = Run ("echo '"+vm_password+"' | sudo -S ufw disable")
 		RunLog.info(ufw)
-	if ((current_distro == 'Red Hat') or (current_distro == 'rhel')):
-		Run ("echo '"+vm_password+"' | sudo -S service iptables save")
-		Run ("echo '"+vm_password+"' | sudo -S service iptables stop")
-		Run ("echo '"+vm_password+"' | sudo -S chkconfig iptables off")
+	elif ((current_distro == 'Red Hat') or (current_distro == 'rhel') or (current_distro == 'centos') or (current_distro == 'oracle')):
+		cmds = ("iptables -F","service iptables save","service iptables stop","chkconfig iptables off","service firewalld stop","chkconfig firewalld off")
+		output = exec_multi_cmds_local_sudo(cmds)
+	elif((current_distro == 'SUSE Linux')or(current_distro == 'sles') or (current_distro == "opensuse")):
+		cmds = ("/sbin/yast2 firewall startup manual","/sbin/rcSuSEfirewall2 stop","chkconfig SuSEfirewall2_setup off")
+		output = exec_multi_cmds_local_sudo(cmds)
+		output = Run("echo '"+vm_password+"' | sudo -S /sbin/rcSuSEfirewall2 status")
+		if((output.find('unused') != -1) or (output.find('dead') != -1)):
+			RunLog.info( "Diasabling iptables..[done]")
+		else:
+			RunLog.info( "Diasabling iptables..[failed]")
 	else:
-		Run ("echo '"+vm_password+"' | sudo -S chkconfig iptables off")
-		Run ("echo '"+vm_password+"' | sudo -S chkconfig ip6tables off")
+		Run ("echo '"+vm_password+"' | sudo -S iptables -F")
+	
+	iptablesInfo = Run ("echo '"+vm_password+"' | sudo -S iptables -nL")
+	RunLog.info("iptables status " +iptablesInfo)
 	RunLog.info("Disabling IPPTABLES...[done]")
 
 def setup_wordpress():
@@ -614,6 +699,7 @@ def setup_wordpress():
 		RunLog.error("Aborting the installation.")
 		end_the_script()
 	else:
+		RunLog.info("wp-config.php updating with user & DB credentails Started..")	
 		Run("echo '"+vm_password+"' | sudo -S cp "+wdp_install_folder+"wordpress/wp-config-sample.php "+wdp_install_folder+"wordpress/wp-config.php")
 		Run("echo '"+vm_password+"' | sudo -S sed -i 's/database_name_here/" +wdp_db_name+ "/' "+wdp_install_folder+"wordpress/wp-config.php")
 		Run("echo '"+vm_password+"' | sudo -S sed -i 's/username_here/"+wdp_db_username+"/' "+wdp_install_folder+"wordpress/wp-config.php")
@@ -632,7 +718,7 @@ def UpdateRepos():
 	#Repo update for current_distro
 	if ((current_distro == "ubuntu") or (current_distro == "Debian")):
 		Run("echo '"+vm_password+"' | sudo -S apt-get update")
-	elif ((current_distro == "RedHat") or (current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == "ol") or (current_distro == 'centos') or (current_distro == "fedora")):
+	elif ((current_distro == "Red Hat") or (current_distro == "rhel") or (current_distro == "Oracle") or (current_distro == "ol") or (current_distro == 'centos') or (current_distro == "fedora")):
 		Run("echo '"+vm_password+"' | sudo -S yum -y update")
 	elif (current_distro == "opensuse") or (current_distro == "SUSE Linux") or (current_distro == "sles"):
 		Run("echo '"+vm_password+"' | sudo -S zypper --non-interactive --gpg-auto-import-keys update")
@@ -693,8 +779,6 @@ def setup_wordpress_singleVM():
 
 def setup_wordpress_E2ELoadBalance_backend(front_end_users):
 	RunLog.info("Setup WordPress for E2ELoadbalancer Backend VM")
-	disable_selinux()
-	disable_iptables()
 
 	# Installing packages in Backend VM Role
 	if (not install_packages_backend()):
@@ -708,7 +792,6 @@ def setup_wordpress_E2ELoadBalance_backend(front_end_users):
 		end_the_script()
 
 	# To make to connection from backend to other IP's ranging from 0.0.0.0
-	#bind = Run("echo '"+vm_password+"' | sudo -S sed -i 's/\(bind-address.*= \)\(.*\)/\\1 0.0.0.0/' /etc/mysql/my.cnf | grep bind")
 	bind = Run("echo '"+vm_password+"' | sudo -S sed -i 's/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/' /etc/mysql/my.cnf| grep bind")
 	bind = Run("echo '"+vm_password+"' | sudo -S sed -i 's/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/' /etc/mysql/mysql.conf.d/mysqld.cnf | grep bind")
 	bind = Run("echo '"+vm_password+"' | sudo -S sed -i 's/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/' /etc/mysql/mariadb.conf.d/mysqld.cnf | grep bind")
@@ -737,8 +820,6 @@ def setup_wordpress_E2ELoadBalance_backend(front_end_users):
 def setup_wordpress_E2ELoadBalance_frontend():
 	global wdp_install_folder
 	RunLog.info("Setup WordPress for E2ELoadbalancer Frontend VM")
-	disable_selinux()
-	disable_iptables()
 
 	# Installing packages in Front-end VM Role's
 	if (not install_packages_frontend()):
@@ -998,7 +1079,7 @@ def main():
 						frontend_count = 1
 						for ip in front_endVM_ips:
 							RunLog.info("**********************************************************")
-							RunLog.info("\nConfiguring frontend"+str(frontend_count)+" at "+ip+":\n")
+							RunLog.info("Configuring frontend"+str(frontend_count)+" at "+ip+":\n")
 							# TODO FIX TCP alive on Servers and restart the 
 							RunLog.info("Copying "+__file__+" to "+ ip)							
 							RunLog.info(put_file_sftp(front_endVM_username, front_endVM_password, ip, __file__))
@@ -1021,7 +1102,7 @@ def main():
 				wdp_db_hostname = sys.argv[2]
 				setup_wordpress_E2ELoadBalance_frontend()
 				#Reboot the Frontend1,2,3
-				RunLog.info( "Rebooting the frontend....\n")
+				RunLog.info( "Wordpress setup done and Rebooting the frontend....\n")
 				if (current_distro != "opensuse"):
 					RunLog.info( exec_multi_cmds_local_sudo(["reboot"]))
 				else:
@@ -1045,7 +1126,8 @@ def main():
 # Code execution Start from here
 get_username_password_from_xml()
 set_variables_OS_dependent()
-UpdateRepos()
+disable_selinux()
+disable_iptables()
 
 #check for availability of pexpect module
 try:
@@ -1060,7 +1142,7 @@ except ImportError:
 		RunLog.info( "pexpect module could not be installed")
 		pythonversion = Run ("echo '"+vm_password+"' | sudo -S python --version 2>&1")
 		if(pythonversion.find('Python 2.7.') or pythonversion.find('Python 3.')):
-				if((current_distro == 'sles') and (distro_version == "12")):
+				if((current_distro == 'sles') and (distro_version >= 12)):
 					RunLog.info( "Trying to install pexpect module using rpm package")
 					out = Run("echo '"+vm_password+"' | sudo -S rpm -ivh python-pexpect-3.1-1.1.noarch.rpm 2>&1")
 					RunLog.info("out = "+out)

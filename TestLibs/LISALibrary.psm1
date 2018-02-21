@@ -141,10 +141,12 @@ function InstallCustomKernel ($customKernel, $allVMData, [switch]$RestartAfterUp
 {
     try
     {
+        $currentKernelVersion = ""
+        $upgradedKernelVersion = ""
         $customKernel = $customKernel.Trim()
-        if( ($customKernel -ne "linuxnext") -and ($customKernel -ne "netnext") -and !($customKernel.EndsWith(".deb"))  -and !($customKernel.EndsWith(".rpm")) )
+        if( ($customKernel -ne "linuxnext") -and ($customKernel -ne "netnext") -and ($customKernel -ne "proposed") -and ($customKernel -ne "latest") -and !($customKernel.EndsWith(".deb"))  -and !($customKernel.EndsWith(".rpm")) )
         {
-            LogErr "Only linuxnext and netnext version is supported. Other version will be added soon. Use -customKernel linuxnext. Or use -customKernel <link to deb file>"
+            LogErr "Only linuxnext, netnext, proposed, latest are supported. E.g. -customKernel linuxnext/netnext/proposed. Or use -customKernel <link to deb file>, -customKernel <link to rpm file>"
         }
         else
         {
@@ -155,6 +157,13 @@ function InstallCustomKernel ($customKernel, $allVMData, [switch]$RestartAfterUp
 	        foreach ( $vmData in $allVMData )
 	        {
                 RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\remote-scripts\$scriptName,.\SetupScripts\DetectLinuxDistro.sh" -username $user -password $password -upload
+                if ( $customKernel.StartsWith("localfile:"))
+                {
+                    $customKernelFilePath = $customKernel.Replace('localfile:','')
+                    RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\$customKernelFilePath" -username $user -password $password -upload                    
+                }
+                RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\remote-scripts\$scriptName,.\SetupScripts\DetectLinuxDistro.sh" -username $user -password $password -upload
+
                 $out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "chmod +x *.sh" -runAsSudo
                 $currentKernelVersion = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "uname -r"
 		        LogMsg "Executing $scriptName ..."
@@ -199,29 +208,43 @@ function InstallCustomKernel ($customKernel, $allVMData, [switch]$RestartAfterUp
 			        WaitFor -seconds 10
 		        }
 	        }
-    
             if ( $kernelSuccess -eq $jobCount )
             {
-                LogMsg "Kernel upgraded to `"$customKernel`" successfully in all VMs."
+                LogMsg "Kernel upgraded to `"$customKernel`" successfully in $($allVMData.Count) VM(s)."
                 if ( $RestartAfterUpgrade )
                 {
                     LogMsg "Now restarting VMs..."
                     $restartStatus = RestartAllDeployments -allVMData $allVMData
                     if ( $restartStatus -eq "True")
                     {
-                        $upgradedKernelVersion = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "uname -r"
-                        LogMsg "Old kernel: $currentKernelVersion"
-                        LogMsg "New kernel: $upgradedKernelVersion"
-                        Add-Content -Value "Old kernel: $currentKernelVersion" -Path .\report\AdditionalInfo.html -Force
-                        Add-Content -Value "New kernel: $upgradedKernelVersion" -Path .\report\AdditionalInfo.html -Force
-                        if ($currentKernelVersion -eq $upgradedKernelVersion)
+                        $retryAttempts = 5
+                        $isKernelUpgraded = $false
+                        while ( !$isKernelUpgraded -and ($retryAttempts -gt 0) )
                         {
-                            LogErr "Kernel version is same after restarting VMs."
-                            return $false
-                        }
-                        else
-                        {
-                            return $true
+                            $retryAttempts -= 1
+                            $upgradedKernelVersion = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "uname -r"
+                            LogMsg "Old kernel: $currentKernelVersion"
+                            LogMsg "New kernel: $upgradedKernelVersion"
+                            if ($currentKernelVersion -eq $upgradedKernelVersion)
+                            {
+                                LogErr "Kernel version is same after restarting VMs."
+                                if ($customKernel -eq "latest")
+                                {
+                                    LogMsg "Continuing the tests as default kernel is latest."
+                                    $isKernelUpgraded = $true
+                                }
+                                else
+                                {
+                                    $isKernelUpgraded = $false
+                                }
+                            }
+                            else
+                            {
+                                $isKernelUpgraded = $true
+                            }
+                            Add-Content -Value "Old kernel: $currentKernelVersion" -Path .\report\AdditionalInfo.html -Force
+                            Add-Content -Value "New kernel: $upgradedKernelVersion" -Path .\report\AdditionalInfo.html -Force
+                            return $isKernelUpgraded
                         }
                     }
                     else
@@ -342,6 +365,141 @@ function InstallcustomLIS ($customLIS, $customLISBranch, $allVMData, [switch]$Re
     catch
     {
         LogErr "Exception in InstallcustomLIS."
+        return $false
+    }
+}
+
+function VerifyMellanoxAdapter($vmData)
+{
+    $maxRetryAttemps = 50
+    $retryAttempts = 1
+    $mellanoxAdapterDetected = $false
+    while ( !$mellanoxAdapterDetected -and ($retryAttempts -lt $maxRetryAttemps))
+    {
+        $pciDevices = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "lspci" -runAsSudo
+        if ( $pciDevices -imatch "Mellanox")
+        {
+            LogMsg "[Attempt $retryAttempts/$maxRetryAttemps] Mellanox Adapter detected in $($vmData.RoleName)."
+            $mellanoxAdapterDetected = $true
+        }
+        else
+        {
+            LogErr "[Attempt $retryAttempts/$maxRetryAttemps] Mellanox Adapter NOT detected in $($vmData.RoleName)."
+            $retryAttempts += 1
+        }
+    }
+    return $mellanoxAdapterDetected
+}
+
+function EnableSRIOVInAllVMs($allVMData)
+{
+    try
+    {
+        if( $EnableAcceleratedNetworking)
+        {
+            $scriptName = "ConfigureSRIOV.sh"
+            $jobCount = 0
+            $kernelSuccess = 0
+	        $packageInstallJobs = @()
+            $sriovDetectedCount = 0
+            $vmCount = 0
+
+	        foreach ( $vmData in $allVMData )
+	        {
+                $vmCount += 1 
+                $currentMellanoxStatus = VerifyMellanoxAdapter -vmData $vmData
+                if ( $currentMellanoxStatus )
+                {
+                    LogMsg "Mellanox Adapter detected in $($vmData.RoleName)."
+                    RemoteCopy -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files ".\remote-scripts\$scriptName" -username $user -password $password -upload
+                    $out = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "chmod +x *.sh" -runAsSudo                    
+		            $sriovOutput = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/home/$user/$scriptName" -runAsSudo
+                    $sriovDetectedCount += 1
+                }
+                else
+                {
+                    LogErr "Mellanox Adapter not detected in $($vmData.RoleName)."
+                }
+		        #endregion
+	        }
+
+            if ($sriovDetectedCount -gt 0)
+            {
+                if ($sriovOutput -imatch "SYSTEM_RESTART_REQUIRED")
+                {
+                    LogMsg "Updated SRIOV configuration. Now restarting VMs..."
+                    $restartStatus = RestartAllDeployments -allVMData $allVMData
+                }
+                if ($sriovOutput -imatch "DATAPATH_SWITCHED_TO_VF")
+                {
+                    $restartStatus="True"
+                }
+            }
+            $vmCount = 0
+            $bondSuccess = 0
+            $bondError = 0
+            if ( $restartStatus -eq "True")
+            {
+	            foreach ( $vmData in $allVMData )
+	            {
+                    $vmCount += 1
+                    if ($sriovOutput -imatch "DATAPATH_SWITCHED_TO_VF")
+                    {
+                        $AfterIfConfigStatus = $null
+                        $AfterIfConfigStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "dmesg" -runAsSudo
+                        if ($AfterIfConfigStatus -imatch "Data path switched to VF")
+                        {
+                            LogMsg "Data path already switched to VF in $($vmData.RoleName)"
+                            $bondSuccess += 1
+                        }
+                        else
+                        {
+                            LogErr "Data path not switched to VF in $($vmData.RoleName)"
+                            $bondError += 1 
+                        }
+                    }
+                    else
+                    {
+                        $AfterIfConfigStatus = $null
+                        $AfterIfConfigStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "/sbin/ifconfig -a" -runAsSudo
+                        if ($AfterIfConfigStatus -imatch "bond")
+                        {
+                            LogMsg "New bond detected in $($vmData.RoleName)"
+                            $bondSuccess += 1
+                        }
+                        else
+                        {
+                            LogErr "New bond not detected in $($vmData.RoleName)"
+                            $bondError += 1 
+                        }
+                    }
+                }
+            }
+            else
+            {
+                return $false
+            }
+            if ($vmCount -eq $bondSuccess)
+            {
+                return $true
+            }
+            else
+            {
+                return $false
+            }
+        }
+        else
+        {
+            return $true
+        }
+    }
+    catch
+    {
+        $line = $_.InvocationInfo.ScriptLineNumber
+        $script_name = ($_.InvocationInfo.ScriptName).Replace($PWD,".")
+        $ErrorMessage =  $_.Exception.Message
+        LogErr "EXCEPTION : $ErrorMessage"
+        LogErr "Source : Line $line in script $script_name." 
         return $false
     }
 }
