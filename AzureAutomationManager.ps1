@@ -33,6 +33,8 @@ param (
 [string] $customLIS,
 [string] $customLISBranch,
 [string] $resizeVMsAfterDeployment,
+[string] $ExistingResourceGroup,
+[switch] $CleanupExistingRG,
 [switch] $ForceDeleteResources
 )
 
@@ -91,6 +93,19 @@ if ( $customLISBranch )
 if ( $RunSelectedTests )
 {
     Set-Variable -Name RunSelectedTests -Value $RunSelectedTests -Scope Global
+}
+if ($ExistingResourceGroup)
+{
+    Set-Variable -Name ExistingRG -Value $ExistingResourceGroup -Scope Global
+    LogMsg "1111111111111111111111"
+}
+if ($CleanupExistingRG)
+{
+    Set-Variable -Name CleanupExistingRG -Value $true -Scope Global
+}
+else
+{
+    Set-Variable -Name CleanupExistingRG -Value $false -Scope Global
 }
 
 if ( $xmlConfig.config.Azure.General.StorageAccount -imatch "NewStorage_" )

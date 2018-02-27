@@ -393,9 +393,33 @@ Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro, [str
 
         while (($isServiceDeployed -eq "False") -and ($retryDeployment -lt 1))
         {
-            LogMsg "Creating Resource Group : $groupName."
-            LogMsg "Verifying that Resource group name is not in use."
-            $isRGDeleted = DeleteResourceGroup -RGName $groupName 
+            if ($ExistingRG)
+            {
+
+                $isServiceCreated = "True"
+                LogMsg "Detecting $ExistingRG region..."
+                $location=(Get-AzureRmResourceGroup -Name $ExistingRG).Location
+                LogMsg "Region: $location..."
+                $groupName = $ExistingRG
+                LogMsg "Using existing Resource Group : $ExistingRG"
+                if ($CleanupExistingRG)
+                {
+                    LogMsg "CleanupExistingRG flag is Set. All resources except availibility set will be cleaned."
+                    LogMsg "If you do not wish to cleanup $ExistingRG, abort NOW. Sleeping 10 Seconds."
+                    Sleep 10
+                    $isRGDeleted = DeleteResourceGroup -RGName $groupName 
+                }
+                else
+                {
+                    $isRGDeleted  = $true
+                }
+            }
+            else
+            {
+                LogMsg "Creating Resource Group : $groupName."
+                LogMsg "Verifying that Resource group name is not in use."
+                $isRGDeleted = DeleteResourceGroup -RGName $groupName 
+            }
             if ($isRGDeleted)
             {    
                 if ( $xRegionTest )
@@ -403,8 +427,10 @@ Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro, [str
                     $location = $xRegionLocations[$locationCounter]
                     $locationCounter += 1
                 }
-
-                $isServiceCreated = CreateResourceGroup -RGName $groupName -location $location
+                else
+                {				
+                    $isServiceCreated = CreateResourceGroup -RGName $groupName -location $location
+                }
                 if ($isServiceCreated -eq "True")
                 {
                     $azureDeployJSONFilePath = "$LogDir\$groupName.json"
@@ -468,19 +494,47 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
     }
     if ($ResourceGroup)
     {
-        $currentGUID = ([guid]::newguid()).Guid
-        $out = Save-AzureRmContext -Path "$env:TEMP\$($currentGUID).azurecontext" -Force
-        $cleanupRGScriptBlock = {
-            $RGName = $args[0]
-            $currentGUID = $args[1]
-            Import-AzureRmContext -AzureContext "$env:TEMP\$($currentGUID).azurecontext"
-            Remove-AzureRmResourceGroup -Name $RGName -Verbose -Force
+		if ($ExistingRG)
+		{
+			$CurrentResources = @()
+	        $CurrentResources += Get-AzureRmResource | Where {$_.ResourceGroupName -eq  $ResourceGroup.ResourceGroupName}
+	        while ( $CurrentResources.Count -ne 1 )
+	        {
+	            foreach ($resource in $CurrentResources) 
+	            {
+	                Write-Host $resource.ResourceType
+	                if ( $resource.ResourceType -imatch "availabilitySets" )
+	                {
+	                    LogMsg "Skipping $($resource.ResourceName)"
+	                }
+	                else
+	                {
+	                    LogMsg "Removing $($resource.ResourceName)"
+	                    $out = Remove-AzureRmResource -ResourceId $resource.ResourceId -Force -Verbose
+	                }
+	            }
+	            $CurrentResources = @()
+	            $CurrentResources += Get-AzureRmResource | Where {$_.ResourceGroupName -eq  $ResourceGroup.ResourceGroupName}
+	        }
+	        LogMsg "$($ResourceGroup.ResourceGroupName) is cleaned."
+			$retValue = $?
+		}
+		else
+		{        
+            $currentGUID = ([guid]::newguid()).Guid
+            $out = Save-AzureRmContext -Path "$env:TEMP\$($currentGUID).azurecontext" -Force
+            $cleanupRGScriptBlock = {
+                $RGName = $args[0]
+                $currentGUID = $args[1]
+                Import-AzureRmContext -AzureContext "$env:TEMP\$($currentGUID).azurecontext"
+                Remove-AzureRmResourceGroup -Name $RGName -Verbose -Force
+            }
+            $currentGUID = ([guid]::newguid()).Guid
+            $out = Save-AzureRmContext -Path "$env:TEMP\$($currentGUID).azurecontext" -Force
+            LogMsg "Triggering : DeleteResourceGroup-$RGName..."
+            $deleteJob = Start-Job -ScriptBlock $cleanupRGScriptBlock -ArgumentList $RGName,$currentGUID -Name "DeleteResourceGroup-$RGName"
+            $retValue = $true
         }
-        $currentGUID = ([guid]::newguid()).Guid
-        $out = Save-AzureRmContext -Path "$env:TEMP\$($currentGUID).azurecontext" -Force
-        LogMsg "Triggering : DeleteResourceGroup-$RGName..."
-        $deleteJob = Start-Job -ScriptBlock $cleanupRGScriptBlock -ArgumentList $RGName,$currentGUID -Name "DeleteResourceGroup-$RGName"
-        $retValue = $true
     }
     else
     {
@@ -687,6 +741,15 @@ $PublicIPName = "PublicIPv4"
 $PublicIPv6Name = "PublicIPv6"
 $sshPath = '/home/' + $user + '/.ssh/authorized_keys'
 $sshKeyData = ""
+if($ExistingRG)
+{
+	$customAVSetName = (Get-AzureRmResource | Where { (( $_.ResourceGroupName -eq  $RGName ) -and  ( $_.ResourceType -imatch  "availabilitySets" ))}).ResourceName
+}
+else
+{
+	$availibilitySetName = "AvailibilitySet"
+	$customAVSetName = $availibilitySetName
+}
 if ( $CurrentTestData.ProvisionTimeExtensions )
 {
 	$extensionString = (Get-Content .\XML\Extensions.xml)
@@ -915,7 +978,14 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
         Add-Content -Value "$($indents[2])^defaultSubnetID^: ^[concat(variables('vnetID'),'/subnets/', variables('defaultSubnet'))]^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^vnetID^: ^[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]^," -Path $jsonFile
     }
+    if ($ExistingRG)
+    {
+        Add-Content -Value "$($indents[2])^availabilitySetName^: ^$customAVSetName^," -Path $jsonFile
+    }
+    else
+    {
         Add-Content -Value "$($indents[2])^availabilitySetName^: ^$availibilitySetName^," -Path $jsonFile
+    }
         Add-Content -Value "$($indents[2])^lbName^: ^$LoadBalancerName^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^lbID^: ^[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]^," -Path $jsonFile
         Add-Content -Value "$($indents[2])^frontEndIPv4ConfigID^: ^[concat(variables('lbID'),'/frontendIPConfigurations/LoadBalancerFrontEndIPv4')]^," -Path $jsonFile
@@ -1074,6 +1144,12 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
     if ( ($numberOfVMs -gt 1) -or ($EnableIPv6) -or ($ForceLoadBalancerForSingleVM) )
     {     
         #region availabilitySets
+    if ($ExistingRG)
+    {
+        LogMsg "Using existing Availibility Set: $customAVSetName"
+    }
+    else
+    {        
         Add-Content -Value "$($indents[2]){" -Path $jsonFile
             Add-Content -Value "$($indents[3])^apiVersion^: ^$apiVersion^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^type^: ^Microsoft.Compute/availabilitySets^," -Path $jsonFile
@@ -1084,6 +1160,7 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
             Add-Content -Value "$($indents[3])}" -Path $jsonFile
         Add-Content -Value "$($indents[2])}," -Path $jsonFile
         LogMsg "Added availabilitySet $availibilitySetName.."
+    }
         #endregion
        
         #region LoadBalancer
@@ -1560,7 +1637,14 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
             Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^dependsOn^: " -Path $jsonFile
             Add-Content -Value "$($indents[3])[" -Path $jsonFile
+			if ($ExistingRG)
+			{
+				#Add-Content -Value "$($indents[4])^[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]^," -Path $jsonFile
+			}
+			else
+			{
                 Add-Content -Value "$($indents[4])^[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]^," -Path $jsonFile
+			}
             if ( $NewARMStorageAccountType) 
             {
                 Add-Content -Value "$($indents[4])^[concat('Microsoft.Storage/storageAccounts/', variables('StorageAccountName'))]^," -Path $jsonFile
@@ -1581,7 +1665,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                 #region availabilitySet
                 Add-Content -Value "$($indents[4])^availabilitySet^: " -Path $jsonFile
                 Add-Content -Value "$($indents[4]){" -Path $jsonFile
-                    Add-Content -Value "$($indents[5])^id^: ^[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]^" -Path $jsonFile
+                Add-Content -Value "$($indents[5])^id^: ^[resourceId('Microsoft.Compute/availabilitySets','$customAVSetName')]^" -Path $jsonFile
                 Add-Content -Value "$($indents[4])}," -Path $jsonFile
                 #endregion
 
@@ -1895,7 +1979,15 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
                     Add-Content -Value "$($indents[5])^vmSize^: ^$instanceSize^" -Path $jsonFile
                 Add-Content -Value "$($indents[4])}," -Path $jsonFile
                 #endregion
-
+            if ($ExistingRG)
+            {
+                #region availabilitySet
+                Add-Content -Value "$($indents[4])^availabilitySet^: " -Path $jsonFile
+                Add-Content -Value "$($indents[4]){" -Path $jsonFile
+                Add-Content -Value "$($indents[5])^id^: ^[resourceId('Microsoft.Compute/availabilitySets','$customAVSetName')]^" -Path $jsonFile
+                Add-Content -Value "$($indents[4])}," -Path $jsonFile
+                #endregion
+            }
                 #region OSProfie
                 Add-Content -Value "$($indents[4])^osProfile^: " -Path $jsonFile
                 Add-Content -Value "$($indents[4]){" -Path $jsonFile
