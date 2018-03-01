@@ -361,14 +361,18 @@ Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro, [str
     {
         if (Test-Path .\XML\SubscriptionUsageLimits.xml)
         {
+            $validateStartTime = Get-Date
             LogMsg "Checking the subscription usage..."
             $readyToDeploy = $false
             while (!$readyToDeploy)
             {
                 $readyToDeploy = ValidateSubscriptionUsage -subscriptionID $xmlConfig.config.Azure.General.SubscriptionID -RGXMLData $RG -SubscriptionUsageLimits ([xml](Get-Content .\XML\SubscriptionUsageLimits.xml))
-                if (!$readyToDeploy)
+                $validateCurrentTime = Get-Date
+                $elapsedWaitTime = ($validateCurrentTime - $validateStartTime).TotalSeconds
+                if ( (!$readyToDeploy) -and ($elapsedWaitTime -lt $coureCountExceededTimeout))
                 {
-                    $waitPeriod = Get-Random -Minimum 1 -Maximum 10 -SetSeed (Get-Random)    
+                    $waitPeriod = Get-Random -Minimum 1 -Maximum 10 -SetSeed (Get-Random)
+                    LogMsg "Timeout in approx. $($coureCountExceededTimeout - $elapsedWaitTime) seconds..."
                     LogMsg "Waiting $waitPeriod minutes..."
                     sleep -Seconds ($waitPeriod*60)
                 }

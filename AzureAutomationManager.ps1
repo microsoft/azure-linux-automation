@@ -36,6 +36,7 @@ param (
 [string] $ExistingResourceGroup,
 [switch] $CleanupExistingRG,
 [switch] $UseManagedDisks,
+[int] $coureCountExceededTimeout = 3600,
 [switch] $ForceDeleteResources
 )
 
@@ -60,7 +61,7 @@ Set-Variable -Name CurrentTestData -Value $CurrentTestData -Scope Global
 Set-Variable -Name preserveKeyword -Value "preserving" -Scope Global
 
 Set-Variable -Name global4digitRandom -Value $(Get-Random -SetSeed $(Get-Random) -Maximum 9999 -Minimum 1111) -Scope Global
-
+Set-Variable -Name coureCountExceededTimeout -Value $coureCountExceededTimeout -Scope Global
 
 if($EnableAcceleratedNetworking)
 {
