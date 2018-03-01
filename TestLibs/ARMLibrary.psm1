@@ -509,8 +509,16 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
 	                }
 	                else
 	                {
-	                    LogMsg "Removing $($resource.ResourceName)"
-	                    $out = Remove-AzureRmResource -ResourceId $resource.ResourceId -Force -Verbose
+                        LogMsg "Removing $($resource.ResourceName)"
+                        try 
+                        {
+                            $out = Remove-AzureRmResource -ResourceId $resource.ResourceId -Force -Verbose    
+                        }
+                        catch 
+                        {
+                            LogErr "Error. We will try to remove this in next attempt."
+                        }
+	                    
 	                }
 	            }
 	            $CurrentResources = @()
@@ -655,6 +663,7 @@ Function CreateResourceGroupDeployment([string]$RGName, $location, $setupType, $
 
 Function GenerateAzureDeployJSONFile ($RGName, $osImage, $osVHD, $RGXMLData, $Location, $azuredeployJSONFilePath, [string]$storageAccount = "")
 {
+$randomNum = Get-Random -Maximum 999999 -Minimum 111111
 LogMsg "Generating Template : $azuredeployJSONFilePath"
 $jsonFile = $azuredeployJSONFilePath
 $StorageAccountName = $xml.config.Azure.General.ARMStorageAccount
@@ -725,8 +734,8 @@ $singleIndent = ""
 $indents += $indent
 $RGRandomNumber = $((Get-Random -Maximum 999999 -Minimum 100000))
 $RGrandomWord = ([System.IO.Path]::GetRandomFileName() -replace '[^a-z]')
-$dnsNameForPublicIP = $($RGName.ToLower() -replace '[^a-z0-9]')
-$dnsNameForPublicIPv6 = $($RGName.ToLower() -replace '[^a-z0-9]') + "v6"
+$dnsNameForPublicIP = $($RGName.ToLower() -replace '[^a-z0-9]') + "$randomNum"
+$dnsNameForPublicIPv6 = $($RGName.ToLower() -replace '[^a-z0-9]') + "v6" + "$randomNum"
 #$virtualNetworkName = $($RGName.ToUpper() -replace '[^a-z]') + "VNET"
 $virtualNetworkName = "VirtualNetwork"
 $defaultSubnetName = "Subnet1"
@@ -736,7 +745,7 @@ $availibilitySetName = "AvailibilitySet"
 $LoadBalancerName =  "LoadBalancer"
 $apiVersion = "2016-03-30"
 #$PublicIPName = $($RGName.ToUpper() -replace '[^a-z]') + "PublicIPv4"
-$PublicIPName = "PublicIPv4"
+$PublicIPName = "PublicIPv4-$randomNum"
 #$PublicIPv6Name = $($RGName.ToUpper() -replace '[^a-z]') + "PublicIPv6"
 $PublicIPv6Name = "PublicIPv6"
 $sshPath = '/home/' + $user + '/.ssh/authorized_keys'
@@ -895,14 +904,26 @@ $StorageProfileScriptBlock = {
                     }
                     else
                     {
-                        Add-Content -Value "$($indents[6])^name^: ^$vmName-OSDisk^," -Path $jsonFile
-                        Add-Content -Value "$($indents[6])^createOption^: ^FromImage^," -Path $jsonFile
-                        Add-Content -Value "$($indents[6])^vhd^: " -Path $jsonFile
-                        Add-Content -Value "$($indents[6]){" -Path $jsonFile
-                            Add-Content -Value "$($indents[7])^uri^: ^[concat('http://',variables('StorageAccountName'),'.blob.core.windows.net/vhds/','$vmName-$RGrandomWord-osdisk.vhd')]^" -Path $jsonFile
-                        Add-Content -Value "$($indents[6])}," -Path $jsonFile
-                        Add-Content -Value "$($indents[6])^caching^: ^ReadWrite^" -Path $jsonFile
+                        if ($UseManagedDisks)
+                        {
+                            Add-Content -Value "$($indents[6])^name^: ^$vmName-OSDisk^," -Path $jsonFile
+                            Add-Content -Value "$($indents[6])^createOption^: ^FromImage^," -Path $jsonFile
+                            Add-Content -Value "$($indents[6])^managedDisk^: " -Path $jsonFile
+                            Add-Content -Value "$($indents[6]){" -Path $jsonFile
+                                Add-Content -Value "$($indents[7])^storageAccountType^: ^$StorageAccountType^" -Path $jsonFile
+                            Add-Content -Value "$($indents[6])}" -Path $jsonFile
 
+                        }
+                        else 
+                        {
+                            Add-Content -Value "$($indents[6])^name^: ^$vmName-OSDisk^," -Path $jsonFile
+                            Add-Content -Value "$($indents[6])^createOption^: ^FromImage^," -Path $jsonFile
+                            Add-Content -Value "$($indents[6])^vhd^: " -Path $jsonFile
+                            Add-Content -Value "$($indents[6]){" -Path $jsonFile
+                                Add-Content -Value "$($indents[7])^uri^: ^[concat('http://',variables('StorageAccountName'),'.blob.core.windows.net/vhds/','$vmName-$RGrandomWord-osdisk.vhd')]^" -Path $jsonFile
+                            Add-Content -Value "$($indents[6])}," -Path $jsonFile
+                            Add-Content -Value "$($indents[6])^caching^: ^ReadWrite^" -Path $jsonFile                            
+                        }
                     }
                     Add-Content -Value "$($indents[5])}," -Path $jsonFile
                     $dataDiskAdded = $false
@@ -1463,7 +1484,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
     }
     else
     {
-        $vmName = $RGName+"-role-"+$role
+        $vmName = $RGName+"-role-"+$role + "-$($randomNum)"
     }
     $NIC = "PrimaryNIC" + "-$vmName"
 
@@ -1631,7 +1652,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
         #region virtualMachines
         LogMsg "Adding Virtual Machine $vmName"
         Add-Content -Value "$($indents[2]){" -Path $jsonFile
-            Add-Content -Value "$($indents[3])^apiVersion^: ^$apiVersion^," -Path $jsonFile
+            Add-Content -Value "$($indents[3])^apiVersion^: ^2017-03-30^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^type^: ^Microsoft.Compute/virtualMachines^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^name^: ^$vmName^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
@@ -1769,13 +1790,27 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
     #region Single VM Deployment...
 if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM )
 {
-    if($newVM.RoleName)
+    if ($ExistingRG)
     {
-        $vmName = $newVM.RoleName
+        if($newVM.RoleName)
+        {
+            $vmName = $newVM.RoleName + "-$($randomNum)"
+        }
+        else
+        {
+            $vmName = $RGName+"-role-0-$($randomNum)"
+        }
     }
     else
     {
-        $vmName = $RGName+"-role-0"
+        if($newVM.RoleName)
+        {
+            $vmName = $newVM.RoleName
+        }
+        else
+        {
+            $vmName = $RGName+"-role-0"
+        }
     }
     $vmAdded = $false
     $newVM = $RGXMLData.VirtualMachine    
@@ -1792,7 +1827,7 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
     $SubnetName = $newVM.ARMSubnetName
     $DnsServerIP = $RGXMLData.DnsServerIP
     $NIC = "PrimaryNIC" + "-$vmName"
-    $SecurityGroupName = "SG-$RGName"
+    $SecurityGroupName = "SG-$vmName"
 
             #region networkInterfaces
         LogMsg "Adding Network Interface Card $NIC.."
@@ -1813,7 +1848,7 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
                 Add-Content -Value "$($indents[4])^ipConfigurations^: " -Path $jsonFile
                 Add-Content -Value "$($indents[4])[" -Path $jsonFile
                     Add-Content -Value "$($indents[5]){" -Path $jsonFile
-                        Add-Content -Value "$($indents[6])^name^: ^IPv4Config1^," -Path $jsonFile
+                        Add-Content -Value "$($indents[6])^name^: ^IPv4Config$($randomNum)^," -Path $jsonFile
                         Add-Content -Value "$($indents[6])^properties^: " -Path $jsonFile
                         Add-Content -Value "$($indents[6]){" -Path $jsonFile
                             Add-Content -Value "$($indents[7])^privateIPAllocationMethod^: ^Dynamic^," -Path $jsonFile
@@ -1950,7 +1985,7 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
         #region virtualMachines
         LogMsg "Adding Virtual Machine $vmName.."
         Add-Content -Value "$($indents[2]){" -Path $jsonFile
-            Add-Content -Value "$($indents[3])^apiVersion^: ^$apiVersion^," -Path $jsonFile
+            Add-Content -Value "$($indents[3])^apiVersion^: ^2017-03-30^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^type^: ^Microsoft.Compute/virtualMachines^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^name^: ^$vmName^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile

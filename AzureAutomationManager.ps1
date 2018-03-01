@@ -35,6 +35,7 @@ param (
 [string] $resizeVMsAfterDeployment,
 [string] $ExistingResourceGroup,
 [switch] $CleanupExistingRG,
+[switch] $UseManagedDisks,
 [switch] $ForceDeleteResources
 )
 
@@ -106,6 +107,14 @@ if ($CleanupExistingRG)
 else
 {
     Set-Variable -Name CleanupExistingRG -Value $false -Scope Global
+}
+if ($UseManagedDisks)
+{
+    Set-Variable -Name UseManagedDisks -Value $true -Scope Global
+}
+else 
+{
+    Set-Variable -Name UseManagedDisks -Value $false -Scope Global    
 }
 
 if ( $xmlConfig.config.Azure.General.StorageAccount -imatch "NewStorage_" )
