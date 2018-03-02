@@ -4684,7 +4684,7 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 				else
 				{
 					LogMsg "    Microsoft.Network/networkSecurityGroups data collection in progress.."
-					$SGData = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceName "SG-$ResourceGroup" -ResourceType "Microsoft.Network/networkSecurityGroups" -ExpandProperties
+					$SGData = Get-AzureRmResource -ResourceGroupName $ResourceGroup -ResourceName "SG-$($testVM.ResourceName)" -ResourceType "Microsoft.Network/networkSecurityGroups" -ExpandProperties
 					foreach ($securityRule in $SGData.Properties.securityRules)
 					{
 						Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($securityRule.name)Port" -Value $securityRule.properties.destinationPortRange -Force

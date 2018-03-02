@@ -26,6 +26,8 @@
 [string] $RunSelectedTests="",
 [string] $StorageAccount="",
 
+[int] $coureCountExceededTimeout,
+
 [switch] $ExitWithZero
 )
 
@@ -278,6 +280,10 @@ if ( $customLIS)
 if ( $RunSelectedTests )
 {
     $cmd += " -RunSelectedTests '$RunSelectedTests'"
+}
+if ( $coureCountExceededTimeout )
+{
+    $cmd += " -coureCountExceededTimeout $coureCountExceededTimeout"
 }
 
 $cmd += " -ImageType Standard"
