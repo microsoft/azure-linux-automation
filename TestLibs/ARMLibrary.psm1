@@ -376,111 +376,127 @@ Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro, [str
                     LogMsg "Waiting $waitPeriod minutes..."
                     sleep -Seconds ($waitPeriod*60)
                 }
+                if ( $elapsedWaitTime -gt $coureCountExceededTimeout )
+                {
+                    break
+                }
             }
         }
-        $curtime = Get-Date
-        $randomNumber = $global4digitRandom
-        $isServiceDeployed = "False"
-        $retryDeployment = 0
-        if ( $RG.Tag -ne $null )
+        else 
         {
-            $groupName = "ICA-RG-" + $RG.Tag + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $randomNumber 
+            $readyToDeploy = $true
         }
-        else
+        if ($readyToDeploy)
         {
-            $groupName = "ICA-RG-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $randomNumber
-        }
-        if($isMultiple -eq "True")
-        {
-            $groupName = $groupName + "-" + $resourceGroupCount
-        }
-
-        while (($isServiceDeployed -eq "False") -and ($retryDeployment -lt 1))
-        {
-            if ($ExistingRG)
+            $curtime = Get-Date
+            $randomNumber = $global4digitRandom
+            $isServiceDeployed = "False"
+            $retryDeployment = 0
+            if ( $RG.Tag -ne $null )
             {
-
-                $isServiceCreated = "True"
-                LogMsg "Detecting $ExistingRG region..."
-                $location=(Get-AzureRmResourceGroup -Name $ExistingRG).Location
-                LogMsg "Region: $location..."
-                $groupName = $ExistingRG
-                LogMsg "Using existing Resource Group : $ExistingRG"
-                if ($CleanupExistingRG)
-                {
-                    LogMsg "CleanupExistingRG flag is Set. All resources except availibility set will be cleaned."
-                    LogMsg "If you do not wish to cleanup $ExistingRG, abort NOW. Sleeping 10 Seconds."
-                    Sleep 10
-                    $isRGDeleted = DeleteResourceGroup -RGName $groupName 
-                }
-                else
-                {
-                    $isRGDeleted  = $true
-                }
+                $groupName = "ICA-RG-" + $RG.Tag + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $randomNumber 
             }
             else
             {
-                LogMsg "Creating Resource Group : $groupName."
-                LogMsg "Verifying that Resource group name is not in use."
-                $isRGDeleted = DeleteResourceGroup -RGName $groupName 
+                $groupName = "ICA-RG-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $randomNumber
             }
-            if ($isRGDeleted)
-            {    
-                if ( $xRegionTest )
+            if($isMultiple -eq "True")
+            {
+                $groupName = $groupName + "-" + $resourceGroupCount
+            }
+            while (($isServiceDeployed -eq "False") -and ($retryDeployment -lt 1))
+            {
+                if ($ExistingRG)
                 {
-                    $location = $xRegionLocations[$locationCounter]
-                    $locationCounter += 1
-                }
-                else
-                {				
-                    $isServiceCreated = CreateResourceGroup -RGName $groupName -location $location
-                }
-                if ($isServiceCreated -eq "True")
-                {
-                    $azureDeployJSONFilePath = "$LogDir\$groupName.json"
-                    $DeploymentCommand = GenerateAzureDeployJSONFile -RGName $groupName -osImage $osImage -osVHD $osVHD -RGXMLData $RG -Location $location -azuredeployJSONFilePath $azureDeployJSONFilePath -storageAccount $storageAccount
-                    $DeploymentStartTime = (Get-Date)
-                    $CreateRGDeployments = CreateResourceGroupDeployment -RGName $groupName -location $location -setupType $setupType -TemplateFile $azureDeployJSONFilePath
-                    $DeploymentEndTime = (Get-Date)
-                    $DeploymentElapsedTime = $DeploymentEndTime - $DeploymentStartTime
-                    if ( $CreateRGDeployments )
+    
+                    $isServiceCreated = "True"
+                    LogMsg "Detecting $ExistingRG region..."
+                    $location=(Get-AzureRmResourceGroup -Name $ExistingRG).Location
+                    LogMsg "Region: $location..."
+                    $groupName = $ExistingRG
+                    LogMsg "Using existing Resource Group : $ExistingRG"
+                    if ($CleanupExistingRG)
                     {
-                        $retValue = "True"
-                        $isServiceDeployed = "True"
-                        $resourceGroupCount = $resourceGroupCount + 1
-                        if ($resourceGroupCount -eq 1)
-                        {
-                            $deployedGroups = $groupName
-                        }
-                        else
-                        {
-                            $deployedGroups = $deployedGroups + "^" + $groupName
-                        }
-
+                        LogMsg "CleanupExistingRG flag is Set. All resources except availibility set will be cleaned."
+                        LogMsg "If you do not wish to cleanup $ExistingRG, abort NOW. Sleeping 10 Seconds."
+                        Sleep 10
+                        $isRGDeleted = DeleteResourceGroup -RGName $groupName 
                     }
                     else
                     {
-                        LogErr "Unable to Deploy one or more VM's"
+                        $isRGDeleted  = $true
+                    }
+                }
+                else
+                {
+                    LogMsg "Creating Resource Group : $groupName."
+                    LogMsg "Verifying that Resource group name is not in use."
+                    $isRGDeleted = DeleteResourceGroup -RGName $groupName 
+                }
+                if ($isRGDeleted)
+                {    
+                    if ( $xRegionTest )
+                    {
+                        $location = $xRegionLocations[$locationCounter]
+                        $locationCounter += 1
+                    }
+                    else
+                    {				
+                        $isServiceCreated = CreateResourceGroup -RGName $groupName -location $location
+                    }
+                    if ($isServiceCreated -eq "True")
+                    {
+                        $azureDeployJSONFilePath = "$LogDir\$groupName.json"
+                        $DeploymentCommand = GenerateAzureDeployJSONFile -RGName $groupName -osImage $osImage -osVHD $osVHD -RGXMLData $RG -Location $location -azuredeployJSONFilePath $azureDeployJSONFilePath -storageAccount $storageAccount
+                        $DeploymentStartTime = (Get-Date)
+                        $CreateRGDeployments = CreateResourceGroupDeployment -RGName $groupName -location $location -setupType $setupType -TemplateFile $azureDeployJSONFilePath
+                        $DeploymentEndTime = (Get-Date)
+                        $DeploymentElapsedTime = $DeploymentEndTime - $DeploymentStartTime
+                        if ( $CreateRGDeployments )
+                        {
+                            $retValue = "True"
+                            $isServiceDeployed = "True"
+                            $resourceGroupCount = $resourceGroupCount + 1
+                            if ($resourceGroupCount -eq 1)
+                            {
+                                $deployedGroups = $groupName
+                            }
+                            else
+                            {
+                                $deployedGroups = $deployedGroups + "^" + $groupName
+                            }
+    
+                        }
+                        else
+                        {
+                            LogErr "Unable to Deploy one or more VM's"
+                            $retryDeployment = $retryDeployment + 1
+                            $retValue = "False"
+                            $isServiceDeployed = "False"
+                        }
+                    }
+                    else
+                    {
+                        LogErr "Unable to create $groupName"
                         $retryDeployment = $retryDeployment + 1
                         $retValue = "False"
                         $isServiceDeployed = "False"
                     }
-                }
+                }    
                 else
                 {
-                    LogErr "Unable to create $groupName"
-                    $retryDeployment = $retryDeployment + 1
+                    LogErr "Unable to delete existing resource group - $groupName"
+                    $retryDeployment = 3
                     $retValue = "False"
                     $isServiceDeployed = "False"
                 }
-            }    
-            else
-            {
-                LogErr "Unable to delete existing resource group - $groupName"
-                $retryDeployment = 3
-                $retValue = "False"
-                $isServiceDeployed = "False"
             }
+        }
+        else
+        {
+            LogErr "Core quota is not sufficient. Stopping VM deployment."
+            $retValue = "False"
+            $isServiceDeployed = "False"
         }
     }
     return $retValue, $deployedGroups, $resourceGroupCount, $DeploymentElapsedTime
