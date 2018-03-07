@@ -25,7 +25,7 @@
 [string] $ResultDBTestTag = "",
 [string] $RunSelectedTests="",
 [string] $StorageAccount="",
-
+[string] $customParameters="",
 [int] $coureCountExceededTimeout,
 
 [switch] $ExitWithZero
@@ -152,7 +152,26 @@ Set-Content -Value "" -Path .\report\lastLogDirectory.txt -Force
 
 #region PREPARE XML FILE
 Write-Host "Injecting Azure Configuration data in $xmlConfigFileFinal file.."
-[xml]$xmlFileData = [xml](Get-Content .\Azure_ICA_all.xml)
+#region Add custom parameters to XML
+
+if ( $customParameters )
+{
+    $customParameters = $customParameters.Replace("^","`n")
+    $xmlFileString = Get-Content .\Azure_ICA_all.xml
+    foreach ($replaceString in $customParameters.Split("`n"))
+    {
+        $actualContent = $replaceString.Split("=")[0]
+        $replacement = $replaceString.Split("=")[1]
+        $xmlFileString = $xmlFileString.Replace($actualContent,$replacement)
+        Write-Host "Replaced $actualContent --> $replacement in XML file."
+    }
+    [xml]$xmlFileData = [xml]($xmlFileString)
+}
+else
+{
+    [xml]$xmlFileData = [xml](Get-Content .\Azure_ICA_all.xml)
+}
+#endregion
 $xmlFileData.config.Azure.General.SubscriptionID = $xmlSecrets.secrets.SubscriptionID.Trim()
 $xmlFileData.config.Azure.General.SubscriptionName = $xmlSecrets.secrets.SubscriptionName.Trim()
 $xmlFileData.config.Azure.General.StorageAccount= $StorageAccountName
@@ -203,7 +222,8 @@ else
 {
     #Write-Host "No Test Tag provided. If test needs DB support please fill testTag."
 }
-#endregion
+
+
 
 $xmlFileData.Save("$xmlConfigFileFinal")
 Write-Host "$xmlConfigFileFinal prepared successfully."
@@ -285,6 +305,8 @@ if ( $coureCountExceededTimeout )
 {
     $cmd += " -coureCountExceededTimeout $coureCountExceededTimeout"
 }
+
+
 
 $cmd += " -ImageType Standard"
 $cmd += " -UseAzureResourceManager"

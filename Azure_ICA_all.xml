@@ -7766,7 +7766,7 @@
 			<testScript></testScript>
 			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
 			<CurrentLISVersion>LATEST</CurrentLISVersion>
-			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<CurrentLISTarFile>CURRENT_LIS_TAR_FILE</CurrentLISTarFile>
 			<setupType>A2</setupType>
 			<files>.\remote-scripts\azuremodules.sh</files>
 			<SubtestValues>TestID2</SubtestValues>
@@ -7779,9 +7779,9 @@
 			<testScript></testScript>
 			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
 			<PreviousLISVersion>PREVIOUS</PreviousLISVersion>
-			<PreviousLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/previous-lis-rpms.tar.gz^tar -xzf previous-lis-rpms.tar.gz^cp -ar LISISO/* . </PreviousLISExtractCommand>
+			<PreviousLISTarFile>PREVIOUS_LIS_TAR_FILE</PreviousLISTarFile>
 			<CurrentLISVersion>LATEST</CurrentLISVersion>
-			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<CurrentLISTarFile>CURRENT_LIS_TAR_FILE</CurrentLISTarFile>
 			<setupType>A2</setupType>
 			<files>.\remote-scripts\azuremodules.sh</files>
 			<SubtestValues>TestID1,TestID3</SubtestValues>
@@ -7794,9 +7794,9 @@
 			<testScript></testScript>
 			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
 			<PreviousLISVersion>PREVIOUS</PreviousLISVersion>
-			<PreviousLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/previous-lis-rpms.tar.gz^tar -xzf previous-lis-rpms.tar.gz^cp -ar LISISO/* . </PreviousLISExtractCommand>
+			<PreviousLISTarFile>PREVIOUS_LIS_TAR_FILE</PreviousLISTarFile>
 			<CurrentLISVersion>LATEST</CurrentLISVersion>
-			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<CurrentLISTarFile>CURRENT_LIS_TAR_FILE</CurrentLISTarFile>
 			<setupType>A2</setupType>
 			<files>.\remote-scripts\azuremodules.sh</files>
 			<SubtestValues>TestID1,TestID3,TestID4,TestID5</SubtestValues>
@@ -7809,7 +7809,7 @@
 			<testScript></testScript>
 			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
 			<CurrentLISVersion>LATEST</CurrentLISVersion>
-			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<CurrentLISTarFile>CURRENT_LIS_TAR_FILE</CurrentLISTarFile>
 			<setupType>A2</setupType>
 			<files>.\remote-scripts\azuremodules.sh</files>
 			<SubtestValues>TestID7,TestID8</SubtestValues>
@@ -7822,7 +7822,7 @@
 			<testScript></testScript>
 			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
 			<CurrentLISVersion>LATEST</CurrentLISVersion>
-			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<CurrentLISTarFile>CURRENT_LIS_TAR_FILE</CurrentLISTarFile>
 			<setupType>A2</setupType>
 			<files>.\remote-scripts\azuremodules.sh</files>
 			<SubtestValues>TestID2,TestID6</SubtestValues>
@@ -7835,9 +7835,9 @@
 			<testScript></testScript>
 			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
 			<PreviousLISVersion>PREVIOUS</PreviousLISVersion>
-			<PreviousLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/previous-lis-rpms.tar.gz^tar -xzf previous-lis-rpms.tar.gz^cp -ar LISISO/* . </PreviousLISExtractCommand>
+			<PreviousLISTarFile>PREVIOUS_LIS_TAR_FILE</PreviousLISTarFile>
 			<CurrentLISVersion>LATEST</CurrentLISVersion>
-			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<CurrentLISTarFile>CURRENT_LIS_TAR_FILE</CurrentLISTarFile>
 			<setupType>A2</setupType>
 			<files>.\remote-scripts\azuremodules.sh</files>
 			<SubtestValues>TestID1,TestID3,TestID6</SubtestValues>
@@ -7850,7 +7850,7 @@
 			<testScript></testScript>
 			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
 			<CurrentLISVersion>LATEST</CurrentLISVersion>
-			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<CurrentLISTarFile>CURRENT_LIS_TAR_FILE</CurrentLISTarFile>
 			<setupType>A2</setupType>
 			<files>.\remote-scripts\azuremodules.sh</files>
 			<SubtestValues>TestID6,TestID2</SubtestValues>
@@ -7863,7 +7863,7 @@
 			<testScript></testScript>
 			<testScriptps1>ICA-LIS-BUILD-TEST.ps1</testScriptps1>
 			<CurrentLISVersion>LATEST</CurrentLISVersion>
-			<CurrentLISExtractCommand>rm -rf */ *.sh *.tar*^wget https://konkasoftpackages.blob.core.windows.net/testpackages/lis-builds/latest-lis-rpms.tar.gz^tar -xzf latest-lis-rpms.tar.gz^cp -ar LISISO/* . </CurrentLISExtractCommand>
+			<CurrentLISTarFile>CURRENT_LIS_TAR_FILE</CurrentLISTarFile>
 			<setupType>A2</setupType>
 			<files>.\remote-scripts\azuremodules.sh</files>
 			<SubtestValues>TestID2,TestID4</SubtestValues>

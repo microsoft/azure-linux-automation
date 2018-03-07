@@ -11,10 +11,18 @@
 Import-Module .\TestLibs\RDFELibs.psm1 -Force
 
 $Subtests = $currentTestData.SubtestValues
-$SubtestValues = $Subtests.Split(",") 
+$SubtestValues = $Subtests.Split(",")
 $LISVersion = ""
-$PreviousLISExtractCommand = $currentTestData.PreviousLISExtractCommand
-$CurrentLISExtractCommand = $currentTestData.CurrentLISExtractCommand
+if ($currentTestData.PreviousLISTarFile)
+{
+	LogMsg "Previous LIS : $($currentTestData.PreviousLISTarFile)"
+	$PreviousLISExtractCommand = "rm -rf */ *.sh *.tar*^wget $($currentTestData.PreviousLISTarFile)^tar -xzf $($currentTestData.PreviousLISTarFile | Split-Path -Leaf)^cp -ar LISISO/* . "
+}
+if ($currentTestData.CurrentLISTarFile)
+{
+	LogMsg "Current LIS : $($currentTestData.CurrentLISTarFile)"
+	$CurrentLISExtractCommand = "rm -rf */ *.sh *.tar*^wget $($currentTestData.CurrentLISTarFile)^tar -xzf $($currentTestData.CurrentLISTarFile | Split-Path -Leaf)^cp -ar LISISO/* . "
+}
 $LISExtractCommand = ""
 $result = ""
 $testResult = ""
