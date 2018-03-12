@@ -27,7 +27,8 @@
 [string] $StorageAccount="",
 [string] $customParameters="",
 [int] $coureCountExceededTimeout,
-
+[int] $testIterations = 1,
+[int] $maxDirLength = 32,
 [switch] $ExitWithZero
 )
 

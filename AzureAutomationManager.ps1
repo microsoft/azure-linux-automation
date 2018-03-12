@@ -37,6 +37,7 @@ param (
 [switch] $CleanupExistingRG,
 [switch] $UseManagedDisks,
 [int] $coureCountExceededTimeout = 3600,
+[int] $testIterations = 1,
 [switch] $ForceDeleteResources
 )
 
@@ -314,7 +315,7 @@ try
         $testCycle =  GetCurrentCycleData -xmlConfig $xmlConfig -cycleName $cycleName
         #Invoke Azure Test Suite
 
-        $testSuiteResultDetails=.\AzureTestSuite.ps1 $xmlConfig -Distro $Distro -cycleName $cycleName
+        $testSuiteResultDetails=.\AzureTestSuite.ps1 $xmlConfig -Distro $Distro -cycleName $cycleName -testIterations $testIterations
         #if(!$sts)
         #{
             #exit

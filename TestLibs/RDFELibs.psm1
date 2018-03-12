@@ -2836,7 +2836,7 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 										}
 										else
 										{
-											LogMsg "CleanUP Successful for $group.."
+											#LogMsg "CleanUP Successful for $group.."
 										}
 									}
 								}
