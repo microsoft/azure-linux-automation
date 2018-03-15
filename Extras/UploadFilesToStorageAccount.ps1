@@ -97,5 +97,5 @@ catch
     $ErrorMessage =  $_.Exception.Message
     Write-Host "EXCEPTION : $ErrorMessage"
     Write-Host "Source : Line $line in script $script_name."
-    Write-Host "ERROR : $($blobContext.BlobEndPoint)/$containerName/$blobName : Failed"
+    Write-Host "ERROR : $($blobContext.BlobEndPoint)$containerName/$blobName : Failed"
 }
