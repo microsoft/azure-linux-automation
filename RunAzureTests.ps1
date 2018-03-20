@@ -318,8 +318,19 @@ Invoke-Expression -Command $cmd
 
 $LogDir = Get-Content .\report\lastLogDirectory.txt -ErrorAction SilentlyContinue
 
-
 $currentDir = $PWD
+$out = Remove-Item *.json -Force
+$out = Remove-Item *.xml -Force
+$zipFile = "$(($TestCycle).Trim())-$shortRandomNumber-azure-buildlogs.zip"
+
+function ZipFiles( $zipfilename, $sourcedir )
+{
+    $sourcedir = $sourcedir.Trim('\')
+    .\tools\7za.exe a -mx5 $zipFile $sourcedir -r
+}
+
+$out = ZipFiles -zipfilename $zipFile -sourcedir $LogDir
+
 
 if ($ArchiveLogDirectory)
 {
@@ -337,8 +348,6 @@ if ($ArchiveLogDirectory)
         Write-Host "Entering $FinalDestDir"
         cd $LogDir
         Write-Host "$LogDir-----------------------"
-        Remove-Item *.json -Force
-        Remove-Item *.xml -Force
         Write-Host "Copying all items recursively to $FinalDestDir"
         Copy-Item -Path .\* -Recurse -Destination $FinalDestDir -Force
         Write-Host "Done."
@@ -346,14 +355,6 @@ if ($ArchiveLogDirectory)
     }
 }
 
-function ZipFiles( $zipfilename, $sourcedir )
-{
-   cd $sourcedir
-   Add-Type -Assembly System.IO.Compression.FileSystem
-   $compressionLevel = [System.IO.Compression.CompressionLevel]::Optimal
-   [System.IO.Compression.ZipFile]::CreateFromDirectory($sourcedir,
-        $zipfilename, $compressionLevel, $false)
-}
 Remove-Item -Path BuildLogs.zip -Force -ErrorAction SilentlyContinue
 $retValue = 1
 try
