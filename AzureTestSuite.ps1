@@ -233,6 +233,10 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 			if ($RunSelectedTests.Trim().Replace(" ","").Split(",") -contains $test.Name)
 			{
 				$currentTestData = GetCurrentTestData -xmlConfig $xmlConfig -testName $test.Name
+				if ( $currentTestData.AdditionalCustomization.Networking -eq "SRIOV" )
+				{
+					Set-Variable -Name EnableAcceleratedNetworking -Value $true -Scope Global
+				}
 			}
 			else
 			{
