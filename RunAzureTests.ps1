@@ -29,6 +29,10 @@
 [int] $coureCountExceededTimeout,
 [int] $testIterations = 1,
 [int] $maxDirLength = 32,
+
+[string] $LinuxUsername="",
+[string] $LinuxPassword="",
+
 [switch] $ExitWithZero
 )
 
@@ -177,8 +181,22 @@ $xmlFileData.config.Azure.General.SubscriptionID = $xmlSecrets.secrets.Subscript
 $xmlFileData.config.Azure.General.SubscriptionName = $xmlSecrets.secrets.SubscriptionName.Trim()
 $xmlFileData.config.Azure.General.StorageAccount= $StorageAccountName
 $xmlFileData.config.Azure.General.ARMStorageAccount = $StorageAccountName
-$xmlFileData.config.Azure.Deployment.Data.Password = '"' + ($xmlSecrets.secrets.linuxTestPassword.Trim()) + '"'
-$xmlFileData.config.Azure.Deployment.Data.UserName = $xmlSecrets.secrets.linuxTestUsername.Trim()
+if ($LinuxUsername)
+{
+    $xmlFileData.config.Azure.Deployment.Data.UserName = $LinuxUsername.Trim()
+}
+else 
+{
+    $xmlFileData.config.Azure.Deployment.Data.UserName = $xmlSecrets.secrets.linuxTestUsername.Trim()
+}
+if ($LinuxPassword)
+{
+    $xmlFileData.config.Azure.Deployment.Data.Password = '"' + ($LinuxPassword.Trim()) + '"'
+}
+else 
+{
+    $xmlFileData.config.Azure.Deployment.Data.Password = '"' + ($xmlSecrets.secrets.linuxTestPassword.Trim()) + '"'
+}
 $xmlFileData.config.Azure.Deployment.Data.Distro[0].Name = ($DistroIdentifier).Trim()
 $xmlFileData.config.Azure.General.AffinityGroup=""
 $newNode = $xmlFileData.CreateElement("Location")
