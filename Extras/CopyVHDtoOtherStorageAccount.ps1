@@ -91,7 +91,18 @@ else
 {
     $targetRegions = (Get-AzureRmLocation).Location
 }
-$targetStorageAccounts = ($GetAzureRmStorageAccount | where { ( $_.StorageAccountName -imatch "konkaci" ) -and $targetRegions.Contains($_.PrimaryLocation) -and ($destinationAccountType -imatch $_.Sku.Tier)}).StorageAccountName
+$targetStorageAccounts = @()
+foreach ($newRegion in $targetRegions)
+{
+    if ( $destinationAccountType -imatch "Standard")
+    {
+        $targetStorageAccounts +=  $regionStorageMapping.AllRegions.$newRegion.StandardStorage
+    }
+    if ( $destinationAccountType -imatch "Premium")
+    {
+        $targetStorageAccounts +=  $regionStorageMapping.AllRegions.$newRegion.PremiumStorage
+    }   
+}
 $destContextArr = @()
 foreach ($targetSA in $targetStorageAccounts)
 {
