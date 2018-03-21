@@ -9200,6 +9200,13 @@
 			</test>
 		</Cycle>
 		<Cycle>
+			<cycleName>BootValidation</cycleName>
+			<Category>SmokeTest</Category>
+			<test>
+				<Name>BVT-VERIFY-DEPLOYMENT-PROVISION</Name>
+			</test>
+		</Cycle>		
+		<Cycle>
 			<cycleName>DISKHOTADDREMOVE</cycleName>
 			<test>
 				<Name>VERIFY-DISK-HOT-ADDREMOVE</Name>
