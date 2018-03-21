@@ -311,6 +311,27 @@
     }
     #endregion
 
+    #region Public IP Addresses
+    $PublicIPs = Get-AzureRmResource | Where-Object { ( $_.ResourceType -eq "Microsoft.Network/publicIPAddresses" )-and ( $_.Location -eq "$Location" )  }
+    LogMsg "Current Public IPs usage:$($PublicIPs.Count). Requested: 1. Estimated usage:$($PublicIPs.Count + 1). Maximum allowed: 100."
+    if ($PublicIPs.Count -ge 100)
+    {
+        $overFlowErrors += 1
+    }
+    #endregion
+
+    if (($currentStorageStatus.CurrentValue + $requiredStorageAccounts) -le $allowedStorageCount)
+    {
+        LogMsg "Current Storage Accounts usage:$($currentStorageStatus.CurrentValue). Requested:$requiredStorageAccounts. Estimated usage:$($currentStorageStatus.CurrentValue + $requiredStorageAccounts). Maximum allowed:$allowedStorageCount/$(($currentStorageStatus.Limit))."
+    }
+    else
+    {
+        LogErr "Current Storage Accounts usage:$($currentStorageStatus.CurrentValue). Requested:$requiredStorageAccounts. Estimated usage:$($currentStorageStatus.CurrentValue + $requiredStorageAccounts). Maximum allowed:$allowedStorageCount/$(($currentStorageStatus.Limit))."
+        $overFlowErrors += 1
+    }
+    #endregion
+
+
     if($overFlowErrors -eq 0)
     {
         LogMsg "Estimated subscription usage is under allowed limits."
