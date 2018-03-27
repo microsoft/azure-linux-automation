@@ -324,8 +324,10 @@ if ( $coureCountExceededTimeout )
 {
     $cmd += " -coureCountExceededTimeout $coureCountExceededTimeout"
 }
-
-
+if ( $testIterations -gt 1 )
+{
+    $cmd += " -testIterations $testIterations"
+}
 
 $cmd += " -ImageType Standard"
 $cmd += " -UseAzureResourceManager"
