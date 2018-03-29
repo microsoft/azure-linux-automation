@@ -1136,7 +1136,7 @@ Function GetAndCheckKernelLogs($allDeployedVMs, $status, $vmUser, $vmPassword)
 				$callTraceFound  = $false
 				foreach ( $line in $KernelLogs )
 				{
-					if ( $line -imatch "Call Trace" )
+					if (( $line -imatch "Call Trace" ) -and  ($line -inotmatch "initcall "))
 					{
 						LogErr $line
 						$callTraceFound = $true
@@ -1166,7 +1166,7 @@ Function GetAndCheckKernelLogs($allDeployedVMs, $status, $vmUser, $vmPassword)
 				$callTraceFound  = $false
 				foreach ( $line in $KernelLogs )
 				{
-					if ( $line -imatch "Call Trace" )
+					if (( $line -imatch "Call Trace" ) -and ($line -inotmatch "initcall "))
 					{
 						LogErr $line
 						$callTraceFound = $true
@@ -1292,7 +1292,7 @@ Function CheckKernelLogs($allVMData, $vmUser, $vmPassword)
 				$callTraceFound  = $false
 				foreach ( $line in $KernelLogs )
 				{
-					if ( $line -imatch "$errorLine" )
+					if ( ($line -imatch "$errorLine") -and ($line -inotmatch "initcall "))
 					{
 						LogErr $line
 						$totalErrors += 1
