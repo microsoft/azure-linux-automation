@@ -2253,10 +2253,23 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 					else
 					{
 						LogMsg "Downloading $testFile from $username : $downloadFrom,port $port to $downloadTo using Password authentication"
-						$curDir = $PWD
+						$curDir =  (Get-Item -Path ".\" -Verbose).FullName
 						$downloadStatusRandomFile = "DownloadStatusFile" + (Get-Random -Maximum 9999 -Minimum 1111) + ".txt"
+						Set-Content -Value "1" -Path $downloadStatusRandomFile;
 						$downloadStartTime = Get-Date
-						$downloadJob = Start-Job -ScriptBlock { $curDir=$args[0];$password=$args[1];$port=$args[2];$testFile=$args[3];$username=$args[4];${downloadFrom}=$args[5];$downloadTo=$args[6];$downloadStatusRandomFile=$args[7]; cd $curDir; Set-Content -Value "1" -Path $args[6]; ; echo y | .\tools\pscp -pw $password -q -P $port $username@${downloadFrom}:$testFile $downloadTo ; Set-Content -Value $LASTEXITCODE -Path $downloadStatusRandomFile;} -ArgumentList $curDir,$password,$port,$testFile,$username,${downloadFrom},$downloadTo,$downloadStatusRandomFile
+						$downloadJob = Start-Job -ScriptBlock { 
+							$curDir=$args[0];
+							$password=$args[1];
+							$port=$args[2];
+							$testFile=$args[3];
+							$username=$args[4];
+							${downloadFrom}=$args[5];
+							$downloadTo=$args[6];
+							$downloadStatusRandomFile=$args[7];
+							cd $curDir; 
+							echo y | .\tools\pscp.exe  -v -2 -unsafe -pw $password -q -P $port $username@${downloadFrom}:$testFile $downloadTo 2> $downloadStatusRandomFile; 
+							Add-Content -Value "DownloadExtiCode_$LASTEXITCODE" -Path $downloadStatusRandomFile;
+						} -ArgumentList $curDir,$password,$port,$testFile,$username,${downloadFrom},$downloadTo,$downloadStatusRandomFile
 						sleep -Milliseconds 100
 						$downloadJobStatus = Get-Job -Id $downloadJob.Id
 						$downloadTimout = $false
@@ -2273,7 +2286,29 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 							$downloadJobStatus = Get-Job -Id $downloadJob.Id
 						}
 						Write-Host ""
-						$returnCode = Get-Content -Path $downloadStatusRandomFile
+						$downloadExitCode = (Select-String -Path $downloadStatusRandomFile -Pattern "DownloadExtiCode_").Line
+						if ( $downloadExitCode )
+						{
+							$returnCode = $downloadExitCode.Replace("DownloadExtiCode_",'')
+						}
+						if ( $returnCode -eq 0)
+						{
+							LogMsg "Download command returned exit code 0"
+						}
+						else 
+						{
+							$receivedFiles = Select-String -Path "$downloadStatusRandomFile" -Pattern "Sending file"
+							if ($receivedFiles.Count -ge 1)
+							{
+								LogMsg "Received $($receivedFiles.Count) file(s)"
+								$returnCode = 0
+							}
+							else 
+							{
+								LogMsg "Download command returned exit code $returnCode"
+								LogMsg "$(Get-Content -Path $downloadStatusRandomFile)"
+							}
+						}
 						Remove-Item -Force $downloadStatusRandomFile | Out-Null
 						Remove-Job -Id $downloadJob.Id -Force | Out-Null
 					}
