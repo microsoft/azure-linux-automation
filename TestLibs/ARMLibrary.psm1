@@ -738,6 +738,21 @@ while(!$saInfoCollected -and ($retryCount -lt $maxRetryCount))
 }
 
 
+if ($ARMImage -and !$osVHD)
+{
+    $publisher = $ARMImage.Publisher
+    $offer = $ARMImage.Offer
+    $sku = $ARMImage.Sku
+    $version = $ARMImage.Version
+}
+elseif ($CurrentTestData.Publisher -and $CurrentTestData.Offer)
+{
+    $publisher = $CurrentTestData.Publisher
+    $offer = $CurrentTestData.Offer
+    $sku = $CurrentTestData.Sku
+    $version = $CurrentTestData.Version
+}
+
 if($storageAccount)
 { 
  $StorageAccountName = $storageAccount
@@ -900,10 +915,6 @@ $StorageProfileScriptBlock = {
                     LogMsg ">>Using ARMImage : $($ARMImage.Publisher):$($ARMImage.Offer):$($ARMImage.Sku):$($ARMImage.Version)"
                     Add-Content -Value "$($indents[5])^imageReference^ : " -Path $jsonFile
                     Add-Content -Value "$($indents[5]){" -Path $jsonFile
-                        $publisher = $ARMImage.Publisher
-                        $offer = $ARMImage.Offer
-                        $sku = $ARMImage.Sku
-                        $version = $ARMImage.Version
                         Add-Content -Value "$($indents[6])^publisher^: ^$publisher^," -Path $jsonFile
                         Add-Content -Value "$($indents[6])^offer^: ^$offer^," -Path $jsonFile
                         Add-Content -Value "$($indents[6])^sku^: ^$sku^," -Path $jsonFile
@@ -914,10 +925,6 @@ $StorageProfileScriptBlock = {
                 {
                     Add-Content -Value "$($indents[5])^imageReference^ : " -Path $jsonFile
                     Add-Content -Value "$($indents[5]){" -Path $jsonFile
-                        $publisher = $CurrentTestData.Publisher
-                        $offer = $CurrentTestData.Offer
-                        $sku = $CurrentTestData.Sku
-                        $version = $CurrentTestData.Version
                         Add-Content -Value "$($indents[6])^publisher^: ^$publisher^," -Path $jsonFile
                         Add-Content -Value "$($indents[6])^offer^: ^$offer^," -Path $jsonFile
                         Add-Content -Value "$($indents[6])^sku^: ^$sku^," -Path $jsonFile
@@ -1697,6 +1704,17 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
             Add-Content -Value "$($indents[3])^type^: ^Microsoft.Compute/virtualMachines^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^name^: ^$vmName^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
+            if ($publisher -imatch "clear-linux-project")
+            {
+                LogMsg "  Adding plan information for clear-linux.."
+                Add-Content -Value "$($indents[3])^plan^:" -Path $jsonFile
+                Add-Content -Value "$($indents[3]){" -Path $jsonFile
+                    Add-Content -Value "$($indents[4])^name^: ^$sku^," -Path $jsonFile
+                    Add-Content -Value "$($indents[4])^product^: ^clear-linux-os^," -Path $jsonFile
+                    Add-Content -Value "$($indents[4])^publisher^: ^clear-linux-project^" -Path $jsonFile
+                Add-Content -Value "$($indents[3])}," -Path $jsonFile              
+            }	    
+            Add-Content -Value "$($indents[3])^tags^: {^GlobalRandom^: ^$GlobalRandom^}," -Path $jsonFile
             Add-Content -Value "$($indents[3])^dependsOn^: " -Path $jsonFile
             Add-Content -Value "$($indents[3])[" -Path $jsonFile
 			if ($ExistingRG)
@@ -2030,6 +2048,16 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
             Add-Content -Value "$($indents[3])^type^: ^Microsoft.Compute/virtualMachines^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^name^: ^$vmName^," -Path $jsonFile
             Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
+            if ($publisher -imatch "clear-linux-project")
+            {
+                LogMsg "  Adding plan information for clear-linux.."
+                Add-Content -Value "$($indents[3])^plan^:" -Path $jsonFile
+                Add-Content -Value "$($indents[3]){" -Path $jsonFile
+                    Add-Content -Value "$($indents[4])^name^: ^$sku^," -Path $jsonFile
+                    Add-Content -Value "$($indents[4])^product^: ^clear-linux-os^," -Path $jsonFile
+                    Add-Content -Value "$($indents[4])^publisher^: ^clear-linux-project^" -Path $jsonFile
+                Add-Content -Value "$($indents[3])}," -Path $jsonFile              
+            }
             Add-Content -Value "$($indents[3])^dependsOn^: " -Path $jsonFile
             Add-Content -Value "$($indents[3])[" -Path $jsonFile
 				#region configure multiple Nics to virtualMachines 
