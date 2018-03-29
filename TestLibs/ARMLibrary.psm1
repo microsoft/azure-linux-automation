@@ -1651,7 +1651,7 @@ foreach ( $newVM in $RGXMLData.VirtualMachine)
                 LogMsg "  Adding plan information for clear-linux.."
                 Add-Content -Value "$($indents[3])^plan^:" -Path $jsonFile
                 Add-Content -Value "$($indents[3]){" -Path $jsonFile
-                    Add-Content -Value "$($indents[4])^name^: ^basic^," -Path $jsonFile
+                    Add-Content -Value "$($indents[4])^name^: ^$sku^," -Path $jsonFile
                     Add-Content -Value "$($indents[4])^product^: ^clear-linux-os^," -Path $jsonFile
                     Add-Content -Value "$($indents[4])^publisher^: ^clear-linux-project^" -Path $jsonFile
                 Add-Content -Value "$($indents[3])}," -Path $jsonFile              
@@ -2025,7 +2025,7 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
                 LogMsg "  Adding plan information for clear-linux.."
                 Add-Content -Value "$($indents[3])^plan^:" -Path $jsonFile
                 Add-Content -Value "$($indents[3]){" -Path $jsonFile
-                    Add-Content -Value "$($indents[4])^name^: ^basic^," -Path $jsonFile
+                    Add-Content -Value "$($indents[4])^name^: ^$sku^," -Path $jsonFile
                     Add-Content -Value "$($indents[4])^product^: ^clear-linux-os^," -Path $jsonFile
                     Add-Content -Value "$($indents[4])^publisher^: ^clear-linux-project^" -Path $jsonFile
                 Add-Content -Value "$($indents[3])}," -Path $jsonFile              
