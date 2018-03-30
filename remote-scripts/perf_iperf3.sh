@@ -43,7 +43,7 @@ touch ./IPERF3Test.log
 
 InstallIPERF3()
 {
-		DISTRO=`grep -ihs "buntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux" /etc/{issue,*release,*version}`
+		DISTRO=`grep -ihs "buntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux\|clear-linux-os" /etc/{issue,*release,*version} /usr/lib/os-release`
 		if [[ $DISTRO =~ "Ubuntu" ]];
 		then
 			
@@ -69,7 +69,12 @@ InstallIPERF3()
 				ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
 				ssh ${1} "yum -y --nogpgcheck install iperf3 sysstat bc psmisc"
 				ssh ${1} "iptables -F"
-				
+		elif [[ $DISTRO =~ "clear-linux-os" ]];
+		then
+				LogMsg "Detected Clear Linux OS. Installing required packages"
+				ssh ${1} "swupd bundle-add dev-utils-dev sysadmin-basic performance-tools os-testsuite-phoronix network-basic openssh-server dev-utils os-core os-core-dev"
+				ssh ${1} "iptables -F"
+								
 		else
 				LogMsg "Unknown Distro"
 				UpdateTestState "TestAborted"

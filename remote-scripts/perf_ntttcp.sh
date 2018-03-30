@@ -43,7 +43,7 @@ touch ./ntttcpTest.log
 
 
 InstallNTTTCP() {
-                DISTRO=`grep -ihs "buntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux" /etc/{issue,*release,*version}`
+                DISTRO=`grep -ihs "buntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux\|clear-linux-os" /etc/{issue,*release,*version} /usr/lib/os-release`
 
                 if [[ $DISTRO =~ "Ubuntu" ]];
                 then
@@ -130,6 +130,11 @@ InstallNTTTCP() {
                                 ssh ${1} "git clone https://github.com/Microsoft/lagscope"
                                 ssh ${1} "cd lagscope/src && make && make install"
                                 ssh ${1} "iptables -F"
+		elif [[ $DISTRO =~ "clear-linux-os" ]];
+		then
+				LogMsg "Detected Clear Linux OS. Installing required packages"
+				ssh ${1} "swupd bundle-add dev-utils-dev sysadmin-basic performance-tools os-testsuite-phoronix network-basic openssh-server dev-utils os-core os-core-dev"
+				ssh ${1} "iptables -F"                                
 
                 else
                                 LogMsg "Unknown Distro"
