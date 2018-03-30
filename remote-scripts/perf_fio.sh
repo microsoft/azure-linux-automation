@@ -47,11 +47,11 @@ UpdateTestState()
 }
 
 InstallFIO() {
-		DISTRO=`grep -ihs "buntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux" /etc/{issue,*release,*version}`
+		DISTRO=`grep -ihs "buntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux\|clear-linux-os" /etc/{issue,*release,*version} /usr/lib/os-release`
 
 		if [[ $DISTRO =~ "Ubuntu" ]] || [[ $DISTRO =~ "Debian" ]];
 		then
-			LogMsg "Detected UBUNTU/Debian"
+			LogMsg "Detected UBUNTU/Debian. Installing required packages"
 			until dpkg --force-all --configure -a; sleep 10; do echo 'Trying again...'; done
 			apt-get update
 			apt-get install -y pciutils gawk mdadm
@@ -64,46 +64,45 @@ InstallFIO() {
 							
 		elif [[ $DISTRO =~ "Red Hat Enterprise Linux Server release 6" ]];
 		then
-			LogMsg "Detected RHEL 6.x"
-			LogMsg "INFO: installing required packages"
+			LogMsg "Detected RHEL 6.x; Installing required packages"
 			rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
 			yum -y --nogpgcheck install wget sysstat mdadm blktrace libaio fio
 			mount -t debugfs none /sys/kernel/debug
 
 		elif [[ $DISTRO =~ "Red Hat Enterprise Linux Server release 7" ]];
 		then
-			LogMsg "Detected RHEL 7.x"
-			LogMsg "INFO: installing required packages"
+			LogMsg "Detected RHEL 7.x; Installing required packages"
 			rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 			yum -y --nogpgcheck install wget sysstat mdadm blktrace libaio fio
 			mount -t debugfs none /sys/kernel/debug
 				
 		elif [[ $DISTRO =~ "CentOS Linux release 6" ]] || [[ $DISTRO =~ "CentOS release 6" ]];
 		then
-			LogMsg "Detected CentOS 6.x"
-			LogMsg "INFO: installing required packages"
+			LogMsg "Detected CentOS 6.x; Installing required packages"
 			rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
 			yum -y --nogpgcheck install wget sysstat mdadm blktrace libaio fio
 			mount -t debugfs none /sys/kernel/debug
 				
 		elif [[ $DISTRO =~ "CentOS Linux release 7" ]];
 		then
-			LogMsg "Detected CentOS 7.x"
-			LogMsg "INFO: installing required packages"
+			LogMsg "Detected CentOS 7.x; Installing required packages"
 			rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 			yum -y --nogpgcheck install wget sysstat mdadm blktrace libaio fio
 			mount -t debugfs none /sys/kernel/debug
 
 		elif [[ $DISTRO =~ "SUSE Linux Enterprise Server 12" ]];
 		then
-			LogMsg "Detected SLES12"
+			LogMsg "Detected SLES12. Installing required packages"
 			zypper addrepo http://download.opensuse.org/repositories/benchmark/SLE_12_SP2_Backports/benchmark.repo
 			zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys refresh
 			zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys remove gettext-runtime-mini-0.19.2-1.103.x86_64
 			zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys install sysstat
 			zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys install grub2
 			zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys install wget mdadm blktrace libaio1 fio
-			
+		elif [[ $DISTRO =~ "clear-linux-os" ]];
+		then
+			LogMsg "Detected Clear Linux OS. Installing required packages"
+			swupd bundle-add dev-utils-dev sysadmin-basic performance-tools os-testsuite-phoronix network-basic openssh-server dev-utils os-core os-core-dev
 
 		else
 				LogMsg "Unknown Distro"

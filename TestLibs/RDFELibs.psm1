@@ -117,6 +117,10 @@ Function DetectLinuxDistro($VIP, $SSHport, $testVMUser, $testVMPassword)
 			{
 				$CleanedDistroName = "COREOS"
 			}
+			elseif ($DistroName -imatch "CLEARLINUX")
+			{
+				$CleanedDistroName = "CLEARLINUX"
+			}
 			else
 			{
 				$CleanedDistroName = "UNKNOWN"
