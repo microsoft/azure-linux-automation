@@ -19,6 +19,7 @@
 [string] $customLIS,
 [string] $customLISBranch,
 [switch] $ForceDeleteResources,
+[switch] $keepReproInact,
 [string] $customSecretsFilePath = "",
 [string] $ArchiveLogDirectory = "",
 [string] $ResultDBTable = "",
@@ -43,7 +44,7 @@
 #---------------------------------------------------------[Initializations]--------------------------------------------------------
 
 Write-Host "-----------$PWD---------"
-$maxDirLength = 32
+$maxDirLength = 64
 if ( $pwd.Path.Length -gt $maxDirLength)
 {
     $shortRandomNumber = Get-Random -Maximum 999999 -Minimum 111111
@@ -307,7 +308,6 @@ if ( $ForceDeleteResources )
 {
     $cmd += " -ForceDeleteResources"
 }
-
 if ( $keepReproInact )
 {
     $cmd += " -keepReproInact"
