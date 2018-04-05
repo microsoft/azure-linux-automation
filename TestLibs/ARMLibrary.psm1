@@ -1077,6 +1077,40 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
 
     #region Common Resources for all deployments..
 
+        #region availabilitySets
+        if ($ExistingRG)
+        {
+            LogMsg "Using existing Availibility Set: $customAVSetName"
+        }
+        else
+        {        
+            Add-Content -Value "$($indents[2]){" -Path $jsonFile
+                Add-Content -Value "$($indents[3])^apiVersion^: ^$apiVersion^," -Path $jsonFile
+                Add-Content -Value "$($indents[3])^type^: ^Microsoft.Compute/availabilitySets^," -Path $jsonFile
+                Add-Content -Value "$($indents[3])^name^: ^[variables('availabilitySetName')]^," -Path $jsonFile
+                Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
+                if ( $tipSessionId -and $tipCluster)
+                {
+                    Add-Content -Value "$($indents[3])^tags^:" -Path $jsonFile
+                    Add-Content -Value "$($indents[3]){" -Path $jsonFile
+                        Add-Content -Value "$($indents[4])^TipNode.SessionId^: ^$tipSessionId^" -Path $jsonFile
+                    Add-Content -Value "$($indents[3])}," -Path $jsonFile
+                }
+                Add-Content -Value "$($indents[3])^properties^:" -Path $jsonFile
+                Add-Content -Value "$($indents[3]){" -Path $jsonFile
+                if ( $tipSessionId -and $tipCluster)
+                {            
+                    Add-Content -Value "$($indents[4])^internalData^:" -Path $jsonFile
+                    Add-Content -Value "$($indents[4]){" -Path $jsonFile
+                        Add-Content -Value "$($indents[5])^pinnedFabricCluster^ : ^$tipCluster^" -Path $jsonFile  
+                    Add-Content -Value "$($indents[4])}" -Path $jsonFile
+                }
+                Add-Content -Value "$($indents[3])}" -Path $jsonFile
+            Add-Content -Value "$($indents[2])}," -Path $jsonFile
+            LogMsg "Added availabilitySet $availibilitySetName.."
+        }
+            #endregion
+
         #region publicIPAddresses
         Add-Content -Value "$($indents[2]){" -Path $jsonFile
             Add-Content -Value "$($indents[3])^apiVersion^: ^$apiVersion^," -Path $jsonFile
@@ -1212,34 +1246,6 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
 
     if ( ($numberOfVMs -gt 1) -or ($EnableIPv6) -or ($ForceLoadBalancerForSingleVM) )
     {     
-        #region availabilitySets
-    if ($ExistingRG)
-    {
-        LogMsg "Using existing Availibility Set: $customAVSetName"
-    }
-    else
-    {        
-        Add-Content -Value "$($indents[2]){" -Path $jsonFile
-            Add-Content -Value "$($indents[3])^apiVersion^: ^$apiVersion^," -Path $jsonFile
-            Add-Content -Value "$($indents[3])^type^: ^Microsoft.Compute/availabilitySets^," -Path $jsonFile
-            Add-Content -Value "$($indents[3])^name^: ^[variables('availabilitySetName')]^," -Path $jsonFile
-            Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
-            Add-Content -Value "$($indents[3])^tags^:" -Path $jsonFile
-            Add-Content -Value "$($indents[3]){" -Path $jsonFile
-                Add-Content -Value "$($indents[4])^TipNode.SessionId^: ^$tipSessionId^" -Path $jsonFile
-            Add-Content -Value "$($indents[3])}," -Path $jsonFile
-            
-            Add-Content -Value "$($indents[3])^properties^:" -Path $jsonFile
-            Add-Content -Value "$($indents[3]){" -Path $jsonFile
-                Add-Content -Value "$($indents[4])^internalData^:" -Path $jsonFile
-                Add-Content -Value "$($indents[4]){" -Path $jsonFile
-                    Add-Content -Value "$($indents[5])^pinnedFabricCluster^ : ^$tipCluster^" -Path $jsonFile  
-                Add-Content -Value "$($indents[4])}" -Path $jsonFile
-            Add-Content -Value "$($indents[3])}" -Path $jsonFile
-        Add-Content -Value "$($indents[2])}," -Path $jsonFile
-        LogMsg "Added availabilitySet $availibilitySetName.."
-    }
-        #endregion
        
         #region LoadBalancer
         LogMsg "Adding Load Balancer ..."
@@ -2069,6 +2075,14 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
             }
             Add-Content -Value "$($indents[3])^dependsOn^: " -Path $jsonFile
             Add-Content -Value "$($indents[3])[" -Path $jsonFile
+                if ($ExistingRG)
+                {
+                    #Add-Content -Value "$($indents[4])^[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]^," -Path $jsonFile
+                }
+                else
+                {
+                    Add-Content -Value "$($indents[4])^[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]^," -Path $jsonFile
+                }            
 				#region configure multiple Nics to virtualMachines 
 				foreach($NicName in $NicNameList)
 				{
@@ -2086,6 +2100,12 @@ if ( ($numberOfVMs -eq 1) -and !$EnableIPv6 -and !$ForceLoadBalancerForSingleVM 
             #region VM Properties
             Add-Content -Value "$($indents[3])^properties^:" -Path $jsonFile
             Add-Content -Value "$($indents[3]){" -Path $jsonFile
+                #region availabilitySet
+                Add-Content -Value "$($indents[4])^availabilitySet^: " -Path $jsonFile
+                Add-Content -Value "$($indents[4]){" -Path $jsonFile
+                Add-Content -Value "$($indents[5])^id^: ^[resourceId('Microsoft.Compute/availabilitySets','$customAVSetName')]^" -Path $jsonFile
+                Add-Content -Value "$($indents[4])}," -Path $jsonFile
+                #endregion            
                 #region Hardware Profile
                 Add-Content -Value "$($indents[4])^hardwareProfile^: " -Path $jsonFile
                 Add-Content -Value "$($indents[4]){" -Path $jsonFile
