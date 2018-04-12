@@ -44,11 +44,11 @@
 #---------------------------------------------------------[Initializations]--------------------------------------------------------
 
 Write-Host "-----------$PWD---------"
-$maxDirLength = 64
+$maxDirLength = 32
 if ( $pwd.Path.Length -gt $maxDirLength)
+$shortRandomNumber = Get-Random -Maximum 999999 -Minimum 111111
+$shortRandomWord = -join ((65..90) | Get-Random -Count 6 | % {[char]$_})
 {
-    $shortRandomNumber = Get-Random -Maximum 999999 -Minimum 111111
-    $shortRandomWord = -join ((65..90) | Get-Random -Count 6 | % {[char]$_})
     $originalWorkingDirectory = $pwd
     Write-Host "Current working directory length is greather than $maxDirLength. Need to change the working directory."
     $tempWorkspace = $env:TEMP
@@ -61,7 +61,6 @@ if ( $pwd.Path.Length -gt $maxDirLength)
     Set-Location -Path $finalWorkingDirectory | Out-Null
     Write-Host "Wroking directory changed to $finalWorkingDirectory"
 }
-
 Remove-Item -Path ".\report\report_$(($TestCycle).Trim()).xml" -Force -ErrorAction SilentlyContinue
 Remove-Item -Path ".\report\testSummary.html" -Force -ErrorAction SilentlyContinue
 mkdir -Path .\report -Force -ErrorAction SilentlyContinue | Out-Null
