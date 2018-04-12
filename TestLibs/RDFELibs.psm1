@@ -2222,7 +2222,7 @@ Function RemoteCopy($uploadTo, $downloadFrom, $downloadTo, $port, $files, $usern
 			foreach ($f in $files)
 			{
 				$retry=1
-				$maxRetry=10
+				$maxRetry=50
 				$testFile = $f.trim()
 				$recurse = ""
 				while($retry -le $maxRetry)
