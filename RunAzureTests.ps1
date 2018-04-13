@@ -45,9 +45,9 @@
 
 Write-Host "-----------$PWD---------"
 $maxDirLength = 32
-if ( $pwd.Path.Length -gt $maxDirLength)
 $shortRandomNumber = Get-Random -Maximum 999999 -Minimum 111111
 $shortRandomWord = -join ((65..90) | Get-Random -Count 6 | % {[char]$_})
+if ( $pwd.Path.Length -gt $maxDirLength)
 {
     $originalWorkingDirectory = $pwd
     Write-Host "Current working directory length is greather than $maxDirLength. Need to change the working directory."
