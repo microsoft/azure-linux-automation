@@ -532,51 +532,24 @@
 					</VirtualMachine>
 				</HostedService>
 			</E2ESingleVM>
-			<NFSWEBTEST>
+			<SingleVM>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
 					<Tag>SingleVM</Tag>
 					<VirtualMachine>
 						<state></state>
-						<RoleName>nfs-backend-vm</RoleName>
-						<InstanceSize>Standard_DS15_v2</InstanceSize>
-						<ARMInstanceSize>Standard_DS15_v2</ARMInstanceSize>
+						<InstanceSize>ExtraSmall</InstanceSize>
+						<ARMInstanceSize>Standard_A1</ARMInstanceSize>
 						<EndPoints>
 							<Name>SSH</Name>
 							<Protocol>tcp</Protocol>
 							<LocalPort>22</LocalPort>
-							<PublicPort>1111</PublicPort>
+							<PublicPort>22</PublicPort>
 						</EndPoints>
 						<DataDisk></DataDisk>
 					</VirtualMachine>
-					<VirtualMachine>
-						<state></state>
-						<InstanceSize>Standard_DS15_v2</InstanceSize>
-						<RoleName>webserver-vm</RoleName>
-						<ARMInstanceSize>Standard_DS15_v2</ARMInstanceSize>
-						<EndPoints>
-							<Name>SSH</Name>
-							<Protocol>tcp</Protocol>
-							<LocalPort>22</LocalPort>
-							<PublicPort>1112</PublicPort>
-						</EndPoints>
-						<DataDisk></DataDisk>
-					</VirtualMachine>
-					<VirtualMachine>
-						<state></state>
-						<InstanceSize>Standard_DS15_v2</InstanceSize>
-						<RoleName>client-vm</RoleName>
-						<ARMInstanceSize>Standard_DS15_v2</ARMInstanceSize>
-						<EndPoints>
-							<Name>SSH</Name>
-							<Protocol>tcp</Protocol>
-							<LocalPort>22</LocalPort>
-							<PublicPort>1113</PublicPort>
-						</EndPoints>
-						<DataDisk></DataDisk>
-					</VirtualMachine>					
 				</HostedService>
-			</NFSWEBTEST>
+			</SingleVM>
 			<ExtraSmallVM>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -4937,7 +4910,7 @@
 			<testScript></testScript>
 			<testScriptPs1>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</testScriptPs1>
 			<files></files>
-			<setupType>NFSWEBTEST</setupType>
+			<setupType>SingleVM</setupType>
 			<TestType></TestType>
 			<TestFeature></TestFeature>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
