@@ -105,8 +105,6 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 	$StartTime = [Datetime]::Now.ToUniversalTime()
 	LogMsg "Starting the Cycle - $($CycleName.ToUpper())"
 	$executionCount = 0
-	$utctime = (Get-Date).ToUniversalTime()
-	$dbDateTimeUTC = "$($utctime.Year)-$($utctime.Month)-$($utctime.Day) $($utctime.Hour):$($utctime.Minute):$($utctime.Second)"
 	$dbEnvironment = "Azure"
 	$dbTestCycle = $CycleName.Trim()
 	$dbExecutionID = [guid]::NewGuid()
@@ -267,7 +265,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 			{
 				$currentTestData.testName = "$($originalTestName)-$testIterationCount"
 				$test.Name = "$($originalTestName)-$testIterationCount"
-			}		
+			}
 			$server = $xmlConfig.config.global.ServerEnv.Server
 			$cluster = $xmlConfig.config.global.ClusterEnv.Cluster
 			$rdosVersion = $xmlConfig.config.global.ClusterEnv.RDOSVersion
@@ -307,10 +305,10 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 					$testcase = StartLogTestCase $testsuite "$($test.Name)" "CloudTesting.$($testCycle.cycleName)"
 					$testSuiteResultDetails.totalTc = $testSuiteResultDetails.totalTc +1
 					$stopWatch = SetStopWatch
-					mkdir $testDir\$($test.Name) -ErrorAction SilentlyContinue | out-null					
-					Set-Variable -Name currentTestData -Value $currentTestData -Scope Global				
+					mkdir $testDir\$($test.Name) -ErrorAction SilentlyContinue | out-null
+					Set-Variable -Name currentTestData -Value $currentTestData -Scope Global
 					$testCaseLogFile = $testDir + "\" + $($currentTestData.testName) + "\" + "azure_ica.log"
-					$global:logFile  = $testCaseLogFile					
+					$global:logFile  = $testCaseLogFile
 					if ((!$currentTestData.SubtestValues -and !$currentTestData.TestMode))
 					{
 						#Tests With No subtests and no SubValues will be executed here..
@@ -358,10 +356,12 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 							{
 								Write-Host "ERROR: Azure Secrets file not found in Jenkins / user not provided -customSecretsFilePath. Test results will not be uploaded to DB" -ForegroundColor Red -BackgroundColor Black
 							}
-							else 
+							else
 							{
-								try 
+								try
 								{
+									$utctime = (Get-Date).ToUniversalTime()
+									$dbDateTimeUTC = "$($utctime.Year)-$($utctime.Month)-$($utctime.Day) $($utctime.Hour):$($utctime.Minute):$($utctime.Second)"
 									$xmlSecrets = [xml](Get-Content $secretsFile)
 									$dataSource = $xmlSecrets.secrets.DatabaseServer
 									$dbuser = $xmlSecrets.secrets.DatabaseUser
@@ -369,7 +369,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 									$database = $xmlSecrets.secrets.DatabaseName
 									$dataTableName = "AzureTestResultsMasterTable"
 									$SQLQuery = "INSERT INTO $dataTableName (DateTimeUTC,Environment,TestCycle,ExecutionID,TestName,TestResult,ARMImage,OsVHD,CustomKernel,CustomLIS,Location,OverrideVMSize,Networking) VALUES "
-									$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$dbTestResult','$dbARMImage','$dbOsVHD','$dbCustomKernel','$dbCustomLIS','$dbLocation','$dbOverrideVMSize','$dbNetworking')"									
+									$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$dbTestResult','$dbARMImage','$dbOsVHD','$dbCustomKernel','$dbCustomLIS','$dbLocation','$dbOverrideVMSize','$dbNetworking')"
 									$SQLQuery = $SQLQuery.TrimEnd(',')
 									$connectionString = "Server=$dataSource;uid=$dbuser; pwd=$dbpassword;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 									$connection = New-Object System.Data.SqlClient.SqlConnection
@@ -379,14 +379,14 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 									$command.CommandText = $SQLQuery
 									$result = $command.executenonquery()
 									$connection.Close()
-									LogMsg "Uploading test results to database :  done!!"									
+									LogMsg "Uploading test results to database :  done!!"
 								}
-								catch 
+								catch
 								{
 									LogErr "Uploading test results to database :  ERROR"
 									LogMsg $SQLQuery
 								}
-							}							
+							}
 						}
 						if($testResult -imatch "PASS")
 						{
@@ -472,10 +472,12 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 							{
 								Write-Host "ERROR: Azure Secrets file not found in Jenkins / user not provided -customSecretsFilePath. Test results will not be uploaded to DB" -ForegroundColor Red -BackgroundColor Black
 							}
-							else 
+							else
 							{
-								try 
+								try
 								{
+									$utctime = (Get-Date).ToUniversalTime()
+									$dbDateTimeUTC = "$($utctime.Year)-$($utctime.Month)-$($utctime.Day) $($utctime.Hour):$($utctime.Minute):$($utctime.Second)"
 									$xmlSecrets = [xml](Get-Content $secretsFile)
 									$dataSource = $xmlSecrets.secrets.DatabaseServer
 									$dbuser = $xmlSecrets.secrets.DatabaseUser
@@ -483,7 +485,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 									$database = $xmlSecrets.secrets.DatabaseName
 									$dataTableName = "AzureTestResultsMasterTable"
 									$SQLQuery = "INSERT INTO $dataTableName (DateTimeUTC,Environment,TestCycle,ExecutionID,TestName,TestResult,ARMImage,OsVHD,CustomKernel,CustomLIS,Location,OverrideVMSize,Networking) VALUES "
-									$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$dbTestResult','$dbARMImage','$dbOsVHD','$dbCustomKernel','$dbCustomLIS','$dbLocation','$dbOverrideVMSize','$dbNetworking')"																		
+									$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$dbTestResult','$dbARMImage','$dbOsVHD','$dbCustomKernel','$dbCustomLIS','$dbLocation','$dbOverrideVMSize','$dbNetworking')"
 									$SQLQuery = $SQLQuery.TrimEnd(',')
 									$connectionString = "Server=$dataSource;uid=$dbuser; pwd=$dbpassword;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 									$connection = New-Object System.Data.SqlClient.SqlConnection
@@ -493,14 +495,14 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 									$command.CommandText = $SQLQuery
 									$result = $command.executenonquery()
 									$connection.Close()
-									LogMsg "Uploading test results to database :  done!!"									
+									LogMsg "Uploading test results to database :  done!!"
 								}
-								catch 
+								catch
 								{
 									LogErr "Uploading test results to database :  ERROR"
 									LogMsg $SQLQuery
 								}
-							}							
+							}
 						}
 						if($testResult[0] -imatch "PASS")
 						{
