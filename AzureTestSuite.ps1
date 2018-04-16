@@ -107,9 +107,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 	$executionCount = 0
 	$dbEnvironment = "Azure"
 	$dbTestCycle = $CycleName.Trim()
-	$dbExecutionID = [guid]::NewGuid()
-	$dbCustomKernel = $customKernel
-	$dbCustomLIS = $customLIS
+	$dbExecutionID = $dbDateTimeUTC = "$($StartTime.Year)-$($StartTime.Month)-$($StartTime.Day) $($StartTime.Hour):$($StartTime.Minute):$($StartTime.Second)"
 	$dbLocation = ($xmlConfig.config.Azure.General.Location).Replace('"','').Replace(" ","").ToLower()
 	$dbOverrideVMSize = $OverrideVMSize
 	if ( $EnableAcceleratedNetworking )
@@ -130,14 +128,13 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 				{
 					Set-Variable -Name ARMImage -Value $tempDistro.ARMImage -Scope Global
 					LogMsg "ARMImage name - $($ARMImage.Publisher) : $($ARMImage.Offer) : $($ARMImage.Sku) : $($ARMImage.Version)"
-					$dbARMImage = "$($ARMImage.Publisher):$($ARMImage.Offer):$($ARMImage.Sku):$($ARMImage.Version)"
+					$dbARMImage = "$($ARMImage.Publisher) $($ARMImage.Offer) $($ARMImage.Sku) $($ARMImage.Version)"
 				}
 				if ( $tempDistro.OsVHD )
 				{
 					$BaseOsVHD = $tempDistro.OsVHD.Trim()
 					Set-Variable -Name BaseOsVHD -Value $BaseOsVHD -Scope Global
 					LogMsg "Base VHD name - $BaseOsVHD"
-					$dbOsVHD
 				}
 			}
 			else
@@ -368,8 +365,8 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 									$dbpassword = $xmlSecrets.secrets.DatabasePassword
 									$database = $xmlSecrets.secrets.DatabaseName
 									$dataTableName = "AzureTestResultsMasterTable"
-									$SQLQuery = "INSERT INTO $dataTableName (DateTimeUTC,Environment,TestCycle,ExecutionID,TestName,TestResult,ARMImage,OsVHD,CustomKernel,CustomLIS,Location,OverrideVMSize,Networking) VALUES "
-									$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$dbTestResult','$dbARMImage','$dbOsVHD','$dbCustomKernel','$dbCustomLIS','$dbLocation','$dbOverrideVMSize','$dbNetworking')"
+									$SQLQuery = "INSERT INTO $dataTableName (DateTimeUTC,Environment,TestCycle,ExecutionID,TestName,TestResult,ARMImage,OsVHD,KernelVersion,LISVersion,GuestDistro,AzureHost,Location,OverrideVMSize,Networking) VALUES "
+									$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$dbTestResult','$dbARMImage','$BaseOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking')"
 									$SQLQuery = $SQLQuery.TrimEnd(',')
 									$connectionString = "Server=$dataSource;uid=$dbuser; pwd=$dbpassword;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 									$connection = New-Object System.Data.SqlClient.SqlConnection
@@ -457,6 +454,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 							$testCycle.emailSummary += "$($currentTestData.testName) Execution Time: $testRunDuration minutes<br />"
 							$testCycle.emailSummary += "	$($currentTestData.testName) : $($testResult[0])  <br />"
 							$testCycle.emailSummary += "$($testResult[1])"
+							$summary = "$($testResult[1])"
 							LogMsg "~~~~~~~~~~~~~~~TEST END : $($currentTestData.testName)~~~~~~~~~~"
 							$dbTestName = $($currentTestData.testName)
 							$dbTestResult = $testResult
@@ -484,8 +482,18 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 									$dbpassword = $xmlSecrets.secrets.DatabasePassword
 									$database = $xmlSecrets.secrets.DatabaseName
 									$dataTableName = "AzureTestResultsMasterTable"
-									$SQLQuery = "INSERT INTO $dataTableName (DateTimeUTC,Environment,TestCycle,ExecutionID,TestName,TestResult,ARMImage,OsVHD,CustomKernel,CustomLIS,Location,OverrideVMSize,Networking) VALUES "
-									$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$dbTestResult','$dbARMImage','$dbOsVHD','$dbCustomKernel','$dbCustomLIS','$dbLocation','$dbOverrideVMSize','$dbNetworking')"
+									$SQLQuery = "INSERT INTO $dataTableName (DateTimeUTC,Environment,TestCycle,ExecutionID,TestName,TestResult,ARMImage,OsVHD,KernelVersion,LISVersion,GuestDistro,AzureHost,Location,OverrideVMSize,Networking) VALUES "
+									$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$($testResult[0])','$dbARMImage','$dbOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking'),"
+									foreach ($tempResult in $summary.Split('>'))
+									{
+										if ($tempResult)
+										{
+											$tempResult = $tempResult.Trim().Replace("<br /","").Trim()
+											$subTestResult = $tempResult.Split(":")[$tempResult.Split(":").Count -1 ].Trim()
+											$subTestName = $tempResult.Replace("$subTestResult","").Trim().TrimEnd(":").Trim()
+											$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','SubTest-$subTestName','$subTestResult','$dbARMImage','$BaseOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking'),"
+										}
+									}
 									$SQLQuery = $SQLQuery.TrimEnd(',')
 									$connectionString = "Server=$dataSource;uid=$dbuser; pwd=$dbpassword;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 									$connection = New-Object System.Data.SqlClient.SqlConnection
