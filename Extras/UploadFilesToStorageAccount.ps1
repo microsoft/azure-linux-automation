@@ -6,21 +6,21 @@ param
     $destinationFolder,
     $destinationStorageKey,
     [string]$customSecretsFilePath=$null
-
 )
 
 #---------------------------------------------------------[Initialisations]--------------------------------------------------------
+
 if ( $customSecretsFilePath )
 {
-	$secretsFile = $customSecretsFilePath
-	Write-Host "Using provided secrets file: $($secretsFile | Split-Path -Leaf)"
+    $secretsFile = $customSecretsFilePath
+    Write-Host "Using provided secrets file: $($secretsFile | Split-Path -Leaf)"
 }
-if  ($env:Azure_Secrets_File)
+elseif  ($env:Azure_Secrets_File)
 {
-	$secretsFile = $env:Azure_Secrets_File
-	Write-Host "Using predefined secrets file: $($secretsFile | Split-Path -Leaf) in Jenkins Global Environments."
+    $secretsFile = $env:Azure_Secrets_File
+    Write-Host "Using predefined secrets file: $($secretsFile | Split-Path -Leaf) in Jenkins Global Environments."
 }
-if ( $secretsFile -eq $null )
+elseif ( $secretsFile -eq $null )
 {
     Write-Host "ERROR: Azure Secrets file not found in Jenkins / user not provided -customSecretsFilePath" -ForegroundColor Red -BackgroundColor Black
     exit 1
@@ -29,30 +29,37 @@ if ( $secretsFile -eq $null )
 
 if ( Test-Path $secretsFile)
 {
-	Write-Host "$($secretsFile | Split-Path -Leaf) found."
+    Write-Host "$($secretsFile | Split-Path -Leaf) found."
     $xmlSecrets = [xml](Get-Content $secretsFile)
-    .\AddAzureRmAccountFromSecretsFile.ps1 -customSecretsFilePath $secretsFile
-	$subscriptionID = $xmlSecrets.secrets.SubscriptionID
+    if ($AuthenticatedSession)
+    {
+        Write-Host "Using pre-authenticated session"
+    }
+    else
+    {
+        .\AddAzureRmAccountFromSecretsFile.ps1 -customSecretsFilePath $secretsFile
+    }
+    $subscriptionID = $xmlSecrets.secrets.SubscriptionID
 }
 else
 {
-	Write-Host "$($secretsFile | Split-Path -Leaf) file is not added in Jenkins Global Environments OR it is not bound to 'Azure_Secrets_File' variable." -ForegroundColor Red -BackgroundColor Black
-	Write-Host "Aborting." -ForegroundColor Red -BackgroundColor Black
-	exit 1
+    Write-Host "$($secretsFile | Split-Path -Leaf) file is not added in Jenkins Global Environments OR it is not bound to 'Azure_Secrets_File' variable." -ForegroundColor Red -BackgroundColor Black
+    Write-Host "Aborting." -ForegroundColor Red -BackgroundColor Black
+    exit 1
 }
 
 if ( Test-Path $secretsFile )
 {
-	Write-Host "$($secretsFile | Split-Path -Leaf) found."
-	Write-Host "---------------------------------"
-	$xmlSecrets = [xml](Get-Content $secretsFile)
+    Write-Host "$($secretsFile | Split-Path -Leaf) found."
+    Write-Host "---------------------------------"
+    $xmlSecrets = [xml](Get-Content $secretsFile)
 }
 else
 {
-	Write-Host "$($secretsFile | Spilt-Path -Leaf) file is not added in Jenkins Global Environments OR it is not bound to 'Azure_Secrets_File' variable."
-	Write-Host "If you are using local secret file, then make sure file path is correct."
-	Write-Host "Aborting."
-	exit 1
+    Write-Host "$($secretsFile | Spilt-Path -Leaf) file is not added in Jenkins Global Environments OR it is not bound to 'Azure_Secrets_File' variable."
+    Write-Host "If you are using local secret file, then make sure file path is correct."
+    Write-Host "Aborting."
+    exit 1
 }
 
 #---------------------------------------------------------[Script Start]--------------------------------------------------------
@@ -64,9 +71,9 @@ try
 {
     if ($destinationStorageKey)
     {
-        Write-Host "Using user provided storage account key." 
+        Write-Host "Using user provided storage account key."
     }
-    else 
+    else
     {
         Write-Host "Getting $destinationStorageAccount storage account key..."
         $allResources = Get-AzureRmResource
@@ -83,9 +90,7 @@ try
         $ticks = (Get-Date).Ticks
         #$fileName = "$LogDir\$($vmData.RoleName)-waagent.log.txt"
         $blobName = "$destinationFolder/$($fileName | Split-Path -Leaf)"
-        Write-Host 
         $out = Set-AzureStorageBlobContent -File $filename -Container $containerName -Blob $blobName -Context $blobContext -Force -ErrorAction Stop
-        Write-Host "$($blobContext.BlobEndPoint)$containerName/$blobName : Success"
         $uploadedFiles += "$($blobContext.BlobEndPoint)$containerName/$blobName"
     }
     return $uploadedFiles

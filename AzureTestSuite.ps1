@@ -357,16 +357,23 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 							{
 								try
 								{
+									$xmlSecrets = [xml](Get-Content $secretsFile)
+									$testLogFolder = "TestLogs"
+									$testLogStorageAccount = $xmlSecrets.secrets.testLogsStorageAccount
+									$testLogStorageAccountKey = $xmlSecrets.secrets.testLogsStorageAccountKey
+									$ticks= (Get-Date).Ticks
+									$uploadFileName = ".\temp\$($currentTestData.testName)-$ticks.zip"
+									$out = ZipFiles -zipfilename $uploadFileName -sourcedir $LogDir
+									$uploadLink = .\Extras\UploadFilesToStorageAccount.ps1 -filePaths $uploadFileName -destinationStorageAccount $testLogStorageAccount -destinationContainer "logs" -destinationFolder "$testLogFolder" -destinationStorageKey $testLogStorageAccountKey
 									$utctime = (Get-Date).ToUniversalTime()
 									$dbDateTimeUTC = "$($utctime.Year)-$($utctime.Month)-$($utctime.Day) $($utctime.Hour):$($utctime.Minute):$($utctime.Second)"
-									$xmlSecrets = [xml](Get-Content $secretsFile)
 									$dataSource = $xmlSecrets.secrets.DatabaseServer
 									$dbuser = $xmlSecrets.secrets.DatabaseUser
 									$dbpassword = $xmlSecrets.secrets.DatabasePassword
 									$database = $xmlSecrets.secrets.DatabaseName
 									$dataTableName = "AzureTestResultsMasterTable"
-									$SQLQuery = "INSERT INTO $dataTableName (DateTimeUTC,Environment,TestCycle,ExecutionID,TestName,TestResult,ARMImage,OsVHD,KernelVersion,LISVersion,GuestDistro,AzureHost,Location,OverrideVMSize,Networking) VALUES "
-									$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$dbTestResult','$dbARMImage','$BaseOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking')"
+									$SQLQuery = "INSERT INTO $dataTableName (DateTimeUTC,Environment,TestCycle,ExecutionID,TestName,TestResult,ARMImage,OsVHD,KernelVersion,LISVersion,GuestDistro,AzureHost,Location,OverrideVMSize,Networking, LogFile, BuildURL) VALUES "
+									$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$dbTestResult','$dbARMImage','$BaseOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking', '$uploadLink', '$env:BUILD_URL`consoleFull')"
 									$SQLQuery = $SQLQuery.TrimEnd(',')
 									$connectionString = "Server=$dataSource;uid=$dbuser; pwd=$dbpassword;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 									$connection = New-Object System.Data.SqlClient.SqlConnection
@@ -474,16 +481,23 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 							{
 								try
 								{
+									$xmlSecrets = [xml](Get-Content $secretsFile)
+									$testLogFolder = "TestLogs"
+									$testLogStorageAccount = $xmlSecrets.secrets.testLogsStorageAccount
+									$testLogStorageAccountKey = $xmlSecrets.secrets.testLogsStorageAccountKey
+									$ticks= (Get-Date).Ticks
+									$uploadFileName = ".\temp\$($currentTestData.testName)-$ticks.zip"
+									$out = ZipFiles -zipfilename $uploadFileName -sourcedir $LogDir
+									$uploadLink = .\Extras\UploadFilesToStorageAccount.ps1 -filePaths $uploadFileName -destinationStorageAccount $testLogStorageAccount -destinationContainer "logs" -destinationFolder "$testLogFolder" -destinationStorageKey $testLogStorageAccountKey
 									$utctime = (Get-Date).ToUniversalTime()
 									$dbDateTimeUTC = "$($utctime.Year)-$($utctime.Month)-$($utctime.Day) $($utctime.Hour):$($utctime.Minute):$($utctime.Second)"
-									$xmlSecrets = [xml](Get-Content $secretsFile)
 									$dataSource = $xmlSecrets.secrets.DatabaseServer
 									$dbuser = $xmlSecrets.secrets.DatabaseUser
 									$dbpassword = $xmlSecrets.secrets.DatabasePassword
 									$database = $xmlSecrets.secrets.DatabaseName
 									$dataTableName = "AzureTestResultsMasterTable"
-									$SQLQuery = "INSERT INTO $dataTableName (DateTimeUTC,Environment,TestCycle,ExecutionID,TestName,TestResult,ARMImage,OsVHD,KernelVersion,LISVersion,GuestDistro,AzureHost,Location,OverrideVMSize,Networking) VALUES "
-									$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$($testResult[0])','$dbARMImage','$dbOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking'),"
+									$SQLQuery = "INSERT INTO $dataTableName (DateTimeUTC,Environment,TestCycle,ExecutionID,TestName,TestResult,ARMImage,OsVHD,KernelVersion,LISVersion,GuestDistro,AzureHost,Location,OverrideVMSize,Networking,LogFile,BuildURL) VALUES "
+									$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$($testResult[0])','$dbARMImage','$dbOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking','$uploadLink', '$env:BUILD_URL`consoleFull'),"
 									foreach ($tempResult in $summary.Split('>'))
 									{
 										if ($tempResult)
