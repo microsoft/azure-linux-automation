@@ -366,7 +366,6 @@ $out = ZipFiles -zipfilename $zipFile -sourcedir $LogDir
 $testLogFolder = "TestCycleLogs"
 $testLogStorageAccount = $xmlSecrets.secrets.testLogsStorageAccount
 $testLogStorageAccountKey = $xmlSecrets.secrets.testLogsStorageAccountKey
-$zipFile = Get-ChildItem "*-azure-buildlogs.zip"
 if ($env:BUILD_NUMBER -gt 0 )
 {
     $filePrefix = "$env:BUILD_NUMBER"
@@ -375,6 +374,7 @@ else
 {
     $filePrefix = "manual"
 }
+Rename-Item -Path $zipFile -NewName "$filePrefix-$zipFile" | Out-Null
 $compressedFile = .\Extras\UploadFilesToStorageAccount.ps1 -filePaths "$filePrefix-$zipFile" -destinationStorageAccount $testLogStorageAccount -destinationContainer "logs" -destinationFolder "$testLogFolder" -destinationStorageKey $testLogStorageAccountKey
 LogMsg $compressedFile
 #endregion

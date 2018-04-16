@@ -311,6 +311,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 						#Tests With No subtests and no SubValues will be executed here..
 						try
 						{
+							$testMode =  "single"
 							$testResult = ""
 							$LogDir = "$testDir\$($currentTestData.testName)"
 							Set-Variable -Name LogDir -Value $LogDir -Scope Global
@@ -341,56 +342,6 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 							LogMsg "~~~~~~~~~~~~~~~TEST END : $($currentTestData.testName)~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 							$dbTestName = $($currentTestData.testName)
 							$dbTestResult = $testResult
-							if ( $customSecretsFilePath )
-							{
-								$secretsFile = $customSecretsFilePath
-							}
-							if  ($env:Azure_Secrets_File)
-							{
-								$secretsFile = $env:Azure_Secrets_File
-							}
-							if ( $secretsFile -eq $null )
-							{
-								Write-Host "ERROR: Azure Secrets file not found in Jenkins / user not provided -customSecretsFilePath. Test results will not be uploaded to DB" -ForegroundColor Red -BackgroundColor Black
-							}
-							else
-							{
-								try
-								{
-									$xmlSecrets = [xml](Get-Content $secretsFile)
-									$testLogFolder = "TestLogs"
-									$testLogStorageAccount = $xmlSecrets.secrets.testLogsStorageAccount
-									$testLogStorageAccountKey = $xmlSecrets.secrets.testLogsStorageAccountKey
-									$ticks= (Get-Date).Ticks
-									$uploadFileName = ".\temp\$($currentTestData.testName)-$ticks.zip"
-									$out = ZipFiles -zipfilename $uploadFileName -sourcedir $LogDir
-									$uploadLink = .\Extras\UploadFilesToStorageAccount.ps1 -filePaths $uploadFileName -destinationStorageAccount $testLogStorageAccount -destinationContainer "logs" -destinationFolder "$testLogFolder" -destinationStorageKey $testLogStorageAccountKey
-									$utctime = (Get-Date).ToUniversalTime()
-									$dbDateTimeUTC = "$($utctime.Year)-$($utctime.Month)-$($utctime.Day) $($utctime.Hour):$($utctime.Minute):$($utctime.Second)"
-									$dataSource = $xmlSecrets.secrets.DatabaseServer
-									$dbuser = $xmlSecrets.secrets.DatabaseUser
-									$dbpassword = $xmlSecrets.secrets.DatabasePassword
-									$database = $xmlSecrets.secrets.DatabaseName
-									$dataTableName = "AzureTestResultsMasterTable"
-									$SQLQuery = "INSERT INTO $dataTableName (DateTimeUTC,Environment,TestCycle,ExecutionID,TestName,TestResult,ARMImage,OsVHD,KernelVersion,LISVersion,GuestDistro,AzureHost,Location,OverrideVMSize,Networking, LogFile, BuildURL) VALUES "
-									$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$dbTestResult','$dbARMImage','$BaseOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking', '$uploadLink', '$env:BUILD_URL`consoleFull')"
-									$SQLQuery = $SQLQuery.TrimEnd(',')
-									$connectionString = "Server=$dataSource;uid=$dbuser; pwd=$dbpassword;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
-									$connection = New-Object System.Data.SqlClient.SqlConnection
-									$connection.ConnectionString = $connectionString
-									$connection.Open()
-									$command = $connection.CreateCommand()
-									$command.CommandText = $SQLQuery
-									$result = $command.executenonquery()
-									$connection.Close()
-									LogMsg "Uploading test results to database :  done!!"
-								}
-								catch
-								{
-									LogErr "Uploading test results to database :  ERROR"
-									LogMsg $SQLQuery
-								}
-							}
 						}
 						if($testResult -imatch "PASS")
 						{
@@ -429,6 +380,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 					{
 						try
 						{
+							$testMode =  "multi"
 							$testResult = @()
 							$LogDir = "$testDir\$($currentTestData.testName)"
 							Set-Variable -Name LogDir -Value $LogDir -Scope Global
@@ -463,68 +415,6 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 							$testCycle.emailSummary += "$($testResult[1])"
 							$summary = "$($testResult[1])"
 							LogMsg "~~~~~~~~~~~~~~~TEST END : $($currentTestData.testName)~~~~~~~~~~"
-							$dbTestName = $($currentTestData.testName)
-							$dbTestResult = $testResult
-							if ( $customSecretsFilePath )
-							{
-								$secretsFile = $customSecretsFilePath
-							}
-							if  ($env:Azure_Secrets_File)
-							{
-								$secretsFile = $env:Azure_Secrets_File
-							}
-							if ( $secretsFile -eq $null )
-							{
-								Write-Host "ERROR: Azure Secrets file not found in Jenkins / user not provided -customSecretsFilePath. Test results will not be uploaded to DB" -ForegroundColor Red -BackgroundColor Black
-							}
-							else
-							{
-								try
-								{
-									$xmlSecrets = [xml](Get-Content $secretsFile)
-									$testLogFolder = "TestLogs"
-									$testLogStorageAccount = $xmlSecrets.secrets.testLogsStorageAccount
-									$testLogStorageAccountKey = $xmlSecrets.secrets.testLogsStorageAccountKey
-									$ticks= (Get-Date).Ticks
-									$uploadFileName = ".\temp\$($currentTestData.testName)-$ticks.zip"
-									$out = ZipFiles -zipfilename $uploadFileName -sourcedir $LogDir
-									$uploadLink = .\Extras\UploadFilesToStorageAccount.ps1 -filePaths $uploadFileName -destinationStorageAccount $testLogStorageAccount -destinationContainer "logs" -destinationFolder "$testLogFolder" -destinationStorageKey $testLogStorageAccountKey
-									$utctime = (Get-Date).ToUniversalTime()
-									$dbDateTimeUTC = "$($utctime.Year)-$($utctime.Month)-$($utctime.Day) $($utctime.Hour):$($utctime.Minute):$($utctime.Second)"
-									$dataSource = $xmlSecrets.secrets.DatabaseServer
-									$dbuser = $xmlSecrets.secrets.DatabaseUser
-									$dbpassword = $xmlSecrets.secrets.DatabasePassword
-									$database = $xmlSecrets.secrets.DatabaseName
-									$dataTableName = "AzureTestResultsMasterTable"
-									$SQLQuery = "INSERT INTO $dataTableName (DateTimeUTC,Environment,TestCycle,ExecutionID,TestName,TestResult,ARMImage,OsVHD,KernelVersion,LISVersion,GuestDistro,AzureHost,Location,OverrideVMSize,Networking,LogFile,BuildURL) VALUES "
-									$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$($testResult[0])','$dbARMImage','$dbOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking','$uploadLink', '$env:BUILD_URL`consoleFull'),"
-									foreach ($tempResult in $summary.Split('>'))
-									{
-										if ($tempResult)
-										{
-											$tempResult = $tempResult.Trim().Replace("<br /","").Trim()
-											$subTestResult = $tempResult.Split(":")[$tempResult.Split(":").Count -1 ].Trim()
-											$subTestName = $tempResult.Replace("$subTestResult","").Trim().TrimEnd(":").Trim()
-											$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','SubTest-$subTestName','$subTestResult','$dbARMImage','$BaseOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking'),"
-										}
-									}
-									$SQLQuery = $SQLQuery.TrimEnd(',')
-									$connectionString = "Server=$dataSource;uid=$dbuser; pwd=$dbpassword;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
-									$connection = New-Object System.Data.SqlClient.SqlConnection
-									$connection.ConnectionString = $connectionString
-									$connection.Open()
-									$command = $connection.CreateCommand()
-									$command.CommandText = $SQLQuery
-									$result = $command.executenonquery()
-									$connection.Close()
-									LogMsg "Uploading test results to database :  done!!"
-								}
-								catch
-								{
-									LogErr "Uploading test results to database :  ERROR"
-									LogMsg $SQLQuery
-								}
-							}
 						}
 						if($testResult[0] -imatch "PASS")
 						{
@@ -557,6 +447,62 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 							$testResultRow = "<span style='background-color:yellow;font-weight:bolder'>ABORT</span>"
 							FinishLogTestCase $testcase "ERROR" "$($test.Name) is aborted." $caseLog
 							$testCycle.htmlSummary += "<tr><td><font size=`"3`">$executionCount</font></td><td>$tempHtmlText$(AddReproVMDetailsToHtmlReport)</td><td>$testRunDuration min</td><td>$testResultRow</td></tr>"
+						}
+					}
+					if ($xmlSecrets)
+					{
+						try
+						{
+							$testLogFolder = "TestLogs"
+							$testLogStorageAccount = $xmlSecrets.secrets.testLogsStorageAccount
+							$testLogStorageAccountKey = $xmlSecrets.secrets.testLogsStorageAccountKey
+							$ticks= (Get-Date).Ticks
+							$uploadFileName = ".\temp\$($currentTestData.testName)-$ticks.zip"
+							$out = ZipFiles -zipfilename $uploadFileName -sourcedir $LogDir
+							$uploadLink = .\Extras\UploadFilesToStorageAccount.ps1 -filePaths $uploadFileName -destinationStorageAccount $testLogStorageAccount -destinationContainer "logs" -destinationFolder "$testLogFolder" -destinationStorageKey $testLogStorageAccountKey
+							$utctime = (Get-Date).ToUniversalTime()
+							$dbDateTimeUTC = "$($utctime.Year)-$($utctime.Month)-$($utctime.Day) $($utctime.Hour):$($utctime.Minute):$($utctime.Second)"
+							$dataSource = $xmlSecrets.secrets.DatabaseServer
+							$dbuser = $xmlSecrets.secrets.DatabaseUser
+							$dbpassword = $xmlSecrets.secrets.DatabasePassword
+							$database = $xmlSecrets.secrets.DatabaseName
+							$dataTableName = "AzureTestResultsMasterTable"
+							$SQLQuery = "INSERT INTO $dataTableName (DateTimeUTC,Environment,TestCycle,ExecutionID,TestName,TestResult,ARMImage,OsVHD,KernelVersion,LISVersion,GuestDistro,AzureHost,Location,OverrideVMSize,Networking,LogFile,BuildURL) VALUES "
+							if ($testMode -eq "multi")
+							{
+								$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$($testResult[0])','$dbARMImage','$BaseOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking','$uploadLink', '$env:BUILD_URL`consoleFull'),"
+								foreach ($tempResult in $summary.Split('>'))
+								{
+									if ($tempResult)
+									{
+										$tempResult = $tempResult.Trim().Replace("<br /","").Trim()
+										$subTestResult = $tempResult.Split(":")[$tempResult.Split(":").Count -1 ].Trim()
+										$subTestName = $tempResult.Replace("$subTestResult","").Trim().TrimEnd(":").Trim()
+										$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','SubTest-$subTestName','$subTestResult','$dbARMImage','$BaseOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking', '$uploadLink', '$env:BUILD_URL`consoleFull')),"
+									}
+								}
+							}
+							elseif ( $testMode -eq "single")
+							{
+								$dbTestName = $($currentTestData.testName)
+								$dbTestResult = $testResult
+								$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$dbTestResult','$dbARMImage','$BaseOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking', '$uploadLink', '$env:BUILD_URL`consoleFull')"
+							}
+							$SQLQuery = $SQLQuery.TrimEnd(',')
+							$connectionString = "Server=$dataSource;uid=$dbuser; pwd=$dbpassword;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+							$connection = New-Object System.Data.SqlClient.SqlConnection
+							$connection.ConnectionString = $connectionString
+							$connection.Open()
+							$command = $connection.CreateCommand()
+							$command.CommandText = $SQLQuery
+							$result = $command.executenonquery()
+							$connection.Close()
+							LogMsg "Uploading test results to database :  done!!"
+						}
+						catch
+						{
+							LogErr "Uploading test results to database :  ERROR"
+							LogMsg $SQLQuery
 						}
 					}
 					Write-Host $testSuiteResultDetails.totalPassTc,$testSuiteResultDetails.totalFailTc,$testSuiteResultDetails.totalAbortedTc
