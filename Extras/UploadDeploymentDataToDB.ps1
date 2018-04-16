@@ -110,7 +110,7 @@ try
         $NumberOfVMsInRG += 1
     }
 
-    $SQLQuery = "INSERT INTO $dataTableName (DateTimeUTC,SubscriptionID,SubscriptionName,ResourceGroupName,NumberOfVMsInRG,RoleName,DeploymentTime,KernelBootTime,WALAProvisionTime,HostVersion,GuestDistro,KernelVersion,WALAVersion,Region,RoleSize,StorageType,TestCaseName,CallTraces,kernelLogFile,WALAlogFile) VALUES "
+    $SQLQuery = "INSERT INTO $dataTableName (DateTimeUTC,SubscriptionID,SubscriptionName,ResourceGroupName,NumberOfVMsInRG,RoleName,DeploymentTime,KernelBootTime,WALAProvisionTime,HostVersion,GuestDistro,KernelVersion,LISVersion,WALAVersion,Region,RoleSize,StorageType,TestCaseName,CallTraces,kernelLogFile,WALAlogFile) VALUES "
 
     foreach ( $vmData in $allVMData )
     {
@@ -126,7 +126,7 @@ try
 
         #Copy and run test file
         $out = RemoteCopy -upload -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files .\remote-scripts\CollectLogFile.sh -username $user -password $password
-        $out = RunLinuxCmd -username $user -password $password -ip $vmData.PublicIP -port $vmData.SSHPort -command "sh CollectLogFile.sh" -ignoreLinuxExitCode
+        $out = RunLinuxCmd -username $user -password $password -ip $vmData.PublicIP -port $vmData.SSHPort -command "bash CollectLogFile.sh" -ignoreLinuxExitCode
 
 
         #download the log files
@@ -177,13 +177,10 @@ try
             $walaDistroIdentifier = "Linux Distribution Detected"
             $walaStartIdentifier = "Azure Linux Agent Version"
         }
-
         #region Guest Distro Checking
-        $waagentFile = "$LogDir\$($vmData.RoleName)-waagent.log.txt"
-        $waagentStartLineNumber = (Select-String -Path $waagentFile -Pattern "$walaDistroIdentifier")[0].LineNumber
-        $waagentStartLine = (Get-Content -Path $waagentFile)[$waagentStartLineNumber - 1]
-        $GuestDistro = ($waagentStartLine.Split(":")[$waagentStartLine.Split(":").Count - 1]).Trim()
+        $GuestDistro = Get-Content -Path "$LogDir\$($vmData.RoleName)-distroVersion.txt"
         Write-Host "$($vmData.RoleName) - GuestDistro = $GuestDistro"
+        Set-Variable -Name GuestDistro -Value $GuestDistro -Scope Global
         #endregion
 
 
@@ -254,10 +251,22 @@ try
         $finalLine = $finalLine.Replace('; Vmbus version:3.0','')
         $HostVersion = ($finalLine.Split(":")[$finalLine.Split(":").Count -1 ]).Trim()
         Write-Host "$($vmData.RoleName) - Host Version = $HostVersion"
+        Set-Variable -Value $HostVersion -Name HostVersion -Scope Global 
         #endregion
 
+        #region LIS Version
+        $LISVersion = (Select-String -Path "$LogDir\$($vmData.RoleName)-lis.txt" -Pattern "^version:").Line
+        if ($LISVersion)
+        {
+            $LISVersion = $LISVersion.Split(":").Trim()[1]
+        }
+        else 
+        {
+            $LISVersion = "NA"
+        }
+        #endregion
 
-        $SQLQuery += "('$DateTimeUTC','$SubscriptionID','$SubscriptionName','$ResourceGroupName','$NumberOfVMsInRG','$RoleName',$DeploymentTime,$KernelBootTime,$WALAProvisionTime,'$HostVersion','$GuestDistro','$KernelVersion','$WALAVersion','$Region','$RoleSize','$StorageType','$TestCaseName','$CallTraces','$kernelLogFile','$WALAlogFile'),"
+        $SQLQuery += "('$DateTimeUTC','$SubscriptionID','$SubscriptionName','$ResourceGroupName','$NumberOfVMsInRG','$RoleName',$DeploymentTime,$KernelBootTime,$WALAProvisionTime,'$HostVersion','$GuestDistro','$KernelVersion','$LISVersion','$WALAVersion','$Region','$RoleSize','$StorageType','$TestCaseName','$CallTraces','$kernelLogFile','$WALAlogFile'),"
     }
     $SQLQuery = $SQLQuery.TrimEnd(',')
     $connectionString = "Server=$dataSource;uid=$dbuser; pwd=$dbpassword;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
@@ -282,4 +291,5 @@ catch
     LogErr "EXCEPTION : $ErrorMessage"
     LogErr "Source : Line $line in script $script_name."
     LogErr "ERROR : Uploading boot data to database"
+    LogMsg $SQLQuery
 }
