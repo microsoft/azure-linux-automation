@@ -7093,4 +7093,18 @@ Function GetFilePathsFromLinuxFolder ([string]$folderToSearch, $IpAddress, $SSHP
 	}
 	return $LogFilesPaths, $LogFiles
 }
+
+function ZipFiles( $zipfilename, $sourcedir )
+{
+    $currentDir = (Get-Location).Path
+    $7z = (Get-ChildItem .\tools\7za.exe).FullName
+    $sourcedir = $sourcedir.Trim('\')
+    cd $sourcedir
+    $out = Invoke-Expression "$7z a -mx5 $currentDir\$zipfilename * -r"
+    cd $currentDir
+    if ($out -match "Everything is Ok")
+    {
+        Write-Host "$currentDir\$zipfilename created successfully."
+    }
+}
 #endregion

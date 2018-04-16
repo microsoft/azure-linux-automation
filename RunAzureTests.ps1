@@ -68,6 +68,8 @@ Set-Content -Value "No tests ran yet." -Path ".\report\testSummary.html" -Force 
 
 .\Extras\CheckForNewKernelPackages.ps1
 
+New-Item -Name temp -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+
 if ( $customSecretsFilePath ) {
     $secretsFile = $customSecretsFilePath
     Write-Host "Using user provided secrets file: $($secretsFile | Split-Path -Leaf)"
@@ -88,6 +90,7 @@ if ( Test-Path $secretsFile) {
     .\AddAzureRmAccountFromSecretsFile.ps1 -customSecretsFilePath $secretsFile
     $xmlSecrets = [xml](Get-Content $secretsFile)
     Set-Variable -Name xmlSecrets -Value $xmlSecrets -Scope Global
+    Set-Variable -Name AuthenticatedSession -Value $true -Scope Global
 }
 else {
     Write-Host "AzureSecrets.xml file is not added in Jenkins Global Environments OR it is not bound to 'Azure_Secrets_File' variable." -ForegroundColor Red -BackgroundColor Black
@@ -352,16 +355,10 @@ Invoke-Expression -Command $cmd
 
 $LogDir = Get-Content .\report\lastLogDirectory.txt -ErrorAction SilentlyContinue
 
-$currentDir = $PWD
+$currentDir = (Get-Location).Path
 $out = Remove-Item *.json -Force
 $out = Remove-Item *.xml -Force
 $zipFile = "$(($TestCycle).Trim())-$shortRandomNumber-azure-buildlogs.zip"
-
-function ZipFiles( $zipfilename, $sourcedir )
-{
-    $sourcedir = $sourcedir.Trim('\')
-    .\tools\7za.exe a -mx5 $zipFile $sourcedir -r
-}
 
 $out = ZipFiles -zipfilename $zipFile -sourcedir $LogDir
 
