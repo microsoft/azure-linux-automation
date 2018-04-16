@@ -135,7 +135,6 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 					$BaseOsVHD = $tempDistro.OsVHD.Trim()
 					Set-Variable -Name BaseOsVHD -Value $BaseOsVHD -Scope Global
 					LogMsg "Base VHD name - $BaseOsVHD"
-					$dbOsVHD
 				}
 			}
 			else
@@ -367,7 +366,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 									$database = $xmlSecrets.secrets.DatabaseName
 									$dataTableName = "AzureTestResultsMasterTable"
 									$SQLQuery = "INSERT INTO $dataTableName (DateTimeUTC,Environment,TestCycle,ExecutionID,TestName,TestResult,ARMImage,OsVHD,KernelVersion,LISVersion,GuestDistro,AzureHost,Location,OverrideVMSize,Networking) VALUES "
-									$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$dbTestResult','$dbARMImage','$dbOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking')"
+									$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$dbTestResult','$dbARMImage','$BaseOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking')"
 									$SQLQuery = $SQLQuery.TrimEnd(',')
 									$connectionString = "Server=$dataSource;uid=$dbuser; pwd=$dbpassword;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 									$connection = New-Object System.Data.SqlClient.SqlConnection
@@ -492,9 +491,9 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 											$tempResult = $tempResult.Trim().Replace("<br /","").Trim()
 											$subTestResult = $tempResult.Split(":")[$tempResult.Split(":").Count -1 ].Trim()
 											$subTestName = $tempResult.Replace("$subTestResult","").Trim().TrimEnd(":").Trim()
-											$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','SubTest-$subTestName','$subTestResult','$dbARMImage','$dbOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking'),"
+											$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','SubTest-$subTestName','$subTestResult','$dbARMImage','$BaseOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking'),"
 										}
-									}									
+									}
 									$SQLQuery = $SQLQuery.TrimEnd(',')
 									$connectionString = "Server=$dataSource;uid=$dbuser; pwd=$dbpassword;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 									$connection = New-Object System.Data.SqlClient.SqlConnection
