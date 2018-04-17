@@ -238,10 +238,6 @@ try
         }
         #endregion
 
-        #region KernelVersion checking
-        $KernelVersion = Get-Content "$LogDir\$($vmData.RoleName)-kernelVersion.txt"
-        #endregion
-
         #region Host Version checking
         $foundLineNumber = (Select-String -Path $dmesgFile -Pattern "Hyper-V Host Build").LineNumber
         $actualLineNumber = $foundLineNumber - 1
@@ -249,7 +245,7 @@ try
         #Write-Host $finalLine
         $finalLine = $finalLine.Replace('; Vmbus version:4.0','')
         $finalLine = $finalLine.Replace('; Vmbus version:3.0','')
-        $HostVersion = ($finalLine.Split(":")[$finalLine.Split(":").Count -1 ]).Trim()
+        $HostVersion = ($finalLine.Split(":")[$finalLine.Split(":").Count -1 ]).Trim().TrimEnd(";")
         Write-Host "$($vmData.RoleName) - Host Version = $HostVersion"
         Set-Variable -Value $HostVersion -Name HostVersion -Scope Global 
         #endregion
@@ -260,12 +256,14 @@ try
         {
             $LISVersion = $LISVersion.Split(":").Trim()[1]
         }
-        else 
+        else
         {
             $LISVersion = "NA"
         }
         #endregion
-
+        #region KernelVersion checking
+        $KernelVersion = Get-Content "$LogDir\$($vmData.RoleName)-kernelVersion.txt"
+        #endregion
         $SQLQuery += "('$DateTimeUTC','$SubscriptionID','$SubscriptionName','$ResourceGroupName','$NumberOfVMsInRG','$RoleName',$DeploymentTime,$KernelBootTime,$WALAProvisionTime,'$HostVersion','$GuestDistro','$KernelVersion','$LISVersion','$WALAVersion','$Region','$RoleSize','$StorageType','$TestCaseName','$CallTraces','$kernelLogFile','$WALAlogFile'),"
     }
     $SQLQuery = $SQLQuery.TrimEnd(',')
