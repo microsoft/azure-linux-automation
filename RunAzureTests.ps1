@@ -354,11 +354,11 @@ Write-Host $cmd
 Invoke-Expression -Command $cmd
 
 $LogDir = Get-Content .\report\lastLogDirectory.txt -ErrorAction SilentlyContinue
-
+$ticks = (Get-Date).Ticks
 $currentDir = (Get-Location).Path
 $out = Remove-Item *.json -Force
 $out = Remove-Item *.xml -Force
-$zipFile = "$(($TestCycle).Trim())-$shortRandomNumber-azure-buildlogs.zip"
+$zipFile = "$(($TestCycle).Trim())-$ticks-azure-buildlogs.zip"
 
 $out = ZipFiles -zipfilename $zipFile -sourcedir $LogDir
 
@@ -401,8 +401,6 @@ if ($ArchiveLogDirectory)
         cd $currentDir
     }
 }
-
-Remove-Item -Path BuildLogs.zip -Force -ErrorAction SilentlyContinue
 $retValue = 1
 try
 {
