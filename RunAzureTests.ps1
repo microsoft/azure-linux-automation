@@ -362,6 +362,22 @@ $zipFile = "$(($TestCycle).Trim())-$shortRandomNumber-azure-buildlogs.zip"
 
 $out = ZipFiles -zipfilename $zipFile -sourcedir $LogDir
 
+#region Get a downloadble link of logs...
+$testLogFolder = "TestCycleLogs"
+$testLogStorageAccount = $xmlSecrets.secrets.testLogsStorageAccount
+$testLogStorageAccountKey = $xmlSecrets.secrets.testLogsStorageAccountKey
+if ($env:BUILD_NUMBER -gt 0 )
+{
+    $filePrefix = "$env:BUILD_NUMBER"
+}
+else
+{
+    $filePrefix = "manual"
+}
+Rename-Item -Path $zipFile -NewName "$filePrefix-$zipFile" | Out-Null
+$compressedFile = .\Extras\UploadFilesToStorageAccount.ps1 -filePaths "$filePrefix-$zipFile" -destinationStorageAccount $testLogStorageAccount -destinationContainer "logs" -destinationFolder "$testLogFolder" -destinationStorageKey $testLogStorageAccountKey
+LogMsg $compressedFile
+#endregion
 
 if ($ArchiveLogDirectory)
 {
