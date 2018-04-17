@@ -16,7 +16,7 @@ if [ -f /etc/redhat-release ] ; then
 elif [ -f /etc/SuSE-release ] ; then
         echo "/etc/SuSE-release detected"
         cat /etc/os-release | grep ^PRETTY_NAME | sed 's/"//g' | sed 's/PRETTY_NAME=//g' > `hostname`-distroVersion.txt
-elif [[ "$release" =~ "UBUNTU" ]] ; then
+elif [[ "$release" =~ "UBUNTU" ]] || [[ "$release" =~ "Ubuntu" ]] ; then
         NAME=`cat /etc/os-release | grep ^NAME= | sed 's/"//g' | sed 's/NAME=//g'`
         VERSION=`cat /etc/os-release | grep ^VERSION= | sed 's/"//g' | sed 's/VERSION=//g'`
         echo "$NAME $VERSION" > `hostname`-distroVersion.txt
