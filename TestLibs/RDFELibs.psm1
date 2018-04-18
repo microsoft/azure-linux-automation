@@ -1701,23 +1701,22 @@ Function isAllSSHPortsEnabled($DeployedServices)
 			$IPPORT = $IPPORT.Split(":")
 			$testIP = $IPPORT[0]
 			$testPort = $IPPORT[1]
-			Write-Host "Connecting to  $TestIP : $testPort" -NoNewline
 			$out = Test-TCP  -testIP $TestIP -testport $testPort
 			if ($out -ne "True")
-			{ 
-				Write-Host " : Failed"
+			{
+				LogMsg "Connecting to  $TestIP : $testPort : Failed"
 				$WaitingForConnect = $WaitingForConnect + 1
 			}
 			else
 			{
-				Write-Host " : Connected"
+				LogMsg "Connecting to  $TestIP : $testPort : Connected"
 			}
 		}
 		if($WaitingForConnect -gt 0)
 		{
 			$timeout = $timeout + 1
-			Write-Host "$WaitingForConnect VM(s) still awaiting to open SSH port.." -NoNewline
-			Write-Host "Retry $timeout/100"
+			LogMsg "$WaitingForConnect VM(s) still awaiting to open SSH port.."
+			LogMsg "Retry $timeout/100"
 			sleep 3
 			$retValue = "False"
 		}
@@ -6085,7 +6084,7 @@ Function PerformIOTestOnDisk($testVMObject, [string]$attachedDisk, [string]$disk
 		$mountPoint = "/mnt/datadisk"
 		LogMsg "Performing I/O operations on $attachedDisk.."
 		$LogPath = "$LogDir\VerifyIO$($attachedDisk.Replace('/','-')).txt"
-		$dmesgBefore = RunLinuxCmd -username $testVMUsername -password $testVMPassword -ip $testVMVIP -port $testVMSSHport -command "dmesg" -runAsSudo 
+		$dmesgBefore = RunLinuxCmd -username $testVMUsername -password $testVMPassword -ip $testVMVIP -port $testVMSSHport -command "dmesg" -runMaxAllowedTime 30 -runAsSudo
 		#CREATE A MOUNT DIRECTORY
 		$out = RunLinuxCmd -username $testVMUsername -password $testVMPassword -ip $testVMVIP -port $testVMSSHport -command "mkdir -p $mountPoint" -runAsSudo 
 		$partitionNumber=1
@@ -6105,7 +6104,7 @@ Function PerformIOTestOnDisk($testVMObject, [string]$attachedDisk, [string]$disk
 			LogMsg "umount failed. Trying umount -l"
 			$out = RunLinuxCmd -username $testVMUsername -password $testVMPassword -ip $testVMVIP -port $testVMSSHport -command "umount -l $mountPoint" -runAsSudo 
 		}
-		$dmesgAfter = RunLinuxCmd -username $testVMUsername -password $testVMPassword -ip $testVMVIP -port $testVMSSHport -command "dmesg" -runAsSudo
+		$dmesgAfter = RunLinuxCmd -username $testVMUsername -password $testVMPassword -ip $testVMVIP -port $testVMSSHport -command "dmesg" -runMaxAllowedTime 30 -runAsSudo
 		$addedLines = $dmesgAfter.Replace($dmesgBefore,$null)
 		LogMsg "Kernel Logs : $($addedLines.Replace('[32m','').Replace('[0m[33m','').Replace('[0m',''))" -LinuxConsoleOuput
 		$retValue = "PASS"	
