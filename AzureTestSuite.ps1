@@ -478,7 +478,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 										$tempResult = $tempResult.Trim().Replace("<br /","").Trim()
 										$subTestResult = $tempResult.Split(":")[$tempResult.Split(":").Count -1 ].Trim()
 										$subTestName = $tempResult.Replace("$subTestResult","").Trim().TrimEnd(":").Trim()
-										$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','SubTest-$subTestName','$subTestResult','$dbARMImage','$BaseOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking', '$uploadLink', '$env:BUILD_URL`consoleFull')),"
+										$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','SubTest-$subTestName','$subTestResult','$dbARMImage','$BaseOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking', '$uploadLink', '$env:BUILD_URL`consoleFull'),"
 									}
 								}
 							}
