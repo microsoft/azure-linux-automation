@@ -446,7 +446,7 @@ function EnableSRIOVInAllVMs($allVMData)
                     if ($sriovOutput -imatch "DATAPATH_SWITCHED_TO_VF")
                     {
                         $AfterIfConfigStatus = $null
-                        $AfterIfConfigStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "dmesg" -runAsSudo
+                        $AfterIfConfigStatus = RunLinuxCmd -ip $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -command "dmesg" -runMaxAllowedTime 30 -runAsSudo
                         if ($AfterIfConfigStatus -imatch "Data path switched to VF")
                         {
                             LogMsg "Data path already switched to VF in $($vmData.RoleName)"
@@ -455,7 +455,7 @@ function EnableSRIOVInAllVMs($allVMData)
                         else
                         {
                             LogErr "Data path not switched to VF in $($vmData.RoleName)"
-                            $bondError += 1 
+                            $bondError += 1
                         }
                     }
                     else
