@@ -417,23 +417,23 @@ Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro, [str
                 }
             }
         }
-        else 
+        else
         {
             $readyToDeploy = $true
         }
         if ($readyToDeploy)
         {
-            $curtime = Get-Date
+            $curtime = ([string]((Get-Date).Ticks / 1000000)).Split(".")[0]
             $randomNumber = $global4digitRandom
             $isServiceDeployed = "False"
             $retryDeployment = 0
             if ( $RG.Tag -ne $null )
             {
-                $groupName = "ICA-RG-" + $RG.Tag + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $randomNumber 
+                $groupName = "ICA-RG-" + $RG.Tag + "-" + $Distro + "-" + "$shortRandomWord-" + "$curtime"
             }
             else
             {
-                $groupName = "ICA-RG-" + $setupType + "-" + $Distro + "-" + $curtime.Month + "-" +  $curtime.Day  + "-" + $curtime.Hour + "-" + $curtime.Minute + "-" + $randomNumber
+                $groupName = "ICA-RG-" + $setupType + "-" + $Distro + "-" + "$shortRandomWord-" + "$curtime"
             }
             if($isMultiple -eq "True")
             {
@@ -630,7 +630,7 @@ Function CreateResourceGroup([string]$RGName, $location)
 {
     $FailCounter = 0
     $retValue = "False"
-    $ResourceGroupDeploymentName = $RGName + "-deployment"
+    $ResourceGroupDeploymentName = $RGName + "-arm"
 
     While(($retValue -eq $false) -and ($FailCounter -lt 5))
     {
