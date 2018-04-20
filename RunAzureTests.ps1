@@ -45,8 +45,10 @@
 
 Write-Host "-----------$PWD---------"
 $maxDirLength = 32
-$shortRandomNumber = Get-Random -Maximum 999999 -Minimum 111111
-$shortRandomWord = -join ((65..90) | Get-Random -Count 6 | % {[char]$_})
+$shortRandomNumber = Get-Random -Maximum 99999 -Minimum 11111
+Set-Variable -Name shortRandomNumber -Value $shortRandomNumber -Scope Global
+$shortRandomWord = -join ((65..90) | Get-Random -Count 4 | % {[char]$_})
+Set-Variable -Name shortRandomWord -Value $shortRandomWord -Scope Global
 if ( $pwd.Path.Length -gt $maxDirLength)
 {
     $originalWorkingDirectory = $pwd
