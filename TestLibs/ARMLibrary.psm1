@@ -455,7 +455,7 @@ Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro, [str
                         LogMsg "CleanupExistingRG flag is Set. All resources except availibility set will be cleaned."
                         LogMsg "If you do not wish to cleanup $ExistingRG, abort NOW. Sleeping 10 Seconds."
                         Sleep 10
-                        $isRGDeleted = DeleteResourceGroup -RGName $groupName 
+                        $isRGDeleted = DeleteResourceGroup -RGName $groupName
                     }
                     else
                     {
@@ -466,7 +466,7 @@ Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro, [str
                 {
                     LogMsg "Creating Resource Group : $groupName."
                     LogMsg "Verifying that Resource group name is not in use."
-                    $isRGDeleted = DeleteResourceGroup -RGName $groupName 
+                    $isRGDeleted = DeleteResourceGroup -RGName $groupName
                 }
                 if ($isRGDeleted)
                 {    
@@ -583,20 +583,29 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
 			$retValue = $?
 		}
 		else
-		{        
-            $currentGUID = ([guid]::newguid()).Guid
-            $out = Save-AzureRmContext -Path "$env:TEMP\$($currentGUID).azurecontext" -Force
-            $cleanupRGScriptBlock = {
-                $RGName = $args[0]
-                $currentGUID = $args[1]
-                Import-AzureRmContext -AzureContext "$env:TEMP\$($currentGUID).azurecontext"
-                Remove-AzureRmResourceGroup -Name $RGName -Verbose -Force
+		{
+            if ( $xmlSecrets.secrets.AutomationRunbooks.CleanupResourceGroupRunBook )
+            {
+                $parameters = $parameters = @{"NAMEFILTER"="$RGName"; "PREVIEWMODE"=$false};
+                $rubookJob = Start-AzureRmAutomationRunbook -Name $xmlSecrets.secrets.AutomationRunbooks.CleanupResourceGroupRunBook -Parameters $parameters -AutomationAccountName $xmlSecrets.secrets.AutomationRunbooks.AutomationAccountName -ResourceGroupName $xmlSecrets.secrets.AutomationRunbooks.ResourceGroupName
+                LogMsg "Cleanup job ID: '$($rubookJob.JobId)' for '$RGName' started using runbooks."
             }
-            $currentGUID = ([guid]::newguid()).Guid
-            $out = Save-AzureRmContext -Path "$env:TEMP\$($currentGUID).azurecontext" -Force
-            LogMsg "Triggering : DeleteResourceGroup-$RGName..."
-            $deleteJob = Start-Job -ScriptBlock $cleanupRGScriptBlock -ArgumentList $RGName,$currentGUID -Name "DeleteResourceGroup-$RGName"
-            $retValue = $true
+            else
+            {
+                $currentGUID = ([guid]::newguid()).Guid
+                $out = Save-AzureRmContext -Path "$env:TEMP\$($currentGUID).azurecontext" -Force
+                $cleanupRGScriptBlock = {
+                    $RGName = $args[0]
+                    $currentGUID = $args[1]
+                    Import-AzureRmContext -AzureContext "$env:TEMP\$($currentGUID).azurecontext"
+                    Remove-AzureRmResourceGroup -Name $RGName -Verbose -Force
+                }
+                $currentGUID = ([guid]::newguid()).Guid
+                $out = Save-AzureRmContext -Path "$env:TEMP\$($currentGUID).azurecontext" -Force
+                LogMsg "Triggering : DeleteResourceGroup-$RGName..."
+                $deleteJob = Start-Job -ScriptBlock $cleanupRGScriptBlock -ArgumentList $RGName,$currentGUID -Name "DeleteResourceGroup-$RGName"
+                $retValue = $true
+            }
         }
     }
     else
