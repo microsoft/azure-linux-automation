@@ -275,7 +275,7 @@
         $script_name = ($_.InvocationInfo.ScriptName).Replace($PWD,".")
         $ErrorMessage =  $_.Exception.Message
         LogErr "EXCEPTION : $ErrorMessage"
-        LogErr "Source : Line $line in script $script_name."  
+        LogErr "Source : Line $line in script $script_name."
     }
 
     #endregion
@@ -296,10 +296,10 @@
     {
         $requiredStorageAccounts = 0
     }
-    
+
     $allowedStorageCount = [int]($currentStorageStatus.Limit*($AllowedUsagePercentage/100))
 
-    
+
     if (($currentStorageStatus.CurrentValue + $requiredStorageAccounts) -le $allowedStorageCount)
     {
         LogMsg "Current Storage Accounts usage:$($currentStorageStatus.CurrentValue). Requested:$requiredStorageAccounts. Estimated usage:$($currentStorageStatus.CurrentValue + $requiredStorageAccounts). Maximum allowed:$allowedStorageCount/$(($currentStorageStatus.Limit))."
@@ -311,22 +311,36 @@
     }
     #endregion
 
+    $GetAzureRmNetworkUsage  = Get-AzureRmNetworkUsage -Location $Location
     #region Public IP Addresses
-    $PublicIPs = Get-AzureRmResource | Where-Object { ( $_.ResourceType -eq "Microsoft.Network/publicIPAddresses" )-and ( $_.Location -eq "$Location" )  }
-    LogMsg "Current Public IPs usage:$($PublicIPs.Count). Requested: 1. Estimated usage:$($PublicIPs.Count + 1). Maximum allowed: 100."
-    if ($PublicIPs.Count -ge 100)
+    $PublicIPs = $GetAzureRmNetworkUsage | Where-Object { $_.Name.Value -eq "PublicIPAddresses" }
+    LogMsg "Current Public IPs usage:$($PublicIPs.CurrentValue). Requested: 1. Estimated usage:$($PublicIPs.CurrentValue + 1). Maximum allowed: $($PublicIPs.Limit)."
+    if (($PublicIPs.CurrentValue + 1) -gt $PublicIPs.Limit)
     {
         $overFlowErrors += 1
     }
     #endregion
-
-    if (($currentStorageStatus.CurrentValue + $requiredStorageAccounts) -le $allowedStorageCount)
+    #region Virtual networks
+    $VNETs = $GetAzureRmNetworkUsage | Where-Object { $_.Name.Value -eq "VirtualNetworks" }
+    LogMsg "Current VNET usage:$($VNETs.CurrentValue). Requested: 1. Estimated usage:$($VNETs.CurrentValue + 1). Maximum allowed: $($VNETs.Limit)."
+    if (($VNETs.CurrentValue + 1) -gt $VNETs.Limit)
     {
-        LogMsg "Current Storage Accounts usage:$($currentStorageStatus.CurrentValue). Requested:$requiredStorageAccounts. Estimated usage:$($currentStorageStatus.CurrentValue + $requiredStorageAccounts). Maximum allowed:$allowedStorageCount/$(($currentStorageStatus.Limit))."
+        $overFlowErrors += 1
     }
-    else
+    #endregion
+    #region Network Security Groups
+    $SGs = $GetAzureRmNetworkUsage | Where-Object { $_.Name.Value -eq "NetworkSecurityGroups" }
+    LogMsg "Current Security Group usage:$($SGs.CurrentValue). Requested: 1. Estimated usage:$($SGs.CurrentValue + 1). Maximum allowed: $($SGs.Limit)."
+    if (($SGs.CurrentValue + 1) -gt $SGs.Limit)
     {
-        LogErr "Current Storage Accounts usage:$($currentStorageStatus.CurrentValue). Requested:$requiredStorageAccounts. Estimated usage:$($currentStorageStatus.CurrentValue + $requiredStorageAccounts). Maximum allowed:$allowedStorageCount/$(($currentStorageStatus.Limit))."
+        $overFlowErrors += 1
+    }
+    #endregion
+    #region Load Balancers
+    $LBs = $GetAzureRmNetworkUsage | Where-Object { $_.Name.Value -eq "LoadBalancers" }
+    LogMsg "Current Load Balancer usage:$($LBs.CurrentValue). Requested: 1. Estimated usage:$($LBs.CurrentValue + 1). Maximum allowed: $($LBs.Limit)."
+    if (($LBs.CurrentValue + 1) -gt $LBs.Limit)
+    {
         $overFlowErrors += 1
     }
     #endregion
