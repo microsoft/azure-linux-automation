@@ -455,7 +455,7 @@ Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro, [str
                         LogMsg "CleanupExistingRG flag is Set. All resources except availibility set will be cleaned."
                         LogMsg "If you do not wish to cleanup $ExistingRG, abort NOW. Sleeping 10 Seconds."
                         Sleep 10
-                        $isRGDeleted = DeleteResourceGroup -RGName $groupName 
+                        $isRGDeleted = DeleteResourceGroup -RGName $groupName
                     }
                     else
                     {
@@ -466,7 +466,7 @@ Function CreateAllResourceGroupDeployments($setupType, $xmlConfig, $Distro, [str
                 {
                     LogMsg "Creating Resource Group : $groupName."
                     LogMsg "Verifying that Resource group name is not in use."
-                    $isRGDeleted = DeleteResourceGroup -RGName $groupName 
+                    $isRGDeleted = DeleteResourceGroup -RGName $groupName
                 }
                 if ($isRGDeleted)
                 {    
@@ -583,20 +583,29 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
 			$retValue = $?
 		}
 		else
-		{        
-            $currentGUID = ([guid]::newguid()).Guid
-            $out = Save-AzureRmContext -Path "$env:TEMP\$($currentGUID).azurecontext" -Force
-            $cleanupRGScriptBlock = {
-                $RGName = $args[0]
-                $currentGUID = $args[1]
-                Import-AzureRmContext -AzureContext "$env:TEMP\$($currentGUID).azurecontext"
-                Remove-AzureRmResourceGroup -Name $RGName -Verbose -Force
+		{
+            if ( $xmlSecrets.secrets.AutomationRunbooks.CleanupResourceGroupRunBook )
+            {
+                $parameters = $parameters = @{"NAMEFILTER"="$RGName"; "PREVIEWMODE"=$false};
+                $rubookJob = Start-AzureRmAutomationRunbook -Name $xmlSecrets.secrets.AutomationRunbooks.CleanupResourceGroupRunBook -Parameters $parameters -AutomationAccountName $xmlSecrets.secrets.AutomationRunbooks.AutomationAccountName -ResourceGroupName $xmlSecrets.secrets.AutomationRunbooks.ResourceGroupName
+                LogMsg "Cleanup job ID: '$($rubookJob.JobId)' for '$RGName' started using runbooks."
             }
-            $currentGUID = ([guid]::newguid()).Guid
-            $out = Save-AzureRmContext -Path "$env:TEMP\$($currentGUID).azurecontext" -Force
-            LogMsg "Triggering : DeleteResourceGroup-$RGName..."
-            $deleteJob = Start-Job -ScriptBlock $cleanupRGScriptBlock -ArgumentList $RGName,$currentGUID -Name "DeleteResourceGroup-$RGName"
-            $retValue = $true
+            else
+            {
+                $currentGUID = ([guid]::newguid()).Guid
+                $out = Save-AzureRmContext -Path "$env:TEMP\$($currentGUID).azurecontext" -Force
+                $cleanupRGScriptBlock = {
+                    $RGName = $args[0]
+                    $currentGUID = $args[1]
+                    Import-AzureRmContext -AzureContext "$env:TEMP\$($currentGUID).azurecontext"
+                    Remove-AzureRmResourceGroup -Name $RGName -Verbose -Force
+                }
+                $currentGUID = ([guid]::newguid()).Guid
+                $out = Save-AzureRmContext -Path "$env:TEMP\$($currentGUID).azurecontext" -Force
+                LogMsg "Triggering : DeleteResourceGroup-$RGName..."
+                $deleteJob = Start-Job -ScriptBlock $cleanupRGScriptBlock -ArgumentList $RGName,$currentGUID -Name "DeleteResourceGroup-$RGName"
+                $retValue = $true
+            }
         }
     }
     else
@@ -2457,23 +2466,22 @@ Function isAllSSHPortsEnabledRG($AllVMDataObject)
         $WaitingForConnect = 0
         foreach ( $vm in $AllVMDataObject)
         {
-            Write-Host "Connecting to  $($vm.PublicIP) : $($vm.SSHPort)" -NoNewline
             $out = Test-TCP  -testIP $($vm.PublicIP) -testport $($vm.SSHPort)
             if ($out -ne "True")
-            { 
-                Write-Host " : Failed"
+            {
+                LogMsg "Connecting to  $($vm.PublicIP) : $($vm.SSHPort) : Failed"
                 $WaitingForConnect = $WaitingForConnect + 1
             }
             else
             {
-                Write-Host " : Connected"
+                LogMsg "Connecting to  $($vm.PublicIP) : $($vm.SSHPort) : Connected"
             }
         }
         if($WaitingForConnect -gt 0)
         {
             $timeout = $timeout + 1
-            Write-Host "$WaitingForConnect VM(s) still awaiting to open SSH port.." -NoNewline
-            Write-Host "Retry $timeout/50"
+            LogMsg "$WaitingForConnect VM(s) still awaiting to open SSH port.."
+            LogMsg "Retry $timeout/50"
             sleep 3
             $retValue = "False"
         }
@@ -2484,7 +2492,23 @@ Function isAllSSHPortsEnabledRG($AllVMDataObject)
         }
 
     }
-    While (($timeout -lt 50) -and ($WaitingForConnect -gt 0))
+    While (($timeout -lt 100) -and ($WaitingForConnect -gt 0))
+
+    #Following Code will be enabled once https://github.com/Azure/azure-powershell/issues/4168 issue resolves.
+
+    #if ($retValue -eq "False")
+    #{
+    #    foreach ( $vm in $AllVMDataObject)
+    #    {
+    #        $out = Test-TCP  -testIP $($vm.PublicIP) -testport $($vm.SSHPort)
+    #        if ($out -ne "True")
+    #        {
+    #            LogMsg "Getting boot diagnostic data from $($vm.RoleName)"
+    #            $bootData = Get-AzureRmVMBootDiagnosticsData -ResourceGroupName $vm.ResourceGroupName -Name $vm.RoleName -Linux
+    #            Set-Content -Value $bootData -Path "$LogDir\$($vm.RoleName)-SSH-Fail-Boot-Logs.txt"
+    #        }
+    #    }
+    #}
 
     return $retValue
 }
