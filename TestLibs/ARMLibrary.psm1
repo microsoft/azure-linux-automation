@@ -2466,23 +2466,22 @@ Function isAllSSHPortsEnabledRG($AllVMDataObject)
         $WaitingForConnect = 0
         foreach ( $vm in $AllVMDataObject)
         {
-            Write-Host "Connecting to  $($vm.PublicIP) : $($vm.SSHPort)" -NoNewline
             $out = Test-TCP  -testIP $($vm.PublicIP) -testport $($vm.SSHPort)
             if ($out -ne "True")
-            { 
-                Write-Host " : Failed"
+            {
+                LogMsg "Connecting to  $($vm.PublicIP) : $($vm.SSHPort) : Failed"
                 $WaitingForConnect = $WaitingForConnect + 1
             }
             else
             {
-                Write-Host " : Connected"
+                LogMsg "Connecting to  $($vm.PublicIP) : $($vm.SSHPort) : Connected"
             }
         }
         if($WaitingForConnect -gt 0)
         {
             $timeout = $timeout + 1
-            Write-Host "$WaitingForConnect VM(s) still awaiting to open SSH port.." -NoNewline
-            Write-Host "Retry $timeout/50"
+            LogMsg "$WaitingForConnect VM(s) still awaiting to open SSH port.."
+            LogMsg "Retry $timeout/50"
             sleep 3
             $retValue = "False"
         }
@@ -2493,7 +2492,23 @@ Function isAllSSHPortsEnabledRG($AllVMDataObject)
         }
 
     }
-    While (($timeout -lt 50) -and ($WaitingForConnect -gt 0))
+    While (($timeout -lt 100) -and ($WaitingForConnect -gt 0))
+
+    #Following Code will be enabled once https://github.com/Azure/azure-powershell/issues/4168 issue resolves.
+
+    #if ($retValue -eq "False")
+    #{
+    #    foreach ( $vm in $AllVMDataObject)
+    #    {
+    #        $out = Test-TCP  -testIP $($vm.PublicIP) -testport $($vm.SSHPort)
+    #        if ($out -ne "True")
+    #        {
+    #            LogMsg "Getting boot diagnostic data from $($vm.RoleName)"
+    #            $bootData = Get-AzureRmVMBootDiagnosticsData -ResourceGroupName $vm.ResourceGroupName -Name $vm.RoleName -Linux
+    #            Set-Content -Value $bootData -Path "$LogDir\$($vm.RoleName)-SSH-Fail-Boot-Logs.txt"
+    #        }
+    #    }
+    #}
 
     return $retValue
 }
