@@ -2709,16 +2709,17 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 				$finalKernelVersion = Get-Content "$LogDir\$($vmData.RoleName)-kernelVersion.txt"
 				Set-Variable -Name finalKernelVersion -Value $finalKernelVersion -Scope Global
 				#region LIS Version
-				$finalLISVersion = (Select-String -Path "$LogDir\$($vmData.RoleName)-lis.txt" -Pattern "^version:").Line
-				if ($LISVersion)
+				$tempLIS = (Select-String -Path "$LogDir\$($vmData.RoleName)-lis.txt" -Pattern "^version:").Line
+				if ($tempLIS)
 				{
-					$finalLISVersion = $finalLISVersion.Split(":").Trim()[1]
+					$finalLISVersion = $tempLIS.Split(":").Trim()[1]
 				}
 				else 
 				{
 					$finalLISVersion = "NA"
 				}
 				Set-Variable -Name finalLISVersion -Value $finalLISVersion -Scope Global
+				Write-Host "Setting : finalLISVersion : $finalLISVersion"
 				#endregion
 			}
 			$currentTestBackgroundJobs = Get-Content $LogDir\CurrentTestBackgroundJobs.txt -ErrorAction SilentlyContinue
