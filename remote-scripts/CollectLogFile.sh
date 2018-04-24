@@ -1,10 +1,10 @@
 #!/bin/bash
-
+export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
 dmesg > `hostname`-dmesg.txt
 cp /var/log/waagent.log `hostname`-waagent.log.txt
 uname -r > `hostname`-kernelVersion.txt
 uptime -s > `hostname`-uptime.txt || echo "UPTIME_COMMAND_ERROR" > `hostname`-uptime.txt
-sh -c "modinfo hv_netvsc" > `hostname`-lis.txt
+modinfo hv_netvsc > `hostname`-lis.txt
 release=`cat /etc/*release*`
 if [ -f /etc/redhat-release ] ; then
         echo "/etc/redhat-release detected"

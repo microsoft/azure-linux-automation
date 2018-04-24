@@ -275,7 +275,6 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 			$lisBuildBranch = $xmlConfig.config.global.VMEnv.LISBuildBranch
 			$VMImageDetails = $xmlConfig.config.global.VMEnv.VMImageDetails
 			$waagentBuild=$xmlConfig.config.global.VMEnv.waagentBuild
-
 			# For the last test running in economy mode, set the IsLastCaseInCycle flag so that the deployments could be cleaned up
 			if ($EconomyMode -and $counter -eq ($testCount - 1))
 			{
@@ -472,7 +471,7 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 							$SQLQuery = "INSERT INTO $dataTableName (DateTimeUTC,Environment,TestCycle,ExecutionID,TestName,TestResult,ARMImage,OsVHD,KernelVersion,LISVersion,GuestDistro,AzureHost,Location,OverrideVMSize,Networking,LogFile,BuildURL) VALUES "
 							if ($testMode -eq "multi")
 							{
-								$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$($testResult[0])','$dbARMImage','$BaseOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking','$uploadLink', '$env:BUILD_URL`consoleFull'),"
+								$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$($testResult[0])','$dbARMImage','$BaseOsVHD','$finalKernelVersion','$finalLISVersion','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking','$uploadLink', '$env:BUILD_URL`consoleFull'),"
 								foreach ($tempResult in $summary.Split('>'))
 								{
 									if ($tempResult)
@@ -480,14 +479,14 @@ Function RunTestsOnCycle ($cycleName , $xmlConfig, $Distro, $testIterations )
 										$tempResult = $tempResult.Trim().Replace("<br /","").Trim()
 										$subTestResult = $tempResult.Split(":")[$tempResult.Split(":").Count -1 ].Trim()
 										$subTestName = $tempResult.Replace("$subTestResult","").Trim().TrimEnd(":").Trim()
-										$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','SubTest-$subTestName','$subTestResult','$dbARMImage','$BaseOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking', '$uploadLink', '$env:BUILD_URL`consoleFull'),"
+										$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','SubTest-$subTestName','$subTestResult','$dbARMImage','$BaseOsVHD','$finalKernelVersion','$finalLISVersion','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking', '$uploadLink', '$env:BUILD_URL`consoleFull'),"
 									}
 								}
 							}
 							elseif ( $testMode -eq "single")
 							{
 								$dbTestResult = $testResult
-								$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$dbTestResult','$dbARMImage','$BaseOsVHD','$finalKernelVersion','NA','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking', '$uploadLink', '$env:BUILD_URL`consoleFull')"
+								$SQLQuery += "('$dbDateTimeUTC','$dbEnvironment','$dbTestCycle','$dbExecutionID','$dbTestName','$dbTestResult','$dbARMImage','$BaseOsVHD','$finalKernelVersion','$finalLISVersion','$GuestDistro','$HostVersion','$dbLocation','$dbOverrideVMSize','$dbNetworking', '$uploadLink', '$env:BUILD_URL`consoleFull')"
 							}
 							$SQLQuery = $SQLQuery.TrimEnd(',')
 							$connectionString = "Server=$dataSource;uid=$dbuser; pwd=$dbpassword;Database=$database;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"

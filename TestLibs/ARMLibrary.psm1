@@ -589,6 +589,7 @@ Function DeleteResourceGroup([string]$RGName, [switch]$KeepDisks)
                 $parameters = $parameters = @{"NAMEFILTER"="$RGName"; "PREVIEWMODE"=$false};
                 $rubookJob = Start-AzureRmAutomationRunbook -Name $xmlSecrets.secrets.AutomationRunbooks.CleanupResourceGroupRunBook -Parameters $parameters -AutomationAccountName $xmlSecrets.secrets.AutomationRunbooks.AutomationAccountName -ResourceGroupName $xmlSecrets.secrets.AutomationRunbooks.ResourceGroupName
                 LogMsg "Cleanup job ID: '$($rubookJob.JobId)' for '$RGName' started using runbooks."
+                $retValue = $true
             }
             else
             {
@@ -2481,7 +2482,7 @@ Function isAllSSHPortsEnabledRG($AllVMDataObject)
         {
             $timeout = $timeout + 1
             LogMsg "$WaitingForConnect VM(s) still awaiting to open SSH port.."
-            LogMsg "Retry $timeout/50"
+            LogMsg "Retry $timeout/100"
             sleep 3
             $retValue = "False"
         }

@@ -258,10 +258,6 @@ Write-Host "$xmlConfigFileFinal prepared successfully."
 
 $currentDir = $PWD
 Write-Host "CURRENT WORKING DIRECTORY - $currentDir"
-& "C:\Program Files (x86)\Microsoft SDKs\Azure\PowerShell\ServiceManagement\Azure\Services\ShortcutStartup.ps1"
-Disable-AzureDataCollection
-cd $currentDir
-
 
 #region Generate trigger command
 Remove-Item -Path ".\report\report_$(($TestCycle).Trim()).xml" -Force -ErrorAction SilentlyContinue
