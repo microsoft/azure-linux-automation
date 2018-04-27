@@ -4596,7 +4596,7 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 						$sg = Get-AzureRmNetworkSecurityGroup -ResourceGroupName $testVM.ResourceGroupName
 						foreach($rule in $sg.SecurityRules)
 						{
-							Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($rule.Name)Port" -Value $rule.DestinationPortRange -Force
+							Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($rule.Name)Port" -Value $rule.DestinationPortRange[0] -Force
 						}
 					}
 				}
