@@ -7875,7 +7875,16 @@
 				<param>redis_test_suites="get,set"</param>
 			</TestParameters>
 			<Priority>P0</Priority>
-		</test>			
+		</test>
+		<test>
+			<testName>ICA-PERF-SYSCALL-BENCHMARK-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-SYSCALL-BENCHMARK-TEST.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<Priority>P0</Priority>
+		</test>		
 		<test>
 			<testName>ICA-BUILD-LINUX-NEXT-DEB-PACKAGE</testName>
 			<testScript>build_deb_from_linux_next.sh</testScript>
@@ -9292,6 +9301,12 @@
 			<test>
 				<Name>ICA-PERF-REDIS-MIDDLEWARE-TEST</Name>
 			</test>			
+		</Cycle>
+		<Cycle>
+			<cycleName>PERF-SYSCALL</cycleName>
+			<test>
+				<Name>ICA-PERF-SYSCALL-BENCHMARK-TEST</Name>
+			</test>
 		</Cycle>
 		<Cycle>
 			<cycleName>LINUX-NEXT-DEB</cycleName>
