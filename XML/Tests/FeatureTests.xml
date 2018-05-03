@@ -1,0 +1,88 @@
+<test>
+    <Name>NC series (CUDA install)</Name>
+    <PowershellScript>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</PowershellScript>
+    <files></files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Feature</Category>
+    <Area>GPU</Area>
+    <Tags></Tags>
+    <TestID>Feature_GPU_001</TestID>
+</test>
+<test>
+    <Name>NV series (CUDA install)</Name>
+    <PowershellScript>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</PowershellScript>
+    <files></files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Feature</Category>
+    <Area>GPU</Area>
+    <Tags></Tags>
+    <TestID>Feature_GPU_002</TestID>
+</test>
+<test>
+    <Name>NC_v2 Series (CUDA install)</Name>
+    <PowershellScript>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</PowershellScript>
+    <files></files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Feature</Category>
+    <Area>GPU</Area>
+    <Tags></Tags>
+    <TestID>Feature_GPU_003</TestID>
+</test>
+<test>
+    <Name>NV_v2 Series (CUDA install)</Name>
+    <PowershellScript>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</PowershellScript>
+    <files></files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Feature</Category>
+    <Area>GPU</Area>
+    <Tags></Tags>
+    <TestID>Feature_GPU_004</TestID>
+</test>
+<test>
+    <Name>NC_v3 Series (CUDA install)</Name>
+    <PowershellScript>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</PowershellScript>
+    <files></files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Feature</Category>
+    <Area>GPU</Area>
+    <Tags></Tags>
+    <TestID>Feature_GPU_005</TestID>
+</test>
+<test>
+    <Name>InfiniBand - A seires VMs</Name>
+    <PowershellScript>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</PowershellScript>
+    <files></files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Feature</Category>
+    <Area>InfiniBand</Area>
+    <Tags></Tags>
+    <TestID>Feature_RDMA_001</TestID>
+</test>
+<test>
+    <Name>InfiniBand - H seires VMs</Name>
+    <PowershellScript>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</PowershellScript>
+    <files></files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Feature</Category>
+    <Area>InfiniBand</Area>
+    <Tags></Tags>
+    <TestID>Feature_RDMA_002</TestID>
+</test>
+<test>
+    <Name>InfiniBand - NC seires VMs</Name>
+    <PowershellScript>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</PowershellScript>
+    <files></files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Feature</Category>
+    <Area>InfiniBand</Area>
+    <Tags></Tags>
+    <TestID>Feature_RDMA_002</TestID>
+</test>

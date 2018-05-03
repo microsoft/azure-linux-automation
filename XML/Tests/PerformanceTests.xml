@@ -1,0 +1,77 @@
+<test>
+    <Name>Disk Performance - HDD</Name>
+    <PowershellScript>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</PowershellScript>
+    <files></files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Performance</Category>
+    <Area>Storage</Area>
+    <Tags>disk</Tags>
+    <TestID>Perforamnce_Disk_001</TestID>
+</test>
+<test>
+    <Name>Disk Performance - SSD</Name>
+    <PowershellScript>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</PowershellScript>
+    <files></files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Performance</Category>
+    <Area>Storage</Area>
+    <Tags>disk</Tags>
+    <TestID>Perforamnce_Disk_002</TestID>
+</test>
+<test>
+    <Name>Disk Performance - NVME</Name>
+    <PowershellScript>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</PowershellScript>
+    <files></files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Performance</Category>
+    <Area>Storage</Area>
+    <Tags></Tags>
+    <TestID>Perforamnce_Disk_003</TestID>
+</test>
+<test>
+    <Name>Network Performance TCP - Synthetic</Name>
+    <PowershellScript>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</PowershellScript>
+    <files></files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Performance</Category>
+    <Area>Network</Area>
+    <Tags>tcp,network</Tags>
+    <TestID>Perforamnce_Network_001</TestID>
+</test>
+<test>
+    <Name>Network Performance UDP - Synthetic</Name>
+    <PowershellScript>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</PowershellScript>
+    <files></files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Performance</Category>
+    <Area>Network</Area>
+    <Tags>udp,network</Tags>
+    <TestID>Perforamnce_Network_002</TestID>
+</test>
+<test>
+    <Name>Network Performance TCP - SRIOV</Name>
+    <PowershellScript>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</PowershellScript>
+    <files></files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Performance</Category>
+    <Area>Network</Area>
+    <Tags>tcp,network</Tags>
+    <TestID>Perforamnce_Network_003</TestID>
+</test>
+<test>
+    <Name>Network Performance UDP - SRIOV</Name>
+    <PowershellScript>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</PowershellScript>
+    <files></files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Performance</Category>
+    <Area>Network</Area>
+    <Tags>udp,network</Tags>
+    <TestID>Perforamnce_Network_004</TestID>
+</test>

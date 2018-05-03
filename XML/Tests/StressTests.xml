@@ -1,0 +1,60 @@
+<test>
+    <Name>CPU Stress</Name>
+    <PowershellScript>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</PowershellScript>
+    <files></files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Stress</Category>
+    <Area>CPU</Area>
+    <Tags></Tags>
+    <TestID>Stress_001</TestID>
+</test>
+<test>
+    <Name>Network Stress - TCP</Name>
+    <testScript></testScript>
+    <PowershellScript>BVT-VERIFY-HOSTNAME.ps1</PowershellScript>
+    <files>.\remote-scripts\nslookup.py,.\remote-scripts\BVT-VERIFY-HOSTNAME.py,.\remote-scripts\azuremodules.py</files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Stress</Category>
+    <Area>Network</Area>
+    <Tags></Tags>
+    <TestID>Stress_002</TestID>
+</test>
+<test>
+    <Name>Network Stress - UDP</Name>
+    <testScript></testScript>
+    <PowershellScript>BVT-VERIFY-HOSTNAME.ps1</PowershellScript>
+    <files>.\remote-scripts\nslookup.py,.\remote-scripts\BVT-VERIFY-HOSTNAME.py,.\remote-scripts\azuremodules.py</files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Stress</Category>
+    <Area>Network</Area>
+    <Tags></Tags>
+    <TestID>Stress_002</TestID>
+</test>
+
+<test>
+    <Name>Storage Stress</Name>
+    <testScript>BVT-IS-ROOT-PASSWORD-DELETED.py</testScript>
+    <PowershellScript>BVT-IS-ROOT-PASSWORD-DELETED.ps1</PowershellScript>
+    <files>.\remote-scripts\BVT-IS-ROOT-PASSWORD-DELETED.py,.\remote-scripts\azuremodules.py</files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Stress</Category>
+    <Area>Storage</Area>
+    <Tags>disk</Tags>
+    <TestID>Stress_003</TestID>
+</test>
+<test>
+    <Name>GPU Stress</Name>
+    <testScript>BVT-WA-PROC-CHECK.py</testScript>
+    <PowershellScript>BVT-WA-PROC-CHECK.ps1</PowershellScript>
+    <files>.\remote-scripts\BVT-WA-PROC-CHECK.py,.\remote-scripts\azuremodules.py</files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Stress</Category>
+    <Area>GPU</Area>
+    <Tags>gpu</Tags>
+    <TestID>Stress_004</TestID>
+</test>

@@ -1,0 +1,72 @@
+<test>
+    <Name>BVT-VERIFY-DEPLOYMENT-PROVISION</Name>
+    <PowershellScript>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</PowershellScript>
+    <files></files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Smoke</Category>
+    <Area>default</Area>
+    <Tags></Tags>
+    <TestID>Smoke_001</TestID>
+</test>
+<test>
+    <Name>BVT-VERIFY-HOSTNAME</Name>
+    <testScript></testScript>
+    <PowershellScript>BVT-VERIFY-HOSTNAME.ps1</PowershellScript>
+    <files>.\remote-scripts\nslookup.py,.\remote-scripts\BVT-VERIFY-HOSTNAME.py,.\remote-scripts\azuremodules.py</files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Smoke</Category>
+    <Area>default</Area>
+    <Tags></Tags>
+    <TestID>Smoke_002</TestID>
+</test>
+<test>
+    <Name>BVT-IS-ROOT-PASSWORD-DELETED</Name>
+    <testScript>BVT-IS-ROOT-PASSWORD-DELETED.py</testScript>
+    <PowershellScript>BVT-IS-ROOT-PASSWORD-DELETED.ps1</PowershellScript>
+    <files>.\remote-scripts\BVT-IS-ROOT-PASSWORD-DELETED.py,.\remote-scripts\azuremodules.py</files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Smoke</Category>
+    <Area>default</Area>
+    <Tags></Tags>
+    <TestID>Smoke_003</TestID>
+</test>
+<test>
+    <Name>BVT-WA-PROC-CHECK</Name>
+    <testScript>BVT-WA-PROC-CHECK.py</testScript>
+    <PowershellScript>BVT-WA-PROC-CHECK.ps1</PowershellScript>
+    <files>.\remote-scripts\BVT-WA-PROC-CHECK.py,.\remote-scripts\azuremodules.py</files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Smoke</Category>
+    <Area>default</Area>
+    <Tags></Tags>
+    <TestID>Smoke_004</TestID>
+</test>
+
+<test>
+    <Name>BVT-VERIFY-RESTART</Name>
+    <testScript></testScript>
+    <PowershellScript>BVT-VERIFY-RESTART.ps1</PowershellScript>
+    <files></files>
+    <setupType>BVTDeployment</setupType>
+    <Platform>Azure</Platform>
+    <Category>Smoke</Category>
+    <Area>default</Area>
+    <Tags></Tags>
+    <TestID>Smoke_005</TestID>
+</test>
+<test>
+    <Name>BVT-VERIFY-RESTART</Name>
+    <testScript></testScript>
+    <PowershellScript>BVT-VERIFY-RESTART.ps1</PowershellScript>
+    <files></files>
+    <setupType>BVTDeployment</setupType>
+    <Platform>Azure</Platform>
+    <Category>Smoke</Category>
+    <Area>default</Area>
+    <Tags></Tags>
+    <TestID>Smoke_005</TestID>
+</test>

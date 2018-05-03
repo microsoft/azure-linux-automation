@@ -1,0 +1,73 @@
+<test>
+    <Name>Resize VM to larger VM</Name>
+    <PowershellScript>BVT-VERIFY-DEPLOYMENT-PROVISION.ps1</PowershellScript>
+    <files></files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Functional</Category>
+    <Area>default</Area>
+    <Tags>disk</Tags>
+    <TestID>Functional_001</TestID>
+</test>
+<test>
+    <Name>Resize to Smaller VM</Name>
+    <testScript></testScript>
+    <PowershellScript>BVT-VERIFY-HOSTNAME.ps1</PowershellScript>
+    <files>.\remote-scripts\nslookup.py,.\remote-scripts\BVT-VERIFY-HOSTNAME.py,.\remote-scripts\azuremodules.py</files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Functional</Category>
+    <Area>default</Area>
+    <Tags></Tags>
+    <TestID>Functional_002</TestID>
+</test>
+<test>
+    <Name>Add disks serially</Name>
+    <testScript>BVT-IS-ROOT-PASSWORD-DELETED.py</testScript>
+    <PowershellScript>BVT-IS-ROOT-PASSWORD-DELETED.ps1</PowershellScript>
+    <files>.\remote-scripts\BVT-IS-ROOT-PASSWORD-DELETED.py,.\remote-scripts\azuremodules.py</files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Functional</Category>
+    <Area>default</Area>
+    <Tags>disk</Tags>
+    <TestID>Functional_003</TestID>
+</test>
+<test>
+    <Name>Remove Disks serially</Name>
+    <testScript>BVT-WA-PROC-CHECK.py</testScript>
+    <PowershellScript>BVT-WA-PROC-CHECK.ps1</PowershellScript>
+    <files>.\remote-scripts\BVT-WA-PROC-CHECK.py,.\remote-scripts\azuremodules.py</files>
+    <setupType>SingleVM</setupType>
+    <Platform>Azure</Platform>
+    <Category>Functional</Category>
+    <Area>default</Area>
+    <Tags>disk</Tags>
+    <TestID>Functional_004</TestID>
+</test>
+
+<test>
+    <Name>Add disks in parallel</Name>
+    <testScript></testScript>
+    <PowershellScript>BVT-VERIFY-RESTART.ps1</PowershellScript>
+    <files></files>
+    <setupType>BVTDeployment</setupType>
+    <Platform>Azure</Platform>
+    <Category>Functional</Category>
+    <Area>default</Area>
+    <Tags>disk</Tags>
+    <TestID>Functional_005</TestID>
+</test>
+
+<test>
+    <Name>All possible VM sizes in Azure</Name>
+    <testScript></testScript>
+    <PowershellScript>BVT-VERIFY-RESTART.ps1</PowershellScript>
+    <files></files>
+    <setupType>BVTDeployment</setupType>
+    <Platform>Azure</Platform>
+    <Category>Functional</Category>
+    <Area>default</Area>
+    <Tags></Tags>
+    <TestID>Functional_006</TestID>
+</test>
