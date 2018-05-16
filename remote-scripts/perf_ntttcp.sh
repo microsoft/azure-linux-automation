@@ -45,14 +45,15 @@ touch ./ntttcpTest.log
 InstallNTTTCP() {
                 DISTRO=`grep -ihs "buntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux\|clear-linux-os" /etc/{issue,*release,*version} /usr/lib/os-release`
 
-                if [[ $DISTRO =~ "Ubuntu" ]];
+                if [[ $DISTRO =~ "Ubuntu" ]] || [[ $DISTRO =~ "Debian" ]];
                 then
-                        LogMsg "Detected UBUNTU"
+                        LogMsg "Detected UBUNTU/Debian"
                                 LogMsg "Configuring ${1} for ntttcp test..."
                                 ssh ${1} "until dpkg --force-all --configure -a; sleep 10; do echo 'Trying again...'; done"
                                 ssh ${1} "apt-get update"
                                 ssh ${1} "apt-get -y install libaio1 sysstat git bc make gcc dstat psmisc"
                                 ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
+								ssh ${1} "cd ntttcp-for-linux/ && git checkout 7a5017b00a603cfaf2ae2a83a6d6b688b2f9dbaa"
                                 ssh ${1} "cd ntttcp-for-linux/src/ && make && make install"
                                 ssh ${1} "cp ntttcp-for-linux/src/ntttcp ."
                                 ssh ${1} "rm -rf lagscope"
@@ -71,6 +72,8 @@ InstallNTTTCP() {
                                 ssh ${1} "mv glibc-2.14.1 glibc-2.14 && cd glibc-2.14 && mkdir build && cd build && ../configure --prefix=/opt/glibc-2.14 && make && make install && export LD_LIBRARY_PATH=/opt/glibc-2.14/lib:$LD_LIBRARY_PATH"
 
                                 ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
+								ssh ${1} "cd ntttcp-for-linux/ && git checkout 7a5017b00a603cfaf2ae2a83a6d6b688b2f9dbaa"
+								
                                 ssh ${1} "cd ntttcp-for-linux/src/ && make && make install"
                                 ssh ${1} "cp ntttcp-for-linux/src/ntttcp ."
                                 ssh ${1} "rm -rf lagscope"
@@ -84,6 +87,7 @@ InstallNTTTCP() {
                                 ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
                                 ssh ${1} "yum -y --nogpgcheck install libaio1 sysstat git bc make gcc dstat psmisc"
                                 ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
+								ssh ${1} "cd ntttcp-for-linux/ && git checkout 7a5017b00a603cfaf2ae2a83a6d6b688b2f9dbaa"
                                 ssh ${1} "cd ntttcp-for-linux/src/ && make && make install"
                                 ssh ${1} "cp ntttcp-for-linux/src/ntttcp ."
                                 ssh ${1} "rm -rf lagscope"
@@ -98,6 +102,7 @@ InstallNTTTCP() {
                                 ssh ${1} "yum -y --nogpgcheck install libaio1 sysstat git bc make gcc dstat psmisc"
                                 ssh ${1} "yum -y --nogpgcheck install gcc-c++"
                                 ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
+								ssh ${1} "cd ntttcp-for-linux/ && git checkout 7a5017b00a603cfaf2ae2a83a6d6b688b2f9dbaa"
                                 ssh ${1} "cd ntttcp-for-linux/src/ && make && make install"
                                 ssh ${1} "cp ntttcp-for-linux/src/ntttcp ."
                                 ssh ${1} "rm -rf lagscope"
@@ -111,6 +116,7 @@ InstallNTTTCP() {
                                 ssh ${1} "rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
                                 ssh ${1} "yum -y --nogpgcheck install libaio1 sysstat git bc make gcc dstat psmisc"
                                 ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
+								ssh ${1} "cd ntttcp-for-linux/ && git checkout 7a5017b00a603cfaf2ae2a83a6d6b688b2f9dbaa"
                                 ssh ${1} "cd ntttcp-for-linux/src/ && make && make install"
                                 ssh ${1} "cp ntttcp-for-linux/src/ntttcp ."
                                 ssh ${1} "rm -rf lagscope"
@@ -124,6 +130,7 @@ InstallNTTTCP() {
                                 ssh ${1} "zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys remove gettext-runtime-mini*"
                                 ssh ${1} "zypper --no-gpg-checks --non-interactive --gpg-auto-import-keys install sysstat git bc make gcc grub2 dstat psmisc"
                                 ssh ${1} "git clone https://github.com/Microsoft/ntttcp-for-linux.git"
+								ssh ${1} "cd ntttcp-for-linux/ && git checkout 7a5017b00a603cfaf2ae2a83a6d6b688b2f9dbaa"
                                 ssh ${1} "cd ntttcp-for-linux/src/ && make && make install"
                                 ssh ${1} "cp ntttcp-for-linux/src/ntttcp ."
                                 ssh ${1} "rm -rf lagscope"

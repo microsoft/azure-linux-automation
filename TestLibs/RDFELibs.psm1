@@ -2701,26 +2701,33 @@ Function DoTestCleanUp($result, $testName, $DeployedServices, $ResourceGroups, [
 	{
 		if($DeployedServices -or $ResourceGroups)
 		{
-			foreach ($vmData in $allVMData)
+			try
 			{
-				$out = RemoteCopy -upload -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files .\remote-scripts\CollectLogFile.sh -username $user -password $password
-				$out = RunLinuxCmd -username $user -password $password -ip $vmData.PublicIP -port $vmData.SSHPort -command "bash CollectLogFile.sh" -ignoreLinuxExitCode
-				$out = RemoteCopy -downloadFrom $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -files "$($vmData.RoleName)-*.txt" -downloadTo "$LogDir" -download
-				$finalKernelVersion = Get-Content "$LogDir\$($vmData.RoleName)-kernelVersion.txt"
-				Set-Variable -Name finalKernelVersion -Value $finalKernelVersion -Scope Global
-				#region LIS Version
-				$tempLIS = (Select-String -Path "$LogDir\$($vmData.RoleName)-lis.txt" -Pattern "^version:").Line
-				if ($tempLIS)
+				foreach ($vmData in $allVMData)
 				{
-					$finalLISVersion = $tempLIS.Split(":").Trim()[1]
+					$out = RemoteCopy -upload -uploadTo $vmData.PublicIP -port $vmData.SSHPort -files .\remote-scripts\CollectLogFile.sh -username $user -password $password
+					$out = RunLinuxCmd -username $user -password $password -ip $vmData.PublicIP -port $vmData.SSHPort -command "bash CollectLogFile.sh" -ignoreLinuxExitCode
+					$out = RemoteCopy -downloadFrom $vmData.PublicIP -port $vmData.SSHPort -username $user -password $password -files "$($vmData.RoleName)-*.txt" -downloadTo "$LogDir" -download
+					$finalKernelVersion = Get-Content "$LogDir\$($vmData.RoleName)-kernelVersion.txt"
+					Set-Variable -Name finalKernelVersion -Value $finalKernelVersion -Scope Global
+					#region LIS Version
+					$tempLIS = (Select-String -Path "$LogDir\$($vmData.RoleName)-lis.txt" -Pattern "^version:").Line
+					if ($tempLIS)
+					{
+						$finalLISVersion = $tempLIS.Split(":").Trim()[1]
+					}
+					else
+					{
+						$finalLISVersion = "NA"
+					}
+					Set-Variable -Name finalLISVersion -Value $finalLISVersion -Scope Global
+					Write-Host "Setting : finalLISVersion : $finalLISVersion"
+					#endregion
 				}
-				else 
-				{
-					$finalLISVersion = "NA"
-				}
-				Set-Variable -Name finalLISVersion -Value $finalLISVersion -Scope Global
-				Write-Host "Setting : finalLISVersion : $finalLISVersion"
-				#endregion
+			}
+			catch
+			{
+				LogErr "Ignorable error in collecting final data from VMs."
 			}
 			$currentTestBackgroundJobs = Get-Content $LogDir\CurrentTestBackgroundJobs.txt -ErrorAction SilentlyContinue
 			if ( $currentTestBackgroundJobs )

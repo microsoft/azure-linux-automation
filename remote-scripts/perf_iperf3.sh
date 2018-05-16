@@ -44,10 +44,10 @@ touch ./IPERF3Test.log
 InstallIPERF3()
 {
 		DISTRO=`grep -ihs "buntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux\|clear-linux-os" /etc/{issue,*release,*version} /usr/lib/os-release`
-		if [[ $DISTRO =~ "Ubuntu" ]];
+		if [[ $DISTRO =~ "Ubuntu" ]] || [[ $DISTRO =~ "Debian" ]];;
 		then
 			
-			LogMsg "Detected Ubuntu"
+			LogMsg "Detected Ubuntu/Debian"
 			ssh ${1} "until dpkg --force-all --configure -a; sleep 10; do echo 'Trying again...'; done"
 			ssh ${1} "apt-get update"
 			ssh ${1} "apt-get -y install iperf3 sysstat bc psmisc"
