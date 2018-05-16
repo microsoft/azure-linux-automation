@@ -12,7 +12,7 @@ if ($isDeployed)
 {
 	try
 	{
-		$testServiceData = Get-AzureService -ServiceName $isDeployed
+		
 
 		#Get VMs deployed in the service..
 		$testVMsinService = $testServiceData | Get-AzureVM
