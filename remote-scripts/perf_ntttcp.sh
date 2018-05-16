@@ -45,7 +45,7 @@ touch ./ntttcpTest.log
 InstallNTTTCP() {
                 DISTRO=`grep -ihs "buntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux\|clear-linux-os" /etc/{issue,*release,*version} /usr/lib/os-release`
 
-                if[[ $DISTRO =~ "Ubuntu" ]] || [[ $DISTRO =~ "Debian" ]];
+                if [[ $DISTRO =~ "Ubuntu" ]] || [[ $DISTRO =~ "Debian" ]];
                 then
                         LogMsg "Detected UBUNTU/Debian"
                                 LogMsg "Configuring ${1} for ntttcp test..."
