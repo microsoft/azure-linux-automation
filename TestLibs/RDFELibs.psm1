@@ -4757,10 +4757,15 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 					}
 					if($AllEndpoints.Length -eq 0)
 					{
-						$sg = Get-AzureRmNetworkSecurityGroup -ResourceGroupName $testVM.ResourceGroupName
+						$sg = Get-AzureRmNetworkSecurityGroup -ResourceGroupName $testVM.ResourceGroupName -Name "SG-$($testVM.ResourceName)"
 						foreach($rule in $sg.SecurityRules)
 						{
 							Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($rule.Name)Port" -Value $rule.DestinationPortRange[0] -Force
+							if (($rule.Name -imatch "Cleanuptool-22-Corpnet") -and ($QuickVMNode.SSHPort -ne "22"))
+							{
+								LogMsg "    Cleanuptool-22-Corpnet detected. Applying workaroud."
+								Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "SSHPort" -Value "22" -Force
+							}                
 						}
 					}
 				}
@@ -7114,4 +7119,6 @@ function ZipFiles( $zipfilename, $sourcedir )
         Write-Host "$currentDir\$zipfilename created successfully."
     }
 }
+
+
 #endregion
