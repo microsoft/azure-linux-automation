@@ -142,6 +142,11 @@ elseif ($StorageAccount -eq "")
     $StorageAccountName = $regionStorageMapping.AllRegions.$regionName.StandardStorage
     Write-Host "Auto selecting storage account : $StorageAccountName as per your test region."
 }
+elseif ($StorageAccount -ne "")
+{
+    $StorageAccountName = $StorageAccount.Trim()
+    Write-Host "Selecting custom storage account : $StorageAccountName as per your test region."
+}
 #if ($defaultDestinationStorageAccount -ne $StorageAccountName)
 #{
 #   $OsVHD = "https://$defaultDestinationStorageAccount.blob.core.windows.net/vhds/$OsVHD"
