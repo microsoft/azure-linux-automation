@@ -4754,6 +4754,12 @@ Function GetAllDeployementData($DeployedServices, $ResourceGroups)
 					foreach ($securityRule in $SGData.Properties.securityRules)
 					{
 						Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "$($securityRule.name)Port" -Value $securityRule.properties.destinationPortRange -Force
+						#This is workaround to get SSH port from corpnet enabled VMs.
+						if (($securityRule.name -imatch "Cleanuptool-22-Corpnet") -and (!$QuickVMNode.SSHPort -ne "22"))
+						{
+							LogMsg "Cleanuptool-22-Corpnet detected. Applying workaroud."
+							Add-Member -InputObject $QuickVMNode -MemberType NoteProperty -Name "SSHPort" -Value 22 -Force
+						}
 					}
 					if($AllEndpoints.Length -eq 0)
 					{
