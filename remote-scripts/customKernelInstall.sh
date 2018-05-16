@@ -182,12 +182,13 @@ InstallKernel()
                         LogMsg "Installing ${customKernel##*/}"
                         rpm -ivh "${customKernel##*/}"  >> $logFolder/build-customKernel.txt 2>&1
                         kernelInstallStatus=$?
+                        rpm -e kernel-$(uname -r)
                 else
                         prefix="localfile:"
                         LogMsg "Installing ${customKernel#$prefix}"
                         rpm -ivh "${customKernel#$prefix}"  >> $logFolder/build-customKernel.txt 2>&1
                         kernelInstallStatus=$?
-
+                        rpm -e kernel-$(uname -r)
                 fi
                 UpdateTestState $ICA_TESTCOMPLETED
                 if [ $kernelInstallStatus -ne 0 ]; then
