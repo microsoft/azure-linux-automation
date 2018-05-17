@@ -8102,6 +8102,21 @@
 			<Priority>P0</Priority>
 		</test>
 		<test>
+			<testName>ICA-N-Series-GPU-TEST-NC24rsv2</testName>
+			<testScript>
+			</testScript>
+			<testScriptps1>ICA-N-Series-GPU-TEST.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<OverrideVMSize>Standard_NC24rs_v2</OverrideVMSize>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+			  <param>enableProposedRepo=yes</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>		
+		<test>
 			<testName>ICA-BUILD-CUSTOM-VM-CAPTURE-VHD-ARM-NEXT</testName>
 			<testScript>
 			</testScript>
@@ -9454,6 +9469,9 @@
 			</test>
 			<test>
 				<Name>ICA-N-Series-GPU-TEST-NC24r</Name>
+			</test>
+			<test>
+				<Name>ICA-N-Series-GPU-TEST-NC24rsv2</Name>
 			</test>
 		</Cycle>	
 		<Cycle>
