@@ -27,7 +27,7 @@ if ($isDeployed)
         LogMsg "Shutting down VM.."
         $stopVM = Stop-AzureRmVM -Name $clientVMData.RoleName -ResourceGroupName $clientVMData.ResourceGroupName -Force -Verbose
         $stopVM = $true
-        if ($stopVM.Status -eq "Succeeded")
+        if ($stopVM)
         {
             LogMsg "Shutdown successful."
             #Copy the OS VHD with different name.
