@@ -832,7 +832,7 @@ $sshPath = '/home/' + $user + '/.ssh/authorized_keys'
 $sshKeyData = ""
 if($ExistingRG)
 {
-	$customAVSetName = (Get-AzureRmResource | Where { (( $_.ResourceGroupName -eq  $RGName ) -and  ( $_.ResourceType -imatch  "availabilitySets" ))}).ResourceName
+	$customAVSetName = (Get-AzureRmResource | Where { (( $_.ResourceGroupName -eq  $RGName ) -and  ( $_.ResourceType -imatch  "availabilitySets" ))}).Name
 }
 else
 {
@@ -1009,6 +1009,24 @@ $StorageProfileScriptBlock = {
                         {
                         Add-Content -Value "$($indents[6])," -Path $jsonFile
                         }
+
+                    if ($UseManagedDisks)
+                    {
+                        Add-Content -Value "$($indents[6]){" -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^name^: ^$vmName-disk-lun-$($dataDisk.LUN)^," -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^diskSizeGB^: ^$($dataDisk.DiskSizeInGB)^," -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^lun^: ^$($dataDisk.LUN)^," -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^createOption^: ^Empty^," -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^caching^: ^$($dataDisk.HostCaching)^," -Path $jsonFile
+                            Add-Content -Value "$($indents[7])^managedDisk^:" -Path $jsonFile
+                            Add-Content -Value "$($indents[7]){" -Path $jsonFile
+                                Add-Content -Value "$($indents[8])^storageAccountType^: ^$StorageAccountType^" -Path $jsonFile
+                            Add-Content -Value "$($indents[7])}" -Path $jsonFile
+                        Add-Content -Value "$($indents[6])}" -Path $jsonFile 
+                        LogMsg "Added managed $($dataDisk.DiskSizeInGB)GB Datadisk to $($dataDisk.LUN)."
+                    }
+                    else
+                    {
                         Add-Content -Value "$($indents[6]){" -Path $jsonFile
                             Add-Content -Value "$($indents[7])^name^: ^$vmName-disk-lun-$($dataDisk.LUN)^," -Path $jsonFile
                             Add-Content -Value "$($indents[7])^diskSizeGB^: ^$($dataDisk.DiskSizeInGB)^," -Path $jsonFile
@@ -1020,7 +1038,8 @@ $StorageProfileScriptBlock = {
                                 Add-Content -Value "$($indents[8])^uri^: ^[concat('http://',variables('StorageAccountName'),'.blob.core.windows.net/vhds/','$vmName-$RGrandomWord-disk-lun-$($dataDisk.LUN).vhd')]^" -Path $jsonFile
                             Add-Content -Value "$($indents[7])}" -Path $jsonFile
                         Add-Content -Value "$($indents[6])}" -Path $jsonFile
-                        LogMsg "Added $($dataDisk.DiskSizeInGB)GB Datadisk to $($dataDisk.LUN)."
+                        LogMsg "Added Blob $($dataDisk.DiskSizeInGB)GB Datadisk to $($dataDisk.LUN)."
+                    }
                         $dataDiskAdded = $true
                     }
                 }
