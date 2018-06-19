@@ -2947,7 +2947,7 @@
 					</VirtualMachine>
 				</HostedService>
 			</A11>
-			<Trim-OP0>
+			<TrimNone>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
 					<VirtualMachine>
@@ -2967,8 +2967,8 @@
 						</DataDisk>
 					</VirtualMachine>
 				</HostedService>
-			</Trim-OP0>
-			<Trim-OP1>
+			</TrimNone>
+			<TrimRO>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
 					<VirtualMachine>
@@ -2988,8 +2988,8 @@
 						</DataDisk>
 					</VirtualMachine>
 				</HostedService>
-			</Trim-OP1>
-			<Trim-OP2>
+			</TrimRO>
+			<TrimRW>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
 					<VirtualMachine>
@@ -3009,7 +3009,7 @@
 						</DataDisk>
 					</VirtualMachine>
 				</HostedService>
-			</Trim-OP2>			
+			</TrimRW>			
 			<DS2DISK2>
 				<isDeployed>NO</isDeployed>
 				<HostedService>
@@ -8230,10 +8230,10 @@
 		</test>
 		<!-- TRIM Test Definations -->
 		<test>
-			<testName>ICA-TRIM-OPTION-0-TEST</testName>
+			<testName>ICA-TRIM-DISK-NONE-CACHE-TEST</testName>
 			<testScript></testScript>
 			<testScriptps1>ICA-TRIM-TEST.ps1</testScriptps1>
-			<setupType>Trim-OP0</setupType>
+			<setupType>TrimNone</setupType>
 			<diskType>None</diskType>
 			<files>.\remote-scripts\auto_rdos_XStoreTrim_setup.sh,.\remote-scripts\auto_rdos_XStoreTrim.sh,.\remote-scripts\auto_rdos_XStoreTrimFinal.sh</files>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
@@ -8244,10 +8244,10 @@
 			<Priority>P0</Priority>
 		</test>	
 		<test>
-			<testName>ICA-TRIM-OPTION-1-TEST</testName>
+			<testName>ICA-TRIM-DISK-READONLY-CACHE-TEST</testName>
 			<testScript></testScript>
 			<testScriptps1>ICA-TRIM-TEST.ps1</testScriptps1>
-			<setupType>Trim-OP1</setupType>
+			<setupType>TrimRO</setupType>
 			<diskType>ReadOnly</diskType>
 			<files>.\remote-scripts\auto_rdos_XStoreTrim_setup.sh,.\remote-scripts\auto_rdos_XStoreTrim.sh,.\remote-scripts\auto_rdos_XStoreTrimFinal.sh</files>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
@@ -8258,10 +8258,10 @@
 			<Priority>P0</Priority>
 		</test>	
 		<test>
-			<testName>ICA-TRIM-OPTION-2-TEST</testName>
+			<testName>ICA-TRIM-DISK-READWRITE-CACHE-TEST</testName>
 			<testScript></testScript>
 			<testScriptps1>ICA-TRIM-TEST.ps1</testScriptps1>
-			<setupType>Trim-OP2</setupType>
+			<setupType>TrimRW</setupType>
 			<diskType>ReadWrite</diskType>
 			<files>.\remote-scripts\auto_rdos_XStoreTrim_setup.sh,.\remote-scripts\auto_rdos_XStoreTrim.sh,.\remote-scripts\auto_rdos_XStoreTrimFinal.sh</files>
 			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
@@ -9408,13 +9408,13 @@
 		<Cycle>
 			<cycleName>TRIM</cycleName>
 			<test>
-				<Name>ICA-TRIM-OPTION-0-TEST</Name>
+				<Name>ICA-TRIM-DISK-NONE-CACHE-TEST</Name>
 			</test>
 			<test>
-				<Name>ICA-TRIM-OPTION-1-TEST</Name>
+				<Name>ICA-TRIM-DISK-READONLY-CACHE-TEST</Name>
 			</test>
 			<test>
-				<Name>ICA-TRIM-OPTION-2-TEST</Name>
+				<Name>ICA-TRIM-DISK-READWRITE-CACHE-TEST</Name>
 			</test>
 		</Cycle>			
 		<Cycle>
