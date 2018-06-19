@@ -206,21 +206,15 @@ Function GetActivePages($VMObject, $PrevTestStatus, $metaData, $trimParam, $Stor
     if ( $PrevTestStatus -eq "PASS" )
     {
         LogMsg "STARTING TEST : $trimParam : $metaData"
-		$GetActivePagesJob = Start-Job -ScriptBlock { cd ".\tools\wazvhdsize-v1.1"; .\wazvhdsize.exe -name $args[0] -key $args[1] -uri $args[2] -env Global } -ArgumentList $StorageAccountName, $StoragePrimaryKey, $vhdUrl
-		sleep -Seconds 20
-		LogMsg "$GetActivePagesJob"
-		$GetActivePagesJobStatus = Receive-Job -Id $GetActivePagesJob.Id
+		$GetActivePagesJobStatus = .\tools\wazvhdsize-v1.0\wazvhdsize.exe $StorageAccountName $StoragePrimaryKey $vhdUrl
 		Set-Content -Value "***** $metaData *****"-Path "$($VMObject.logDir)\ActivePages-$metaData.txt"
 		Add-Content -Value $GetActivePagesJobStatus -Path "$($VMObject.logDir)\ActivePages-$metaData.txt"
-		if ($GetActivePagesJobStatus -imatch "Calulation completed")
+		if ($GetActivePagesJobStatus -inotmatch "StorageException")
 		{
 			$ExitCode = "PASS"
 			LogMsg "StorageAccountName : $StorageAccountName`n vhdUrl : $vhdUrl"
 			LogMsg (Get-Content -Path "$($VMObject.logDir)\ActivePages-$metaData.txt")
 			LogMsg "GetActivePages : $trimParam : $metaData COMPLETED"
-			
-		
-			Remove-Job -Id $GetActivePagesJob.Id -Force -Verbose
 		}
 		else
 		{
@@ -228,7 +222,6 @@ Function GetActivePages($VMObject, $PrevTestStatus, $metaData, $trimParam, $Stor
 			LogMsg "StorageAccountName : $StorageAccountName`n vhdUrl : $vhdUrl"
 			LogMsg (Get-Content -Path "$($VMObject.logDir)\ActivePages-$metaData.txt")
 			LogMsg "GetActivePages : $trimParam : $metaData FAILED"	
-			Remove-Job -Id $GetActivePagesJob.Id -Force -Verbose
 		}
 	}
 	elseif ( $PrevTestStatus -eq "FAIL" )
