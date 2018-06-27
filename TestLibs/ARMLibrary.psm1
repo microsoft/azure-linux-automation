@@ -1132,6 +1132,13 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
                 Add-Content -Value "$($indents[3])^type^: ^Microsoft.Compute/availabilitySets^," -Path $jsonFile
                 Add-Content -Value "$($indents[3])^name^: ^[variables('availabilitySetName')]^," -Path $jsonFile
                 Add-Content -Value "$($indents[3])^location^: ^[variables('location')]^," -Path $jsonFile
+                if ($UseManagedDisks)
+                {
+                    Add-Content -Value "$($indents[3])^sku^:" -Path $jsonFile
+                    Add-Content -Value "$($indents[3]){" -Path $jsonFile
+                        Add-Content -Value "$($indents[4])^name^: ^Aligned^" -Path $jsonFile
+                    Add-Content -Value "$($indents[3])}," -Path $jsonFile                    
+                }		
                 if ( $tipSessionId -and $tipCluster)
                 {
                     Add-Content -Value "$($indents[3])^tags^:" -Path $jsonFile
