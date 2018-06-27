@@ -1148,6 +1148,8 @@ Set-Content -Value "$($indents[0]){" -Path $jsonFile -Force
                 }
                 Add-Content -Value "$($indents[3])^properties^:" -Path $jsonFile
                 Add-Content -Value "$($indents[3]){" -Path $jsonFile
+                    Add-Content -Value "$($indents[4])^platformFaultDomainCount^:2," -Path $jsonFile
+                    Add-Content -Value "$($indents[4])^platformUpdateDomainCount^:5" -Path $jsonFile   		
                 if ( $tipSessionId -and $tipCluster)
                 {            
                     Add-Content -Value "$($indents[4])^internalData^:" -Path $jsonFile
