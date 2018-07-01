@@ -37,8 +37,7 @@ Copy-Item -Path $oldFile -Destination $fallback -Verbose -Force
 Remove-Item -Path $oldFile -Verbose -Force
 Copy-Item -Path $newFile -Destination $oldFile -Verbose -Force
 Remove-Item -Path $newFile -Force -Verbose
-$allRegions = (Get-AzureRmLocation).Location
-$allRegions = "eastasia,southeastasia".Split(",")
+$allRegions = (Get-AzureRMLocation | Where {$_.Providers.Contains("Microsoft.Compute")}).Location
 foreach ( $region in $allRegions)
 {
     try
