@@ -7671,7 +7671,46 @@
 			</TestParameters>
 			<Priority>P0</Priority>
 		</test>		
-		
+		<test>
+			<testName>ICA-PERF-DISKSPD-IO-TEST-4K</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-DISKSPD-IO-TEST.ps1</testScriptps1>
+			<setupType>DS14DISK12</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+				<param>modes='randread randwrite read write'</param>
+				<param>startThread=1</param>
+				<param>maxThread=1024</param>
+				<param>startIO=4</param>
+				<param>numjobs=1</param>
+				<param>ioruntime=300</param>
+				<param>maxIO=4</param>
+				<param>fileSize=1023G</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
+		<test>
+			<testName>ICA-PERF-DISKSPD-IO-TEST-1024K</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-DISKSPD-IO-TEST.ps1</testScriptps1>
+			<setupType>DS14DISK12</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<files>.\remote-scripts\azuremodules.sh</files>
+			<TestParameters>
+				<param>modes='randread randwrite read write'</param>
+				<param>startThread=1</param>
+				<param>maxThread=1024</param>
+				<param>startIO=1024</param>
+				<param>numjobs=1</param>
+				<param>ioruntime=300</param>
+				<param>maxIO=1024</param>
+				<param>fileSize=1023G</param>
+			</TestParameters>
+			<Priority>P0</Priority>
+		</test>
 		<test>
 			<testName>ICA-PERF-UDP-LOSS-TEST</testName>
 			<testScript></testScript>
@@ -7729,8 +7768,6 @@
 			</TestParameters>
 			<Priority>P0</Priority>
 		</test>		
-
-
 
 		<test>
 			<testName>ICA-IPERF3-TCP-IPV6-TEST</testName>
@@ -7875,7 +7912,16 @@
 				<param>redis_test_suites="get,set"</param>
 			</TestParameters>
 			<Priority>P0</Priority>
-		</test>			
+		</test>
+		<test>
+			<testName>ICA-PERF-SYSCALL-BENCHMARK-TEST</testName>
+			<testScript></testScript>
+			<testScriptps1>ICA-PERF-SYSCALL-BENCHMARK-TEST.ps1</testScriptps1>
+			<setupType>SingleVM</setupType>
+			<SupportedExecutionModes>AzureServiceManagement,AzureResourceManager</SupportedExecutionModes>
+			<SubtestValues>SOME,TEXTS,NEEDS,TO,BE,PRESENT,HERE,FOR,PRINTING,TEST,SUMMARY</SubtestValues>
+			<Priority>P0</Priority>
+		</test>		
 		<test>
 			<testName>ICA-BUILD-LINUX-NEXT-DEB-PACKAGE</testName>
 			<testScript>build_deb_from_linux_next.sh</testScript>
@@ -9307,6 +9353,21 @@
 			<test>
 				<Name>ICA-PERF-REDIS-MIDDLEWARE-TEST</Name>
 			</test>			
+		</Cycle>
+		<Cycle>
+			<cycleName>PERF-DISKSPD</cycleName>
+			<test>
+				<Name>ICA-PERF-DISKSPD-IO-TEST-4K</Name>
+			</test>
+			<test>
+				<Name>ICA-PERF-DISKSPD-IO-TEST-1024K</Name>
+			</test>
+		</Cycle>
+		<Cycle>
+			<cycleName>PERF-SYSCALL</cycleName>
+			<test>
+				<Name>ICA-PERF-SYSCALL-BENCHMARK-TEST</Name>
+			</test>
 		</Cycle>
 		<Cycle>
 			<cycleName>LINUX-NEXT-DEB</cycleName>
