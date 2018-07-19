@@ -113,6 +113,15 @@ InstallKernel()
                         apt -y update >> $logFolder/build-customKernel.txt 2>&1
                         apt -y --fix-missing upgrade >> $logFolder/build-customKernel.txt 2>&1
                         kernelInstallStatus=$?
+                elif [[ $DISTRO =~ "Bionic" ]];
+                then
+                        LogMsg "Enabling proposed repositry..."
+                        echo "deb http://archive.ubuntu.com/ubuntu/ bionic-proposed restricted main multiverse universe" >> /etc/apt/sources.list
+                        rm -rf /etc/apt/preferences.d/proposed-updates
+                        LogMsg "Installing linux-image-generic from proposed repository."
+                        apt -y update >> $logFolder/build-customKernel.txt 2>&1
+                        apt -y --fix-missing upgrade >> $logFolder/build-customKernel.txt 2>&1
+                        kernelInstallStatus=$?
                 fi
                 UpdateTestState $ICA_TESTCOMPLETED
                 if [ $kernelInstallStatus -ne 0 ]; then
