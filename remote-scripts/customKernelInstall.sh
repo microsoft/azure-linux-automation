@@ -131,6 +131,34 @@ InstallKernel()
                         LogMsg "CUSTOM_KERNEL_SUCCESS"
                         UpdateTestState $ICA_TESTCOMPLETED
                 fi
+        elif [ "${customKernel}" == "proposed-edge" ]; then
+            DISTRO=`grep -ihs "buntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux" /etc/{issue,*release,*version}`
+            LogMsg "Enabling proposed repository..."
+            if [[ $DISTRO =~ "Xenial" ]];
+            then
+                echo "deb http://archive.ubuntu.com/ubuntu/ xenial-proposed restricted main multiverse universe" >> /etc/apt/sources.list
+                apt-get clean all
+                apt-get -qq update
+                LogMsg "Installing linux-azure-edge from proposed repository."
+                apt-get install -qq linux-azure-edge/xenial
+                kernelInstallStatus=$?
+            elif [[ $DISTRO =~ "Bionic" ]];
+            then
+                echo "deb http://archive.ubuntu.com/ubuntu/ bionic-proposed restricted main multiverse universe" >> /etc/apt/sources.list
+                apt-get clean all
+                apt-get -qq update
+                LogMsg "Installing linux-azure-edge from proposed repository."
+                apt-get install -qq linux-azure-edge/bionic
+                kernelInstallStatus=$?
+            fi
+            UpdateTestState $ICA_TESTCOMPLETED
+            if [ $kernelInstallStatus -ne 0 ]; then
+                LogMsg "CUSTOM_KERNEL_FAIL"
+                UpdateTestState $ICA_TESTFAILED
+            else
+                LogMsg "CUSTOM_KERNEL_SUCCESS"
+                UpdateTestState $ICA_TESTCOMPLETED
+            fi
         elif [ "${customKernel}" == "latest" ]; then
                 DISTRO=`grep -ihs "buntu\|Suse\|Fedora\|Debian\|CentOS\|Red Hat Enterprise Linux" /etc/{issue,*release,*version}`
                 if [[ $DISTRO =~ "Ubuntu" ]];
