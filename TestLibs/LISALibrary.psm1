@@ -144,9 +144,10 @@ function InstallCustomKernel ($customKernel, $allVMData, [switch]$RestartAfterUp
         $currentKernelVersion = ""
         $upgradedKernelVersion = ""
         $customKernel = $customKernel.Trim()
-        if( ($customKernel -ne "linuxnext") -and ($customKernel -ne "netnext") -and ($customKernel -ne "proposed") -and ($customKernel -ne "latest") -and !($customKernel.EndsWith(".deb"))  -and !($customKernel.EndsWith(".rpm")) )
+        if ( ($customKernel -ne "linuxnext") -and ($customKernel -ne "netnext") -and ($customKernel -ne "proposed") `
+                -and ($customKernel -ne "proposed-edge") -and ($customKernel -ne "latest") -and !($customKernel.EndsWith(".deb")) -and !($customKernel.EndsWith(".rpm")) )
         {
-            LogErr "Only linuxnext, netnext, proposed, latest are supported. E.g. -customKernel linuxnext/netnext/proposed. Or use -customKernel <link to deb file>, -customKernel <link to rpm file>"
+            LogErr "Only linuxnext, netnext, proposed, proposed-edge, latest are supported. E.g. -customKernel linuxnext/netnext/proposed. Or use -customKernel <link to deb file>, -customKernel <link to rpm file>"
         }
         else
         {
