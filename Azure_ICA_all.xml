@@ -6549,22 +6549,43 @@
 			<!--ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM -->
 			<SubtestValues>ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM</SubtestValues>
 			<ExistingDisks>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_0.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_1.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_2.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_3.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_4.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_5.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_6.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_7.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_8.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_9.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_10.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_11.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_12.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_13.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_14.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_15.vhd</MediaLink>
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_0.vhd</MediaLink>
+				<!-- Comment#1
+					1.	STORAGE_ACCOUNT_NAME_ASM = Name of the storage account where your disks are present.
+						(Storage account needs to be created with Azure service management mode)
+					2.	CONTAINER_NAME = VHD’s container name.
+					3.	EXISTING_DISK_NAME = Name of existing disk. (Please make sure to not to use any production disk with important data).
+				-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_1.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_2.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_3.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_4.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_5.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_6.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_7.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_8.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_9.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_10.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_11.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_12.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_13.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_14.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_15.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
 			</ExistingDisks>
 			<Priority>P0</Priority>
 		</test>
@@ -6581,22 +6602,38 @@
 			<!--ExtraSmallVM,SmallVM,MediumVM,LargeVM,ExtraLargeVM -->
 			<SubtestValues>SmallVM,MediumVM,LargeVM,ExtraLargeVM</SubtestValues>
 			<ExistingDisks>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_0.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_1.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_2.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_3.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_4.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_5.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_6.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_7.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_8.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_9.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_10.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_11.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_12.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_13.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_14.vhd</MediaLink>
-				<MediaLink>http://sivahydsa.blob.core.windows.net/testdata/E2E_Existing_Disk_Test_Do_Not_Delete_15.vhd</MediaLink>
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_0.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_1.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_2.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_3.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_4.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_5.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_6.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_7.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_8.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_9.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_10.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_11.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_12.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_13.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_14.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
+				<MediaLink>http://STORAGE_ACCOUNT_NAME_ASM.blob.core.windows.net/CONTAINER_NAME/EXISTING_DISK_NAME_15.vhd</MediaLink>
+				<!-- Please refer Comment#1-->
 			</ExistingDisks>
 			<Priority>P0</Priority>
 		</test>	
